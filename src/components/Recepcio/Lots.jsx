@@ -3,6 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal } from 'react-bootstrap';
+import axios from "axios";
 
 import Header from '../Header';
 import Filtres from '../Filtres';
@@ -20,12 +21,12 @@ const LotSchema = Yup.object().shape({
 
 
 
-function Lots() {
+const Lots = () => {
   const [lot, setLot] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [orderReceptions, setOrderReceptions] = useState([]);
-  const [orderLineReceptions, setOrderLineReceptions] = useState([]);
+  const [products, setProduct] = useState([]);
+  const [suppliers, setSupplier] = useState([]);
+  const [orderReceptions, setOrderReception] = useState([]);
+  const [orderLineReceptions, setOrderLineReception] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
   const [valorsInicials, setValorsInicials] = useState({
@@ -40,18 +41,36 @@ function Lots() {
   });
 
   useEffect(() => {
-    async function fetchData() {
-      const data = await getData(url, 'Lot');
-      const product = await getData(url, 'Product');
-      const supplier = await getData(url, 'Supplier');
-      const orderReceptionData = await getData(url, 'OrderReception');  // Obtener las órdenes de recepción
-      const orderLineReceptionData = await getData(url, 'OrderLineReception');  // Obtener las líneas de orden de recepción
-      setLot(data);
-      setProducts(product);
-      setSuppliers(supplier);
-      setOrderReceptions(orderReceptionData);
-      setOrderLineReceptions(orderLineReceptionData);
+
+    const fetchData = async () => {
+      try{
+        const lot = await axios.get("http://node.daw.iesevalorpego.es:3001/Lot");
+        const product = await axios.get("http://node.daw.iesevalorpego.es:3001/Product");
+        const supplier = await axios.get("http://node.daw.iesevalorpego.es:3001/Supplier");
+
+        setLot(lot.data);
+        setProduct(product.data);
+        setSupplier(supplier.data);
+      }
+      catch(error){
+        console.log("Error:", error);
+      }
     }
+
+    // async function fetchData() {
+    //   const data = await getData(url, 'Lot');
+    //   const product = await getData(url, 'Product');
+    //   const supplier = await getData(url, 'Supplier');
+    //   const orderReceptionData = await getData(url, 'OrderReception');  // Obtener las órdenes de recepción
+    //   const orderLineReceptionData = await getData(url, 'OrderLineReception');  // Obtener las líneas de orden de recepción
+    //   setLot(data);
+    //   setProducts(product);
+    //   setSuppliers(supplier);
+    //   setOrderReceptions(orderReceptionData);
+    //   setOrderLineReceptions(orderLineReceptionData);
+    // }
+
+
     fetchData();
   }, []);
 
@@ -93,22 +112,22 @@ function Lots() {
           Alta Lots
         </Button>
       </div>
-      <div className="table-responsive mx-2">
-        <table className="table table-bordered table-hover table-striped text-center mt-4">
+      <div className="table-responsive mx-2 mt-4">
+        <table className="table table-striped table-bordered table-hover text-center align-middle">
           <thead className="thead-dark">
             <tr>
-              <th>ID</th>
-              <th>Nom</th>
-              <th>ID Product</th>
-              <th>ID Supplier</th>
-              <th>Quantitat</th>
-              <th>Data producció</th>
-              <th>Data caducitat</th>
-              <th>Order Reception</th>
-              <th>Order Line Reception</th>
-              <th>Visualitzar</th>
-              <th>Modificar</th>
-              <th>Eliminar</th>
+              <th className="align-middle">ID</th>
+              <th className="align-middle">Nom</th>
+              <th className="align-middle">ID Product</th>
+              <th className="align-middle">ID Supplier</th>
+              <th className="align-middle">Quantitat</th>
+              <th className="align-middle">Data producció</th>
+              <th className="align-middle">Data caducitat</th>
+              <th className="align-middle">Order Reception</th>
+              <th className="align-middle">Order Line Reception</th>
+              <th className="align-middle">Visualitzar</th>
+              <th className="align-middle">Modificar</th>
+              <th className="align-middle">Eliminar</th>
             </tr>
           </thead>
           <tbody>
