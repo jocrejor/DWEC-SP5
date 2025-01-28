@@ -24,7 +24,7 @@ import EstatsOrdreRecepcioLinia from './components/Recepcio/EstatsOrdreRecepcioL
 import Lots from './components/Recepcio/Lots';
 
 
-import GestioMagatzem from './components/Magatzem/GestioMagatzem.jsx';
+import GestioMagatzem from './components/Magatzem/GestioMagatzem';
 
 
 
@@ -96,7 +96,7 @@ function App() {
                 
 
 
-                <Route path="/incidencies" element={<Incidencies />} />
+                <Route path="/incidencies/*" element={<Incidencies />} />
 
                 <Route path="/moviments" element={<Moviments />} />
                 
