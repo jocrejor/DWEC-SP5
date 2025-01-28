@@ -20,10 +20,7 @@ import Lots from './components/Recepcio/Lots';
 
 
 import GestioMagatzem from './components/Magatzem/GestioMagatzem.jsx';
-import Magatzem from './components/Magatzem/Magatzem';
-import Carrer from './components//Magatzem/Carrer';
-import Estanteria from './components/Magatzem/Estanteria';
-import Espai from './components/Magatzem/Espai';
+
 
 
 import Inventaris from './components/Magatzem/Inventaris';
