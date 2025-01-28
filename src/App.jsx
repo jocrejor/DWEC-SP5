@@ -11,9 +11,9 @@ import Rols from './components/Administracio/Rols';
 import DadesGeografiques from './components/Administracio/DadesGeografiques';
 import Transportistes from './components/Administracio/Transportistes';
 import Clients from './components/Enviament/Clients';
-import OrdesEnviament from './components/Enviament/OrdesEnviament';
+import OrdresEnviament from './components/Enviament/OrdresEnviament.jsx';
 import Proveidors from './components/Recepcio/Proveidors';
-import OrdesRecepcio from './components/Recepcio/OrdesRecepcio';
+import OrdresRecepcio from './components/Recepcio/OrdresRecepcio';
 import EstatsOrdreRecepcio from './components/Recepcio/EstatsOrdreRecepcio';
 import EstatsOrdreRecepcioLinia from './components/Recepcio/EstatsOrdreRecepcioLinia.jsx';
 import Lots from './components/Recepcio/Lots';
@@ -59,11 +59,11 @@ function App() {
 
                 <Route path="/clients" element={<Clients />} />
 
-                <Route path="/ordresEnviament" element={<OrdesEnviament />} />
+                <Route path="/ordresEnviament" element={<OrdresEnviament />} />
 
                 <Route path="/proveidors" element={<Proveidors />} />
 
-                <Route path="/ordresRecepcio" element={<OrdesRecepcio />} />
+                <Route path="/ordresRecepcio" element={<OrdresRecepcio />} />
 
                 <Route path="/estatsOrdreRecepcio" element={<EstatsOrdreRecepcio />} />
 
