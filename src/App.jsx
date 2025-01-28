@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import './App.css'
 import Lateral from './components/Lateral'
 import Login from './components/login';
@@ -37,7 +38,14 @@ import OrderPickingReception from './components/Recepcio/OrderPickingReception';
 import OrderPickingShipping from './components/Enviament/OrderPickingShipping';
 
 function App() {
+  const navigate = useNavigate(); 
 
+  useEffect(() => { 
+    if (localStorage.getItem('token') === null) {
+        console.log('No has iniciat sessió')
+        navigate('/login'); 
+    }
+  }, [navigate]);
 
   return (
     <>
