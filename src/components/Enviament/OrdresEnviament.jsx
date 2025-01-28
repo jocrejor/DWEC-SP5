@@ -133,7 +133,7 @@ function OrdresEnviament() {
     <Filter />
     <div>
   <Button variant="success" onClick={() => { canviEstatModal(); setTipoModal("Crear"); }}>
-    Alta Orden
+    Alta Ordre
   </Button>
   
   <div className="table-responsive mt-3">
@@ -142,10 +142,9 @@ function OrdresEnviament() {
         <tr>
           <th>ID</th>
           <th>Client</th>
-          <th>Transportista</th>
-          <th>Preparado</th>
           <th>Data Estimada</th>
           <th>Estat</th>
+          <th>Visualitzar</th>
           <th>Modificar</th>
           <th>Eliminar</th>
         </tr>
@@ -154,27 +153,35 @@ function OrdresEnviament() {
         {orders.map((valors) => (
           <tr key={valors.id}>
             <td>{valors.id}</td>
-            <td>{clientExistent(valors.client_id)}</td>
-            <td>{transportistaExistente(valors.carrier_id)}</td>
-            <td>{valors.prepared_by}</td>
+            <td>{clientExistent(valors.client_id)}</td>    
             <td>{valors.shipping_date}</td>
             <td>{estatExistent(valors.ordershipping_status_id)}</td>
             <td>
               <Button
-                variant="warning"
-                onClick={() => { modificarOrdre(valors); canviEstatModal(); }}
+                variant="outline-secondary"
+                onClick={() => {
+                  visualitzaOrder(valors);
+                }}
               >
-                Modificar
+                <i className="bi bi-eye p-2"></i>
               </Button>
             </td>
             <td>
-              <Button
-                className="btn btn-danger"
-                onClick={() => eliminarOrder(valors.id)}
-              >
-                Eliminar
-              </Button>
-            </td>
+                  <Button
+                    variant="outline-success"
+                    onClick={() => { modificarOrdre(valors); canviEstatModal(); }}
+                  >
+                    <i className="bi bi-pencil-square p-2"></i>
+                  </Button>
+                </td>
+                <td>
+                  <Button
+                    variant="outline-danger"
+                    onClick={() => eliminarOrder(valors.id)}
+                  >
+                    <i className='bi bi-trash p-2'></i>
+                  </Button>
+                </td>
           </tr>
         ))}
       </tbody>
@@ -218,8 +225,7 @@ function OrdresEnviament() {
                 </div>
                 {/* NOM PRODUCTE */}
                 <div>
-                <h2>Capçalera</h2>
-                  <label htmlFor='client_id'>Cliente</label>
+                  <label htmlFor='client_id'>Client</label>
                   <Field as="select" name="client_id" values = {values.client_id}>
                     <option value="">Selecciona un client:</option>
                     {clientes.map(cliente => {
@@ -238,17 +244,6 @@ function OrdresEnviament() {
                     }) }
                   </Field>
                     {errors.carrier_id && touched.carrier_id ? <div>{errors.carrier_id}</div> : null}
-                </div>
-
-                <div>
-                  <label htmlFor='prepared_by'>Preparado por</label>
-                  <Field as="select" name="prepared_by" values = {values.prepared_by}>
-                    <option value="">Selecciona un usuari:</option>
-                    {users.map(user => {
-                      return <option key={user.id} value={user.id}>{user.name}</option>
-                    }) }
-                  </Field>
-                    {errors.prepared_by && touched.prepared_by ? <div>{errors.prepared_by}</div> : null}
                 </div>
 
                 <div>
@@ -288,7 +283,7 @@ function OrdresEnviament() {
 
                 {/* NOM PRODUCTE */}
                 <div>
-                <h2>Detall</h2>              
+                <h4>Afegeix productes a la ordre:</h4>              
                 <label htmlFor='product_id'>Producte</label>
                   <Field as="select" name="product_id">
                     <option value="">Selecciona un producte</option>
