@@ -24,6 +24,7 @@ function Incidencies() {
     const [products, setProducts]                   = useState([])
     const [orderlineStatus, setOrderlineStatus]     = useState([])
     const [showModal, setShowModal]                 = useState(false)
+    const [showViewModal, setShowViewModal]         = useState(false);
     const [tipoModal, setTipoModal]                 = useState("Crear")
     const [valorsInicials, setValorsInicials]       = useState({
         product: '',
@@ -58,7 +59,13 @@ const eliminarIncident = (id) => {
 
 const modificarIncident = (valors) => {
     setTipoModal("Modificar")
-    setValorsInicials(valors);
+    setValorsInicials(valors)
+}
+
+const visualitzarIncident = (valors) => {
+    setTipoModal("Visualitzar")
+    setValorsInicials(valors)
+    setShowViewModal(true)
 }
 
 const canviEstatModal = () => {
@@ -79,32 +86,38 @@ const getStatusName = (statusId) => {
     <>
     <Header title="Incidències"/>
     <Button variant='success' onClick={()=>{canviEstatModal(); setTipoModal("Crear")}}>Llistat ordres de recepció</Button>
-        <table>
-            <tr>
-                <th>Data de creació</th>
-                <th>Descripció</th>
-                <th>Producte</th>
-                <th>Unitats demanades</th>
-                <th>Unitats rebudes</th>
-                <th>Estat</th>
-                <th>Modificar</th>
-                <th>Eliminar</th>
-            </tr>
-            {(incidents.length == 0)?
-            <div>No hi han articles</div>
-            :incidents.map((valors) => {
-            return (
-            <tr key={valors.id}>
-                <td>{valors.created_at}</td>
-                <td>{valors.description}</td>
-                <td>{getProductName(valors.product)}</td>
-                <td>{valors.quantity_ordered}</td>
-                <td>{valors.quantity_received}</td>          
-                <td>{getStatusName(valors.status)}</td>
-                <td><Button variant="warning"  onClick={()=> {modificarIncident(valors);canviEstatModal(); }}>Modificar</Button></td>
-                <td><Button variant="primary"  onClick={()=> {eliminarIncident(valors.id)}}>Eliminar</Button></td>
-            </tr>)
-            })}
+        <table className='table table-striped'>
+            <thead>
+                <tr>
+                    <th>Data de creació</th>
+                    <th>Descripció</th>
+                    <th>Producte</th>
+                    <th>Unitats demanades</th>
+                    <th>Unitats rebudes</th>
+                    <th>Estat</th>
+                    <th>Visualitzar</th>
+                    <th>Modificar</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {(incidents.length == 0)?
+                <div>No hi han articles</div>
+                :incidents.map((valors) => {
+                return (
+                <tr key={valors.id}>
+                    <td>{valors.created_at}</td>
+                    <td>{valors.description}</td>
+                    <td>{getProductName(valors.product)}</td>
+                    <td>{valors.quantity_ordered}</td>
+                    <td>{valors.quantity_received}</td>          
+                    <td>{getStatusName(valors.status)}</td>
+                    <td><Button variant="outline-secondary" onClick={()=> {visualitzarIncident(valors);canviEstatModal(); }}><i className="bi bi-eye p-2"></i></Button></td>
+                    <td><Button variant="outline-success"   onClick={()=> {modificarIncident(valors);canviEstatModal(); }}><i className="bi bi-pencil-square p-2"></i></Button></td>
+                    <td><Button variant="outline-danger"    onClick={()=> {eliminarIncident(valors.id)}}><i className="bi bi-trash p-2"></i></Button></td>
+                </tr>)
+                })}
+            </tbody>
         </table>
 
       <Modal show={showModal} onHide={canviEstatModal}>
@@ -113,7 +126,7 @@ const getStatusName = (statusId) => {
         </Modal.Header>
 
         <Modal.Body>
-          
+            
       <Formik
             initialValues= {(tipoModal==='Modificar'?valorsInicials: {product: '', quantity_received: '', description: '', supplier: '', operator: '', quantity_ordered: '', created_at: '', orderReception_id: '', })}
             validationSchema={IncidenciaSchema}
