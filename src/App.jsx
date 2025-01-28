@@ -9,13 +9,17 @@ import Productes from './components/Recepcio/Productes';
 import Usuaris from './components/Administracio/Usuaris';
 import Rols from './components/Administracio/Rols';
 import DadesGeografiques from './components/Administracio/DadesGeografiques';
+
 import Transportistes from './components/Administracio/Transportistes';
 import Clients from './components/Enviament/Clients';
 import OrdresEnviament from './components/Enviament/OrdresEnviament.jsx';
+import EstatsOrdreEnviament from './components/Enviament/EstatsOrdreEnviament.jsx';
+
 import Proveidors from './components/Recepcio/Proveidors';
 import OrdresRecepcio from './components/Recepcio/OrdresRecepcio';
 import EstatsOrdreRecepcio from './components/Recepcio/EstatsOrdreRecepcio';
 import EstatsOrdreRecepcioLinia from './components/Recepcio/EstatsOrdreRecepcioLinia.jsx';
+
 import Lots from './components/Recepcio/Lots';
 
 
@@ -68,6 +72,8 @@ function App() {
                 <Route path="/estatsOrdreRecepcio" element={<EstatsOrdreRecepcio />} />
 
                 <Route path="/estatsOrdreRecepcioLinia" element={<EstatsOrdreRecepcioLinia />} />
+
+                <Route path="/estatsOrdreEnviament" element={<EstatsOrdreEnviament />} />
 
                 <Route path="/productes" element={<Productes />} />
 
