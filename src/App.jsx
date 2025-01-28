@@ -29,7 +29,7 @@ import GestioMagatzem from './components/Magatzem/GestioMagatzem';
 
 
 import Inventaris from './components/Magatzem/Inventaris';
-import Incidencies from './components/Magatzem/Incidencies';
+import Incidencies from './components/Magatzem/Incidencies_old.jsx';
 import Moviments from './components/Magatzem/Moviments';
 import Inventariar from './components/Magatzem/Inventariar';
 import CompletarInventari from './components/Magatzem/CompletarInventari';
