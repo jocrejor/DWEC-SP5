@@ -10,7 +10,7 @@ import { Button, Table, Modal } from "react-bootstrap";
 
 function OrderPickingShipping() {
   const [orderPickingShipping, setOrderPickingShipping] = useState([]);
-  const [orderreception, setOrderShipping] = useState([]);
+  const [orderShipping, setOrderShipping] = useState([]);
   const [orderLineShipping, setOrderLineShipping] = useState([]);
   const [products, setProducts] = useState([]);
   const [temporalPickings, setTemporalPickings] = useState([]);
@@ -78,7 +78,7 @@ function OrderPickingShipping() {
               order_reception_id: order.id,
               order_line_reception_id: line.id,
               product_id: line.product_id,
-              quantity_received: line.quantity_received,
+              quantity: line.quantity,
               storage_id: space.storage_id,
               street_id: space.street_id,
               selft_id: space.selft_id,
@@ -189,7 +189,7 @@ function OrderPickingShipping() {
                   <tr key={temporalPicking.order_reception_id}>
                     <td>{temporalPicking.order_reception_id}</td>
                     <td>{product.name}</td>
-                    <td>{temporalPicking.quantity_received}</td>
+                    <td>{temporalPicking.quantity}</td>
                     <td>
                       {temporalPicking.storage_id} / {temporalPicking.street_id}{" "}
                       / {temporalPicking.selft_id} / {temporalPicking.space_id}
@@ -255,7 +255,7 @@ function OrderPickingShipping() {
                         return (
                           <tr key={order}>
                             <td>{product.name}</td>
-                            <td>{lines.quantity_received}</td>
+                            <td>{lines.quantity}</td>
                             <td>
                               {space.storage_id} / {space.street_id} /{" "}
                               {space.selft_id} / {space.id}
@@ -340,7 +340,22 @@ function OrderPickingShipping() {
                       </tr>
                     </thead>
 
-                    <tbody></tbody>
+                    <tbody>
+                      {orderPickingShipping
+                        .find((order) => order.id === orderVisualitzar)
+                        .productos.map((item) => {
+                          const nom = products.find(
+                            (product) => product.id === item.product_id
+                          ).name;
+                          return (
+                            <tr key={item.product_id}>
+                              <td>{nom}</td>
+                              {/* <td>{item.quantity}</td>
+                              <td>{item.space_id}</td> */}
+                            </tr>
+                          );
+                        })}
+                    </tbody>
                   </Table>
                   <Button
                     variant="success"
