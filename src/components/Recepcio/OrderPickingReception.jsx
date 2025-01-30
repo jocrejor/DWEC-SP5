@@ -26,6 +26,9 @@ function OrderPickingReception() {
 
         const fetchData = async () => {
             const orderPicking = await getData(url, "OrderPickingReception");
+            //axios.get(`${apiUrl}/OrderPickingReception` , { headers: { "auth-token":JSON.parse(localStorage.getItem("token")) } });
+                //.then((response) => {setOrderPickingReception(response.data);})
+                //.catch((error) => {console.error('Error:', error);});
             setOrderPickingReception(orderPicking);
 
             const orderReception = await getData(url, "OrderReception");
@@ -108,9 +111,14 @@ function OrderPickingReception() {
             create_date: new Date().toISOString(),
             productos: orderSelected.map((orderLineId) => {
                 const line = orderLineReception.find((l) => l.id === orderLineId);
+                const space = spaces.find((s) => s.product_id === line.product_id);
                 return {
                     product_id: line.product_id,
-                    quantity: line.quantity_received
+                    quantity: line.quantity_received,
+                    storage_id: space.storage_id,
+                    street_id: space.street_id,
+                    shelf_id: space.selft_id,
+                    space_id: space.id
                 };
             }),
         };
