@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Formik, Form, Field } from "formik";
 import { url, postData, getData, deleteData, updateId } from "../../apiAccess/crud";
 import { Button, Table, Modal } from "react-bootstrap";
+import axios from "axios";
 
 function OrderPickingReception() {
     const [orderPickingReception, setOrderPickingReception] = useState([]);
@@ -76,8 +77,6 @@ function OrderPickingReception() {
     const canviEstatModal = () => {
         setShowModal(!showModal);
     }
-
-
 
     const crearOrderPickingReception = () => {
         //obtindre els productes seleccionats
