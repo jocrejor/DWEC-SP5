@@ -20,7 +20,7 @@ const OrderLineSchema = yup.object().shape({
   quantity: yup.number().required('Valor requerit'),
 })
 
-function OrdesEnviament() {
+function OrdresEnviament() {
   const [orders, setOrder] = useState([])
   const [status, setStatus] = useState([])
   const [showModal, setShowModal] = useState(false)
@@ -327,4 +327,4 @@ function OrdesEnviament() {
   )
 }
 
-export default OrdesEnviament
+export default OrdresEnviament
