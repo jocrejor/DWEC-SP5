@@ -44,17 +44,38 @@ const Lots = () => {
 
     const fetchData = async () => {
       try {
-        const lot = await axios.get("https://api.dwes.iesevalorpego.es/lot");
-        const product = await axios.get("http://node.daw.iesevalorpego.es:3001/Product");
-        const supplier = await axios.get("http://node.daw.iesevalorpego.es:3001/Supplier");
-        const orderReception = await axios.get("http://node.daw.iesevalorpego.es:3001/OrderReception");
-        const orderLineReception = await axios.get("http://node.daw.iesevalorpego.es:3001/OrderLineReception");
+
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const token = localStorage.getItem('token');
+
+        const lot = await axios.get(`${apiUrl}/lot`, { headers: { "auth-token": token } })
+          .then(response => {
+            setLot(response.data)
+          })
+          .catch(error => {
+            console.log(error)
+          })
+
+        // // const lot = axios.get(`${apiUrl}/lot`, { headers: {"auth-token" : JSON.parse(localStorage.getItem("token"))}});
+        // const lot = axios.get(`http://node.daw.iesevalorpego.es:3001/lot`, { headers: {"auth-token" : token}})
+        //   .then(response => {
+        //     setLot(response.data)
+        //   })
+        //   .catch(error => {
+        //     console.log(error)
+        //   })
+
+
+        // const product = await axios.get("http://node.daw.iesevalorpego.es:3001/Product");
+        // const supplier = await axios.get("http://node.daw.iesevalorpego.es:3001/Supplier");
+        // const orderReception = await axios.get("http://node.daw.iesevalorpego.es:3001/OrderReception");
+        // const orderLineReception = await axios.get("http://node.daw.iesevalorpego.es:3001/OrderLineReception");
 
         setLot(lot.data);
-        setProduct(product.data);
-        setSupplier(supplier.data);
-        setOrderReception(orderReception.data);
-        setOrderLineReception(orderLineReception.data);
+        // setProduct(product.data);
+        // setSupplier(supplier.data);
+        // setOrderReception(orderReception.data);
+        // setOrderLineReception(orderLineReception.data);
       }
       catch (error) {
         console.log("Error:", error);
@@ -78,11 +99,20 @@ const Lots = () => {
     fetchData();
   }, []);
 
-  const eliminarLot = (id) => {
-    deleteData(url, 'Lot', id);
-    const newLot = lot.filter((item) => item.id !== id);
-    setLot(newLot);
-  };
+  const eliminarLot = async (id) => {
+    try {
+      await axios.delete(`http://node.daw.iesevalorpego.es:3001/Lot/${id}`);
+      setLot((prevLot) => prevLot.filter((item) => item.id !== id));
+    }
+    catch (error) {
+      console.log("Error:", error);
+    }
+  }
+  // const eliminarLot = (id) => {
+  //   deleteData(url, 'Lot', id);
+  //   const newLot = lot.filter((item) => item.id !== id);
+  //   setLot(newLot);
+  // };
 
   const modificarLot = (valors) => {
     setTipoModal('Modificar');
@@ -218,19 +248,26 @@ const Lots = () => {
             }
             validationSchema={LotSchema}
             /** SE ACTUALIZA LA TABLA AL MODIFICAR O CREAR */
-            onSubmit={(values) => {
+            onSubmit={async (values) => {
               if (tipoModal === 'Crear') {
-                axios.post("https://api.dwes.iesevalorpego.es/lot", values)
-                  .then((response) => {
-                    setLot((prevLot) => [...prevLot, response.data]);
-                  })
-                  .catch((error) => console.error("Error al crear el lote:", error));
-              } else {
-                updateId(url, 'Lot', values.id, values).then(() => {
-                  setLot(prevLot => prevLot.map(lot => (lot.id === values.id ? values : lot)));
-                });
+                const response = await axios.post("https://api.dwes.iesevalorpego.es/lot", values);
+                setLot((prevLot) => [...prevLot, response.data]);
               }
-              canviEstatModal();
+              else {
+                await axios.put(`https://api.dwes.iesevalorpego.es/lot${values.id}`, values);
+              }
+              // if (tipoModal === 'Crear') {
+              //   axios.post("https://api.dwes.iesevalorpego.es/lot", values)
+              //     .then((response) => {
+              //       setLot((prevLot) => [...prevLot, response.data]);
+              //     })
+              //     .catch((error) => console.error("Error al crear el lote:", error));
+              // } else {
+              //   // updateId(url, 'Lot', values.id, values).then(() => {
+              //   //   setLot(prevLot => prevLot.map(lot => (lot.id === values.id ? values : lot)));
+              //   // });
+              // }
+              // canviEstatModal();
             }}
           /** SIN ACTUALIZAR (VERSIÓN ANTERIOR) */
           // onSubmit={(values) => {
