@@ -11,7 +11,7 @@ const OrderReceptionSchema = Yup.object().shape({
   OrderLineReception_Status: Yup.string().min(1, "Valor mínim d'1 caràcter.").max(25, 'El valor màxim és de 25 caràcters.').required('Estat requerit'),
 });
 
-function OrderReception() {
+function OrdreRecepcio() {
   const [orderReceptions, setOrderReceptions] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [statuses, setStatuses] = useState([]);
@@ -297,4 +297,4 @@ function OrderReception() {
   );
 }
 
-export default OrderReception;
+export default OrdreRecepcio;
