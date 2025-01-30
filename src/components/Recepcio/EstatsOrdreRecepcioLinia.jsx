@@ -5,15 +5,15 @@ import { url, postData, getData, deleteData, updateId } from '../../apiAccess/cr
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header'
 
-const OrderReception_StatusSchema = Yup.object().shape({
+const OrderLineReception_StatusSchema = Yup.object().shape({
   name: Yup.string()
     .min(1, "Valor mínim d'1 caràcter.")
     .max(25, 'El valor màxim és de 25 caràcters.')
     .required('Valor requerit'),
 });
 
-function OrderReception_Status() {
-  const [ordersLineReceptionStatus, setOrdersLineReceptionStatus] = useState([]);
+function OrderLineReception_Status() {
+  const [ordersLineReception, setOrdersLineReception] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
@@ -23,8 +23,8 @@ function OrderReception_Status() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const data = await getData(url, 'OrderReception_Status');
-      setOrdersLineReceptionStatus(data);
+      const data = await getData(url, 'OrderLineReception_Status');
+      setOrdersLineReception(data);
       setError(null);
     } catch (err) {
       setError('Error carregant les dades.');
@@ -37,11 +37,11 @@ function OrderReception_Status() {
     fetchOrders();
   }, []);
 
-  const eliminarEstatLinia = async (id) => {
+  const eliminarEstatOrdre = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquest estat?')) {
       try {
-        await deleteData(url, 'OrderReception_Status', id);
-        setOrdersLineReceptionStatus((prev) =>
+        await deleteData(url, 'OrderLineReception_Status', id);
+        setOrdersLineReception((prev) =>
           prev.filter((item) => item.id !== id)
         );
       } catch (err) {
@@ -50,7 +50,7 @@ function OrderReception_Status() {
     }
   };
 
-  const modificarEstatLinia = (valors) => {
+  const modificarEstatOrdre = (valors) => {
     setTipoModal('Modificar');
     setValorsInicials(valors);
     setShowModal(true);
@@ -63,9 +63,9 @@ function OrderReception_Status() {
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
-        await postData(url, 'OrderReception_Status', values);
+        await postData(url, 'OrderLineReception_Status', values);
       } else {
-        await updateId(url, 'OrderReception_Status', values.id, values);
+        await updateId(url, 'OrderLineReception_Status', values.id, values);
       }
       await fetchOrders();
       canviEstatModal();
@@ -77,7 +77,7 @@ function OrderReception_Status() {
 
   return (
     <>
-      <Header title="Llistat Estats de Línia" />
+      <Header title="Llistat Estats de Ordre" />
       <Button
         variant="success"
         onClick={() => {
@@ -86,13 +86,13 @@ function OrderReception_Status() {
           canviEstatModal();
         }}
       >
-        Nou Estat de línia
+        Nou Estat de ordre
       </Button>
       {loading ? (
         <Spinner animation="border" />
       ) : error ? (
         <div>{error}</div>
-      ) : ordersLineReceptionStatus.length === 0 ? (
+      ) : ordersLineReception.length === 0 ? (
         <div>No hi ha estats</div>
       ) : (
         <Table striped bordered hover>
@@ -105,14 +105,14 @@ function OrderReception_Status() {
             </tr>
           </thead>
           <tbody>
-            {ordersLineReceptionStatus.map((valors) => (
+            {ordersLineReception.map((valors) => (
               <tr key={valors.id}>
                 <td>{valors.id}</td>
                 <td>{valors.name}</td>
                 <td>
                   <Button
                     variant="warning"
-                    onClick={() => modificarEstatLinia(valors)}
+                    onClick={() => modificarEstatOrdre(valors)}
                   >
                     Modificar
                   </Button>
@@ -120,7 +120,7 @@ function OrderReception_Status() {
                 <td>
                   <Button
                     variant="primary"
-                    onClick={() => eliminarEstatLinia(valors.id)}
+                    onClick={() => eliminarEstatOrdre(valors.id)}
                   >
                     Eliminar
                   </Button>
@@ -132,12 +132,12 @@ function OrderReception_Status() {
       )}
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
-          <Modal.Title>{tipoModal} Estat de Línia</Modal.Title>
+          <Modal.Title>{tipoModal} Estat de Ordre</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Formik
             initialValues={valorsInicials}
-            validationSchema={OrderReception_StatusSchema}
+            validationSchema={OrderLineReception_StatusSchema}
             onSubmit={handleSubmit}
           >
             {({ errors, touched }) => (
@@ -148,7 +148,7 @@ function OrderReception_Status() {
                     id="name"
                     type="text"
                     name="name"
-                    placeholder="Nom del estat de línia"
+                    placeholder="Nom del estat"
                     autoComplete="off"
                   />
                   {errors.name && touched.name && <div>{errors.name}</div>}
@@ -173,4 +173,4 @@ function OrderReception_Status() {
   );
 }
 
-export default OrderReception_Status;
+export default OrderLineReception_Status;

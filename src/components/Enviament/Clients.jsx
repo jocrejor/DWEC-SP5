@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud'
 import { Formik, Form, Field } from 'formik'
 import * as yup from 'yup'
-
 import { Button, Modal } from 'react-bootstrap';
+import Header from "../Header";
 
 const ClientSchema = yup.object().shape({
   name: yup.string().min(4, 'Valor mínim de 4 caracters').max(50, 'Valor màxim de 50 caracters').required('Valor Requerit.'),
@@ -98,8 +98,10 @@ function Client() {
 
   return (
     <>
+    <div>
+        <Header title="Clients" />
+      </div>
       <div>
-        <h2>Llistat Clients</h2>
         <Button variant="success" onClick={() => { canviEstatModal(); setTipoModal("Crear") }}>Alta Client</Button>
         <table>
           <thead>
