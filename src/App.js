@@ -7,6 +7,4 @@ function main () {
     boton.addEventListener("click", () => {
         menu.classList.toggle('show');
     });
-
-
 }

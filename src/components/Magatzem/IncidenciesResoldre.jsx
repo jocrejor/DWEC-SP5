@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
-import { Formik, Form, Field } from 'formik'
-import * as Yup from 'yup'
+import { useState, useEffect }                          from 'react'
+import { Formik, Form, Field }                          from 'formik'
+import * as Yup                                         from 'yup'
 import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud'
-import { Button, Modal } from 'react-bootstrap';
-import Header from '../Header'
+import { Button, Modal }                                from 'react-bootstrap';
+import Header                                           from '../Header'
+import axios                                            from 'axios'
 
 const IncidenciaSchema = Yup.object().shape({
     //Aso es té que llevar quan estiga ben fet, es soles un formulari de alta de prova perque Crespo no m'ha explicat on és fa l'alta i quins camps tinc que posar
@@ -35,11 +36,17 @@ function IncidenciesResoldre() {
         created_at: ''
     });
 
+    const getDataIncident = () => {
+        const apiURL = import.meta.env.VITE_API_URL
+        const token = localStorage.getItem("token")
+        console.log(token)
+        axios.get(`${apiURL}/incident`, {headers: {"auth-token" : token}})
+            .then(response => setIncident(response))
+            .catch(error => console.log(error))
+    }
+
     useEffect(() => {      
-        (async () => {
-            const dataIncident = await getData(url, "Incident")
-            setIncident(dataIncident);          
-        })();
+        getDataIncident();
         (async () => {
             const dataProduct = await getData(url, "Product")
             setProducts(dataProduct)
