@@ -6,6 +6,7 @@ import { Button, Modal } from 'react-bootstrap';
 
 import Header from '../Header';
 import Filtres from '../Filtres';
+import axios from 'axios';
 
 const carrierschema = Yup.object().shape({
   name: Yup.string().min(3, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
@@ -45,6 +46,9 @@ function Transportistes() {
   });
 
   useEffect(() => {
+    const apiURL = import.meta.env.VITE_API_URL;
+    axios
+    .get(`${apiURL}/transportistes`,)
     async function fetchData() {
       const data = await getData(url, 'Carriers');
       const pais = await getData(url, 'State');
