@@ -17,11 +17,12 @@ function Lateral() {
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/usuaris">Usuaris</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/rols">Rols</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/dadesGeografiques">Dades geogràfiques</a></li>
-                        <li className="list-group-item px-0 opacity-75 activo"><a className="text-decoration-none d-block" href="/transportistes"><i className="bi bi-caret-right-fill pe-1"></i>Transportistes</a></li>
                         <li className="list-group-item py-3 px-1 text-white fondo-azul border-top no-hover"><i className="bi bi-send px-1 text-white"></i>Enviament</li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/clients">Clients</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/ordresEnviament">Ordres d'enviament <span className="badge rounded-pill bg-danger px-3 ms-2 text-white">9</span></a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/orderpickingshipping">Ordes de Picking E.</a></li>
+                        <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/estatsOrdreEnviament">Estats O. d'enviament </a></li>
+                        <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/transportistes">Transportistes</a></li>
                         
                         <li className="list-group-item py-3 px-1 text-white fondo-azul border-top no-hover"><i className="bi bi-inboxes px-1 text-white"></i>Recepció</li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/proveidors">Proveïdors</a></li>

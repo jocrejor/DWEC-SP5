@@ -8,15 +8,15 @@ import Header from '../Header';
 
 const API_URL = 'https://api.dwes.iesevalorpego.es';
 
-const OrderLineReception_StatusSchema = Yup.object().shape({
+const OrderReception_StatusSchema = Yup.object().shape({
   name: Yup.string()
     .min(1, "Valor mínim d'1 caràcter.")
     .max(25, 'El valor màxim és de 25 caràcters.')
     .required('Valor requerit'),
 });
 
-function OrderLineReception_Status() {
-  const [ordersLineReception, setOrdersLineReception] = useState([]);
+function OrderReception_Status() {
+  const [ordersLineReceptionStatus, setOrdersLineReceptionStatus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
@@ -26,7 +26,7 @@ function OrderLineReception_Status() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${API_URL}/OrderLineReception_Status`);
+      const { data } = await axios.get(`${API_URL}/OrderReception_Status`);
       setOrdersLineReception(data);
       setError(null);
     } catch (err) {
@@ -40,10 +40,10 @@ function OrderLineReception_Status() {
     fetchOrders();
   }, []);
 
-  const eliminarEstatOrdre = async (id) => {
+  const eliminarEstat = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquest estat?')) {
       try {
-        await axios.delete(`${API_URL}/OrderLineReception_Status/${id}`);
+        await axios.delete(`${API_URL}/OrderReception_Status/${id}`);
         setOrdersLineReception((prev) => prev.filter((item) => item.id !== id));
       } catch (err) {
         setError("Error eliminant l'estat.");
@@ -51,7 +51,7 @@ function OrderLineReception_Status() {
     }
   };
 
-  const modificarEstatOrdre = (valors) => {
+  const modificarEstat = (valors) => {
     setTipoModal('Modificar');
     setValorsInicials(valors);
     setShowModal(true);
@@ -64,9 +64,9 @@ function OrderLineReception_Status() {
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
-        await axios.post(`${API_URL}/OrderLineReception_Status`, values);
+        await axios.post(`${API_URL}/OrderReception_Status`, values);
       } else {
-        await axios.put(`${API_URL}/OrderLineReception_Status/${values.id}`, values);
+        await axios.put(`${API_URL}/OrderReception_Status/${values.id}`, values);
       }
       await fetchOrders();
       canviEstatModal();
@@ -78,7 +78,7 @@ function OrderLineReception_Status() {
 
   return (
     <>
-      <Header title="Llistat Estats de Ordre" />
+      <Header title="Llistat Estats de Línia" />
       <Button
         variant="success"
         onClick={() => {
@@ -87,13 +87,13 @@ function OrderLineReception_Status() {
           canviEstatModal();
         }}
       >
-        Nou Estat de ordre
+        Nou Estat de línia
       </Button>
       {loading ? (
         <Spinner animation="border" />
       ) : error ? (
         <div>{error}</div>
-      ) : ordersLineReception.length === 0 ? (
+      ) : ordersLineReceptionStatus.length === 0 ? (
         <div>No hi ha estats</div>
       ) : (
         <Table striped bordered hover>
@@ -106,14 +106,14 @@ function OrderLineReception_Status() {
             </tr>
           </thead>
           <tbody>
-            {ordersLineReception.map((valors) => (
+            {ordersLineReceptionStatus.map((valors) => (
               <tr key={valors.id}>
                 <td>{valors.id}</td>
                 <td>{valors.name}</td>
                 <td>
                   <Button
                     variant="warning"
-                    onClick={() => modificarEstatOrdre(valors)}
+                    onClick={() => modificarEstat(valors)}
                   >
                     Modificar
                   </Button>
@@ -121,7 +121,7 @@ function OrderLineReception_Status() {
                 <td>
                   <Button
                     variant="primary"
-                    onClick={() => eliminarEstatOrdre(valors.id)}
+                    onClick={() => eliminarEstat(valors.id)}
                   >
                     Eliminar
                   </Button>
@@ -133,12 +133,12 @@ function OrderLineReception_Status() {
       )}
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
-          <Modal.Title>{tipoModal} Estat de Ordre</Modal.Title>
+          <Modal.Title>{tipoModal} Estat de Línia</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Formik
             initialValues={valorsInicials}
-            validationSchema={OrderLineReception_StatusSchema}
+            validationSchema={OrderReception_StatusSchema}
             onSubmit={handleSubmit}
           >
             {({ errors, touched }) => (
@@ -149,7 +149,7 @@ function OrderLineReception_Status() {
                     id="name"
                     type="text"
                     name="name"
-                    placeholder="Nom del estat"
+                    placeholder="Nom del estat de línia"
                     autoComplete="off"
                   />
                   {errors.name && touched.name && <div>{errors.name}</div>}
@@ -174,4 +174,4 @@ function OrderLineReception_Status() {
   );
 }
 
-export default OrderLineReception_Status;
+export default OrderReception_Status;
