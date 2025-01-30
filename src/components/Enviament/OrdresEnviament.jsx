@@ -5,6 +5,7 @@ import * as yup from 'yup'
 import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header'
 import Filter from '../Filtres'
+import axios from 'axios'
 
 
 const OrderShippingSchema = yup.object().shape({
@@ -33,9 +34,13 @@ function OrdresEnviament() {
   const [products, setProducts] = useState([])
   const [arrayProductos,setArray] = useState([])
   
+
   useEffect(async () => {
-    const data = await getData(url,'OrderShipping')
-    setOrder(data)
+    axios.get('https://api.dwes.iesevalorpego.es/ordershipping')
+    .then(response => {
+      setOrder(response.data)
+      console.log(ordrers)
+    })
     const dataClient = await getData(url,'Client')
     setClientes(dataClient)
     const dataCarrier = await getData(url,'Carriers')
