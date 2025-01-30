@@ -22,6 +22,8 @@ function OrderPickingReception() {
     const [orderSelected, setOrderSelected] = useState([]);
 
     useEffect(() => {
+        const apiUrl = import.meta.env.VITE_API_URL;
+
         const fetchData = async () => {
             const orderPicking = await getData(url, "OrderPickingReception");
             setOrderPickingReception(orderPicking);
@@ -102,7 +104,7 @@ function OrderPickingReception() {
         const operari = document.getElementById("operari").value;
 
         const newOrderPickingReception = {
-            user_id: operari,
+            operator_id: operari,
             create_date: new Date().toISOString(),
             productos: orderSelected.map((orderLineId) => {
                 const line = orderLineReception.find((l) => l.id === orderLineId);
