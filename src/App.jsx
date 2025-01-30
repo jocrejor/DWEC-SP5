@@ -1,5 +1,9 @@
-import { Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import './App.css'
+
+
+
 import Lateral from './components/Lateral'
 import Login from './components/login';
 import Logout from './components/logout';
@@ -9,17 +13,21 @@ import Productes from './components/Recepcio/Productes';
 import Usuaris from './components/Administracio/Usuaris';
 import Rols from './components/Administracio/Rols';
 import DadesGeografiques from './components/Administracio/DadesGeografiques';
+
 import Transportistes from './components/Administracio/Transportistes';
 import Clients from './components/Enviament/Clients';
-import OrdesEnviament from './components/Enviament/OrdesEnviament';
+import OrdresEnviament from './components/Enviament/OrdresEnviament.jsx';
+import EstatsOrdreEnviament from './components/Enviament/EstatsOrdreEnviament.jsx';
+
 import Proveidors from './components/Recepcio/Proveidors';
-import OrdesRecepcio from './components/Recepcio/OrdesRecepcio';
+import OrdresRecepcio from './components/Recepcio/OrdresRecepcio';
 import EstatsOrdreRecepcio from './components/Recepcio/EstatsOrdreRecepcio';
 import EstatsOrdreRecepcioLinia from './components/Recepcio/EstatsOrdreRecepcioLinia.jsx';
+
 import Lots from './components/Recepcio/Lots';
 
 
-import GestioMagatzem from './components/Magatzem/GestioMagatzem.jsx';
+import GestioMagatzem from './components/Magatzem/GestioMagatzem';
 
 
 
@@ -32,8 +40,19 @@ import './App.js';
 import OrderPickingReception from './components/Recepcio/OrderPickingReception';
 import OrderPickingShipping from './components/Enviament/OrderPickingShipping';
 
-function App() {
 
+
+
+function App() {
+  const navigate = useNavigate(); 
+
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  useEffect(() => { 
+    if (localStorage.getItem('token') === null) {
+        navigate('/login'); 
+    }
+  }, [navigate]);
 
   return (
     <>
@@ -59,15 +78,17 @@ function App() {
 
                 <Route path="/clients" element={<Clients />} />
 
-                <Route path="/ordresEnviament" element={<OrdesEnviament />} />
+                <Route path="/ordresEnviament" element={<OrdresEnviament />} />
 
                 <Route path="/proveidors" element={<Proveidors />} />
 
-                <Route path="/ordresRecepcio" element={<OrdesRecepcio />} />
+                <Route path="/ordresRecepcio" element={<OrdresRecepcio />} />
 
                 <Route path="/estatsOrdreRecepcio" element={<EstatsOrdreRecepcio />} />
 
                 <Route path="/estatsOrdreRecepcioLinia" element={<EstatsOrdreRecepcioLinia />} />
+
+                <Route path="/estatsOrdreEnviament" element={<EstatsOrdreEnviament />} />
 
                 <Route path="/productes" element={<Productes />} />
 
@@ -82,7 +103,7 @@ function App() {
                 
 
 
-                <Route path="/incidencies" element={<Incidencies />} />
+                <Route path="/incidencies/*" element={<Incidencies />} />
 
                 <Route path="/moviments" element={<Moviments />} />
                 
