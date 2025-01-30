@@ -43,16 +43,20 @@ const Lots = () => {
   useEffect(() => {
 
     const fetchData = async () => {
-      try{
-        const lot = await axios.get("http://node.daw.iesevalorpego.es:3001/Lot");
+      try {
+        const lot = await axios.get("https://api.dwes.iesevalorpego.es/lot");
         const product = await axios.get("http://node.daw.iesevalorpego.es:3001/Product");
         const supplier = await axios.get("http://node.daw.iesevalorpego.es:3001/Supplier");
+        const orderReception = await axios.get("http://node.daw.iesevalorpego.es:3001/OrderReception");
+        const orderLineReception = await axios.get("http://node.daw.iesevalorpego.es:3001/OrderLineReception");
 
         setLot(lot.data);
         setProduct(product.data);
         setSupplier(supplier.data);
+        setOrderReception(orderReception.data);
+        setOrderLineReception(orderLineReception.data);
       }
-      catch(error){
+      catch (error) {
         console.log("Error:", error);
       }
     }
@@ -216,9 +220,11 @@ const Lots = () => {
             /** SE ACTUALIZA LA TABLA AL MODIFICAR O CREAR */
             onSubmit={(values) => {
               if (tipoModal === 'Crear') {
-                postData(url, 'Lot', values).then((nuevoLote) => {
-                  setLot(prevLot => [...prevLot, nuevoLote]);
-                });
+                axios.post("https://api.dwes.iesevalorpego.es/lot", values)
+                  .then((response) => {
+                    setLot((prevLot) => [...prevLot, response.data]);
+                  })
+                  .catch((error) => console.error("Error al crear el lote:", error));
               } else {
                 updateId(url, 'Lot', values.id, values).then(() => {
                   setLot(prevLot => prevLot.map(lot => (lot.id === values.id ? values : lot)));
