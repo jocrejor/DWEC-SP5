@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import './App.css'
+
+
+
 import Lateral from './components/Lateral'
 import Login from './components/login';
 import Logout from './components/logout';
@@ -29,7 +32,7 @@ import GestioMagatzem from './components/Magatzem/GestioMagatzem';
 
 
 import Inventaris from './components/Magatzem/Inventaris';
-import Incidencies from './components/Magatzem/Incidencies_old.jsx';
+import Incidencies from './components/Magatzem/Incidencies';
 import Moviments from './components/Magatzem/Moviments';
 import Inventariar from './components/Magatzem/Inventariar';
 import CompletarInventari from './components/Magatzem/CompletarInventari';
@@ -37,12 +40,16 @@ import './App.js';
 import OrderPickingReception from './components/Recepcio/OrderPickingReception';
 import OrderPickingShipping from './components/Enviament/OrderPickingShipping';
 
+
+
+
 function App() {
   const navigate = useNavigate(); 
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   useEffect(() => { 
     if (localStorage.getItem('token') === null) {
-        console.log('No has iniciat sessió')
         navigate('/login'); 
     }
   }, [navigate]);
