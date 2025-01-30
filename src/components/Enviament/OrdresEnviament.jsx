@@ -6,6 +6,7 @@ import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header'
 import Filter from '../Filtres'
 import axios from 'axios'
+const apiUrl = import.meta.env.VITE_API_URL;
 
 
 const OrderShippingSchema = yup.object().shape({
@@ -36,28 +37,68 @@ function OrdresEnviament() {
   
 
   useEffect(async () => {
-    axios.get('https://api.dwes.iesevalorpego.es/ordershipping')
+    axios.get(`${apiUrl}/ordershipping`, {headers: {"auth-token": localStorage.getItem("token")}})
     .then(response => {
       setOrder(response.data)
-      console.log(ordrers)
     })
-    const dataClient = await getData(url,'Client')
-    setClientes(dataClient)
-    const dataCarrier = await getData(url,'Carriers')
-    setCarriers(dataCarrier)
-    const dataUsers = await getData(url,'User')
-    setUsers(dataUsers)
-    const dataProducts = await getData(url,'Product')
-    setProducts(dataProducts)
-    const dataStatus = await getData(url,'OrderShipping_Status')
-    console.log(dataStatus)
-    setStatus(dataStatus)
+    .catch(e => {
+      console.log(e)
+    }
+    )
+
+    axios.get(`${apiUrl}/client`, {headers: {"auth-token": localStorage.getItem("token")}})
+    .then(response => {
+      setClientes(response.data)
+    })
+    .catch(e => {
+      console.log(e)
+    }
+    )
+
+    axios.get(`${apiUrl}/carrier`, {headers: {"auth-token": localStorage.getItem("token")}})
+    .then(response => {
+      setCarriers(response.data)
+    })
+    .catch(e => {
+      console.log(e)
+    }
+    )
+
+    axios.get(`${apiUrl}/users`, {headers: {"auth-token": localStorage.getItem("token")}})
+    .then(response => {
+      setUsers(response.data)
+    })
+    .catch(e => {
+      console.log(e)
+      }
+    )
+
+    axios.get(`${apiUrl}/product`, {headers: {"auth-token": localStorage.getItem("token")}})
+    .then(response => {
+      setProducts(response.data)
+    })
+    .catch(e => {
+      console.log(e)
+      }
+    )
+
+    axios.get(`${apiUrl}/ordershipping_status`, {headers: {"auth-token": localStorage.getItem("token")}})
+    .then(response => {
+      setStatus(response.data)
+    })
+    .catch(e => {
+      console.log(e)
+      }
+    )
   }, [])
 
   const eliminarOrder = (id) => {
-    deleteData(url,'OrderShipping', id)
-    const newOrders = orders.filter(order => order.id !== id)
-    setOrder(newOrders)
+    axios.delete(`${apiUrl}ordershipping/${id}`,{headers: {"auth-token": localStorage.getItem("token")}})
+    .then(()=> {
+      alert("Orden eliminada");
+      const newOrders = orders.filter(order => order.id !== id)
+      setOrder(newOrders)
+    })
   }
 
   const afegirProducte = (producte) => {
