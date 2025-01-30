@@ -23,33 +23,44 @@ function OrderPickingReception() {
 
     useEffect(() => {
         const apiUrl = import.meta.env.VITE_API_URL;
+        const token = JSON.parse(localStorage.getItem("token"));
 
         const fetchData = async () => {
-            const orderPicking = await getData(url, "OrderPickingReception");
-            //axios.get(`${apiUrl}/OrderPickingReception` , { headers: { "auth-token":JSON.parse(localStorage.getItem("token")) } });
-                //.then((response) => {setOrderPickingReception(response.data);})
-                //.catch((error) => {console.error('Error:', error);});
-            setOrderPickingReception(orderPicking);
+            //order picking reception
+            axios.get(`${apiUrl}/OrderPickingReception`, { headers: { "auth-token": token } })
+            .then((response) => {setOrderPickingReception(response.data);})
+            .catch((error) => {console.error('Error:', error);});
 
-            const orderReception = await getData(url, "OrderReception");
-            setOrderReception(orderReception);
+            //order reception
+            axios.get(`${apiUrl}/OrderReception`, { headers: { "auth-token": token } })
+            .then((response) => {setOrderReception(response.data);})
+            .catch((error) => {console.error('Error:', error);});
 
-            const orderLine = await getData(url, "OrderLineReception");
-            setOrderLineReception(orderLine);
+            //order line reception
+            axios.get(`${apiUrl}/OrderLineReception`, { headers: { "auth-token": token } })
+            .then((response) => {setOrderLineReception(response.data);})
+            .catch((error) => {console.error('Error:', error);});
 
-            const product = await getData(url, "Product");
-            setProducts(product);
+            //product
+            axios.get(`${apiUrl}/Product`, { headers: { "auth-token": token } })
+            .then((response) => {setProducts(response.data);})
+            .catch((error) => {console.error('Error:', error);});
 
-            const spaces = await getData(url, "Space");
-            setSpaces(spaces);
+            //space
+            axios.get(`${apiUrl}/Space`, { headers: { "auth-token": token } })
+            .then((response) => {setSpaces(response.data);})
+            .catch((error) => {console.error('Error:', error);});
 
-            const users = await getData(url, "User");
-            setUsers(users);
+            //user
+            axios.get(`${apiUrl}/User`, { headers: { "auth-token": token } })
+            .then((response) => {setUsers(response.data);})
+            .catch((error) => {console.error('Error:', error);});
+
 
             setCurrentUser(localStorage.getItem("currentuser"));
 
             //recorrer orden reception pendent (desempaquetada)
-            const orderPendent = orderReception.filter((order) => order.orderreception_status_id === "ceba");
+            const orderPendent = orderreception.filter((order) => order.orderreception_status_id === "ceba");
 
             const tempPickings = [];
             orderPendent.map((order) => {
