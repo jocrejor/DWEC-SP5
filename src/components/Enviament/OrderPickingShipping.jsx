@@ -27,9 +27,12 @@ function OrderPickingShipping() {
   const [orderSelected, setOrderSelected] = useState([]);
 
   useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    axios.get(`${apiUrl}OrderPickingshipping`).then((res) => {
+      setOrderPickingShipping(res.data);
+    }).catch((error) => console.log(error));
+
     const fetchData = async () => {
-      const orderPicking = await getData(url, "OrderPickingshipping");
-      setOrderPickingShipping(orderPicking);
 
       const orderShipping = await getData(url, "OrderShipping");
       setOrderShipping(orderShipping);
