@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
+import Filtres from '../Filtres';
 
 const StreetSchema = Yup.object().shape({
     name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
@@ -51,8 +52,8 @@ function Street() {
 
     return (
         <>
+            <Filtres />
             <h1> Magatzem: {magatzem}</h1>
-            
             <Button variant='success' onClick={() => { canviEstatModal(); setTipoModal("Crear"); }}>Alta Carrer</Button>
             <table>
                 <thead>

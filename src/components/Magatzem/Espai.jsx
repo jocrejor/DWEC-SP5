@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
+import Filtres from '../Filtres';
 
 const SpaceSchema = Yup.object().shape({
     name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
@@ -51,6 +52,7 @@ function Space() {
 
     return (
         <>
+              <Filtres />
               <h2>magatzem {magatzem}</h2>
               <h2>carrer {carrer}</h2>
               <h2>estanteria {estanteria} </h2>
