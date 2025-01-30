@@ -269,7 +269,21 @@ function OrderPickingReception() {
                                         </thead>
 
                                         <tbody>
-                                            
+                                            {orderPickingReception.find(order => order.id === orderVisualitzar)?.productos.map(producto => {
+                                                const product = products.find(p => p.id === producto.product_id);
+                                                const space = spaces.find(s => s.product_id === producto.product_id);
+                                                
+                                                return (
+                                                    <tr key={producto.product_id}>
+                                                        <td> </td>
+                                                        <td>{product.name}</td>
+                                                        <td>{space.quantity}</td>
+                                                        <td>
+                                                           {space.storage_id} / {space.street_id} / {space.selft_id} / {space.id}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </Table>
                                     <Button variant="success" onClick={() => {
