@@ -16,7 +16,7 @@ const GestioMagatzem = () => {
                       <Route path="magatzem" element={<Magatzem />} />
                       <Route path="carrer/:magatzem" element={<Carrer />} />
                       <Route path="estanteria/:magatzem/:carrer" element={<Estanteria />} />
-                      <Route path="espai/:magatzem/:carrer/:estateria" element={<Espai />} />
+                      <Route path="espai/:magatzem/:carrer/:estanteria" element={<Espai />} />
              </Routes>
              
         </div>
