@@ -4,17 +4,18 @@ import * as Yup from 'yup';
 import { Button, Modal } from 'react-bootstrap';
 import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import Header from '../Header';
+import axios from 'axios';
 
 const UserProfileSchema = Yup.object().shape({
   name: Yup.string()
-    .min(4, 'Valor mínimo de 4 caracteres.')
-    .max(50, 'El valor máximo es de 50 caracteres')
-    .required('Valor requerido'),
+    .min(4, 'Valor mínim de 4 caràcters.')
+    .max(50, 'El valor màxim és de 50 caràcters')
+    .required('Valor requerit'),
 });
 
 function Rols() {
   const [userProfiles, setUserProfiles] = useState([]);
-  const [filteredProfiles, setFilteredProfiles] = useState([]); 
+  const [filteredProfiles, setFilteredProfiles] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -25,10 +26,34 @@ function Rols() {
     const fetchUserProfiles = async () => {
       try {
         const data = await getData(url, 'UserProfile');
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const token = localStorage.getItem("token");
+        console.log(token);
+
+        // Realitzant totes les crides a l'API
+        const requests = [
+          axios.get(`${apiUrl}/OrderLine_Status`, { headers: { "auth-token": token } }),
+          axios.get(`${apiUrl}/Ordershipping`, { headers: { "auth-token": token } }),
+          axios.get(`${apiUrl}/Client`, { headers: { "auth-token": token } }),
+          axios.get(`${apiUrl}/Carrier`, { headers: { "auth-token": token } }),
+          axios.get(`${apiUrl}/Users`, { headers: { "auth-token": token } }),
+          axios.get(`${apiUrl}/Product`, { headers: { "auth-token": token } }),
+        ];
+
+        // Esperem a que totes les crides finalitzin
+       //wait Promise.all(requests);
+        const [orderLineStatusResponse] = await Promise.all(requests);
+
+        // Ara pots utilitzar les dades de `orderLineStatusResponse` si ho necessites
+        const orderLineStatus = orderLineStatusResponse.data;  // Accedeix a les dades
+  
+        console.log(orderLineStatus); // Fes alguna cosa amb les dades obtingudes
+  
+        // Actualitzant els estats amb les respostes
         setUserProfiles(data);
-        setFilteredProfiles(data); 
+        setFilteredProfiles(data);
       } catch (error) {
-        console.error('Error en obtenir els perfils de usuari:', error);
+        console.error('Error en obtenir els perfils d\'usuari', error);
       }
     };
     fetchUserProfiles();
@@ -38,7 +63,7 @@ function Rols() {
     try {
       await deleteData(url, 'UserProfile', id);
       setUserProfiles((prevProfiles) => prevProfiles.filter((item) => item.id !== id));
-      setFilteredProfiles((prevProfiles) => prevProfiles.filter((item) => item.id !== id)); 
+      setFilteredProfiles((prevProfiles) => prevProfiles.filter((item) => item.id !== id));
     } catch (error) {
       console.error('Error en suprimir el perfil de usuari:', error);
     }
@@ -54,7 +79,7 @@ function Rols() {
     try {
       const profile = await getData(url, `UserProfile/${id}`);
       setSelectedProfile(profile);
-      setModalType('Visualizar');
+      setModalType('Visualitzar');
       setShowModal(true);
     } catch (error) {
       console.error('Error en obtenir els detalls del perfil de usuari:', error);
@@ -71,7 +96,7 @@ function Rols() {
 
   return (
     <div>
-      <Header title="Lista de roles" />
+      <Header title="Lista de rols" />
       <Button variant="success" onClick={obrirModal} className="mb-3">
         Alta Perfil d'usuaris
       </Button>
@@ -86,7 +111,7 @@ function Rols() {
           </tr>
         </thead>
         <tbody>
-          {filteredProfiles.length === 0 ? (
+          {userProfiles.length === 0 ? (
             <tr>
               <td colSpan="5" className="text-center">No hi ha perfils d'usuaris</td>
             </tr>
@@ -130,10 +155,10 @@ function Rols() {
 
       <Modal show={showModal} onHide={tancarModal}>
         <Modal.Header closeButton>
-          <Modal.Title>{tipoModal} Perfil de Usuario</Modal.Title>
+          <Modal.Title>{tipoModal} Perfil de Usuari</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {modalType === 'Visualizar' ? (
+          {modalType === 'Visualitzar' ? (
             selectedProfile ? (
               <div>
                 <p><strong>Id:</strong> {selectedProfile.id}</p>
