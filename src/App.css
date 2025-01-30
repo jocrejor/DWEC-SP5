@@ -118,6 +118,9 @@ li:hover i{
     #logo {
         width: 5em;
     }
+    .m-customized{
+        margin-top: 5.8em;
+    }
 
     
 
@@ -135,4 +138,12 @@ li:hover i{
     }
 
 
+}
+
+@media only screen and (max-width: 600px){
+    .m-customized{
+        margin-top: 1.5em;
+        left: 35%;
+        
+    }
 }
