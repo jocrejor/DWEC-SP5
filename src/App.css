@@ -119,7 +119,9 @@ li:hover i{
         width: 5em;
     }
 
-    
+    .m-customized{
+        margin-top: 5.8em;
+    }
 
     /*********** DESPLAZAMIENTO DEL MENÚ ***********/
     @keyframes slideDown {
@@ -135,4 +137,12 @@ li:hover i{
     }
 
 
+}
+
+@media only screen and (max-width: 600px){
+    .m-customized{
+        margin-top: 1.5em;
+        left: 35%;
+        
+    }
 }
