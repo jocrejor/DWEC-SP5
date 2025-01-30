@@ -4,6 +4,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Header from './Header';
 
 const SignupSchema = Yup.object().shape({
   email: Yup.string().email('Correo electrónico inválido').required('Campo obligatorio'),
@@ -13,19 +14,22 @@ const SignupSchema = Yup.object().shape({
 function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const formik = useFormik({
     initialValues: { email: '', password: '' },
     validationSchema: SignupSchema,
     onSubmit: async (values) => {
       try {
-        const response = await axios.post('https://api.dwes.iesevalorpego.es/login', values, {
+        const response = await axios.post(`${apiUrl}/login`, values, {
           headers: { 'Content-Type': 'application/json' },
         });
 
         if (response.data.token && response.data.id && response.data.name) {
           localStorage.setItem('token', response.data.token);
-          localStorage.setItem(response.data.name, response.data.id);
+          delete response.data.token;
+          localStorage.setItem('user', JSON.stringify(response.data));
           navigate('/');
         } else {
           throw new Error('Token, Name o ID no recibido. Verifique el servidor.');
@@ -38,7 +42,7 @@ function Login() {
 
   return (
     <div>
-      <h1>Login</h1>
+      <Header title="Inici de sessió" />
       {error && <div className="text-danger">{error}</div>}
       <Form onSubmit={formik.handleSubmit}>
         <Form.Group className="mb-3">
