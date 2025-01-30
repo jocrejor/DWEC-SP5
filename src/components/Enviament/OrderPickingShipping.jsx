@@ -28,26 +28,63 @@ function OrderPickingShipping() {
 
   useEffect(() => {
     const apiUrl = import.meta.env.VITE_API_URL;
-    axios.get(`${apiUrl}OrderPickingshipping`).then((res) => {
-      setOrderPickingShipping(res.data);
-    }).catch((error) => console.log(error));
+    const token = localStorage.getItem("token");
+    
 
     const fetchData = async () => {
+      axios
+      .get(`${apiUrl}orderpickingshipping`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setOrderPickingShipping(res.data);
+      })
+      .catch((error) => console.log(error));
 
-      const orderShipping = await getData(url, "OrderShipping");
-      setOrderShipping(orderShipping);
+      axios
+      .get(`${apiUrl}ordershipping`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setOrderShipping(res.data);
+      })
+      .catch((error) => console.log(error));
 
-      const orderLine = await getData(url, "OrderLineShipping");
-      setOrderLineShipping(orderLine);
+      axios
+      .get(`${apiUrl}orderlineshipping`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setOrderLineShipping(res.data);
+      })
+      .catch((error) => console.log(error));
 
-      const product = await getData(url, "Product");
-      setProducts(product);
+      axios
+      .get(`${apiUrl}product`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setProducts(res.data);
+      })
+      .catch((error) => console.log(error));
 
-      const spaces = await getData(url, "Space");
-      setSpaces(spaces);
+      axios
+      .get(`${apiUrl}space`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setSpaces(res.data);
+      })
+      .catch((error) => console.log(error));
 
-      const users = await getData(url, "User");
-      setUsers(users);
+      axios
+      .get(`${apiUrl}users`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      })
+      .catch((error) => console.log(error));
 
       setCurrentUser(localStorage.getItem("currentuser"));
 
@@ -190,7 +227,7 @@ function OrderPickingShipping() {
                   (p) => p.id === temporalPicking.product_id
                 );
                 return (
-                  <tr key={temporalPicking.order_reception_id}>
+                  <tr key={temporalPicking.order_line_reception_id}>
                     <td>{temporalPicking.order_reception_id}</td>
                     <td>{product.name}</td>
                     <td>{temporalPicking.quantity}</td>
