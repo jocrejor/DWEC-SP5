@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import axios from 'axios';
 import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
-import Header from '../Header'
+import Header from '../Header';
+
+const API_URL = 'https://api.dwes.iesevalorpego.es';
 
 const OrderLineReception_StatusSchema = Yup.object().shape({
   name: Yup.string()
@@ -23,7 +26,7 @@ function OrderLineReception_Status() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const data = await getData(url, 'OrderLineReception_Status');
+      const { data } = await axios.get(`${API_URL}/OrderLineReception_Status`);
       setOrdersLineReception(data);
       setError(null);
     } catch (err) {
@@ -40,12 +43,10 @@ function OrderLineReception_Status() {
   const eliminarEstatOrdre = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquest estat?')) {
       try {
-        await deleteData(url, 'OrderLineReception_Status', id);
-        setOrdersLineReception((prev) =>
-          prev.filter((item) => item.id !== id)
-        );
+        await axios.delete(`${API_URL}/OrderLineReception_Status/${id}`);
+        setOrdersLineReception((prev) => prev.filter((item) => item.id !== id));
       } catch (err) {
-        setError('Error eliminant l\'estat.');
+        setError("Error eliminant l'estat.");
       }
     }
   };
@@ -63,15 +64,15 @@ function OrderLineReception_Status() {
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
-        await postData(url, 'OrderLineReception_Status', values);
+        await axios.post(`${API_URL}/OrderLineReception_Status`, values);
       } else {
-        await updateId(url, 'OrderLineReception_Status', values.id, values);
+        await axios.put(`${API_URL}/OrderLineReception_Status/${values.id}`, values);
       }
       await fetchOrders();
       canviEstatModal();
       setError(null);
     } catch (err) {
-      setError('Error en l\'operació.');
+      setError("Error en l'operació.");
     }
   };
 
