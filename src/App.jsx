@@ -1,5 +1,9 @@
-import { Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import './App.css'
+
+
+
 import Lateral from './components/Lateral'
 import Login from './components/login';
 import Logout from './components/logout';
@@ -23,7 +27,7 @@ import EstatsOrdreRecepcioLinia from './components/Recepcio/EstatsOrdreRecepcioL
 import Lots from './components/Recepcio/Lots';
 
 
-import GestioMagatzem from './components/Magatzem/GestioMagatzem.jsx';
+import GestioMagatzem from './components/Magatzem/GestioMagatzem';
 
 
 
@@ -36,8 +40,19 @@ import './App.js';
 import OrderPickingReception from './components/Recepcio/OrderPickingReception';
 import OrderPickingShipping from './components/Enviament/OrderPickingShipping';
 
-function App() {
 
+
+
+function App() {
+  const navigate = useNavigate(); 
+
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  useEffect(() => { 
+    if (localStorage.getItem('token') === null) {
+        navigate('/login'); 
+    }
+  }, [navigate]);
 
   return (
     <>
@@ -88,7 +103,7 @@ function App() {
                 
 
 
-                <Route path="/incidencies" element={<Incidencies />} />
+                <Route path="/incidencies/*" element={<Incidencies />} />
 
                 <Route path="/moviments" element={<Moviments />} />
                 
