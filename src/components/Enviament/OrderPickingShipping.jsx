@@ -189,7 +189,11 @@ function OrderPickingShipping() {
       {tabla === "CrearOrder" ? (
         <>
           <div>
-            <h2>Llistat Order Shipping</h2>
+            <h1 class="text-center py-4 fs-4 fw-bold m-0 text-white bg-title">Llistat Order Shipping</h1>
+            <p class="position-absolute top-0 end-0 me-4 m-customized mt-xl-4 fw-bold fs-5 text-white">
+              <i class="bi bi-person-circle pe-2"></i>
+              Usuari Admin
+            </p>
           </div>
 
           <Button
