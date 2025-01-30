@@ -7,6 +7,7 @@ import {
   // updateId,
 } from "../../apiAccess/crud";
 import { Button, Table, Modal } from "react-bootstrap";
+import axios from "axios";
 
 function OrderPickingShipping() {
   const [orderPickingShipping, setOrderPickingShipping] = useState([]);
@@ -334,6 +335,7 @@ function OrderPickingShipping() {
                   <Table striped bordered hover>
                     <thead>
                       <tr>
+                        <th></th>
                         <th>Producte</th>
                         <th>Quantitat</th>
                         <th>Magatzem / Carrer / Estantería / Espai</th>
@@ -343,15 +345,23 @@ function OrderPickingShipping() {
                     <tbody>
                       {orderPickingShipping
                         .find((order) => order.id === orderVisualitzar)
-                        .productos.map((item) => {
-                          const nom = products.find(
-                            (product) => product.id === item.product_id
-                          ).name;
+                        .productos.map((producto) => {
+                          const product = products.find(
+                            (p) => p.id === producto.product_id
+                          );
+                          const space = spaces.find(
+                            (s) => s.product_id === producto.product_id
+                          );
+
                           return (
-                            <tr key={item.product_id}>
-                              <td>{nom}</td>
-                              {/* <td>{item.quantity}</td>
-                              <td>{item.space_id}</td> */}
+                            <tr key={producto.product_id}>
+                              <td></td>
+                              <td>{product.name}</td>
+                              <td>{space.quantity}</td>
+                              <td>
+                                {space.storage_id} / {space.street_id} /{" "}
+                                {space.selft_id} / {space.id}
+                              </td>
                             </tr>
                           );
                         })}
