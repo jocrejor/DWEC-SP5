@@ -12,7 +12,6 @@ const ProducteSchema = Yup.object().shape({
   weight: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
   lotorserial: Yup.string().matches(/(Lot|Serial|Non)/).required('Valor requerit'),
   sku: Yup.string().matches(/^[A-Z0-9]{5,10}$/, 'El SKU ha de tindre alfanumèrics en majúscules i números (5 i 10) ').required('Valor requerit'),
-  image_url: Yup.string().url("La url ha de ser correcta")
 })
 
 function Productes() {
@@ -21,7 +20,7 @@ function Productes() {
   const [showModal, setShowModal] = useState(false)
   const [showModalUpolad, setShowModalUpload] = useState(false)
   const [tipoModal, setTipoModal]  = useState("Crear")
-  const [valorsInicials, setValorsInicials] = useState({ name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '', image_url: '' })
+  const [valorsInicials, setValorsInicials] = useState({ name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '' })
   const [image, setImage] = useState({id:0, file: null})
   const [messageImage, setMessageImage] = useState('');
   
@@ -108,7 +107,10 @@ const upload =  async (e)=>{
                 },
             });
             setMessageImage(response.data.message);
-             //canviEstatModalUpload()
+            setTimeout(() => { 
+              canviEstatModalUpload()
+            }, 1500);
+
         } catch (error) {
             setMessageImage('Error al subir el archivo: ' + (error.response?.data?.message || error.message));
         }
@@ -167,7 +169,7 @@ return (
         <Modal.Body>
           
       <Formik
-        initialValues= {(tipoModal==='Modificar'?valorsInicials: {name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '', image_url: '' })}
+        initialValues= {(tipoModal==='Modificar'?valorsInicials: {name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '' })}
         validationSchema={ProducteSchema}
         onSubmit={ values => { grabar(values)} }
       >
@@ -178,10 +180,12 @@ return (
           /* and other goodies */
         }) => (
           <Form>
-            <div>
+            <div className="form-group">
+              
               <label htmlFor='name'>Nom </label>
               <Field
                 type="text" 
+                className="form-control"
                 name="name"
                 placeholder="Nom del producte"
                 autoComplete="off"
@@ -191,10 +195,11 @@ return (
               {errors.name && touched.name ? <div>{errors.name}</div> : null}
             </div>
             {/*Em senc atacat*/}
-            <div>
+            <div className="form-group">
               <label htmlFor='description'>Descripció </label>
               <Field
                 as='textarea'
+                className="form-control"
                 type="text"
                 name="description"
                 placeholder="Descripció del producte"
@@ -204,10 +209,11 @@ return (
               {errors.description && touched.description ? <div>{errors.description}</div> : null}
             </div>
 
-            <div>
+            <div className="form-group">
               <label htmlFor='volume'>Volumen </label>
               <Field
                 type="number"
+                className="form-control"
                 name="volume"
                 step="0.001"
                 placeholder="0"
@@ -219,10 +225,11 @@ return (
 
 
 
-            <div>
+            <div className="form-group">
               <label htmlFor='weight'>Pes </label>
               <Field
                 type="number"
+                className="form-control"
                 name="weight"
                 step="1"
                 placeholder="0"
@@ -232,11 +239,12 @@ return (
               {errors.weight && touched.weight ? <div>{errors.weight}</div> : null}
             </div>
 
-            <div>
+            <div className="form-group">
               <label htmlFor='lotorserial'>Control lot o serie</label>
               <Field
                 as="select"
                 name="lotorserial"
+                className="form-control"
               >
                 <option value="">
                   Selecciona una opció
@@ -255,10 +263,11 @@ return (
               {errors.lotorserial && touched.lotorserial ? <div>{errors.lotorserial}</div> : null}
             </div>
 
-            <div>
+            <div className="form-group">
               <label htmlFor='sku'>SKU </label>
               <Field
                 type="text"
+                className="form-control"
                 name="sku"
                 placeholder="sku del producte"
                 autocomplete="off"
@@ -267,20 +276,9 @@ return (
               />
               {errors.sku && touched.sku ? <div>{errors.sku}</div> : null}
             </div>
-            <div>
-              <label htmlFor='image_url'>url de la imatge </label>
-              <Field
-                type="text"
-                name="image_url"
-                placeholder="url de la imatge del producte"
-                autoComplete="off"
-
-                value={values.image_url}
-              />
-              {errors.image_url && touched.image_url ? <div>{errors.image_url}</div> : null}
-            </div>
-            <div>
-            <Button variant="secondary" onClick={canviEstatModal}>Close</Button>
+                        
+            <div className="form-group">
+              <Button variant="secondary" onClick={canviEstatModal}>Close</Button>
 
               <Button variant={tipoModal==="Modificar"?"success":"info"} type="submit">{tipoModal}</Button>      
         
@@ -317,7 +315,7 @@ return (
       />
     </div>
     <div className="mb-3">
-      <label htmlFor="staticEmail2" className="visually-hidden">Imagen</label>
+      <label htmlFor="file" className="visually-hidden">Imagen</label>
       <input 
         type="file" 
         className="form-control"
