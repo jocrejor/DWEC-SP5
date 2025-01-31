@@ -6,8 +6,8 @@ import axios from "axios";
 
 import Header from '../Header';
 import Filtres from '../Filtres';
-const apiUrl = import.meta.env.VITE_API_URL;
-// const apiUrl = "http://node.daw.iesevalorpego.es:3001";
+// const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
 const token = localStorage.getItem('token');
 
 const LotSchema = Yup.object().shape({
@@ -43,8 +43,8 @@ function Lots() {
   });
 
   useEffect(async () => {
-    // axios.get(`${apiUrl}/Lot`, { headers: { "auth-token": token } })
-    axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}Lot`, { headers: { "auth-token": token } })
+      // axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
       .then(response => {
         setLot(response.data)
       })
@@ -53,8 +53,8 @@ function Lots() {
       }
       )
 
-    // axios.get(`${apiUrl}/Product`, { headers: { "auth-token": token } })
-    axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
+      // axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
       .then(response => {
         setProduct(response.data)
       })
@@ -62,8 +62,8 @@ function Lots() {
         console.log(error)
       }
       )
-    // axios.get(`${apiUrl}/Supplier`, { headers: { "auth-token": token } })
-    axios.get(`${apiUrl}supplier`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}Supplier`, { headers: { "auth-token": token } })
+      // axios.get(`${apiUrl}supplier`, { headers: { "auth-token": token } })
       .then(response => {
         setSupplier(response.data)
       })
@@ -72,8 +72,8 @@ function Lots() {
       }
       )
 
-    // axios.get(`${apiUrl}/OrderReception`, { headers: { "auth-token": token } })
-    axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
+      // axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
       .then(response => {
         setOrderReception(response.data)
       })
@@ -82,8 +82,8 @@ function Lots() {
       }
       )
 
-    // axios.get(`${apiUrl}/OrderLineReception`, { headers: { "auth-token": token } })
-    axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}OrderLineReception`, { headers: { "auth-token": token } })
+      // axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
       .then(response => {
         setOrderLineReception(response.data)
       })
@@ -125,10 +125,31 @@ function Lots() {
   return (
     <>
       <Header title="Llistat Lots" />
-
       <Filtres />
 
-      <div className="d-flex justify-content-end mt-3 me-3">
+      <div className="container-fluid">
+        <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+          <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+            <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+              <div className="form-floating bg-white">
+                <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
+                  <option selected>Tria una opció</option>
+                  <option value="1">Eliminar</option>
+                </select>
+                <label htmlFor="floatingSelect">Accions en lot</label>
+              </div>
+              <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button"><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+            </div>
+          </div>
+          <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+          <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+            <div className="d-flex h-100 justify-content-xl-end">
+              <button type="button" className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"><i className="bi bi-plus-circle text-white pe-1"></i>Crear</button>
+            </div>
+          </div>
+        </div>
+
+        {/* <div className="d-flex justify-content-end mt-3 me-3">
         <Button
           variant="success"
           className="btn btn-primary"
@@ -139,8 +160,152 @@ function Lots() {
         >
           Alta Lots
         </Button>
+      </div> */}
+
+        <div className="row">
+          <div className="col-12">
+            <div>
+              <table className="table table-striped text-center align-middle">
+                <thead className="table-active border-bottom border-dark-subtle">
+                  <tr>
+                    <th className='align-middle' scope='col'>
+                      <input className='form-check-input' type="checkbox" />
+                    </th>
+                    <th scope='col' className="align-middle">ID</th>
+                    <th scope='col' className="align-middle">Nom</th>
+                    <th scope='col' className="align-middle">ID Product</th>
+                    <th scope='col' className="align-middle">ID Supplier</th>
+                    <th scope='col' className="align-middle">Quantitat</th>
+                    <th scope='col' className="align-middle">Data producció</th>
+                    <th scope='col' className="align-middle">Data caducitat</th>
+                    <th scope='col' className="align-middle">Order Reception</th>
+                    <th scope='col' className="align-middle">Order Line Reception</th>
+                    <th scope='col' className="align-middle">Accions</th>
+                    {/* <th scope='col' className="align-middle">Visualitzar</th>
+                    <th scope='col' className="align-middle">Modificar</th>
+                    <th scope='col' className="align-middle">Eliminar</th> */}
+                  </tr>
+                </thead>
+                <tbody>
+                  {lot.length === 0 ? (
+                    <tr>
+                      <td colSpan="12" className="text-center">
+                        No hi han lots
+                      </td>
+                    </tr>
+                  ) : (
+                    lot.map((valors) => (
+                      <tr key={valors.id}>
+                        <td scope='row' data-cell="Seleccionar">
+                          <input className='form-check-input' type="checkbox" />
+                        </td>
+                        <td data-cell="ID">{valors.id}</td>
+                        <td data-cell="Nom">{valors.name}</td>
+                        <td data-cell="ID producte">{products.find((product) => product.id === valors.product_id)?.name}</td>
+                        <td data-cell="ID proveidor">{suppliers.find((supplier) => supplier.id === valors.supplier_id)?.name}</td>
+                        <td data-cell="Quantitat">{valors.quantity}</td>
+                        <td data-cell="Data producció">{valors.production_date}</td>
+                        <td data-cell="Data caducitat">{valors.expiration_date}</td>
+                        <td data-cell="ID ordre recepció">{valors.orderReception}</td>
+                        <td data-cell="ID ordre línia recepció">{valors.orderLineReception}</td>
+                        <td data-no-colon="true" className='fs-5'>
+                          <div className="d-xl-flex flex-xl-column flex-xl-row">
+                            <i
+                              onClick={() => {
+                                visualitzarLot(valors);
+                                canviEstatModal();
+                              }}
+                              className="bi bi-eye">
+                            </i>
+                            <i
+                              onClick={() => {
+                                modificarLot(valors);
+                                canviEstatModal();
+                              }}
+                              className="bi bi-pencil-square px-3">
+                            </i>
+                            <i
+                              onClick={() => {
+                                eliminarLot(valors.id);
+                              }}
+                              className="bi bi-trash">
+                            </i>
+                          </div>
+
+                        </td>
+                        {/* <td>
+                          <Button
+                            variant="primary"
+                            className="btn-sm"
+                            onClick={() => {
+                              visualitzarLot(valors);
+                              canviEstatModal();
+                            }}
+                          >
+                            <i className="bi bi-eye"></i>
+                          </Button>
+                        </td>
+                        <td>
+                          <Button
+                            variant="warning"
+                            className="btn-sm"
+                            onClick={() => {
+                              modificarLot(valors);
+                              canviEstatModal();
+                            }}
+                          >
+                            <i className="bi bi-pencil-square"></i>
+                          </Button>
+                        </td>
+                        <td>
+                          <Button
+                            variant="danger"
+                            className="btn-sm"
+                            onClick={() => {
+                              eliminarLot(valors.id);
+                            }}
+                          >
+                            <i className="bi bi-trash"></i>
+                          </Button>
+                        </td> */}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+
+
+
+
+
+
+              <nav aria-label="Page navigation example" className="d-block">
+                <ul className="pagination justify-content-center">
+                  <li className="page-item">
+                    <a className="page-link text-light-blue" href="#" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                  <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+                  <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+                  <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+                  <li className="page-item">
+                    <a className="page-link text-light-blue" href="#" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="table-responsive mx-2 mt-4">
+
+
+
+
+      {/* <div className="table-responsive mx-2 mt-4">
         <table className="table table-striped table-bordered table-hover text-center align-middle">
           <thead className="thead-dark">
             <tr>
@@ -217,7 +382,7 @@ function Lots() {
             )}
           </tbody>
         </table>
-      </div>
+      </div> */}
 
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
@@ -247,7 +412,7 @@ function Lots() {
               try {
                 if (tipoModal === 'Crear') {
                   // const response = await axios.post(`${apiUrl}/Lot`, values, {
-                    const response = await axios.post(`${apiUrl}lot`, values, {
+                  const response = await axios.post(`${apiUrl}lot`, values, {
                     headers: { "auth-token": token }
                   })
 
@@ -257,7 +422,7 @@ function Lots() {
                 }
                 else {
                   // await axios.put(`${apiUrl}/Lot/${values.id}`, values, {
-                    await axios.put(`${apiUrl}lot/${values.id}`, values, {
+                  await axios.put(`${apiUrl}lot/${values.id}`, values, {
                     headers: { "auth-token": token }
                   });
 
@@ -272,131 +437,7 @@ function Lots() {
             }}
           >
             {({ values, errors, touched }) => (
-              //   <Form>
-              //   <div className="form-group">
-              //     <label htmlFor="name">Nom del lot</label>
-              //     <Field
-              //       type="text"
-              //       name="name"
-              //       placeholder="Nom del lot"
-              //       className="form-control"
-              //       disabled={tipoModal === 'Visualitzar'}
-              //     />
-              //     {errors.name && touched.name && <div className="text-danger mt-1">{errors.name}</div>}
-              //   </div>
-
-              //   {/* ID Product */}
-              //   <div className="form-group">
-              //     <label htmlFor="product_id">ID del Producte</label>
-              //     <Field as="select" name="product_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-              //       <option value="">Selecciona un producte</option>
-              //       {products.map((product) => (
-              //         <option key={product.id} value={product.id}>
-              //           {product.name}
-              //         </option>
-              //       ))}
-              //     </Field>
-              //     {errors.product_id && touched.product_id && <div className="text-danger mt-1">{errors.product_id}</div>}
-              //   </div>
-
-              //   {/* ID Supplier */}
-              //   <div className="form-group">
-              //     <label htmlFor="supplier_id">ID del Proveïdor</label>
-              //     <Field as="select" name="supplier_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-              //       <option value="">Selecciona un proveïdor</option>
-              //       {suppliers.map((supplier) => (
-              //         <option key={supplier.id} value={supplier.id}>
-              //           {supplier.name}
-              //         </option>
-              //       ))}
-              //     </Field>
-              //     {errors.supplier_id && touched.supplier_id && <div className="text-danger mt-1">{errors.supplier_id}</div>}
-              //   </div>
-
-              //   {/* Quantitat */}
-              //   <div className="form-group">
-              //     <label htmlFor="quantity">Quantitat</label>
-              //     <Field
-              //       type="number"
-              //       name="quantity"
-              //       placeholder="Quantitat del lot"
-              //       className="form-control"
-              //       disabled={tipoModal === 'Visualitzar'}
-              //     />
-              //     {errors.quantity && touched.quantity && <div className="text-danger mt-1">{errors.quantity}</div>}
-              //   </div>
-
-              //   {/* Production Date */}
-              //   <div className="form-group">
-              //     <label htmlFor="production_date">Data de producció</label>
-              //     <Field
-              //       type="date"
-              //       name="production_date"
-              //       className="form-control"
-              //       disabled={tipoModal === 'Visualitzar'}
-              //     />
-              //     {errors.production_date && touched.production_date && <div className="text-danger mt-1">{errors.production_date}</div>}
-              //   </div>
-
-              //   {/* Expiration Date */}
-              //   <div className="form-group">
-              //     <label htmlFor="expiration_date">Data d'expiració</label>
-              //     <Field
-              //       type="date"
-              //       name="expiration_date"
-              //       className="form-control"
-              //       disabled={tipoModal === 'Visualitzar'}
-              //     />
-              //     {errors.expiration_date && touched.expiration_date && <div className="text-danger mt-1">{errors.expiration_date}</div>}
-              //   </div>
-
-              //   {/* Order Reception */}
-              //   <div className="form-group">
-              //     <label htmlFor="orderReception">Order Reception</label>
-              //     <Field as="select" name="orderReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-              //       <option value="">Selecciona una orden de recepció</option>
-              //       {orderReceptions.map((order) => (
-              //         <option key={order.id} value={order.id}>
-              //           {order.name}
-              //         </option>
-              //       ))}
-              //     </Field>
-              //     {errors.orderReception && touched.orderReception && <div className="text-danger mt-1">{errors.orderReception}</div>}
-              //   </div>
-
-              //   {/* Order Line Reception */}
-              //   <div className="form-group">
-              //     <label htmlFor="orderLineReception">Order Line Reception</label>
-              //     <Field as="select" name="orderLineReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-              //       <option value="">Selecciona una línea de orden de recepció</option>
-              //       {orderLineReceptions.map((line) => (
-              //         <option key={line.id} value={line.id}>
-              //           {line.name}
-              //         </option>
-              //       ))}
-              //     </Field>
-              //     {errors.orderLineReception && touched.orderLineReception && <div className="text-danger mt-1">{errors.orderLineReception}</div>}
-              //   </div>
-
-              //   <div className="form-group d-flex justify-content-between mt-3">
-              //     <Button
-              //       variant="secondary"
-              //       onClick={canviEstatModal}
-              //       className="btn btn-secondary"
-              //     >
-              //       Tancar
-              //     </Button>
-              //     {tipoModal !== 'Visualitzar' && (
-              //       <Button
-              //         variant={tipoModal === 'Modificar' ? 'success' : 'info'}
-              //         type="submit"
-              //         className="btn"
-              //       >
-              //         {tipoModal}
-              //       </Button>
-              //     )}
-              //   </div>
-              // </Form>
+              /**FORMULARIO CON SELECTS Y DEMÁS (CORRECTO) */
               <Form>
                 <div className="form-group">
                   <label htmlFor="name">Nom del lot</label>
@@ -413,26 +454,28 @@ function Lots() {
                 {/* ID Product */}
                 <div className="form-group">
                   <label htmlFor="product_id">ID del Producte</label>
-                  <Field
-                    type="text"
-                    name="product_id"
-                    placeholder="ID del Producte"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
+                  <Field as="select" name="product_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
+                    <option value="">Selecciona un producte</option>
+                    {products.map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name}
+                      </option>
+                    ))}
+                  </Field>
                   {errors.product_id && touched.product_id && <div className="text-danger mt-1">{errors.product_id}</div>}
                 </div>
 
                 {/* ID Supplier */}
                 <div className="form-group">
                   <label htmlFor="supplier_id">ID del Proveïdor</label>
-                  <Field
-                    type="text"
-                    name="supplier_id"
-                    placeholder="ID del Proveïdor"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
+                  <Field as="select" name="supplier_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
+                    <option value="">Selecciona un proveïdor</option>
+                    {suppliers.map((supplier) => (
+                      <option key={supplier.id} value={supplier.id}>
+                        {supplier.name}
+                      </option>
+                    ))}
+                  </Field>
                   {errors.supplier_id && touched.supplier_id && <div className="text-danger mt-1">{errors.supplier_id}</div>}
                 </div>
 
@@ -476,26 +519,28 @@ function Lots() {
                 {/* Order Reception */}
                 <div className="form-group">
                   <label htmlFor="orderReception">Order Reception</label>
-                  <Field
-                    type="text"
-                    name="orderReception"
-                    placeholder="Order Reception"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
+                  <Field as="select" name="orderReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
+                    <option value="">Selecciona una orden de recepció</option>
+                    {orderReceptions.map((order) => (
+                      <option key={order.id} value={order.id}>
+                        {order.name}
+                      </option>
+                    ))}
+                  </Field>
                   {errors.orderReception && touched.orderReception && <div className="text-danger mt-1">{errors.orderReception}</div>}
                 </div>
 
                 {/* Order Line Reception */}
                 <div className="form-group">
                   <label htmlFor="orderLineReception">Order Line Reception</label>
-                  <Field
-                    type="text"
-                    name="orderLineReception"
-                    placeholder="Order Line Reception"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
+                  <Field as="select" name="orderLineReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
+                    <option value="">Selecciona una línea de orden de recepció</option>
+                    {orderLineReceptions.map((line) => (
+                      <option key={line.id} value={line.id}>
+                        {line.name}
+                      </option>
+                    ))}
+                  </Field>
                   {errors.orderLineReception && touched.orderLineReception && <div className="text-danger mt-1">{errors.orderLineReception}</div>}
                 </div>
 
@@ -518,14 +563,128 @@ function Lots() {
                   )}
                 </div>
               </Form>
+              /**FORMUALRIO SIN SELECTS (MAL HECHO) */
+              // <Form>
+              //   <div className="form-group">
+              //     <label htmlFor="name">Nom del lot</label>
+              //     <Field
+              //       type="text"
+              //       name="name"
+              //       placeholder="Nom del lot"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.name && touched.name && <div className="text-danger mt-1">{errors.name}</div>}
+              //   </div>
 
+              //   {/* ID Product */}
+              //   <div className="form-group">
+              //     <label htmlFor="product_id">ID del Producte</label>
+              //     <Field
+              //       type="text"
+              //       name="product_id"
+              //       placeholder="ID del Producte"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.product_id && touched.product_id && <div className="text-danger mt-1">{errors.product_id}</div>}
+              //   </div>
 
+              //   {/* ID Supplier */}
+              //   <div className="form-group">
+              //     <label htmlFor="supplier_id">ID del Proveïdor</label>
+              //     <Field
+              //       type="text"
+              //       name="supplier_id"
+              //       placeholder="ID del Proveïdor"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.supplier_id && touched.supplier_id && <div className="text-danger mt-1">{errors.supplier_id}</div>}
+              //   </div>
 
+              //   {/* Quantitat */}
+              //   <div className="form-group">
+              //     <label htmlFor="quantity">Quantitat</label>
+              //     <Field
+              //       type="number"
+              //       name="quantity"
+              //       placeholder="Quantitat del lot"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.quantity && touched.quantity && <div className="text-danger mt-1">{errors.quantity}</div>}
+              //   </div>
 
+              //   {/* Production Date */}
+              //   <div className="form-group">
+              //     <label htmlFor="production_date">Data de producció</label>
+              //     <Field
+              //       type="date"
+              //       name="production_date"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.production_date && touched.production_date && <div className="text-danger mt-1">{errors.production_date}</div>}
+              //   </div>
 
+              //   {/* Expiration Date */}
+              //   <div className="form-group">
+              //     <label htmlFor="expiration_date">Data d'expiració</label>
+              //     <Field
+              //       type="date"
+              //       name="expiration_date"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.expiration_date && touched.expiration_date && <div className="text-danger mt-1">{errors.expiration_date}</div>}
+              //   </div>
 
+              //   {/* Order Reception */}
+              //   <div className="form-group">
+              //     <label htmlFor="orderReception">Order Reception</label>
+              //     <Field
+              //       type="text"
+              //       name="orderReception"
+              //       placeholder="Order Reception"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.orderReception && touched.orderReception && <div className="text-danger mt-1">{errors.orderReception}</div>}
+              //   </div>
 
+              //   {/* Order Line Reception */}
+              //   <div className="form-group">
+              //     <label htmlFor="orderLineReception">Order Line Reception</label>
+              //     <Field
+              //       type="text"
+              //       name="orderLineReception"
+              //       placeholder="Order Line Reception"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.orderLineReception && touched.orderLineReception && <div className="text-danger mt-1">{errors.orderLineReception}</div>}
+              //   </div>
 
+              //   <div className="form-group d-flex justify-content-between mt-3">
+              //     <Button
+              //       variant="secondary"
+              //       onClick={canviEstatModal}
+              //       className="btn btn-secondary"
+              //     >
+              //       Tancar
+              //     </Button>
+              //     {tipoModal !== 'Visualitzar' && (
+              //       <Button
+              //         variant={tipoModal === 'Modificar' ? 'success' : 'info'}
+              //         type="submit"
+              //         className="btn"
+              //       >
+              //         {tipoModal}
+              //       </Button>
+              //     )}
+              //   </div>
+              // </Form>
             )}
           </Formik>
         </Modal.Body>
