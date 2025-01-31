@@ -293,6 +293,7 @@ function OrderPickingReception() {
                                     <Table striped bordered hover>
                                         <thead>
                                             <tr>
+                                                <th></th>
                                                 <th>Producte</th>
                                                 <th>Quantitat</th>
                                                 <th>Magatzem / Carrer / Estantería / Espai</th>
