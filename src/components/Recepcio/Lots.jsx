@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal } from 'react-bootstrap';
 import axios from "axios";
 
 import Header from '../Header';
 import Filtres from '../Filtres';
+const apiUrl = import.meta.env.VITE_API_URL;
+// const apiUrl = "http://node.daw.iesevalorpego.es:3001";
+const token = localStorage.getItem('token');
 
 const LotSchema = Yup.object().shape({
   name: Yup.string().min(4, 'Valor mínim de 4 caràcters.').max(50, 'El valor màxim és de 50 caràcters').required('Valor requerit'),
@@ -21,7 +23,7 @@ const LotSchema = Yup.object().shape({
 
 
 
-const Lots = () => {
+function Lots() {
   const [lot, setLot] = useState([]);
   const [products, setProduct] = useState([]);
   const [suppliers, setSupplier] = useState([]);
@@ -40,63 +42,55 @@ const Lots = () => {
     orderLineReception: '',
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-
-        // const apiUrl = import.meta.env.VITE_API_URL;
-        const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
-        const token = localStorage.getItem('token');
-
-        const lot = await axios.get(`${apiUrl}/lot`, { headers: { "auth-token": token } })
-          .then(response => {
-            setLot(response.data)
-          })
-          .catch(error => {
-            console.log(error)
-          })
-
-        // // const lot = axios.get(`${apiUrl}/lot`, { headers: {"auth-token" : JSON.parse(localStorage.getItem("token"))}});
-        // const lot = axios.get(`http://node.daw.iesevalorpego.es:3001/lot`, { headers: {"auth-token" : token}})
-        //   .then(response => {
-        //     setLot(response.data)
-        //   })
-        //   .catch(error => {
-        //     console.log(error)
-        //   })
-
-
-        // const product = await axios.get("http://node.daw.iesevalorpego.es:3001/Product");
-        // const supplier = await axios.get("http://node.daw.iesevalorpego.es:3001/Supplier");
-        // const orderReception = await axios.get("http://node.daw.iesevalorpego.es:3001/OrderReception");
-        // const orderLineReception = await axios.get("http://node.daw.iesevalorpego.es:3001/OrderLineReception");
-
-        setLot(lot.data);
-        // setProduct(product.data);
-        // setSupplier(supplier.data);
-        // setOrderReception(orderReception.data);
-        // setOrderLineReception(orderLineReception.data);
+  useEffect(async () => {
+    // axios.get(`${apiUrl}/Lot`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
+      .then(response => {
+        setLot(response.data)
+      })
+      .catch(error => {
+        console.log(error)
       }
-      catch (error) {
-        console.log("Error:", error);
+      )
+
+    // axios.get(`${apiUrl}/Product`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
+      .then(response => {
+        setProduct(response.data)
+      })
+      .catch(error => {
+        console.log(error)
       }
-    }
+      )
+    // axios.get(`${apiUrl}/Supplier`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}supplier`, { headers: { "auth-token": token } })
+      .then(response => {
+        setSupplier(response.data)
+      })
+      .catch(error => {
+        console.log(error)
+      }
+      )
 
-    // async function fetchData() {
-    //   const data = await getData(url, 'Lot');
-    //   const product = await getData(url, 'Product');
-    //   const supplier = await getData(url, 'Supplier');
-    //   const orderReceptionData = await getData(url, 'OrderReception');  // Obtener las órdenes de recepción
-    //   const orderLineReceptionData = await getData(url, 'OrderLineReception');  // Obtener las líneas de orden de recepción
-    //   setLot(data);
-    //   setProducts(product);
-    //   setSuppliers(supplier);
-    //   setOrderReceptions(orderReceptionData);
-    //   setOrderLineReceptions(orderLineReceptionData);
-    // }
+    // axios.get(`${apiUrl}/OrderReception`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
+      .then(response => {
+        setOrderReception(response.data)
+      })
+      .catch(error => {
+        console.log(error)
+      }
+      )
 
-
-    fetchData();
+    // axios.get(`${apiUrl}/OrderLineReception`, { headers: { "auth-token": token } })
+    axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
+      .then(response => {
+        setOrderLineReception(response.data)
+      })
+      .catch(error => {
+        console.log(error)
+      }
+      )
   }, []);
 
   const eliminarLot = async (id) => {
@@ -249,35 +243,160 @@ const Lots = () => {
             validationSchema={LotSchema}
             /** SE ACTUALIZA LA TABLA AL MODIFICAR O CREAR */
             onSubmit={async (values) => {
-              if (tipoModal === 'Crear') {
-                const response = await axios.post("https://api.dwes.iesevalorpego.es/lot", values);
-                setLot((prevLot) => [...prevLot, response.data]);
+              console.log(values);
+              try {
+                if (tipoModal === 'Crear') {
+                  // const response = await axios.post(`${apiUrl}/Lot`, values, {
+                    const response = await axios.post(`${apiUrl}lot`, values, {
+                    headers: { "auth-token": token }
+                  })
+
+                  setLot((prevLot) => [...prevLot, response.data]);
+
+                  setShowModal(false);
+                }
+                else {
+                  // await axios.put(`${apiUrl}/Lot/${values.id}`, values, {
+                    await axios.put(`${apiUrl}lot/${values.id}`, values, {
+                    headers: { "auth-token": token }
+                  });
+
+                  setLot((prevLot) => prevLot.map((lot) => (lot.id === values.id ? values : lot)));
+
+                  setShowModal(false);
+                }
               }
-              else {
-                await axios.put(`https://api.dwes.iesevalorpego.es/lot/${values.id}`, values);
+              catch (error) {
+                console.log(error);
               }
-              // if (tipoModal === 'Crear') {
-              //   axios.post("https://api.dwes.iesevalorpego.es/lot", values)
-              //     .then((response) => {
-              //       setLot((prevLot) => [...prevLot, response.data]);
-              //     })
-              //     .catch((error) => console.error("Error al crear el lote:", error));
-              // } else {
-              //   // updateId(url, 'Lot', values.id, values).then(() => {
-              //   //   setLot(prevLot => prevLot.map(lot => (lot.id === values.id ? values : lot)));
-              //   // });
-              // }
-              // canviEstatModal();
             }}
-          /** SIN ACTUALIZAR (VERSIÓN ANTERIOR) */
-          // onSubmit={(values) => {
-          //   tipoModal === 'Crear'
-          //     ? postData(url, 'Lot', values)
-          //     : updateId(url, 'Lot', values.id, values);
-          //   canviEstatModal();
-          // }}
           >
             {({ values, errors, touched }) => (
+              //   <Form>
+              //   <div className="form-group">
+              //     <label htmlFor="name">Nom del lot</label>
+              //     <Field
+              //       type="text"
+              //       name="name"
+              //       placeholder="Nom del lot"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.name && touched.name && <div className="text-danger mt-1">{errors.name}</div>}
+              //   </div>
+
+              //   {/* ID Product */}
+              //   <div className="form-group">
+              //     <label htmlFor="product_id">ID del Producte</label>
+              //     <Field as="select" name="product_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
+              //       <option value="">Selecciona un producte</option>
+              //       {products.map((product) => (
+              //         <option key={product.id} value={product.id}>
+              //           {product.name}
+              //         </option>
+              //       ))}
+              //     </Field>
+              //     {errors.product_id && touched.product_id && <div className="text-danger mt-1">{errors.product_id}</div>}
+              //   </div>
+
+              //   {/* ID Supplier */}
+              //   <div className="form-group">
+              //     <label htmlFor="supplier_id">ID del Proveïdor</label>
+              //     <Field as="select" name="supplier_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
+              //       <option value="">Selecciona un proveïdor</option>
+              //       {suppliers.map((supplier) => (
+              //         <option key={supplier.id} value={supplier.id}>
+              //           {supplier.name}
+              //         </option>
+              //       ))}
+              //     </Field>
+              //     {errors.supplier_id && touched.supplier_id && <div className="text-danger mt-1">{errors.supplier_id}</div>}
+              //   </div>
+
+              //   {/* Quantitat */}
+              //   <div className="form-group">
+              //     <label htmlFor="quantity">Quantitat</label>
+              //     <Field
+              //       type="number"
+              //       name="quantity"
+              //       placeholder="Quantitat del lot"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.quantity && touched.quantity && <div className="text-danger mt-1">{errors.quantity}</div>}
+              //   </div>
+
+              //   {/* Production Date */}
+              //   <div className="form-group">
+              //     <label htmlFor="production_date">Data de producció</label>
+              //     <Field
+              //       type="date"
+              //       name="production_date"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.production_date && touched.production_date && <div className="text-danger mt-1">{errors.production_date}</div>}
+              //   </div>
+
+              //   {/* Expiration Date */}
+              //   <div className="form-group">
+              //     <label htmlFor="expiration_date">Data d'expiració</label>
+              //     <Field
+              //       type="date"
+              //       name="expiration_date"
+              //       className="form-control"
+              //       disabled={tipoModal === 'Visualitzar'}
+              //     />
+              //     {errors.expiration_date && touched.expiration_date && <div className="text-danger mt-1">{errors.expiration_date}</div>}
+              //   </div>
+
+              //   {/* Order Reception */}
+              //   <div className="form-group">
+              //     <label htmlFor="orderReception">Order Reception</label>
+              //     <Field as="select" name="orderReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
+              //       <option value="">Selecciona una orden de recepció</option>
+              //       {orderReceptions.map((order) => (
+              //         <option key={order.id} value={order.id}>
+              //           {order.name}
+              //         </option>
+              //       ))}
+              //     </Field>
+              //     {errors.orderReception && touched.orderReception && <div className="text-danger mt-1">{errors.orderReception}</div>}
+              //   </div>
+
+              //   {/* Order Line Reception */}
+              //   <div className="form-group">
+              //     <label htmlFor="orderLineReception">Order Line Reception</label>
+              //     <Field as="select" name="orderLineReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
+              //       <option value="">Selecciona una línea de orden de recepció</option>
+              //       {orderLineReceptions.map((line) => (
+              //         <option key={line.id} value={line.id}>
+              //           {line.name}
+              //         </option>
+              //       ))}
+              //     </Field>
+              //     {errors.orderLineReception && touched.orderLineReception && <div className="text-danger mt-1">{errors.orderLineReception}</div>}
+              //   </div>
+
+              //   <div className="form-group d-flex justify-content-between mt-3">
+              //     <Button
+              //       variant="secondary"
+              //       onClick={canviEstatModal}
+              //       className="btn btn-secondary"
+              //     >
+              //       Tancar
+              //     </Button>
+              //     {tipoModal !== 'Visualitzar' && (
+              //       <Button
+              //         variant={tipoModal === 'Modificar' ? 'success' : 'info'}
+              //         type="submit"
+              //         className="btn"
+              //       >
+              //         {tipoModal}
+              //       </Button>
+              //     )}
+              //   </div>
+              // </Form>
               <Form>
                 <div className="form-group">
                   <label htmlFor="name">Nom del lot</label>
@@ -288,68 +407,36 @@ const Lots = () => {
                     className="form-control"
                     disabled={tipoModal === 'Visualitzar'}
                   />
-                  {errors.name && touched.name ? (
-                    <div className="text-danger mt-1">{errors.name}</div>
-                  ) : null}
+                  {errors.name && touched.name && <div className="text-danger mt-1">{errors.name}</div>}
                 </div>
 
-                {/* <div className="form-group">
+                {/* ID Product */}
+                <div className="form-group">
                   <label htmlFor="product_id">ID del Producte</label>
                   <Field
-                    type="number"
+                    type="text"
                     name="product_id"
-                    placeholder="ID del producte"
+                    placeholder="ID del Producte"
                     className="form-control"
                     disabled={tipoModal === 'Visualitzar'}
                   />
-                  {errors.product_id && touched.product_id ? (
-                    <div className="text-danger mt-1">{errors.product_id}</div>
-                  ) : null}
+                  {errors.product_id && touched.product_id && <div className="text-danger mt-1">{errors.product_id}</div>}
                 </div>
 
+                {/* ID Supplier */}
                 <div className="form-group">
                   <label htmlFor="supplier_id">ID del Proveïdor</label>
                   <Field
-                    type="number"
+                    type="text"
                     name="supplier_id"
-                    placeholder="ID del proveïdor"
+                    placeholder="ID del Proveïdor"
                     className="form-control"
                     disabled={tipoModal === 'Visualitzar'}
                   />
-                  {errors.supplier_id && touched.supplier_id ? (
-                    <div className="text-danger mt-1">{errors.supplier_id}</div>
-                  ) : null}
-                </div> */}
-                <div className="form-group">
-                  <label htmlFor="product_id">ID del Producte</label>
-                  <Field as="select" name="product_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona un producte</option>
-                    {products.map((product) => (
-                      <option key={product.id} value={product.id}>
-                        {product.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.product_id && touched.product_id ? (
-                    <div className="text-danger mt-1">{errors.product_id}</div>
-                  ) : null}
+                  {errors.supplier_id && touched.supplier_id && <div className="text-danger mt-1">{errors.supplier_id}</div>}
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="supplier_id">ID del Proveïdor</label>
-                  <Field as="select" name="supplier_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona un proveïdor</option>
-                    {suppliers.map((supplier) => (
-                      <option key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.supplier_id && touched.supplier_id ? (
-                    <div className="text-danger mt-1">{errors.supplier_id}</div>
-                  ) : null}
-                </div>
-
+                {/* Quantitat */}
                 <div className="form-group">
                   <label htmlFor="quantity">Quantitat</label>
                   <Field
@@ -359,11 +446,10 @@ const Lots = () => {
                     className="form-control"
                     disabled={tipoModal === 'Visualitzar'}
                   />
-                  {errors.quantity && touched.quantity ? (
-                    <div className="text-danger mt-1">{errors.quantity}</div>
-                  ) : null}
+                  {errors.quantity && touched.quantity && <div className="text-danger mt-1">{errors.quantity}</div>}
                 </div>
 
+                {/* Production Date */}
                 <div className="form-group">
                   <label htmlFor="production_date">Data de producció</label>
                   <Field
@@ -372,25 +458,23 @@ const Lots = () => {
                     className="form-control"
                     disabled={tipoModal === 'Visualitzar'}
                   />
-                  {errors.production_date && touched.production_date ? (
-                    <div className="text-danger mt-1">{errors.production_date}</div>
-                  ) : null}
+                  {errors.production_date && touched.production_date && <div className="text-danger mt-1">{errors.production_date}</div>}
                 </div>
 
+                {/* Expiration Date */}
                 <div className="form-group">
-                  <label htmlFor="expiration_date">Data d&apos;expiració</label>  {/* &apos; es ' */}
+                  <label htmlFor="expiration_date">Data d'expiració</label>
                   <Field
                     type="date"
                     name="expiration_date"
                     className="form-control"
                     disabled={tipoModal === 'Visualitzar'}
                   />
-                  {errors.expiration_date && touched.expiration_date ? (
-                    <div className="text-danger mt-1">{errors.expiration_date}</div>
-                  ) : null}
+                  {errors.expiration_date && touched.expiration_date && <div className="text-danger mt-1">{errors.expiration_date}</div>}
                 </div>
 
-                {/* <div className="form-group">
+                {/* Order Reception */}
+                <div className="form-group">
                   <label htmlFor="orderReception">Order Reception</label>
                   <Field
                     type="text"
@@ -399,11 +483,10 @@ const Lots = () => {
                     className="form-control"
                     disabled={tipoModal === 'Visualitzar'}
                   />
-                  {errors.orderReception && touched.orderReception ? (
-                    <div className="text-danger mt-1">{errors.orderReception}</div>
-                  ) : null}
+                  {errors.orderReception && touched.orderReception && <div className="text-danger mt-1">{errors.orderReception}</div>}
                 </div>
 
+                {/* Order Line Reception */}
                 <div className="form-group">
                   <label htmlFor="orderLineReception">Order Line Reception</label>
                   <Field
@@ -413,39 +496,7 @@ const Lots = () => {
                     className="form-control"
                     disabled={tipoModal === 'Visualitzar'}
                   />
-                  {errors.orderLineReception && touched.orderLineReception ? (
-                    <div className="text-danger mt-1">{errors.orderLineReception}</div>
-                  ) : null}
-                </div> */}
-
-                <div className="form-group">
-                  <label htmlFor="orderReception">Order Reception</label>
-                  <Field as="select" name="orderReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona una orden de recepció</option>
-                    {orderReceptions.map((order) => (
-                      <option key={order.id} value={order.id}>
-                        {order.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.orderReception && touched.orderReception ? (
-                    <div className="text-danger mt-1">{errors.orderReception}</div>
-                  ) : null}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="orderLineReception">Order Line Reception</label>
-                  <Field as="select" name="orderLineReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona una línea de orden de recepció</option>
-                    {orderLineReceptions.map((line) => (
-                      <option key={line.id} value={line.id}>
-                        {line.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.orderLineReception && touched.orderLineReception ? (
-                    <div className="text-danger mt-1">{errors.orderLineReception}</div>
-                  ) : null}
+                  {errors.orderLineReception && touched.orderLineReception && <div className="text-danger mt-1">{errors.orderLineReception}</div>}
                 </div>
 
                 <div className="form-group d-flex justify-content-between mt-3">
@@ -467,6 +518,14 @@ const Lots = () => {
                   )}
                 </div>
               </Form>
+
+
+
+
+
+
+
+
             )}
           </Formik>
         </Modal.Body>
