@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { Formik, Form, Field } from "formik";
+//import { Formik, Form, Field } from "formik";
 import { url, postData, getData, deleteData, updateId } from "../../apiAccess/crud";
 import { Button, Table, Modal } from "react-bootstrap";
 import axios from "axios";
+import Filtres from "../Filtres";
+import Header from "../Header";
 
 function OrderPickingReception() {
     const [orderPickingReception, setOrderPickingReception] = useState([]);
@@ -22,37 +24,44 @@ function OrderPickingReception() {
     const [orderSelected, setOrderSelected] = useState([]);
 
     useEffect(() => {
-        const apiUrl = import.meta.env.VITE_API_URL;
-        const token = JSON.parse(localStorage.getItem("token"));
+        //const apiUrl = import.meta.env.VITE_API_URL;
+        const apiUrl = url;
+        //const token = JSON.parse(localStorage.getItem("token"));
 
         const fetchData = async () => {
             //order picking reception
-            axios.get(`${apiUrl}/OrderPickingReception`, { headers: { "auth-token": token } })
+            axios.get(`${apiUrl}OrderPickingReception`, { //headers: { "auth-token": token } 
+            })
             .then((response) => {setOrderPickingReception(response.data);})
             .catch((error) => {console.error('Error:', error);});
 
             //order reception
-            axios.get(`${apiUrl}/OrderReception`, { headers: { "auth-token": token } })
+            axios.get(`${apiUrl}OrderReception`, { //headers: { "auth-token": token } 
+            })
             .then((response) => {setOrderReception(response.data);})
             .catch((error) => {console.error('Error:', error);});
 
             //order line reception
-            axios.get(`${apiUrl}/OrderLineReception`, { headers: { "auth-token": token } })
+            axios.get(`${apiUrl}OrderLineReception`, { //headers: { "auth-token": token } 
+            })
             .then((response) => {setOrderLineReception(response.data);})
             .catch((error) => {console.error('Error:', error);});
 
             //product
-            axios.get(`${apiUrl}/Product`, { headers: { "auth-token": token } })
+            axios.get(`${apiUrl}Product`, { //headers: { "auth-token": token } 
+            })
             .then((response) => {setProducts(response.data);})
             .catch((error) => {console.error('Error:', error);});
 
             //space
-            axios.get(`${apiUrl}/Space`, { headers: { "auth-token": token } })
+            axios.get(`${apiUrl}Space`, { //headers: { "auth-token": token } 
+            })
             .then((response) => {setSpaces(response.data);})
             .catch((error) => {console.error('Error:', error);});
 
             //user
-            axios.get(`${apiUrl}/User`, { headers: { "auth-token": token } })
+            axios.get(`${apiUrl}User`, { //headers: { "auth-token": token } 
+            })
             .then((response) => {setUsers(response.data);})
             .catch((error) => {console.error('Error:', error);});
 
@@ -145,6 +154,8 @@ function OrderPickingReception() {
 
     return (
         <>
+            <Header title="Order picking Reception" />
+            <Filtres />
             {tabla === "CrearOrder" ? (
                 <>
                     <div>
