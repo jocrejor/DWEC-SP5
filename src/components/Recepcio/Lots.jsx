@@ -41,11 +41,11 @@ const Lots = () => {
   });
 
   useEffect(() => {
-
     const fetchData = async () => {
       try {
 
-        const apiUrl = import.meta.env.VITE_API_URL;
+        // const apiUrl = import.meta.env.VITE_API_URL;
+        const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
         const token = localStorage.getItem('token');
 
         const lot = await axios.get(`${apiUrl}/lot`, { headers: { "auth-token": token } })
@@ -254,7 +254,7 @@ const Lots = () => {
                 setLot((prevLot) => [...prevLot, response.data]);
               }
               else {
-                await axios.put(`https://api.dwes.iesevalorpego.es/lot${values.id}`, values);
+                await axios.put(`https://api.dwes.iesevalorpego.es/lot/${values.id}`, values);
               }
               // if (tipoModal === 'Crear') {
               //   axios.post("https://api.dwes.iesevalorpego.es/lot", values)
