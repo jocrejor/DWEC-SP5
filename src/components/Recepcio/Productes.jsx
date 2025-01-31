@@ -3,6 +3,7 @@ import { Formik, Form, Field } from 'formik'
 import * as Yup from 'yup'
 import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud'
 import { Button, Modal } from 'react-bootstrap';
+import axios from 'axios';
 
 const ProducteSchema = Yup.object().shape({
   name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 60 caracters').required('Valor requerit'),
@@ -18,15 +19,24 @@ function Productes() {
 
   const [products, setProducts] = useState([])
   const [showModal, setShowModal] = useState(false)
+  const [showModalUpolad, setShowModalUpload] = useState(false)
   const [tipoModal, setTipoModal]  = useState("Crear")
   const [valorsInicials, setValorsInicials] = useState({ name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '', image_url: '' })
+  const [image, setImage] = useState({id:0, file: null})
+  const [messageImage, setMessageImage] = useState('');
   
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem('token');
 
-
-  useEffect(async () => {
-    const data = await getData(url, "Product")
-    setProducts(data)
+  useEffect( () => {
+   
+   axios.get(`${apiUrl}/product` , { headers: {"auth-token" : `${token}`} })
+    .then((response) => setProducts(response.data) ) 
+    .catch((error) => {console.log(error)})
+    
   }, [])
+
+
 
 const eliminarProducte = (id) =>{
   deleteData(url, "Product", id) 
@@ -44,6 +54,10 @@ const canviEstatModal = () =>{
     setShowModal(!showModal)
 }
 
+const canviEstatModalUpload = () =>{
+  setShowModalUpload(!showModalUpolad)
+}
+
 const grabar = async (values)=>{
   if(tipoModal==="Crear"){
     await postData(url,'Product', values)
@@ -56,7 +70,53 @@ const grabar = async (values)=>{
 }
 
 
-  return (
+const handleImageChange = (e) => {
+  setImage({
+    ...image,
+    [e.target.name]: e.target.files[0]
+  }); 
+}
+
+
+const updateImage = (valors) =>{
+  setImage({
+    ...image,
+    "id": valors.id
+  })
+  setMessageImage('') 
+  canviEstatModalUpload()
+}
+
+const upload =  async (e)=>{
+  e.preventDefault();
+  // valiar
+ 
+
+  if (!image.file) {
+    setMessageImage('Por favor, selecciona una imagen.');
+    return;
+  }
+
+      const formData = new FormData();
+        formData.append('image', image.file); 
+        
+        try {
+            const response = await axios.put(`${apiUrl}/product/uploadimage/${image.id}` , formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'auth-token' : `${token}`
+                },
+            });
+            setMessageImage(response.data.message);
+             //canviEstatModalUpload()
+        } catch (error) {
+            setMessageImage('Error al subir el archivo: ' + (error.response?.data?.message || error.message));
+        }
+
+  // fi
+ 
+}
+return (
     <>
 
 <div><h2>Llistat productes</h2></div>
@@ -71,13 +131,15 @@ const grabar = async (values)=>{
           <th scope="col">Pes</th>
           <th scope="col">Control</th>
           <th scope="col">SKU</th>
+          <th scope="col">Imatge</th>
           <th scope="col">Modificar</th>
-          <th>Eliminar</th>
+          <th scope="col">Eliminar</th>
         </tr>
         </thead>
         <tbody>
         {(products.length == 0)?
           <tr><th>No hi han articles</th></tr>
+           
         :products.map((valors) => {
           return (
           <tr key={valors.id}>
@@ -88,6 +150,7 @@ const grabar = async (values)=>{
             <td>{valors.weight}</td>
             <td>{valors.lotorserial}</td>
             <td>{valors.sku}</td>
+            <td><Button variant="info"  onClick={()=> {updateImage(valors)}}>Imatge</Button></td>
             <td><Button variant="warning"  onClick={()=> {modificarProducte(valors);canviEstatModal(); }}>Modificar</Button></td>
             <td><Button variant="primary"  onClick={()=> {eliminarProducte(valors.id)}}>Eliminar</Button></td>
 
@@ -236,10 +299,54 @@ const grabar = async (values)=>{
       
      
   
-     
-    </>
-  )
+    
+
+<Modal show={showModalUpolad} onHide={canviEstatModalUpload}>
+<Modal.Header closeButton >
+  <Modal.Title>Pujar Foto del producte</Modal.Title>
+</Modal.Header>
+
+<Modal.Body>
+    <form onSubmit={upload} >    
+    <div className="mb-3">
+      <input
+        type="hidden"
+        name="id"
+        value={image.id}
+        onChange={handleImageChange}
+      />
+    </div>
+    <div className="mb-3">
+      <label htmlFor="staticEmail2" className="visually-hidden">Imagen</label>
+      <input 
+        type="file" 
+        className="form-control"
+        name="file"
+        onChange={handleImageChange}
+        />
+    </div>
+        <div className="mb-3">
+          <p className='text-danger'>{messageImage}</p>
+          </div>
+    <div>
+      <Button variant="secondary" onClick={canviEstatModalUpload}>Close</Button>
+
+      <Button variant="success" type="submit" >Enviar</Button>      
+
+    </div>
+    </form>    
+
+</Modal.Body>
+</Modal>
+
+
+
+
+
+</>
+)
 }
 
 export default Productes
+
 
