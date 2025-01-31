@@ -26,9 +26,9 @@ function OrderPickingShipping() {
 
   const [orderSelected, setOrderSelected] = useState([]);
 
+  const apiUrl = url;
   useEffect(() => {
     // const apiUrl = import.meta.env.VITE_API_URL;
-    const apiUrl = url;
     // const token = localStorage.getItem("token");
 
     const fetchData = async () => {
@@ -50,7 +50,7 @@ function OrderPickingShipping() {
         })
         .catch((error) => console.log(error));
 
-      axios
+      const orderLine = axios
         .get(`${apiUrl}OrderLineShipping`, {
           // headers: { "auth-token": token },
         })
@@ -96,7 +96,7 @@ function OrderPickingShipping() {
       const tempPickings = [];
       orderPendent.map((order) => {
         //recorrer line reception de cada orden reception
-        const lines = orderLineShipping.filter(
+        const lines = orderLine.data.filter(
           (line) => line.shipping_order_id === order.id
         );
         //obtindre product.name, product.quantitat, product.space
@@ -132,7 +132,7 @@ function OrderPickingShipping() {
       });
     };
     fetchData();
-  });
+  }, []);
 
   const canviEstatModal = () => {
     setShowModal(!showModal);
