@@ -23,6 +23,7 @@ function Productes() {
   const [valorsInicials, setValorsInicials] = useState({ name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '' })
   const [image, setImage] = useState({id:0, file: null})
   const [messageImage, setMessageImage] = useState('');
+  const [messageError, setMessageError] = useState('');
   
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
@@ -36,11 +37,16 @@ function Productes() {
   }, [])
 
 
-
 const eliminarProducte = (id) =>{
-  deleteData(url, "Product", id) 
-  const newproducts = products.filter(item => item.id != id)
-  setProducts(newproducts)
+  axios.delete(`${apiUrl}/product/${id}` , { headers: {"auth-token" : `${token}`} })
+    .then((response) =>{ 
+      console.log(response) 
+      const newproducts = products.filter(item => item.id != id)
+      setProducts(newproducts)
+    }) 
+    .catch((error) => {console.log(error)})
+     
+ 
 }
 
 const modificarProducte = (valors) =>{
@@ -51,21 +57,47 @@ const modificarProducte = (valors) =>{
 
 const canviEstatModal = () =>{
     setShowModal(!showModal)
+    setMessageError('')
 }
 
 const canviEstatModalUpload = () =>{
   setShowModalUpload(!showModalUpolad)
 }
 
-const grabar = async (values)=>{
+const grabar = (values)=>{
+  setMessageError('');
   if(tipoModal==="Crear"){
-    await postData(url,'Product', values)
+    axios.post(`${apiUrl}/product` ,values,  { headers: {"auth-token" : `${token}`} })
+    .then((response) =>{ 
+      console.log(response.data.message) 
+      canviEstatModal()
+      axios.get(`${apiUrl}/product` , { headers: {"auth-token" : `${token}`} })
+           .then((response) => setProducts(response.data) ) 
+           .catch((error) => {setMessageImage(error)})
+
+    }) 
+    .catch((error) => {setMessageError(error.response.data)})
+  
   }else{
-    await updateId(url,'Product',values.id,values)
+    const id=values.id;
+    delete values.id;
+    axios.put(`${apiUrl}/product/${id}` ,values ,  { headers: {"auth-token" : `${token}`} })
+    .then((response) =>{
+       console.log(response.data.message)
+       canviEstatModal()
+         axios.get(`${apiUrl}/product` , { headers: {"auth-token" : `${token}`} })
+           .then((response) => setProducts(response.data) ) 
+           .catch((error) => {setMessageImage(error)})
+
+       }) 
+    .catch((error) => {setMessageError(error.response.data)})
+  
     }
-  const data = await getData(url, "Product")
-  await setProducts(data)
-  canviEstatModal()
+ 
+ 
+    
+
+  
 }
 
 
@@ -107,6 +139,9 @@ const upload =  async (e)=>{
                 },
             });
             setMessageImage(response.data.message);
+            axios.get(`${apiUrl}/product` , { headers: {"auth-token" : `${token}`} })
+              .then((response) => setProducts(response.data) ) 
+              .catch((error) => {setMessageImage(error)})
             setTimeout(() => { 
               canviEstatModalUpload()
             }, 1500);
@@ -145,9 +180,10 @@ return (
         :products.map((valors) => {
           return (
           <tr key={valors.id}>
+            <td><img src={valors.image_url}  height="50"/></td>
             <td>{valors.id}</td>
             <td>{valors.name}</td>
-            <td>{valors.description}</td>
+            <td>{valors.description.slice(0,30)}</td>
             <td>{valors.volume}</td>
             <td>{valors.weight}</td>
             <td>{valors.lotorserial}</td>
@@ -245,6 +281,7 @@ return (
                 as="select"
                 name="lotorserial"
                 className="form-control"
+                value={values.lotorserial}
               >
                 <option value="">
                   Selecciona una opció
@@ -270,13 +307,14 @@ return (
                 className="form-control"
                 name="sku"
                 placeholder="sku del producte"
-                autocomplete="off"
 
                 value={values.sku}
               />
               {errors.sku && touched.sku ? <div>{errors.sku}</div> : null}
             </div>
-                        
+            <div className="mb-3">
+                <p className='text-danger'>{messageError}</p>
+            </div>
             <div className="form-group">
               <Button variant="secondary" onClick={canviEstatModal}>Close</Button>
 
