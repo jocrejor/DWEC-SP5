@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal } from 'react-bootstrap';
-
 import Header from '../Header';
 import Filtres from '../Filtres';
 import axios from 'axios';
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const carrierschema = Yup.object().shape({
-  name: Yup.string().min(3, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
+  name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
   nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit'),
   phone: Yup.string()
@@ -25,7 +25,7 @@ const carrierschema = Yup.object().shape({
   cp: Yup.string().matches(/^\d{5}$/, 'El codi postal ha de tenir 5 dígits').required('Valor requerit'),
 });
 
-function Transportistes() {
+function carrier() {
   const [carriers, setCarriers] = useState([]);
   const [pais, setPais] = useState([]);
   const [provincia, setProvince] = useState([]);
@@ -46,34 +46,44 @@ function Transportistes() {
   });
 
   useEffect(() => {
-    const apiURL = import.meta.env.VITE_API_URL;
-    axios
-    .get(`${apiURL}/transportistes`,)
-    async function fetchData() {
-      const data = await getData(url, 'Carriers');
-      const pais = await getData(url, 'State');
-      const provincia = await getData(url, 'Province');
-      const ciutat = await getData(url, 'City');
-      setPais(pais);
-      setProvince(provincia);
-      setCity(ciutat);
-      setCarriers(data);
-    }
     fetchData();
   }, []);
 
-  const deleteCarriers = (id) => {
-    deleteData(url, 'Carriers', id);
-    const newCarriers = carriers.filter((item) => item.id !== id);
-    setCarriers(newCarriers);
+  const fetchData = async () => {
+    try {
+      const [carriersResponse, paisResponse, provinciaResponse, ciutatResponse] = await Promise.all([
+        axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/state`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/province`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/city`, { headers: { "auth-token": localStorage.getItem("token") } }),
+      ]);
+
+      setCarriers(carriersResponse.data);
+      setPais(paisResponse.data);
+      setProvince(provinciaResponse.data);
+      setCity(ciutatResponse.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const delCarrier = async (id) => {
+    try {
+      await axios.delete(`${apiUrl}/carrier/${id}`, { headers: { "auth-token": localStorage.getItem("token") } });
+      const newCarriers = carriers.filter((item) => item.id !== id);
+      setCarriers(newCarriers);
+    } catch (error) {
+      console.error('Error eliminant trasportista:', error);
+    }
   };
 
   const modCarriers = (valors) => {
     setTipoModal('Modificar');
     setValorsInicials(valors);
+    setShowModal(true);
   };
 
-  const viewCarrier = (valors) => {
+  const verCarrier = (valors) => {
     setValorsInicials(valors);
     setShowViewModal(true);
   };
@@ -83,31 +93,67 @@ function Transportistes() {
   };
 
   const gravar = async (values) => {
-    if (tipoModal === 'Crear') {
-      await postData(url, 'Carriers', values);
-    } else {
-      await updateId(url, 'Carriers', values.id, values);
+    try {
+      if (tipoModal === 'Crear') {
+        await axios.post(`${apiUrl}/carrier`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+      } else {
+        await axios.put(`${apiUrl}/carrier/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+      }
+      const updatedCarriers = await axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } });
+      setCarriers(updatedCarriers.data);
+      canviEstatModal();
+    } catch (error) {
+      console.error('Error guardant transportista:', error);
     }
-    const info = await getData(url, 'Carriers');
-    await setCarriers(info);
-    canviEstatModal();
   };
 
   return (
     <>
-      <Header title="Llistat transportistes" />
+      <Header title="Llistat de transportistes" />
       <Filtres />
+
+      <div class="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+        <div class="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+          <div class="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+            <div class="form-floating bg-white">
+              <select class="form-select" id="floatingSelect" aria-label="Seleccione una opción">
+                <option selected>Tria una opció</option>
+                <option value="1">Eliminar</option>
+              </select>
+              <label for="floatingSelect">Accions en lot</label>
+            </div>
+            <button class="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button"><i class="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+          </div>
+        </div>
+        <div class="d-none d-xl-block col-xl-4 order-xl-1"></div>
+        <div class="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+          <div class="d-flex h-100 justify-content-xl-end">
+            <Button
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+              onClick={() => {
+                canviEstatModal();
+                setTipoModal('Crear');
+                setValorsInicials({
+                  name: '',
+                  address: '',
+                  nif: '',
+                  phone: '',
+                  email: '',
+                  state_id: 0,
+                  province: '',
+                  city: '',
+                  cp: '',
+                }); // Limpiar el formulario al crear
+              }}
+            >
+              <i class="bi bi-plus-circle text-white pe-1"></i>Crear
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div className='container-fluid pt-3'>
-        <Button
-          variant="success"
-          className="btn text-white"
-          onClick={() => {
-            canviEstatModal();
-            setTipoModal('Crear');
-          }}
-        >
-          Alta Transportistes
-        </Button>
+
         <table className='table table-striped border mt-2'>
           <thead>
             <tr>
@@ -123,7 +169,7 @@ function Transportistes() {
           <tbody>
             {carriers.length === 0 ? (
               <tr>
-                <td colSpan="13">No hi han transportistes</td>
+                <td colSpan="13">No hi han carrier</td>
               </tr>
             ) : (
               carriers.map((valors) => (
@@ -138,7 +184,7 @@ function Transportistes() {
                     <Button
                       variant="info"
                       onClick={() => {
-                        viewCarrier(valors);
+                        verCarrier(valors);
                       }}
                     >
                       <i className="bi bi-eye"></i>
@@ -148,7 +194,6 @@ function Transportistes() {
                       variant="warning mx-2"
                       onClick={() => {
                         modCarriers(valors);
-                        canviEstatModal();
                       }}
                     >
                       <i className="bi bi-pencil-square"></i>
@@ -157,7 +202,7 @@ function Transportistes() {
                     <Button
                       variant="danger"
                       onClick={() => {
-                        deleteCarriers(valors.id);
+                        delCarrier(valors.id);
                       }}
                     >
                       <i className='bi bi-trash '></i>
@@ -169,6 +214,7 @@ function Transportistes() {
           </tbody>
         </table>
       </div>
+
       {/* Modal Visualitzar */}
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
         <Modal.Header closeButton>
@@ -181,7 +227,7 @@ function Transportistes() {
             <p><b>NIF:</b> {valorsInicials.nif}</p>
             <p><b>Telèfon:</b> {valorsInicials.phone}</p>
             <p><b>Email:</b> {valorsInicials.email}</p>
-            <p><b>Estat:</b> {valorsInicials.state_id}</p> {/*la vd q no sé per que no va el state_name*/}
+            <p><b>Estat:</b> {valorsInicials.state_id}</p>
             <p><b>Província:</b> {valorsInicials.province}</p>
             <p><b>Ciutat:</b> {valorsInicials.city}</p>
             <p><b>Codi Postal:</b> {valorsInicials.cp}</p>
@@ -404,10 +450,9 @@ function Transportistes() {
             )}
           </Formik>
         </Modal.Body>
-
       </Modal>
     </>
   );
 }
 
-export default Transportistes;
+export default carrier;
