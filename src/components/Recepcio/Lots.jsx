@@ -6,8 +6,8 @@ import axios from "axios";
 
 import Header from '../Header';
 import Filtres from '../Filtres';
-// const apiUrl = import.meta.env.VITE_API_URL;
-const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
+const apiUrl = import.meta.env.VITE_API_URL;
+// const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
 const token = localStorage.getItem('token');
 
 const LotSchema = Yup.object().shape({
@@ -17,8 +17,8 @@ const LotSchema = Yup.object().shape({
   quantity: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
   production_date: Yup.string().required('Valor requerit'),
   expiration_date: Yup.string().required('Valor requerit'),
-  orderReception: Yup.string().required('Valor requerit'),
-  orderLineReception: Yup.string().required('Valor requerit'),
+  // orderReception: Yup.string().required('Valor requerit'),
+  orderlinereception_id: Yup.string().required('Valor requerit'),
 });
 
 
@@ -27,7 +27,8 @@ function Lots() {
   const [lot, setLot] = useState([]);
   const [products, setProduct] = useState([]);
   const [suppliers, setSupplier] = useState([]);
-  const [orderReceptions, setOrderReception] = useState([]);
+  // de momento no hay orderReception
+  // const [orderReceptions, setOrderReception] = useState([]);
   const [orderLineReceptions, setOrderLineReception] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
@@ -38,68 +39,79 @@ function Lots() {
     quantity: '',
     production_date: '',
     expiration_date: '',
-    orderReception: '',
-    orderLineReception: '',
+    // orderReception: '',
+    orderlinereception_id: '',
   });
 
-  useEffect(async () => {
-    axios.get(`${apiUrl}Lot`, { headers: { "auth-token": token } })
-      // axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
-      .then(response => {
-        setLot(response.data)
-      })
-      .catch(error => {
-        console.log(error)
-      }
-      )
+  useEffect(() => {
+    const fetchData = async () => {
 
-    axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
-      // axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
-      .then(response => {
-        setProduct(response.data)
-      })
-      .catch(error => {
-        console.log(error)
-      }
-      )
-    axios.get(`${apiUrl}Supplier`, { headers: { "auth-token": token } })
-      // axios.get(`${apiUrl}supplier`, { headers: { "auth-token": token } })
-      .then(response => {
-        setSupplier(response.data)
-      })
-      .catch(error => {
-        console.log(error)
-      }
-      )
+      axios.get(`${apiUrl}Lot`, { headers: { "auth-token": token } })
+        // axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
+        .then(response => {
+          setLot(response.data)
+        })
+        .catch(error => {
+          console.log(error)
+        }
+        )
 
-    axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
-      // axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
-      .then(response => {
-        setOrderReception(response.data)
-      })
-      .catch(error => {
-        console.log(error)
-      }
-      )
+      axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
+        // axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
+        .then(response => {
+          setProduct(response.data)
+        })
+        .catch(error => {
+          console.log(error)
+        }
+        )
+      axios.get(`${apiUrl}Supplier`, { headers: { "auth-token": token } })
+        // axios.get(`${apiUrl}supplier`, { headers: { "auth-token": token } })
+        .then(response => {
+          setSupplier(response.data)
+        })
+        .catch(error => {
+          console.log(error)
+        }
+        )
 
-    axios.get(`${apiUrl}OrderLineReception`, { headers: { "auth-token": token } })
-      // axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
-      .then(response => {
-        setOrderLineReception(response.data)
-      })
-      .catch(error => {
-        console.log(error)
-      }
-      )
+      // axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
+      //   // axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
+      //   .then(response => {
+      //     setOrderReception(response.data)
+      //   })
+      //   .catch(error => {
+      //     console.log(error)
+      //   }
+      //   )
+
+      axios.get(`${apiUrl}OrderLineReception`, { headers: { "auth-token": token } })
+        // axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
+        .then(response => {
+          setOrderLineReception(response.data)
+        })
+        .catch(error => {
+          console.log(error)
+        }
+        )
+    }
+    fetchData();
   }, []);
 
-  const eliminarLot = async (id) => {
+  const eliminarLot = (id) => {
     try {
-      await axios.delete(`http://node.daw.iesevalorpego.es:3001/Lot/${id}`);
-      setLot((prevLot) => prevLot.filter((item) => item.id !== id));
+      axios.delete(`${apiUrl}lot/${id}`, {
+        headers: { "auth-token": token }
+      })
+      .then(() => {
+        setLot((prevLot) => prevLot.filter((item) => item.id !== id));
+      })
+      .catch(error => {
+        console.error(error);
+      });
     }
     catch (error) {
-      console.log("Error:", error);
+      console.log("Error al eliminar:", error);
     }
   }
   // const eliminarLot = (id) => {
@@ -109,6 +121,8 @@ function Lots() {
   // };
 
   const modificarLot = (valors) => {
+    console.log(valors.id);
+
     setTipoModal('Modificar');
     setValorsInicials(valors);
   };
@@ -133,7 +147,7 @@ function Lots() {
             <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
               <div className="form-floating bg-white">
                 <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
-                  <option selected>Tria una opció</option>
+                  <option>Tria una opció</option>
                   <option value="1">Eliminar</option>
                 </select>
                 <label htmlFor="floatingSelect">Accions en lot</label>
@@ -144,23 +158,18 @@ function Lots() {
           <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
           <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
             <div className="d-flex h-100 justify-content-xl-end">
-              <button type="button" className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"><i className="bi bi-plus-circle text-white pe-1"></i>Crear</button>
+              <Button 
+              type="button"
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+              onClick={() => {
+                canviEstatModal();
+                setTipoModal('Crear');
+              }}>
+                <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+              </Button>
             </div>
           </div>
         </div>
-
-        {/* <div className="d-flex justify-content-end mt-3 me-3">
-        <Button
-          variant="success"
-          className="btn btn-primary"
-          onClick={() => {
-            canviEstatModal();
-            setTipoModal('Crear');
-          }}
-        >
-          Alta Lots
-        </Button>
-      </div> */}
 
         <div className="row">
           <div className="col-12">
@@ -173,17 +182,15 @@ function Lots() {
                     </th>
                     <th scope='col' className="align-middle">ID</th>
                     <th scope='col' className="align-middle">Nom</th>
-                    <th scope='col' className="align-middle">ID Product</th>
-                    <th scope='col' className="align-middle">ID Supplier</th>
+                    <th scope='col' className="align-middle">Producte</th>
+                    <th scope='col' className="align-middle">Proveidor</th>
                     <th scope='col' className="align-middle">Quantitat</th>
                     <th scope='col' className="align-middle">Data producció</th>
                     <th scope='col' className="align-middle">Data caducitat</th>
-                    <th scope='col' className="align-middle">Order Reception</th>
+                    {/* de momento no hay orderReception */}
+                    {/* <th scope='col' className="align-middle">Order Reception</th> */}
                     <th scope='col' className="align-middle">Order Line Reception</th>
                     <th scope='col' className="align-middle">Accions</th>
-                    {/* <th scope='col' className="align-middle">Visualitzar</th>
-                    <th scope='col' className="align-middle">Modificar</th>
-                    <th scope='col' className="align-middle">Eliminar</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -195,19 +202,20 @@ function Lots() {
                     </tr>
                   ) : (
                     lot.map((valors) => (
-                      <tr key={valors.id}>
+                      <tr key={`lot-${valors.id}`}>
                         <td scope='row' data-cell="Seleccionar">
                           <input className='form-check-input' type="checkbox" />
                         </td>
                         <td data-cell="ID">{valors.id}</td>
                         <td data-cell="Nom">{valors.name}</td>
-                        <td data-cell="ID producte">{products.find((product) => product.id === valors.product_id)?.name}</td>
-                        <td data-cell="ID proveidor">{suppliers.find((supplier) => supplier.id === valors.supplier_id)?.name}</td>
+                        <td data-cell="Producte">{products.find((product) => product.id === valors.product_id)?.name}</td>
+                        <td data-cell="Proveidor">{suppliers.find((supplier) => supplier.id === valors.supplier_id)?.name}</td>
                         <td data-cell="Quantitat">{valors.quantity}</td>
                         <td data-cell="Data producció">{valors.production_date}</td>
                         <td data-cell="Data caducitat">{valors.expiration_date}</td>
-                        <td data-cell="ID ordre recepció">{valors.orderReception}</td>
-                        <td data-cell="ID ordre línia recepció">{valors.orderLineReception}</td>
+                        {/* de momento no hay orderReception */}
+                        {/* <td data-cell="ID ordre recepció">{valors.orderReception}</td> */}
+                        <td data-cell="ID ordre línia recepció">{valors.orderlinereception_id}</td>
                         <td data-no-colon="true" className='fs-5'>
                           <div className="d-xl-flex flex-xl-column flex-xl-row">
                             <i
@@ -215,59 +223,26 @@ function Lots() {
                                 visualitzarLot(valors);
                                 canviEstatModal();
                               }}
-                              className="bi bi-eye">
+                              className="bi bi-eye icono"
+                              role='button'>
                             </i>
                             <i
                               onClick={() => {
                                 modificarLot(valors);
                                 canviEstatModal();
                               }}
-                              className="bi bi-pencil-square px-3">
+                              className="bi bi-pencil-square px-3 icono"
+                              role='button'>
                             </i>
                             <i
                               onClick={() => {
                                 eliminarLot(valors.id);
                               }}
-                              className="bi bi-trash">
+                              className="bi bi-trash icono"
+                              role='button'>
                             </i>
                           </div>
-
                         </td>
-                        {/* <td>
-                          <Button
-                            variant="primary"
-                            className="btn-sm"
-                            onClick={() => {
-                              visualitzarLot(valors);
-                              canviEstatModal();
-                            }}
-                          >
-                            <i className="bi bi-eye"></i>
-                          </Button>
-                        </td>
-                        <td>
-                          <Button
-                            variant="warning"
-                            className="btn-sm"
-                            onClick={() => {
-                              modificarLot(valors);
-                              canviEstatModal();
-                            }}
-                          >
-                            <i className="bi bi-pencil-square"></i>
-                          </Button>
-                        </td>
-                        <td>
-                          <Button
-                            variant="danger"
-                            className="btn-sm"
-                            onClick={() => {
-                              eliminarLot(valors.id);
-                            }}
-                          >
-                            <i className="bi bi-trash"></i>
-                          </Button>
-                        </td> */}
                       </tr>
                     ))
                   )}
@@ -341,7 +316,7 @@ function Lots() {
                   <td>{valors.production_date}</td>
                   <td>{valors.expiration_date}</td>
                   <td>{valors.orderReception}</td>
-                  <td>{valors.orderLineReception}</td>
+                  <td>{valors.orderlinereception_id}</td>
                   <td>
                     <Button
                       variant="primary"
@@ -401,38 +376,73 @@ function Lots() {
                   quantity: '',
                   production_date: '',
                   expiration_date: '',
-                  orderReception: '',
-                  orderLineReception: '',
+                  /* de momento no hay orderReception */
+                  // orderReception: '',
+                  orderlinereception_id: '',
                 }
             }
             validationSchema={LotSchema}
             /** SE ACTUALIZA LA TABLA AL MODIFICAR O CREAR */
-            onSubmit={async (values) => {
+            onSubmit={(values) => {
               console.log(values);
+              console.log(tipoModal);
               try {
                 if (tipoModal === 'Crear') {
-                  // const response = await axios.post(`${apiUrl}/Lot`, values, {
-                  const response = await axios.post(`${apiUrl}lot`, values, {
+                  axios.post(`${apiUrl}lot`, values, {
                     headers: { "auth-token": token }
                   })
-
-                  setLot((prevLot) => [...prevLot, response.data]);
-
-                  setShowModal(false);
-                }
-                else {
-                  // await axios.put(`${apiUrl}/Lot/${values.id}`, values, {
-                  await axios.put(`${apiUrl}lot/${values.id}`, values, {
-                    headers: { "auth-token": token }
+                  .then((response) => {
+                    console.log("Response data", response.data);
+                    console.log("Response data results", response.data.results);
+                
+                    // Usamos los 'values' (datos del formulario) para agregar el lote
+                    const newLot = {
+                      ...values,
+                      id: response.data.results.insertId // Asigna el ID generado por la base de datos
+                    };
+                
+                    setLot((prevLot) => {
+                      const updatedLot = [...prevLot, newLot];
+                      console.log("Updated Lot list:", updatedLot);
+                      return updatedLot;
+                    });
+                
+                    setShowModal(false);
+                  })
+                  .catch(error => {
+                    console.error("Error al crear:", error);
                   });
+                }
+                
+                else if(tipoModal === 'Modificar') {
+                  axios.put(`${apiUrl}lot/${values.id}`, values, {
+                    headers: { "auth-token": token }
+                  })
+                  .then((response) => {
+                    // Actualizar el lote en el estado después de la modificación
+                    // setLot((prevLot) =>
+                    //   prevLot.map((lot) => (lot.id === values.id ? response.data : lot))
+                    // );
+                    console.log(response.data);
 
-                  setLot((prevLot) => prevLot.map((lot) => (lot.id === values.id ? values : lot)));
+                    setLot((prevLot) =>
+                      prevLot.map((lot) =>
+                        lot.id === values.id ? { ...lot, ...response.data } : lot
+                      )
+                    );
 
+                    console.log(lot);
+                  })
+                  .catch(error => {
+                    console.error("Error al modificar:", error);
+                  });
+                
+                  // Cerrar el modal
                   setShowModal(false);
                 }
               }
               catch (error) {
-                console.log(error);
+                console.log("Error al crear o eliminar:", error);
               }
             }}
           >
@@ -515,9 +525,9 @@ function Lots() {
                   />
                   {errors.expiration_date && touched.expiration_date && <div className="text-danger mt-1">{errors.expiration_date}</div>}
                 </div>
-
+                {/* de momento no hay orderReception */}
                 {/* Order Reception */}
-                <div className="form-group">
+                {/* <div className="form-group">
                   <label htmlFor="orderReception">Order Reception</label>
                   <Field as="select" name="orderReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
                     <option value="">Selecciona una orden de recepció</option>
@@ -528,20 +538,20 @@ function Lots() {
                     ))}
                   </Field>
                   {errors.orderReception && touched.orderReception && <div className="text-danger mt-1">{errors.orderReception}</div>}
-                </div>
+                </div> */}
 
                 {/* Order Line Reception */}
                 <div className="form-group">
-                  <label htmlFor="orderLineReception">Order Line Reception</label>
-                  <Field as="select" name="orderLineReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona una línea de orden de recepció</option>
+                  <label htmlFor="orderlinereception_id">ID Order Line Reception</label>
+                  <Field as="select" name="orderlinereception_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
+                    <option value="">Selecciona un id de línea de orden de recepció</option>
                     {orderLineReceptions.map((line) => (
                       <option key={line.id} value={line.id}>
-                        {line.name}
+                        {line.id}
                       </option>
                     ))}
                   </Field>
-                  {errors.orderLineReception && touched.orderLineReception && <div className="text-danger mt-1">{errors.orderLineReception}</div>}
+                  {errors.orderlinereception_id && touched.orderlinereception_id && <div className="text-danger mt-1">{errors.orderlinereception_id}</div>}
                 </div>
 
                 <div className="form-group d-flex justify-content-between mt-3">
@@ -561,7 +571,7 @@ function Lots() {
                       {tipoModal}
                     </Button>
                   )}
-                </div>
+                </div>                
               </Form>
               /**FORMUALRIO SIN SELECTS (MAL HECHO) */
               // <Form>
@@ -655,15 +665,15 @@ function Lots() {
 
               //   {/* Order Line Reception */}
               //   <div className="form-group">
-              //     <label htmlFor="orderLineReception">Order Line Reception</label>
+              //     <label htmlFor="orderlinereception_id">Order Line Reception</label>
               //     <Field
               //       type="text"
-              //       name="orderLineReception"
+              //       name="orderlinereception_id"
               //       placeholder="Order Line Reception"
               //       className="form-control"
               //       disabled={tipoModal === 'Visualitzar'}
               //     />
-              //     {errors.orderLineReception && touched.orderLineReception && <div className="text-danger mt-1">{errors.orderLineReception}</div>}
+              //     {errors.orderlinereception_id && touched.orderlinereception_id && <div className="text-danger mt-1">{errors.orderlinereception_id}</div>}
               //   </div>
 
               //   <div className="form-group d-flex justify-content-between mt-3">
