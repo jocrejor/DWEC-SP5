@@ -211,8 +211,8 @@ function Lots() {
                         <td data-cell="Producte">{products.find((product) => product.id === valors.product_id)?.name}</td>
                         <td data-cell="Proveidor">{suppliers.find((supplier) => supplier.id === valors.supplier_id)?.name}</td>
                         <td data-cell="Quantitat">{valors.quantity}</td>
-                        <td data-cell="Data producció">{valors.production_date}</td>
-                        <td data-cell="Data caducitat">{valors.expiration_date}</td>
+                        <td data-cell="Data producció">{new Date(valors.production_date).toLocaleDateString("es-ES")}</td>
+                        <td data-cell="Data caducitat">{new Date(valors.expiration_date).toLocaleDateString("es-ES")}</td>
                         {/* de momento no hay orderReception */}
                         {/* <td data-cell="ID ordre recepció">{valors.orderReception}</td> */}
                         <td data-cell="ID ordre línia recepció">{valors.orderlinereception_id}</td>
