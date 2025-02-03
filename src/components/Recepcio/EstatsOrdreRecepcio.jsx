@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
+import axios from 'axios';
 
-const API_URL = 'https://api.dwes.iesevalorpego.es';
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const OrderReception_StatusSchema = Yup.object().shape({
   name: Yup.string()
@@ -16,35 +15,37 @@ const OrderReception_StatusSchema = Yup.object().shape({
 });
 
 function OrderReception_Status() {
-  const [ordersLineReceptionStatus, setOrdersLineReceptionStatus] = useState([]);
+  const [ordersReceptionStatus, setOrdersReceptionStatus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
   const [valorsInicials, setValorsInicials] = useState({ name: '' });
   const [error, setError] = useState(null);
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const { data } = await axios.get(`${API_URL}/OrderReception_Status`);
-      setOrdersLineReception(data);
-      setError(null);
-    } catch (err) {
-      setError('Error carregant les dades.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/orderreception_status`, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
+        setOrdersReceptionStatus(response.data);
+        setError(null);
+      } catch (err) {
+        setError('Error carregant les dades.');
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchOrders();
   }, []);
 
   const eliminarEstat = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquest estat?')) {
       try {
-        await axios.delete(`${API_URL}/OrderReception_Status/${id}`);
-        setOrdersLineReception((prev) => prev.filter((item) => item.id !== id));
+        await axios.delete(`${apiUrl}/orderreception_status/${id}`, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
+        setOrdersReceptionStatus((prev) => prev.filter((item) => item.id !== id));
       } catch (err) {
         setError("Error eliminant l'estat.");
       }
@@ -64,11 +65,18 @@ function OrderReception_Status() {
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
-        await axios.post(`${API_URL}/OrderReception_Status`, values);
+        await axios.post(`${apiUrl}/orderreception_status`, values, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
       } else {
-        await axios.put(`${API_URL}/OrderReception_Status/${values.id}`, values);
+        await axios.put(`${apiUrl}/orderreception_status/${values.id}`, values, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
       }
-      await fetchOrders();
+      const response = await axios.get(`${apiUrl}/orderreception_status`, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+      setOrdersReceptionStatus(response.data);
       canviEstatModal();
       setError(null);
     } catch (err) {
@@ -78,7 +86,7 @@ function OrderReception_Status() {
 
   return (
     <>
-      <Header title="Llistat Estats de Línia" />
+      <Header title="Llistat Estats de Ordre" />
       <Button
         variant="success"
         onClick={() => {
@@ -87,13 +95,13 @@ function OrderReception_Status() {
           canviEstatModal();
         }}
       >
-        Nou Estat de línia
+        Nou Estat de Ordre
       </Button>
       {loading ? (
         <Spinner animation="border" />
       ) : error ? (
         <div>{error}</div>
-      ) : ordersLineReceptionStatus.length === 0 ? (
+      ) : ordersReceptionStatus.length === 0 ? (
         <div>No hi ha estats</div>
       ) : (
         <Table striped bordered hover>
@@ -106,7 +114,7 @@ function OrderReception_Status() {
             </tr>
           </thead>
           <tbody>
-            {ordersLineReceptionStatus.map((valors) => (
+            {ordersReceptionStatus.map((valors) => (
               <tr key={valors.id}>
                 <td>{valors.id}</td>
                 <td>{valors.name}</td>
@@ -120,7 +128,7 @@ function OrderReception_Status() {
                 </td>
                 <td>
                   <Button
-                    variant="primary"
+                    variant="danger"
                     onClick={() => eliminarEstat(valors.id)}
                   >
                     Eliminar

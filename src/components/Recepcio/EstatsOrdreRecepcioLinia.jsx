@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
-import Header from '../Header'
+import Header from '../Header';
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const OrderLineReception_StatusSchema = Yup.object().shape({
   name: Yup.string()
@@ -20,33 +22,29 @@ function OrderLineReception_Status() {
   const [valorsInicials, setValorsInicials] = useState({ name: '' });
   const [error, setError] = useState(null);
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const data = await getData(url, 'OrderLineReception_Status');
-      setOrdersLineReception(data);
-      setError(null);
-    } catch (err) {
-      setError('Error carregant les dades.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchOrders();
+    axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setOrdersLineReception(response.data);
+        setError(null);
+      })
+      .catch(() => {
+        setError('Error carregant les dades.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const eliminarEstatOrdre = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquest estat?')) {
-      try {
-        await deleteData(url, 'OrderLineReception_Status', id);
-        setOrdersLineReception((prev) =>
-          prev.filter((item) => item.id !== id)
-        );
-      } catch (err) {
-        setError('Error eliminant l\'estat.');
-      }
+      axios.delete(`${apiUrl}/orderline_status/${id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+        .then(() => {
+          setOrdersLineReception(prev => prev.filter(item => item.id !== id));
+        })
+        .catch(() => {
+          setError('Error eliminant l\'estat.');
+        });
     }
   };
 
@@ -63,11 +61,12 @@ function OrderLineReception_Status() {
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
-        await postData(url, 'OrderLineReception_Status', values);
+        await axios.post(`${apiUrl}/orderline_status`, values, { headers: { "auth-token": localStorage.getItem("token") } });
       } else {
-        await updateId(url, 'OrderLineReception_Status', values.id, values);
+        await axios.put(`${apiUrl}/orderline_status/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } });
       }
-      await fetchOrders();
+      const updatedData = await axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } });
+      setOrdersLineReception(updatedData.data);
       canviEstatModal();
       setError(null);
     } catch (err) {
@@ -77,24 +76,9 @@ function OrderLineReception_Status() {
 
   return (
     <>
-      <Header title="Llistat Estats de Ordre" />
-      <Button
-        variant="success"
-        onClick={() => {
-          setTipoModal('Crear');
-          setValorsInicials({ name: '' });
-          canviEstatModal();
-        }}
-      >
-        Nou Estat de ordre
-      </Button>
-      {loading ? (
-        <Spinner animation="border" />
-      ) : error ? (
-        <div>{error}</div>
-      ) : ordersLineReception.length === 0 ? (
-        <div>No hi ha estats</div>
-      ) : (
+      <Header title="Llistat Estats de Línia" />
+      <Button variant="success" onClick={() => { setTipoModal('Crear'); setValorsInicials({ name: '' }); canviEstatModal(); }}>Nou Estat de línia</Button>
+      {loading ? <Spinner animation="border" /> : error ? <div>{error}</div> : ordersLineReception.length === 0 ? <div>No hi ha estats</div> : (
         <Table striped bordered hover>
           <thead>
             <tr>
@@ -109,22 +93,8 @@ function OrderLineReception_Status() {
               <tr key={valors.id}>
                 <td>{valors.id}</td>
                 <td>{valors.name}</td>
-                <td>
-                  <Button
-                    variant="warning"
-                    onClick={() => modificarEstatOrdre(valors)}
-                  >
-                    Modificar
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="primary"
-                    onClick={() => eliminarEstatOrdre(valors.id)}
-                  >
-                    Eliminar
-                  </Button>
-                </td>
+                <td><Button variant="warning" onClick={() => modificarEstatOrdre(valors)}>Modificar</Button></td>
+                <td><Button variant="primary" onClick={() => eliminarEstatOrdre(valors.id)}>Eliminar</Button></td>
               </tr>
             ))}
           </tbody>
@@ -135,34 +105,17 @@ function OrderLineReception_Status() {
           <Modal.Title>{tipoModal} Estat de Ordre</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Formik
-            initialValues={valorsInicials}
-            validationSchema={OrderLineReception_StatusSchema}
-            onSubmit={handleSubmit}
-          >
+          <Formik initialValues={valorsInicials} validationSchema={OrderLineReception_StatusSchema} onSubmit={handleSubmit}>
             {({ errors, touched }) => (
               <Form>
                 <div>
                   <label htmlFor="name">Nom</label>
-                  <Field
-                    id="name"
-                    type="text"
-                    name="name"
-                    placeholder="Nom del estat"
-                    autoComplete="off"
-                  />
+                  <Field id="name" type="text" name="name" placeholder="Nom del estat" autoComplete="off" />
                   {errors.name && touched.name && <div>{errors.name}</div>}
                 </div>
                 <div>
-                  <Button variant="secondary" onClick={canviEstatModal}>
-                    Tanca
-                  </Button>
-                  <Button
-                    variant={tipoModal === 'Modificar' ? 'success' : 'info'}
-                    type="submit"
-                  >
-                    {tipoModal}
-                  </Button>
+                  <Button variant="secondary" onClick={canviEstatModal}>Tanca</Button>
+                  <Button variant={tipoModal === 'Modificar' ? 'success' : 'info'} type="submit">{tipoModal}</Button>
                 </div>
               </Form>
             )}
