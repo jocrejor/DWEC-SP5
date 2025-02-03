@@ -10,16 +10,11 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const OrderReceptionSchema = Yup.object().shape({
   supplier_id: Yup.number().required('Proveïdor requerit'),
   estimated_reception_date: Yup.date().required('Data estimada requerida'),
-  ordrerline_status: Yup.string()
-    .min(1, "Valor mínim d'1 caràcter.")
-    .max(25, 'El valor màxim és de 25 caràcters.')
-    .required('Estat requerit'),
 });
 
 function OrderReception() {
   const [orderReceptions, setOrderReceptions] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
-  const [statuses, setStatuses] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +23,6 @@ function OrderReception() {
   const [valorsInicials, setValorsInicials] = useState({
     supplier_id: '',
     estimated_reception_date: '',
-    ordrerline_status: '',
   });
   const [error, setError] = useState(null);
   const [productId, setProductId] = useState('');
@@ -37,15 +31,14 @@ function OrderReception() {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [ordersRes, suppliersRes, statusesRes, productsRes] = await Promise.all([
+      const [ordersRes, suppliersRes, productsRes] = await Promise.all([
         axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/orderreception_status`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } }),
       ]);
       setOrderReceptions(ordersRes.data);
       setSuppliers(suppliersRes.data);
-      setStatuses(statusesRes.data);
       setProducts(productsRes.data);
       setError(null);
     } catch (err) {
@@ -60,6 +53,7 @@ function OrderReception() {
     fetchInitialData();
   }, []);
 
+  // Funció per eliminar ordre de recepció
   const eliminarOrdre = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquesta ordre?')) {
       try {
@@ -72,29 +66,27 @@ function OrderReception() {
     }
   };
 
+  // Funció per modificar ordre de recepció
   const modificarOrdre = (valors) => {
     setTipoModal('Modificar');
-    // Carreguem els valors inicials de l'ordre a modificar
     setValorsInicials(valors);
-    // Carreguem els productes ja assignats (o un array buit si no n'hi ha)
     setSelectedProducts(valors.products || []);
     setShowModal(true);
   };
 
   const canviEstatModal = () => {
     setShowModal(!showModal);
-    // Reiniciem els camps per afegir productes
     setSelectedProducts([]);
     setProductId('');
     setQuantity('');
   };
 
+  // Funció per afegir producte a la llista de productes seleccionats
   const afegirProducte = () => {
     if (!productId || !quantity || isNaN(quantity) || Number(quantity) <= 0) {
       alert('Selecciona un producte vàlid i una quantitat positiva!');
       return;
     }
-
     const product = products.find((p) => p.name === productId);
     if (!product) {
       alert('Producte no trobat!');
@@ -108,36 +100,68 @@ function OrderReception() {
     setQuantity('');
   };
 
+  // Funció per eliminar producte de la llista seleccionada
   const eliminarProducte = (index) => {
     setSelectedProducts((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Funció per crear l'Ordre de Recepció
+  const crearOrdreDeRecepcio = async (ordreDeRecepcio) => {
+    try {
+      const res = await axios.post(`${apiUrl}/orderreception`, ordreDeRecepcio, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      });
+      return res.data.id;
+    } catch (err) {
+      console.error("Error creant ordre de recepció:", err);
+      throw new Error("No s'ha pogut crear l'ordre de recepció.");
+    }
+  };
+
+  // Funció per crear les línies d'Ordre de Recepció
+  const crearLiniaOrdreDeRecepcio = async (liniaOrdreDeRecepcio) => {
+    try {
+      await axios.post(`${apiUrl}/orderlinereception`, liniaOrdreDeRecepcio, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      });
+    } catch (err) {
+      console.error("Error creant línia d'ordre de recepció:", err);
+      throw new Error("No s'ha pogut crear la línia d'ordre de recepció.");
+    }
+  };
+
+  // Funció per enviar el formulari (crear ordre i línies associades)
   const handleSubmit = async (values) => {
     try {
-      if (selectedProducts.length === 0) {
-        alert("Afegir com a mínim un producte a l'ordre.");
-        return;
+      const ordreDeRecepcio = {
+        ...values,
+        orderreception_status_id: 1,
+      };
+
+      // Crear l'Ordre de Recepció
+      const ordreId = await crearOrdreDeRecepcio(ordreDeRecepcio);
+      const ordreIdValue = ordreId.id;
+
+      for (let product of selectedProducts) {
+        const liniaOrdre = {
+          order_reception_id: ordreIdValue,
+          product_id: product.product_id,
+          quantity_ordered: product.quantity,
+          orderreception_status_id: 1,
+          orderline_status_id: 1,
+          quantity_received: 0,
+        };
+        await crearLiniaOrdreDeRecepcio(liniaOrdre);
       }
-      const dataToSend = { ...values, products: selectedProducts };
-      console.log("Data to send:", dataToSend);
-      if (tipoModal === 'Crear') {
-        const res = await axios.post(`${apiUrl}/orderreception`, dataToSend, {
-          headers: { "auth-token": localStorage.getItem("token") },
-        });
-        console.log("Resposta creació:", res.data);
-      } else {
-        const res = await axios.put(`${apiUrl}/orderreception/${values.id}`, dataToSend, {
-          headers: { "auth-token": localStorage.getItem("token") },
-        });
-        console.log("Resposta modificació:", res.data);
-      }
+
+      // Actualitzar la llista de dades
       await fetchInitialData();
       canviEstatModal();
       setError(null);
+
     } catch (err) {
-      // Mostrem més informació sobre l'error per depurar
-      console.error("Error en la creació/modificació de l'ordre:", err.response ? err.response.data : err);
-      setError("Error en l'operació.");
+      console.error("Error en crear ordre i línies d'ordre:", err);
+      setError("Error creant ordre de recepció i línies.");
     }
   };
 
@@ -151,7 +175,6 @@ function OrderReception() {
           setValorsInicials({
             supplier_id: '',
             estimated_reception_date: '',
-            ordrerline_status: '',
           });
           canviEstatModal();
         }}
@@ -182,7 +205,7 @@ function OrderReception() {
                 <td>{valors.id}</td>
                 <td>{suppliers.find((sup) => sup.id === valors.supplier_id)?.name}</td>
                 <td>{valors.estimated_reception_date}</td>
-                <td>{statuses.find((status) => status.id === valors.ordrerline_status)?.name}</td>
+                <td>{valors.orderreception_status}</td>
                 <td>
                   <Button variant="warning" onClick={() => modificarOrdre(valors)}>
                     Modificar
@@ -235,25 +258,6 @@ function OrderReception() {
                   {errors.estimated_reception_date &&
                     touched.estimated_reception_date && (
                       <div>{errors.estimated_reception_date}</div>
-                    )}
-                </div>
-                <div>
-                  <label htmlFor="ordrerline_status">Estat</label>
-                  <Field
-                    as="select"
-                    id="ordrerline_status"
-                    name="ordrerline_status"
-                  >
-                    <option value="">Selecciona un estat</option>
-                    {statuses.map((status) => (
-                      <option key={status.id} value={status.id}>
-                        {status.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.ordrerline_status &&
-                    touched.ordrerline_status && (
-                      <div>{errors.ordrerline_status}</div>
                     )}
                 </div>
                 <div>
