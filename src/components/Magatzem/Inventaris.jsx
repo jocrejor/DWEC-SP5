@@ -1,12 +1,11 @@
 import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Formik, Form, Field } from 'formik'
 import * as Yup from 'yup'
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud'
 import { Row, Col, Modal, Table, Button, Tab } from 'react-bootstrap/'
 import Header from '../Header'
 import Filtres from '../Filtres'
+import axios from 'axios'
 
 const InventorySchema = Yup.object().shape({
   storage_id: Yup.string().required('Required'),
@@ -26,23 +25,70 @@ function Inventaris() {
   const [inventoryLines, setInventoryLines] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedInventoryLines, setSelectedInventoryLines] = useState([]);
+  const [inventoryStatus, setInventoryStatus] = useState([]);
+  
 
+  const apiURL = import.meta.env.VITE_API_URL;
+  
 
+  useEffect(() => {
+    //const stock = await getData(url, "Inventory");
+    axios.get(`${apiURL}inventory`, {headers: {"auth-token": localStorage.getItem('token')}})
+      .then(response => {
+        setInventory(response.data);
+      })
+      .catch(e => {console.log(e.response.data)})
 
-  useEffect(async () => {
-    const stock = await getData(url, "Inventory");
-    const store = await getData(url, "Storage");
-    const street = await getData(url, "Street");
-    const space = await getData(url, "Space");
-    const lines = await getData(url, "InventoryLine");
-    const prod = await getData(url, "Product");
+      axios.get(`${apiURL}inventory_status`, {headers: {"auth-token": localStorage.getItem('token')}})
+      .then(response => {
+        setInventoryStatus(response.data);
+      })
+      .catch(e => {console.log(e.response.data)})
+
+    axios.get(`${apiURL}storage`, {headers: {"auth-token": localStorage.getItem('token')}})
+      .then(response => {
+        setStorages(response.data);
+      })
+      .catch(e => {console.log(e)})
+
+    axios.get(`${apiURL}street`, {headers: {"auth-token": localStorage.getItem('token')}})
+    .then(response => {
+      setStreets(response.data);
+    })
+    .catch(e => {console.log(e)})
+
+    axios.get(`${apiURL}space`, {headers: {"auth-token": localStorage.getItem('token')}})
+      .then(response => {
+        setSpaces(response.data);
+      })
+      .catch(e => {console.log(e)})
+
+    axios.get(`${apiURL}product`, {headers: {"auth-token": localStorage.getItem('token')}})
+    .then(response => {
+      setProducts(response.data);
+    })
+    .catch(e => {console.log(e)})
+
+    axios.get(`${apiURL}inventoryline`, {headers: {"auth-token": localStorage.getItem('token')}})
+      .then(response => {
+        setInventoryLines(response.data);
+      })
+      .catch(e => {console.log(e)})
+
+      console.log("hola")
+
+   /*const store = await getData(url, "Storage");
+    //const street = await getData(url, "Street");
+    //const space = await getData(url, "Space");
+    //const lines = await getData(url, "InventoryLine");
+    //const prod = await getData(url, "Product");
 
     setInventory(stock);
     setStorages(store);
     setStreets(street);
     setSpaces(space);
     setInventoryLines(lines);
-    setProducts(prod);
+    setProducts(prod);*/
   }, []);
 
   useEffect(() => {
@@ -57,7 +103,6 @@ function Inventaris() {
 
   useEffect(() => {
     if (selectedInventory) {
-      console.log("HOLA")
       const filteredInventoryLines = inventoryLines.filter(line => line.inventory_id === selectedInventory.id);
       setSelectedInventoryLines(filteredInventoryLines);
     } else {
@@ -65,8 +110,7 @@ function Inventaris() {
     }
   }, [selectedInventory])
   /**************** CREAR INVENTARIO ****************/
-  const createInventory = async (values) => {
-    console.log(values);
+  const createInventory = (values) => {
     let filteredSpaces;
     if (!values.street_id) {
       filteredSpaces = spaces.filter(space => space.storage_id === values.storage_id);
@@ -77,17 +121,20 @@ function Inventaris() {
     let dataInventory = new Date().toLocaleString('es-ES');
 
     let newInventory = {
-      date: dataInventory,
+      //date: dataInventory,
       created_by: 1,
-      inventory_status: "Pendent",
+      inventory_status: 1,
       storage_id: values.storage_id
     }
 
-    let inventoryUploaded = await postData(url, "Inventory", newInventory);
+
+    // = await postData(url, "Inventory", newInventory);
+    axios.post(`${apiURL}inventory`,newInventory, {headers: {"auth-token": localStorage.getItem('token')}})
+      .catch(e => {console.log(e.response.data)})
 
     filteredSpaces.map(space => {
       let newInventoryLine = {
-        inventory_id: inventoryUploaded.id,
+        inventory_id: newInventory.id,
         product_id: space.product_id,
         quantity_estimated: space.quantity,
         storage_id: space.storage_id,
@@ -95,9 +142,18 @@ function Inventaris() {
         selft_id: space.selft_id,
         space_id: space.id
       }
-      console.log(newInventoryLine)
-      postData(url, "InventoryLine", newInventoryLine)
+      console.log('new inventory line: '+ newInventoryLine)
+      //postData(url, "InventoryLine", newInventoryLine)
+      axios.post(`${apiURL}inventoryline`, newInventoryLine, {headers: {"auth-token": localStorage.getItem('token')}})
     });
+    //const data = await getData(url, "Inventory")
+    //setInventory(data)
+    axios.get(`${apiURL}inventory`, {headers: {"auth-token": localStorage.getItem('token')}})
+      .then(response => {
+        setInventory(response.data);
+        
+      })
+      .catch(e => {console.log(e)})
   }
 
   /************* ELIMINAR INVENTARIO ***************/
@@ -109,14 +165,14 @@ function Inventaris() {
     }
   }
 
-  const displayInventoryModal = (values) => {
+  /*const displayInventoryModal = (values) => {
     setSelectedInventory(values);
     console.log(values.id)
     // const filteredInventoryLines = inventoryLines.filter(line => line.inventory_id === values.id);
     // setInventoryLines(filteredInventoryLines);
 
     changeModalStatus();
-  }
+  }*/
 
   //********* MODAL *********
   const [show, setShow] = useState(false);
@@ -231,16 +287,16 @@ function Inventaris() {
                             <input type="checkbox" className='form-check-input' name="" id="" />
                           </td>
                           <td>{values.id}</td>
-                          <td>{values.date}</td>
+                          <td>{values.created_at}</td>
                           <td>{values.inventory_status}</td>
                           <td>{(storages.find(storage => storage.id === values.storage_id)).name}</td>
                           <td>
                             {
                               (values.inventory_status === 'Pendent') ?
-                              <a href={`/inventaris/inventariar/${values.id}`}>Inventariar</a>
+                              <a href={`/inventaris/inventariar/${values.id}`} className='text-decoration-none text-orange cursor-pointer'>Inventariar</a>
                                :
                                 (values.inventory_status === 'Fent-se') ?
-                                  <a  href={`/inventaris/completarInventari/${values.id}`}>Completar</a> :
+                                  <a  href={`/inventaris/completarInventari/${values.id}`} className='text-decoration-none text-orange cursor-pointer'>Completar</a> :
                                   ""
                             }
                           </td>
