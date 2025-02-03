@@ -25,7 +25,7 @@ const carrierschema = Yup.object().shape({
   cp: Yup.string().matches(/^\d{5}$/, 'El codi postal ha de tenir 5 dígits').required('Valor requerit'),
 });
 
-function carrier() {
+function Transportista() {
   const [carriers, setCarriers] = useState([]);
   const [pais, setPais] = useState([]);
   const [provincia, setProvince] = useState([]);
@@ -143,7 +143,7 @@ function carrier() {
                   province: '',
                   city: '',
                   cp: '',
-                }); // Limpiar el formulario al crear
+                });
               }}
             >
               <i class="bi bi-plus-circle text-white pe-1"></i>Crear
@@ -169,7 +169,7 @@ function carrier() {
           <tbody>
             {carriers.length === 0 ? (
               <tr>
-                <td colSpan="13">No hi han carrier</td>
+                <td colSpan="13">No hi han transportistes</td>
               </tr>
             ) : (
               carriers.map((valors) => (
@@ -455,4 +455,4 @@ function carrier() {
   );
 }
 
-export default carrier;
+export default Transportista;
