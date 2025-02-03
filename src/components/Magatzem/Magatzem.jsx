@@ -15,7 +15,7 @@ const StorageSchema = Yup.object().shape({
 });
 
 function Storage() {
-  const [storages, setStorage] = useState([]);
+  const [storages, setStorages] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Crear");
   const [valorsInicials, setValorsInicials] = useState({ name: '', type: '', address: '' });
@@ -23,10 +23,10 @@ function Storage() {
 
   useEffect(() => {
     axios.get(`${apiUrl}/storage`, {
-      headers: { "auth-token": localStorage.getItem("token") } 
+      headers: { "auth-token": localStorage.getItem("token") }
     })
       .then(response => {
-        setStorage(response.data);  
+        setStorages(response.data);
       })
       .catch(error => {
         console.log('Error fetching data:', error);
@@ -38,7 +38,7 @@ function Storage() {
       await axios.delete(`${apiUrl}/storage/${id}`, {
         headers: { "auth-token": localStorage.getItem("token") }
       });
-      setStorage(storages.filter(item => item.id !== id));  
+      setStorages(storages.filter(item => item.id !== id));
     } catch (e) {
       console.log('Error deleting storage:', e);
     }
@@ -111,7 +111,7 @@ function Storage() {
                   });
                 }
                 setShowModal(false);
-                window.location.reload();  
+                window.location.reload();
               } catch (e) {
                 console.log('Error on submit:', e);
               }
