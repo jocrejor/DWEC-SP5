@@ -13,7 +13,6 @@ function Inventariar() {
   const navigate = useNavigate();
   const apiURL = import.meta.env.VITE_API_URL;
 
-  const [inventory, setInventory] = useState([]);
   const [storages, setStorages] = useState([]);
   const [selectedInventory, setSelectedInventory] = useState(null);
   const [inventoryLines, setInventoryLines] = useState([]);
@@ -21,37 +20,45 @@ function Inventariar() {
   const [selectedInventoryLines, setSelectedInventoryLines] = useState([]);
   const [updatedInventoryLines, setUpdatedInventoryLines] = useState([]);
   const [inventoryStatus, setInventoryStatus] = useState([]);
+  const [inventoryReasons, setInventoryReasons] = useState([]);
+  const [inputLocked, setInputLocked] = useState(false)
 
 
   useEffect(() => {
 
-      axios.get(`${apiURL}inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setSelectedInventory(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventoryStatus(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventoryLines(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}storage`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}storage`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setStorages(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}product`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}product`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setProducts(response.data);
+      })
+      .catch(e => { console.log(e.response.data) })
+
+    axios.get(`${apiURL}inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
+      .then(response => {
+        setInventoryReasons(response.data);
       })
       .catch(e => { console.log(e.response.data) })
   }, []);
@@ -61,7 +68,7 @@ function Inventariar() {
     if (selectedInventory) {
       const filteredInventoryLines = inventoryLines.filter(line =>
         line.inventory_id === selectedInventory.id &&
-        line.quantity_estimated != line.real_quantity &&
+        line.quantity_estimated != line.quantity_real &&
         products.some((product) => product.id === line.product_id));
 
       const orderedInventoryLines = filteredInventoryLines.sort((a, b) => {
@@ -97,7 +104,7 @@ function Inventariar() {
     const { name, value, type } = e.target;
     const lineId = name;
     const newValue = value;
-    const field = type === 'number' ? 'real_quantity' : 'justification';
+    const field = type === 'number' ? 'quantity_real' : 'justification';
 
     console.log(field + ' - ' + value + ' - ' + type)
     console.log(field)
@@ -121,25 +128,41 @@ function Inventariar() {
 
   }
 
-  const handleSubmit = () => {
-    if (updatedInventoryLines != selectedInventory) {
+  const handleSubmit = async () => {
+    if (updatedInventoryLines.length != selectedInventoryLines.length) {
+      console.log(updatedInventoryLines.length + " - " + selectedInventory.length)
       alert("Introdueix totes les quantitats reals");
+    } else if (updatedInventoryLines === null){
+      alert("No hi ha res a inventariar");
     } else {
       const updatedLines = selectedInventoryLines.map(async (line) => {
         const updatedLine = updatedInventoryLines.find((updated) => updated.id === line.id);
 
         if (updatedLine) {
-          line = { ...line, real_quantity: updatedLine?.real_quantity, justification: updatedLine?.justification };
-          //await updateId(url, "InventoryLine", line.id, line);
+          line = { ...line, quantity_real: updatedLine?.quantity_real, justification: updatedLine?.justification };
+          
+          await axios.put(`${apiURL}inventoryline/${line.id}`, line, { headers: { "auth-token": localStorage.getItem('token') } })
+            
+          
+            
+      
           return line;
         }
         return line;
       })
 
+      const updatedSelectedInventory = {...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Fent-se').id}
+      console.log(updatedSelectedInventory)
+
+      await axios.put(`${apiURL}inventory/${selectedInventory.id}`, updatedSelectedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+
       setSelectedInventoryLines(updatedLines);
+      setSelectedInventory(updatedSelectedInventory);
+      setInputLocked(true);
+
+      alert("Linia actualitzada amb èxit");
+      navigate('/inventaris');
     }
-    //console.log(updatedLines);
-    //console.log(selectedInventoryLines)
 
   }
 
@@ -163,8 +186,8 @@ function Inventariar() {
                 <tr>
                   <td>{selectedInventory?.id}</td>
                   <td>{selectedInventory?.created_at}</td>
-                  <td>{(inventoryStatus.find(inventory => inventory.id === selectedInventory.inventory_status))?.name}</td>
-                  <td>{(storages.find(storage => storage.id === selectedInventory.storage_id))?.name}</td>
+                  <td>{(inventoryStatus.find(inventory => inventory.id === selectedInventory?.inventory_status))?.name}</td>
+                  <td>{(storages.find(storage => storage.id === selectedInventory?.storage_id))?.name}</td>
                 </tr>
               </tbody>
             </Table>
@@ -197,8 +220,9 @@ function Inventariar() {
                               step="1"
                               placeholder='0'
                               className='form-control'
-                              value={value.real_quantity}
+                              value={value.quantity_real}
                               onChange={handleInputChange}
+                              disabled={inputLocked}
                             />
                           </td>
                           <td>
@@ -209,12 +233,11 @@ function Inventariar() {
                               value={value.justification}
                             >
                               <option>Selecciona una opció</option>
-                              <option value="Defectuós">Defectuós</option>
-                              <option value="Trencat">Trencat</option>
-                              <option value="Robatori">Robatori</option>
-                              <option value="Desaparegut">Desaparegut</option>
-                              <option value="Error administratiu">Error administratiu</option>
-                              <option value="Recompte cíclic">Recompte cíclic</option>
+                              {inventoryReasons.map((reason) => {
+                                return (
+                                  <option value={reason.id} id={reason.id}>{reason.name}</option>
+                                )
+                              })}
                             </select>
                           </td>
                         </tr>)

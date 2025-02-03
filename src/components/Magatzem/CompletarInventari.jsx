@@ -1,31 +1,19 @@
 import React from 'react'
-
-function CompletarInventari() {
-  return (
-    <div>CompletarInventari</div>
-  )
-}
-
-export default CompletarInventari
-
-/*import React from 'react'
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-
-import { Row, Col, Modal, Table, Button, Tab } from 'react-bootstrap/'
+import { Row, Col, Table, Button, Tab } from 'react-bootstrap/'
 import Header from '../Header'
-
+import axios from 'axios';
 
 
 
 
 function CompletarInventari() {
-
   const { id } = useParams();
   const navigate = useNavigate();
+  const apiURL = import.meta.env.VITE_API_URL;
 
-  const [inventory, setInventory] = useState([]);
   const [storages, setStorages] = useState([]);
   const [selectedInventory, setSelectedInventory] = useState(null);
   const [inventoryLines, setInventoryLines] = useState([]);
@@ -33,24 +21,53 @@ function CompletarInventari() {
   const [spaces, setSpaces] = useState([]);
   const [selectedInventoryLines, setSelectedInventoryLines] = useState([]);
   const [updatedInventoryLines, setUpdatedInventoryLines] = useState([]);
+  const [inventoryStatus, setInventoryStatus] = useState([]);
+  const [inventoryReasons, setInventoryReasons] = useState([]);
 
 
   useEffect(() => {
     const fetchData = async () => {
-      const stock = await getData(url, "Inventory");
-      const store = await getData(url, "Storage");
-      const lines = await getData(url, "InventoryLine");
-      const prod = await getData(url, "Product");
-      const places = await getData(url, "Space");
+      axios.get(`${apiURL}inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
+        .then(response => {
+          setSelectedInventory(response.data);
+        })
+        .catch(e => { console.log(e.response.data) })
 
-      setInventory(stock);
-      setStorages(store);
-      setInventoryLines(lines);
-      setProducts(prod);
-      setSpaces(places);
+      axios.get(`${apiURL}inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
+        .then(response => {
+          setInventoryStatus(response.data);
+        })
+        .catch(e => { console.log(e.response.data) })
 
-      const inventoryData = stock.find(inventory => inventory.id === id);
-      setSelectedInventory(inventoryData);
+      axios.get(`${apiURL}inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
+        .then(response => {
+          setInventoryLines(response.data);
+        })
+        .catch(e => { console.log(e.response.data) })
+
+      axios.get(`${apiURL}storage`, { headers: { "auth-token": localStorage.getItem('token') } })
+        .then(response => {
+          setStorages(response.data);
+        })
+        .catch(e => { console.log(e.response.data) })
+
+      axios.get(`${apiURL}product`, { headers: { "auth-token": localStorage.getItem('token') } })
+        .then(response => {
+          setProducts(response.data);
+        })
+        .catch(e => { console.log(e.response.data) })
+
+      axios.get(`${apiURL}space`, { headers: { "auth-token": localStorage.getItem('token') } })
+        .then(response => {
+          setSpaces(response.data);
+        })
+        .catch(e => { console.log(e.response.data) })
+
+      axios.get(`${apiURL}inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
+        .then(response => {
+          setInventoryReasons(response.data);
+        })
+        .catch(e => { console.log(e.response.data) })
     }
 
     fetchData();
@@ -86,14 +103,14 @@ function CompletarInventari() {
 
 
   useEffect(() => {
-      console.log(updatedInventoryLines)
-      console.log(selectedInventoryLines)
-   
-    }, [updatedInventoryLines, selectedInventoryLines])
+    console.log(updatedInventoryLines)
+    console.log(selectedInventoryLines)
+
+  }, [updatedInventoryLines, selectedInventoryLines])
 
 
-  const handleInputChange = (e)=>{
-    const {name, value} = e.target;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
     const lineId = name;
     const field = 'justification';
     console.log(value)
@@ -101,13 +118,13 @@ function CompletarInventari() {
     setUpdatedInventoryLines((prev) => {
       const index = prev.findIndex((line) => line.id === lineId);
 
-      if(index != -1){
+      if (index != -1) {
         const updatedLines = [...prev];
-        updatedLines[index] = {...updatedLines[index], [field]: value};
+        updatedLines[index] = { ...updatedLines[index], [field]: value };
         return updatedLines;
       }
       return [
-        ...prev, {id: lineId, [field]: value}
+        ...prev, { id: lineId, [field]: value }
       ]
     })
   }
@@ -117,8 +134,8 @@ function CompletarInventari() {
     const updatedLines = selectedInventoryLines.map(async (line) => {
       const updatedLine = updatedInventoryLines.find((updated) => updated.id === line.id);
 
-      if(updatedLine){
-        line ={...line, justification:updatedLine?.justification}
+      if (updatedLine) {
+        line = { ...line, justification: updatedLine?.justification }
         console.log(line)
         //await updateId(url, "InventoryLine", line.id, line);
         return line;
@@ -131,18 +148,20 @@ function CompletarInventari() {
     selectedInventoryLines.map(async (line) => {
       const space = spaces.find((space) => space.id === line.space_id);
       const updatedQuantity = space.quantity - line.real_quantity;
-      console.log(space.id + ' : product-id: '+ line.product_id + ' - '+ space.quantity + ' - ' + line.real_quantity + ' = ' + updatedQuantity)
+      console.log(space.id + ' : product-id: ' + line.product_id + ' - ' + space.quantity + ' - ' + line.real_quantity + ' = ' + updatedQuantity)
 
-      if(space){
-        const updatedSpace = {...space, quantity: updatedQuantity || space.quantity}
+      if (space) {
+        const updatedSpace = { ...space, quantity: updatedQuantity || space.quantity }
         console.log(updatedSpace);
-        await updateId(url, 'Space', space.id, updatedSpace)
+        //await updateId(url, 'Space', space.id, updatedSpace)
+        axios.put(`${apiURL}space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
       };
     })
 
-    const updatedInvetory = {...selectedInventory, inventory_status: 'Completat'}
-    console.log(updatedInvetory)
-    await updateId(url, 'Inventory', selectedInventory.id, updatedInvetory);
+    const updatedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Completat').id }
+    
+    //await updateId(url, 'Inventory', selectedInventory.id, updatedInvetory);
+    axios.put(`${apiURL}inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
     alert('Inventari completat amb èxit');
     navigate('/inventaris');
@@ -167,9 +186,9 @@ function CompletarInventari() {
               <tbody>
                 <tr>
                   <td>{selectedInventory?.id}</td>
-                  <td>{selectedInventory?.date}</td>
+                  <td>{selectedInventory?.created_at}</td>
                   <td>{selectedInventory?.inventory_status}</td>
-                  <td>{(storages.find(storage => storage.id === selectedInventory.storage_id))?.name}</td>
+                  <td>{(storages.find(storage => storage.id === selectedInventory?.storage_id))?.name}</td>
                 </tr>
               </tbody>
             </Table>
@@ -202,12 +221,11 @@ function CompletarInventari() {
                               value={value.justification}
                             >
                               <option>Selecciona una opció</option>
-                              <option value="Defectuós">Defectuós</option>
-                              <option value="Trencat">Trencat</option>
-                              <option value="Robatori">Robatori</option>
-                              <option value="Desaparegut">Desaparegut</option>
-                              <option value="Error administratiu">Error administratiu</option>
-                              <option value="Recompte cíclic" selected>Recompte cíclic</option>
+                              {inventoryReasons.map((reason) => {
+                                return (
+                                  <option value={reason.id} id={reason.id}>{reason.name}</option>
+                                )
+                              })}
                             </select>
 
                           </td>
@@ -227,4 +245,4 @@ function CompletarInventari() {
   )
 }
 
-export default CompletarInventari*/
+export default CompletarInventari

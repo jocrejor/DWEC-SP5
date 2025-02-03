@@ -16,6 +16,8 @@ const InventorySchema = Yup.object().shape({
 function Inventaris() {
   const apiURL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user'));
+
 
   const [inventory, setInventory] = useState([]);
   const [storages, setStorages] = useState([]);
@@ -29,9 +31,8 @@ function Inventaris() {
   const [products, setProducts] = useState([]);
   const [selectedInventoryLines, setSelectedInventoryLines] = useState([]);
   const [inventoryStatus, setInventoryStatus] = useState([]);
-
-
-
+  const [inputLocked, setInputLocked] = useState(false)
+  
 
   useEffect(() => {
     axios.get(`${apiURL}inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
@@ -92,30 +93,39 @@ function Inventaris() {
   useEffect(() => {
     if (selectedInventory) {
       const filteredInventoryLines = inventoryLines.filter(line => line.inventory_id === selectedInventory.id);
+      const orderedInventoryLines = filteredInventoryLines.sort((a,b) => {
+        if(a.street_id < b.street_id) return -1;
+        if(a.street_id > b.street_id) return 1;
+
+        if(a.selft < b.selft_id) return -1;
+        if(a.selft_id > b.selft_id) return 1;
+
+        if(a.space_id < b.space_id) return -1;
+        if(a.space_id > b.space_id) return 1;
+
+        return 0;
+
+      })
       setSelectedInventoryLines(filteredInventoryLines);
     } else {
       setSelectedInventoryLines([]);
     }
   }, [selectedInventory])
   /**************** CREAR INVENTARIO ****************/
-  const createInventory = (values) => {
+  const createInventory = async (values) => {
     let filteredSpaces;
     if (!values.street_id) {
       filteredSpaces = spaces.filter(space => space.storage_id === values.storage_id);
     } else {
       filteredSpaces = spaces.filter(space => space.storage_id === values.street_id)
     };
-
-    //let dataInventory = new Date().toLocaleString('es-ES');
-
+    
     let newInventory = {
       created_by: 1,
       inventory_status: 1,
       storage_id: values.storage_id
     }
 
-
-    // = await postData(url, "Inventory", newInventory);
     axios.post(`${apiURL}inventory`, newInventory, { headers: { "auth-token": localStorage.getItem('token') } })
       .catch(e => { console.log(e.response.data) })
 
@@ -129,13 +139,14 @@ function Inventaris() {
         selft_id: space.selft_id,
         space_id: space.id
       }
-      console.log('new inventory line: ' + newInventoryLine)
       axios.post(`${apiURL}inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
     });
   
-    axios.get(`${apiURL}inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
+    await axios.get(`${apiURL}inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
-        setInventory(response);
+        console.log(response)
+        console.log(response.data)
+        setInventory(response.data);
 
       })
       .catch(e => { console.log(e) })
@@ -145,10 +156,13 @@ function Inventaris() {
   const deleteInventory = (id) => {
     if (confirm("¿Estàs segur de que vols esborrar aquest inventari?")) {
       axios.delete(`${apiURL}inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
+
+      axios.get(`${apiURL}inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
-        setInventory(response);
+        setInventory(response.data);
 
       })
+      .catch(e => { console.log(e) })
     }
   }
 
@@ -171,7 +185,8 @@ function Inventaris() {
       <Row>
         <Col>
           <div className='px-3 pt-3'>
-            <Button variant='secondary' className='mb-3 btn btn-success' onClick={handleShow}>Crear</Button>
+            {(user.name === 'Admin') ? 
+              <Button variant='secondary' className='mb-3 btn btn-success' onClick={handleShow}>Crear</Button> : null}
 
             <Modal show={show} onHide={handleClose} animation={true} >
               <Modal.Header closeButton>
@@ -267,13 +282,13 @@ function Inventaris() {
                           <td>{values.id}</td>
                           <td>{values.created_at}</td>
                           <td>{(inventoryStatus.find(inventory => inventory.id === values.inventory_status))?.name}</td>
-                          <td>{(storages.find(storage => storage.id === values.storage_id)).name}</td>
+                          <td>{(storages.find(storage => storage.id === values.storage_id))?.name}</td>
                           <td>
                             {
-                              (values.inventory_status === 1) ?
+                              (values.inventory_status === inventoryStatus.find(status => status.name === 'Pendent')?.id) ?
                                 <Button onClick={() => navigate(`/inventaris/inventariar/${values.id}`)} variant="outline-primary">Inventariar</Button>
                                 :
-                                (values.inventory_status === 2) ?
+                                (values.inventory_status === inventoryStatus.find(status => status.name === 'Fent-se')?.id) && (user.name === 'Admin') ?
                                   <Button onClick={() => navigate(`/inventaris/completarInventari/${values.id}`)} variant="outline-warning">Completar</Button> :
                                   ""
                             }
@@ -312,7 +327,7 @@ function Inventaris() {
                         <tr>
                           <td>{selectedInventory.id}</td>
                           <td>{selectedInventory.created_at}</td>
-                          <td>{selectedInventory.inventory_status}</td>
+                          <td>{inventoryStatus.find(status => status.id === selectedInventory.inventory_status)?.name}</td>
                           <td>{(storages.find(storage => storage.id === selectedInventory.storage_id))?.name}</td>
                         </tr>
                       </tbody>
@@ -344,7 +359,7 @@ function Inventaris() {
                                       <td>{value.space_id}</td>
                                       <td>{(products.find(product => product.id === value.product_id))?.name}</td>
                                       <td>{value.quantity_estimated}</td>
-                                      <td>{value.real_quantity}</td>
+                                      <td>{value.quantity_real}</td>
                                     </tr>)
                                 })
                             }
