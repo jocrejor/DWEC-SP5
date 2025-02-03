@@ -49,7 +49,10 @@ function IncidenciesResoldre() {
         const token = localStorage.getItem("token")
         
         axios.get(`${apiURL}/product`, {headers: {"auth-token" : token}})
-            .then(response => setProducts(response.data))
+            .then(response => {
+                setProducts(response.data),
+                console.log("Productos obtenidos:", response.data)
+            })
             .catch(error => console.log(error))
     }
 
@@ -99,8 +102,8 @@ function IncidenciesResoldre() {
     };
 
     useEffect(() => {
-        getDataIncident();
         getDataProduct();
+        getDataIncident();
         getDataOrderLineStatus();
     },  []);
 
@@ -116,7 +119,7 @@ function IncidenciesResoldre() {
     const getProductName = (productId) => {
         const product = products.find(p => p.id === productId);
         return product ? product.name : "Producte desconegut";
-    }
+    }; 
 
     const getStatusName = (statusId) => {
         const status = orderlineStatus.find(s => s.id === statusId);
@@ -141,21 +144,28 @@ function IncidenciesResoldre() {
             <tbody>
                 {incidents.length === 0 ? (
                     <tr>
-                        <td colSpan="8" className="text-center">No hi han articles</td> 
+                        <td colSpan="6" className="text-center">No hi ha incidències</td>
                     </tr>
-                ) : incidents.map((valors) => (
-                    <tr key={valors.id}>
-                        <td>{valors.created_at}</td>
-                        <td>{valors.description}</td>
-                        <td>{getProductName(valors.product)}</td>
-                        <td>{valors.quantity_ordered}</td>
-                        <td>{valors.quantity_received}</td>          
-                        <td>{getStatusName(valors.status)}</td>
-                        <td><Button variant="outline-success"><i className="bi bi-eye p-2"></i></Button></td> {/*Así anira el visualitza*/}
-                        <td><Button variant="outline-success" onClick={()   => { modificarIncident(valors); canviEstatModal(); }}><i className="bi bi-pencil-square p-2"></i></Button></td>
-                        <td><Button variant="outline-danger" onClick={()    => { deleteIncident(valors.id) }}><i className='bi bi-trash p-2'></i></Button></td>
-                    </tr>
-                ))}
+                ) : (
+                    incidents.map((valors) => {
+                        console.log("Iterando incidente:", valors); // Ver qué llega a la tabla
+
+                        return (
+                            <tr key={valors.id}>
+                                <td>{valors.created_at}</td>
+                                <td>ffff</td> {/* Esto debería mostrarse siempre */}
+                                <td>{valors.description}</td>
+                                <td>{getProductName(valors.product)}</td>
+                                <td>{valors.quantity_ordered}</td>
+                                <td>{valors.quantity_received}</td>          
+                                <td>{getStatusName(valors.status)}</td>
+                                <td><Button variant="outline-success"><i className="bi bi-eye p-2"></i></Button></td>
+                                <td><Button variant="outline-success" onClick={()   => { modificarIncident(valors); canviEstatModal(); }}><i className="bi bi-pencil-square p-2"></i></Button></td>
+                                <td><Button variant="outline-danger" onClick={()    => { deleteIncident(valors.id) }}><i className='bi bi-trash p-2'></i></Button></td>
+                            </tr>
+                        );
+                    })
+                )}
             </tbody>
         </table>
 
