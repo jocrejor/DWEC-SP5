@@ -20,8 +20,8 @@ export default function Incidencies() {
         
         <Outlet/>
         <Routes>
-          <Route path="incidenciesGenerar" element={<IncidenciesGenerar />} />
-          <Route path="incidenciesResoldre" element={<IncidenciesResoldre />} />
+          <Route path="incidenciesGenerar" element={<IncidenciesGenerar />}/>
+          <Route path="incidenciesResoldre" element={<IncidenciesResoldre />}/>
         </Routes>
     </>
   )

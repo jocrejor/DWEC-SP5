@@ -1,7 +1,6 @@
 import { useState, useEffect }                          from 'react'
 import { Formik, Form, Field }                          from 'formik'
 import * as Yup                                         from 'yup'
-import { deleteData }                    from '../../apiAccess/crud'
 import { Button, Modal }                                from 'react-bootstrap';
 import Header                                           from '../Header'
 import axios                                            from 'axios'
@@ -85,220 +84,232 @@ function IncidenciesResoldre() {
             .catch(error => console.log(error));
     }
 
+    const deleteIncident = (id) => {
+        const apiURL = import.meta.env.VITE_API_URL;
+        const token = localStorage.getItem("token");
+    
+        axios.delete(`${apiURL}/incident/${id}`, {
+            headers: { "auth-token": token }
+        })
+        .then(() => {
+            // Filtrar incidencia eliminada y actualitzar l'estat
+            setIncident(prevIncidents => prevIncidents.filter(item => item.id !== id));
+        })
+        .catch(error => console.error("Error al eliminar la incidencia:", error));
+    };
+
     useEffect(() => {
         getDataIncident();
         getDataProduct();
         getDataOrderLineStatus();
     },  []);
 
-const eliminarIncident = (id) => {
-    deleteData(url, "Incident", id) 
-    const newIncident = incidents.filter(item => item.id != id)
-    setIncident(newIncident)
-}
+    const modificarIncident = (valors) => {
+        setTipoModal("Modificar")
+        setValorsInicials(valors);
+    }
 
-const modificarIncident = (valors) => {
-    setTipoModal("Modificar")
-    setValorsInicials(valors);
-}
+    const canviEstatModal = () => {
+        setShowModal(!showModal)
+    }
 
-const canviEstatModal = () => {
-    setShowModal(!showModal)
-}
+    const getProductName = (productId) => {
+        const product = products.find(p => p.id === productId);
+        return product ? product.name : "Producte desconegut";
+    }
 
-const getProductName = (productId) => {
-    const product = products.find(p => p.id === productId);
-    return product ? product.name : "Producte desconegut";
-}
+    const getStatusName = (statusId) => {
+        const status = orderlineStatus.find(s => s.id === statusId);
+        return status ? status.name : "Estat desconegut";
+    }
 
-const getStatusName = (statusId) => {
-    const status = orderlineStatus.find(s => s.id === statusId);
-    return status ? status.name : "Estat desconegut";
-}
-
-  return (
-    <>
-    <Header title="Incidències"/>
-    <Button variant='success' onClick={()=>{canviEstatModal(); setTipoModal("Crear")}}>Llistat ordres de recepció</Button>
+    return (
+        <>
+        <Header title="Incidències"/>
+        <Button variant='success' onClick={()=>{canviEstatModal(); setTipoModal("Crear")}}>Llistat ordres de recepció</Button>
         <table>
-            <tr>
-                <th>Data de creació</th>
-                <th>Descripció</th>
-                <th>Producte</th>
-                <th>Unitats demanades</th>
-                <th>Unitats rebudes</th>
-                <th>Estat</th>
-                <th>Modificar</th>
-                <th>Eliminar</th>
-            </tr>
-            {(incidents.length == 0)?
-            <div>No hi han articles</div>
-            :incidents.map((valors) => {
-            return (
-            <tr key={valors.id}>
-                <td>{valors.created_at}</td>
-                <td>{valors.description}</td>
-                <td>{getProductName(valors.product)}</td>
-                <td>{valors.quantity_ordered}</td>
-                <td>{valors.quantity_received}</td>          
-                <td>{getStatusName(valors.status)}</td>
-                <td><Button variant="warning"  onClick={()=> {modificarIncident(valors);canviEstatModal(); }}>Modificar</Button></td>
-                <td><Button variant="primary"  onClick={()=> {eliminarIncident(valors.id)}}>Eliminar</Button></td>
-            </tr>)
-            })}
+            <thead>
+                <tr>
+                    <th>Data de creació</th>
+                    <th>Descripció</th>
+                    <th>Producte</th>
+                    <th>Unitats demanades</th>
+                    <th>Unitats rebudes</th>
+                    <th>Estat</th>
+                    <th>Modificar</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {incidents.length === 0 ? (
+                    <tr>
+                        <td colSpan="8">No hi han articles</td> 
+                    </tr>
+                ) : incidents.map((valors) => (
+                    <tr key={valors.id}>
+                        <td>{valors.created_at}</td>
+                        <td>{valors.description}</td>
+                        <td>{getProductName(valors.product)}</td>
+                        <td>{valors.quantity_ordered}</td>
+                        <td>{valors.quantity_received}</td>          
+                        <td>{getStatusName(valors.status)}</td>
+                        <td><Button variant="warning" onClick={() => { modificarIncident(valors); canviEstatModal(); }}>Modificar</Button></td>
+                        <td><Button variant="primary" onClick={() => { deleteIncident(valors.id) }}>Eliminar</Button></td>
+                    </tr>
+                ))}
+            </tbody>
         </table>
 
-      <Modal show={showModal} onHide={canviEstatModal}>
-        <Modal.Header closeButton >
-          <Modal.Title>{tipoModal} Incidència</Modal.Title>
-        </Modal.Header>
+            <Modal show={showModal} onHide={canviEstatModal}>
+                <Modal.Header closeButton >
+                    <Modal.Title>{tipoModal} Incidència</Modal.Title>
+                </Modal.Header>
+            <Modal.Body>
+            
+            <Formik
+                initialValues= {(tipoModal==='Modificar'?valorsInicials: {product: '', quantity_received: '', description: '', supplier: '', operator: '', quantity_ordered: '', created_at: '', orderReception_id: '', })}
+                validationSchema={IncidenciaSchema}
+                onSubmit={values => {
+                    console.log(values)
+                    //(Utilitza la API del crud anterior) tipoModal==="Crear"?postData(url,"Incident", values):updateId(url,"Incident",values.id,values)
+                    tipoModal==="Crear"?postDataIncident(values):updateDataIncident(values.id, values)
+                    canviEstatModal()         
+                }}
+            >
+            {({
+                values,
+                errors,
+                touched
+                /* and other goodies */
+            }) => (
+            <Form>
+                {/*ID Ordre de Recepció*/}
+                <div>
+                    <label htmlFor='id_ordre_recepcio'>ID Ordre de Recepció</label>
+                    <Field
+                        type="text" 
+                        name="id_ordre_recepcio"
+                        placeholder="ID ordre de recepció"
+                        autoComplete="off"
+                        disabled
 
-        <Modal.Body>
-          
-      <Formik
-            initialValues= {(tipoModal==='Modificar'?valorsInicials: {product: '', quantity_received: '', description: '', supplier: '', operator: '', quantity_ordered: '', created_at: '', orderReception_id: '', })}
-            validationSchema={IncidenciaSchema}
-            onSubmit={values => {
-                console.log(values)
-                //(Utilitza la API del crud anterior) tipoModal==="Crear"?postData(url,"Incident", values):updateId(url,"Incident",values.id,values)
-                tipoModal==="Crear"?postDataIncident(values):updateDataIncident(values.id, values)
-                canviEstatModal()         
-            }}
-      >
-        {({
-            values,
-            errors,
-            touched
-            /* and other goodies */
-        }) => (
-          <Form>
-            {/*ID Ordre de Recepció*/}
-            <div>
-                <label htmlFor='id_ordre_recepcio'>ID Ordre de Recepció</label>
-                <Field
-                    type="text" 
-                    name="id_ordre_recepcio"
-                    placeholder="ID ordre de recepció"
-                    autoComplete="off"
-                    disabled
+                        value={values.orderReception_id}
+                    />
+                    {errors.orderReception_id && touched.orderReception_id ? <div>{errors.orderReception_id}</div> : null}
+                </div>
+                {/*Data creació*/}
+                <div>
+                    <label htmlFor='created_at'>Data creació</label>
+                    <Field
+                        type="date" 
+                        name="created_at"
+                        placeholder="Data de creació"
+                        autoComplete="off"
+                        disabled={tipoModal === "Modificar"}
 
-                    value={values.orderReception_id}
-                />
-                {errors.orderReception_id && touched.orderReception_id ? <div>{errors.orderReception_id}</div> : null}
-            </div>
-            {/*Data creació*/}
-            <div>
-                <label htmlFor='created_at'>Data creació</label>
-                <Field
-                    type="date" 
-                    name="created_at"
-                    placeholder="Data de creació"
-                    autoComplete="off"
-                    disabled={tipoModal === "Modificar"}
+                        value={values.created_at}
+                    />
+                    {errors.created_at && touched.created_at ? <div>{errors.created_at}</div> : null}
+                </div>
+                {/*Producte*/}
+                <div>
+                    <label htmlFor='product'>Producte</label>
+                    <Field
+                        type="text" 
+                        name="product"
+                        placeholder="Nom del producte"
+                        autoComplete="off"
+                        disabled={tipoModal === "Modificar"}
 
-                    value={values.created_at}
-                />
-                {errors.created_at && touched.created_at ? <div>{errors.created_at}</div> : null}
-            </div>
-            {/*Producte*/}
-            <div>
-                <label htmlFor='product'>Producte</label>
-                <Field
-                    type="text" 
-                    name="product"
-                    placeholder="Nom del producte"
-                    autoComplete="off"
-                    disabled={tipoModal === "Modificar"}
+                        value={tipoModal === "Modificar" ? getProductName(values.product) : values.product}
+                    />
+                    {/*{errors.getProductName(values.product) && touched.getProductName(values.product) ? <div>{errors.getProductName(values.product)}</div> : null}*/}
+                    {errors.product && touched.product ? <div>{errors.product}</div> : null}
+                </div>
+                {/*Proveïdor*/}
+                <div>
+                    <label htmlFor='name'>Proveïdor</label>
+                    <Field
+                        type="text" 
+                        name="supplier"
+                        placeholder="Nom del proveïdor"
+                        autoComplete="off"
+                        disabled={tipoModal === "Modificar"}
 
-                    value={tipoModal === "Modificar" ? getProductName(values.product) : values.product}
-                />
-                {/*{errors.getProductName(values.product) && touched.getProductName(values.product) ? <div>{errors.getProductName(values.product)}</div> : null}*/}
-                {errors.product && touched.product ? <div>{errors.product}</div> : null}
-            </div>
-            {/*Proveïdor*/}
-            <div>
-                <label htmlFor='name'>Proveïdor</label>
-                <Field
-                    type="text" 
-                    name="supplier"
-                    placeholder="Nom del proveïdor"
-                    autoComplete="off"
-                    disabled={tipoModal === "Modificar"}
+                        value={values.supplier}
+                    />
+                    {errors.supplier && touched.supplier ? <div>{errors.supplier}</div> : null}
+                </div>
+                {/*Operari*/}
+                <div>
+                    <label htmlFor='name'>Operari</label>
+                    <Field
+                        type="text" 
+                        name="operator"
+                        placeholder="Operari"
+                        autoComplete="off"
+                        disabled={tipoModal === "Modificar"}
 
-                    value={values.supplier}
-                />
-                {errors.supplier && touched.supplier ? <div>{errors.supplier}</div> : null}
-            </div>
-            {/*Operari*/}
-            <div>
-                <label htmlFor='name'>Operari</label>
-                <Field
-                    type="text" 
-                    name="operator"
-                    placeholder="Operari"
-                    autoComplete="off"
-                    disabled={tipoModal === "Modificar"}
+                        value={values.operator}
+                    />
+                    {errors.operator && touched.operator ? <div>{errors.operator}</div> : null}
+                </div>
+                {/*Quantitat demanada*/}
+                <div>
+                    <label htmlFor='name'>Quantitat demanada</label>
+                    <Field
+                        type="text" 
+                        name="quantity_ordered"
+                        placeholder="Quantiat demanada"
+                        autoComplete="off"
+                        disabled={tipoModal === "Modificar"}
 
-                    value={values.operator}
-                />
-                {errors.operator && touched.operator ? <div>{errors.operator}</div> : null}
-            </div>
-            {/*Quantitat demanada*/}
-            <div>
-                <label htmlFor='name'>Quantitat demanada</label>
-                <Field
-                    type="text" 
-                    name="quantity_ordered"
-                    placeholder="Quantiat demanada"
-                    autoComplete="off"
-                    disabled={tipoModal === "Modificar"}
+                        value={values.quantity_ordered}
+                    />
+                    {errors.quantity_ordered && touched.quantity_ordered ? <div>{errors.quantity_ordered}</div> : null}
+                </div>
+                {/*Quantitat rebuda*/}
+                <div>
+                    <label htmlFor='name'>Quantitat rebuda</label>
+                    <Field
+                        type="text" 
+                        name="quantity_received"
+                        placeholder="Quantitat rebuda"
+                        autoComplete="off"
 
-                    value={values.quantity_ordered}
-                />
-                {errors.quantity_ordered && touched.quantity_ordered ? <div>{errors.quantity_ordered}</div> : null}
-            </div>
-            {/*Quantitat rebuda*/}
-            <div>
-                <label htmlFor='name'>Quantitat rebuda</label>
-                <Field
-                    type="text" 
-                    name="quantity_received"
-                    placeholder="Quantitat rebuda"
-                    autoComplete="off"
+                        value={values.quantity_received}
+                    />
+                    {errors.quantity_received && touched.quantity_received ? <div>{errors.quantity_received}</div> : null}
+                </div>
+                {/*Em senc atacat -- Descripcio*/}
+                <div>
+                    <label htmlFor='description'>Descripció</label>
+                    <Field
+                        as='textarea'
+                        type="text"
+                        name="description"
+                        placeholder="Descripció"
+                        autoComplete="off"
 
-                    value={values.quantity_received}
-                />
-                {errors.quantity_received && touched.quantity_received ? <div>{errors.quantity_received}</div> : null}
-            </div>
-            {/*Em senc atacat -- Descripcio*/}
-            <div>
-                <label htmlFor='description'>Descripció</label>
-                <Field
-                    as='textarea'
-                    type="text"
-                    name="description"
-                    placeholder="Descripció"
-                    autoComplete="off"
+                        value={values.description}
+                    />
+                    {errors.description && touched.description ? <div>{errors.description}</div> : null}
+                </div>
 
-                    value={values.description}
-                />
-                {errors.description && touched.description ? <div>{errors.description}</div> : null}
-            </div>
+                <div>
+                <Button variant="secondary" onClick={canviEstatModal}>Close</Button>
 
-            <div>
-            <Button variant="secondary" onClick={canviEstatModal}>Close</Button>
+                    <Button variant={tipoModal==="Modificar"?"success":"info"} type="submit">{tipoModal}</Button>             
+            
+                </div>
+            </Form>
+            )}
 
-                <Button variant={tipoModal==="Modificar"?"success":"info"} type="submit">{tipoModal}</Button>             
-           
-            </div>
-          </Form>
-        )}
-
-      </Formik>
-       </Modal.Body>
-      </Modal>
-    </>
-  )
+        </Formik>
+        </Modal.Body>
+        </Modal>
+        </>
+    )
 }
 
 export default IncidenciesResoldre
