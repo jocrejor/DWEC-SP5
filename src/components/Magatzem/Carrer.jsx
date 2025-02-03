@@ -18,25 +18,27 @@ function Street() {
     const [showModal, setShowModal] = useState(false);
     const [tipoModal, setTipoModal] = useState("Crear");
     const [valorsInicials, setValorsInicials] = useState({ name: '', storage_id: '' });
+    const [loading, setLoading] = useState(true); // Nueva variable de estado para el estado de carga
     const navigate = useNavigate();
     let { magatzem } = useParams();
 
     useEffect(() => {
-
+        setLoading(true); // Al inicio de la carga
         axios.get(`${apiUrl}/street?storage_id=${magatzem}`, {
             headers: { "auth-token": localStorage.getItem("token") }
         })
             .then(response => {
                 setStreet(response.data);
+                setLoading(false); // Carga finalizada
             })
             .catch(error => {
                 console.log('Error fetching data:', error);
+                setLoading(false); // Carga fallida
             });
     }, [magatzem]);
 
     const eliminarStreet = async (id) => {
         try {
-
             await axios.delete(`${apiUrl}/street/${id}`, {
                 headers: { "auth-token": localStorage.getItem("token") }
             });
@@ -61,34 +63,40 @@ function Street() {
             <Filtres />
             <h1>Magatzem: {magatzem}</h1>
             <Button variant='success' onClick={() => { setShowModal(true); setTipoModal("Crear"); }}>Alta Carrer</Button>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Nom</th>
-                        <th>ID Magatzem</th>
-                        <th>Estanteria</th>
-                        <th>Modificar</th>
-                        <th>Eliminar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {streets.length === 0 ? (
-                        <tr><td>No hi han carrers</td></tr>
-                    ) : (
-                        streets.map((valors) => (
-                            <tr key={valors.id}>
-                                <td>{valors.id}</td>
-                                <td>{valors.name}</td>
-                                <td>{valors.storage_id}</td>
-                                <td><Button onClick={() => handleCarrerClick(valors.id)}>Estanteria</Button></td>
-                                <td><Button variant="warning" onClick={() => modificarStreet(valors)}>Modificar</Button></td>
-                                <td><Button variant="primary" onClick={() => eliminarStreet(valors.id)}>Eliminar</Button></td>
-                            </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
+            
+            {/* Condicional para mostrar un mensaje mientras cargan los datos */}
+            {loading ? (
+                <p>Cargando...</p>
+            ) : (
+                <table className="table table-striped text-center align-middle">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Nom</th>
+                            <th>ID Magatzem</th>
+                            <th>Estanteria</th>
+                            <th>Modificar</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {streets.length === 0 ? (
+                            <tr><td colSpan="6">No hi han carrers</td></tr>
+                        ) : (
+                            streets.map((valors) => (
+                                <tr key={valors.id}>
+                                    <td>{valors.id}</td>
+                                    <td>{valors.name}</td>
+                                    <td>{valors.storage_id}</td>
+                                    <td><Button onClick={() => handleCarrerClick(valors.id)}>Estanteria</Button></td>
+                                    <td><Button variant="warning" onClick={() => modificarStreet(valors)}>Modificar</Button></td>
+                                    <td><Button variant="danger" onClick={() => eliminarStreet(valors.id)}>Eliminar</Button></td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            )}
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
@@ -101,27 +109,21 @@ function Street() {
                         onSubmit={async (values) => {
                             try {
                                 if (tipoModal === "Crear") {
-                                
                                     await axios.post(`${apiUrl}/street`, values, {
                                         headers: { "auth-token": localStorage.getItem("token") }
                                     });
                                 } else {
-                              
                                     await axios.put(`${apiUrl}/street/${values.id}`, values, {
                                         headers: { "auth-token": localStorage.getItem("token") }
                                     });
                                 }
                                 setShowModal(false);
-                                
-                                axios.get(`${apiUrl}/street?storage_id=${magatzem}`, {
+
+                                // Actualizar la lista de calles después de crear o modificar
+                                const response = await axios.get(`${apiUrl}/street?storage_id=${magatzem}`, {
                                     headers: { "auth-token": localStorage.getItem("token") }
-                                })
-                                    .then(response => {
-                                        setStreet(response.data);
-                                    })
-                                    .catch(error => {
-                                        console.log('Error fetching updated data:', error);
-                                    });
+                                });
+                                setStreet(response.data);
                             } catch (e) {
                                 console.log('Error on submit:', e);
                             }
@@ -131,15 +133,15 @@ function Street() {
                             <Form>
                                 <div>
                                     <label htmlFor='name'>Nom</label>
-                                    <Field type="text" name="name" placeholder="Nom del carrer" autoComplete="off" value={values.name} />
-                                    {errors.name && touched.name && <div>{errors.name}</div>}
+                                    <Field type="text" name="name" placeholder="Nom del carrer" autoComplete="off" value={values.name} className="form-control" />
+                                    {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
                                 </div>
                                 <div>
                                     <label htmlFor='storage_id'>ID Magatzem</label>
-                                    <Field type="text" name="storage_id" placeholder="Id del magatzem" autoComplete="off" value={values.storage_id} />
-                                    {errors.storage_id && touched.storage_id && <div>{errors.storage_id}</div>}
+                                    <Field type="text" name="storage_id" placeholder="Id del magatzem" autoComplete="off" value={values.storage_id} className="form-control" />
+                                    {errors.storage_id && touched.storage_id && <div className="text-danger">{errors.storage_id}</div>}
                                 </div>
-                                <Button type="submit">{tipoModal === "Crear" ? "Crear" : "Modificar"}</Button>
+                                <Button type="submit" variant="primary">{tipoModal === "Crear" ? "Crear" : "Modificar"}</Button>
                             </Form>
                         )}
                     </Formik>

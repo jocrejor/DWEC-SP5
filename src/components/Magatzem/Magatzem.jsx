@@ -21,7 +21,6 @@ function Storage() {
   const [valorsInicials, setValorsInicials] = useState({ name: '', type: '', address: '' });
   const navigate = useNavigate();
 
-  
   useEffect(() => {
     axios.get(`${apiUrl}/storage`, {
       headers: { "auth-token": localStorage.getItem("token") } 
@@ -34,7 +33,6 @@ function Storage() {
       });
   }, []); 
 
- 
   const eliminarStorage = async (id) => {
     try {
       await axios.delete(`${apiUrl}/storage/${id}`, {
@@ -52,7 +50,6 @@ function Storage() {
     setShowModal(true);
   };
 
-
   const handleCarrerClick = (id) => {
     navigate(`../carrer/${id}`);
   };
@@ -62,7 +59,8 @@ function Storage() {
       <Filtres />
       <h1> Magatzems</h1>
       <Button variant='success' onClick={() => { setShowModal(true); setTipoModal("Crear"); }}>Alta Magatzem</Button>
-      <table>
+      
+      <table className="table table-striped text-center align-middle">
         <thead>
           <tr>
             <th>Id</th>
@@ -86,14 +84,13 @@ function Storage() {
                 <td>{valors.address}</td>
                 <td><Button onClick={() => handleCarrerClick(valors.id)}>Carrer</Button></td>
                 <td><Button variant="warning" onClick={() => modificarStorage(valors)}>Modificar</Button></td>
-                <td><Button variant="primary" onClick={() => eliminarStorage(valors.id)}>Eliminar</Button></td>
+                <td><Button variant="danger" onClick={() => eliminarStorage(valors.id)}>Eliminar</Button></td>
               </tr>
             ))
           )}
         </tbody>
       </table>
 
-      {}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Magatzem</Modal.Title>
@@ -124,20 +121,41 @@ function Storage() {
               <Form>
                 <div>
                   <label htmlFor='name'>Nom</label>
-                  <Field type="text" name="name" placeholder="Nom del magatzem" autoComplete="off" value={values.name} />
-                  {errors.name && touched.name && <div>{errors.name}</div>}
+                  <Field 
+                    type="text" 
+                    name="name" 
+                    placeholder="Nom del magatzem" 
+                    autoComplete="off" 
+                    value={values.name} 
+                    className="form-control"
+                  />
+                  {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
                 </div>
                 <div>
                   <label htmlFor='type'>Tipus</label>
-                  <Field type="text" name="type" placeholder="Tipus de magatzem" autoComplete="off" value={values.type} />
-                  {errors.type && touched.type && <div>{errors.type}</div>}
+                  <Field 
+                    type="text" 
+                    name="type" 
+                    placeholder="Tipus de magatzem" 
+                    autoComplete="off" 
+                    value={values.type} 
+                    className="form-control"
+                  />
+                  {errors.type && touched.type && <div className="text-danger">{errors.type}</div>}
                 </div>
                 <div>
                   <label htmlFor='address'>Adreça</label>
-                  <Field type="text" name="address" placeholder="Adreça del magatzem" autoComplete="off" value={values.address} />
-                  {errors.address && touched.address && <div>{errors.address}</div>}
+                  <Field 
+                    type="text" 
+                    name="address" 
+                    placeholder="Adreça del magatzem" 
+                    autoComplete="off" 
+                    value={values.address} 
+                    className="form-control"
+                  />
+                  {errors.address && touched.address && <div className="text-danger">{errors.address}</div>}
                 </div>
-                <Button type="submit">{tipoModal === "Crear" ? "Crear" : "Modificar"}</Button>
+                <Button type="submit" variant="primary">{tipoModal === "Crear" ? "Crear" : "Modificar"}</Button>
               </Form>
             )}
           </Formik>
