@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal } from 'react-bootstrap';
-import axios from 'axios';
-
 import Header from '../Header';
 import Filtres from '../Filtres';
+import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -13,7 +12,7 @@ const supplierschema = Yup.object().shape({
   name: Yup.string().min(3, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
   nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit'),
-  phone: Yup.string().matches(/^\+\d{1,3}\s\d{9}$/, 'El telèfon ha de ser correcte (+34 911234567)').required('Valor requerit'),
+  phone: Yup.string().required('Valor requerit'),
   email: Yup.string().email('Email no vàlid').required('Valor requerit'),
   state_id: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
   province: Yup.string().required('Valor requerit'),
@@ -69,13 +68,14 @@ function Proveidors() {
       const newSuppliers = suppliers.filter((item) => item.id !== id);
       setSuppliers(newSuppliers);
     } catch (error) {
-      console.error('Error al eliminar un proveidor:', error);
+      console.error('Error eliminant proveidors:', error);
     }
   };
 
   const modSuppliers = (valors) => {
     setTipoModal('Modificar');
     setValorsInicials(valors);
+    setShowModal(true);
   };
 
   const viewSupplier = (valors) => {
@@ -88,99 +88,132 @@ function Proveidors() {
   };
 
   const gravar = async (values) => {
-    if (tipoModal === 'Crear') {
-      await axios.post(`${apiUrl}/supplier`, values, { headers: { "auth-token": localStorage.getItem("token") } });
-    } else {
-      await axios.put(`${apiUrl}/carrier/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token")} });
+    try {
+      if (tipoModal === 'Crear') {
+        await axios.post(`${apiUrl}/supplier`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+      } else {
+        await axios.put(`${apiUrl}/supplier/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+      }
+      const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } });
+      setSuppliers(updatedSuppliers.data);
+      canviEstatModal();
+    } catch (error) {
+      console.error('Error guardant proveidors:', error);
     }
-    const info = await axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } });
-    await setSuppliers(info);
-    canviEstatModal();
   };
 
   return (
     <>
-      <Header title="Llistat proveidors" />
+      <Header title="Llistat de proveidors" />
       <Filtres />
-      <Button
-        variant="success"
-        className="btn text-white"
-        onClick={() => {
-          canviEstatModal();
-          setTipoModal('Crear');
-        }}
-      >
-        Alta Proveidors
-      </Button>
-      <table className='table table-striped'>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Adreça</th>
-            <th>NIF</th>
-            <th>Telèfon</th>
-            <th>Email</th>
-            <th>Visualitzar</th>
-            <th>Modificar</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {suppliers.length === 0 ? (
+
+      <div class="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+        <div class="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+          <div class="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+            <div class="form-floating bg-white">
+              <select class="form-select" id="floatingSelect" aria-label="Seleccione una opción">
+                <option selected>Tria una opció</option>
+                <option value="1">Eliminar</option>
+              </select>
+              <label for="floatingSelect">Accions en lot</label>
+            </div>
+            <button class="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button"><i class="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+          </div>
+        </div>
+        <div class="d-none d-xl-block col-xl-4 order-xl-1"></div>
+        <div class="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+          <div class="d-flex h-100 justify-content-xl-end">
+            <Button
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+              onClick={() => {
+                canviEstatModal();
+                setTipoModal('Crear');
+                setValorsInicials({
+                  name: '',
+                  address: '',
+                  nif: '',
+                  phone: '',
+                  email: '',
+                  state_id: 0,
+                  province: '',
+                  city: '',
+                  cp: '',
+                });
+              }}
+            >
+              <i class="bi bi-plus-circle text-white pe-1"></i>Crear
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className='container-fluid pt-3'>
+
+        <table className='table table-striped border mt-2'>
+          <thead>
             <tr>
-              <td colSpan="13">No hi han proveidors</td>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Adreça</th>
+              <th>NIF</th>
+              <th>Telèfon</th>
+              <th>Email</th>
+              <th>Accions</th>
             </tr>
-          ) : (
-            suppliers.map((valors) => (
-              <tr key={valors.id}>
-                <td>{valors.id}</td>
-                <td>{valors.name}</td>
-                <td>{valors.address}</td>
-                <td>{valors.nif}</td>
-                <td>{valors.phone}</td>
-                <td>{valors.email}</td>
-                <td>
-                  <Button
-                    variant="outline-secondary"
-                    onClick={() => {
-                      viewSupplier(valors);
-                    }}
-                  >
-                    <i className="bi bi-eye p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-success"
-                    onClick={() => {
-                      modSuppliers(valors);
-                      canviEstatModal();
-                    }}
-                  >
-                    <i className="bi bi-pencil-square p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-danger"
-                    onClick={() => {
-                      deleteSuppliers(valors.id);
-                    }}
-                  >
-                    <i className='bi bi-trash p-2'></i>
-                  </Button>
-                </td>
+          </thead>
+          <tbody>
+            {suppliers.length === 0 ? (
+              <tr>
+                <td colSpan="13">No hi han proveidors</td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              suppliers.map((valors) => (
+                <tr key={valors.id}>
+                  <td>{valors.id}</td>
+                  <td>{valors.name}</td>
+                  <td>{valors.address}</td>
+                  <td>{valors.nif}</td>
+                  <td>{valors.phone}</td>
+                  <td>{valors.email}</td>
+                  <td>
+                    <Button
+                      variant="info"
+                      onClick={() => {
+                        viewSupplier(valors);
+                      }}
+                    >
+                      <i className="bi bi-eye"></i>
+                    </Button>
+
+                    <Button
+                      variant="warning mx-2"
+                      onClick={() => {
+                        modSuppliers(valors);
+                      }}
+                    >
+                      <i className="bi bi-pencil-square"></i>
+                    </Button>
+
+                    <Button
+                      variant="danger"
+                      onClick={() => {
+                        deleteSuppliers(valors.id);
+                      }}
+                    >
+                      <i className='bi bi-trash '></i>
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Modal Visualitzar */}
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Visualitzar Proveidor</Modal.Title>
+          <Modal.Title>Visualitzar Proveidors</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div>
@@ -205,7 +238,7 @@ function Proveidors() {
       {/* Modal Crear/Modificar */}
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
-          <Modal.Title>{tipoModal} proveidor</Modal.Title>
+          <Modal.Title>{tipoModal} proveidors</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Formik
@@ -293,7 +326,6 @@ function Proveidors() {
                   ) : null}
                 </div>
 
-                {/* A partir d'aci */}
                 <div className="form-group">
                   <label htmlFor="state_id">Estat</label>
                   <Field
@@ -315,26 +347,24 @@ function Proveidors() {
                 </div>
                 <div className="form-group">
                   <label htmlFor="province">Província</label>
-                  {values.state_id === '194' ? ( // Si es España, mostramos un select
+                  {values.state_id === '194' ? (
                     <>
                       <Field
                         as="select"
                         id="province"
                         name="province"
-                        className={`form-control ${
-                          touched.province && errors.province ? 'is-invalid' : ''
-                        }`}
-                        //value={values.province.name} // Aseguramos que el valor esté sincronizado con el estado del formulario
+                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
+                          }`}
                       >
                         <option value="">Selecciona una província</option>
                         {provincia.length > 0 ? (
                           provincia.map((prov) => (
-                            <option key={prov.id} value={prov.name}> {/* Usa 'id' como valor */}
+                            <option key={prov.id} value={prov.name}>
                               {prov.name}
                             </option>
                           ))
                         ) : (
-                          <option value="">No hay provincias disponibles</option>
+                          <option value="">No hi han províncies</option>
                         )}
                       </Field>
                       {touched.province && errors.province && (
@@ -343,58 +373,56 @@ function Proveidors() {
 
                     </>
                   ) : (
-                    // Si no es España, mostramos un campo de texto
                     <>
                       <Field
                         type="text"
                         id="province"
                         name="province"
                         placeholder="Escribe la provincia"
-                        className={`form-control ${
-                          touched.province && errors.province ? 'is-invalid' : ''
-                        }`}
+                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
+                          }`}
                       />
                       {touched.province && errors.province && (
                         <div className="invalid-feedback">{errors.province}</div>
                       )}
-                      
+
                     </>
                   )}
                 </div>
                 {values.state_id === '194' && values.province ? (
-                <div className="form-group">
-                  <label htmlFor="city">Ciutat</label>
-                  <Field
-                    as="select"
-                    id="city"
-                    name="city"
-                    className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
-                  >
-                    <option value="">Selecciona una ciutat</option>
-                    {ciutat.map((ciudad) => (
-                      <option key={ciudad.id} value={ciudad.name}>
-                        {ciudad.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {touched.city && errors.city && (
-                    <div className="invalid-feedback">{errors.city}</div>
-                  )}
-                </div>
+                  <div className="form-group">
+                    <label htmlFor="city">Ciutat</label>
+                    <Field
+                      as="select"
+                      id="city"
+                      name="city"
+                      className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
+                    >
+                      <option value="">Selecciona una ciutat</option>
+                      {ciutat.map((ciudad) => (
+                        <option key={ciudad.id} value={ciudad.name}>
+                          {ciudad.name}
+                        </option>
+                      ))}
+                    </Field>
+                    {touched.city && errors.city && (
+                      <div className="invalid-feedback">{errors.city}</div>
+                    )}
+                  </div>
                 ) : (
-                <div className="form-group">
-                  <label htmlFor="city">Ciutat</label>
-                  <Field
-                    type="text"
-                    id="city"
-                    name="city"
-                    placeholder="Escriu la ciutat"
-                    className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
-                  />
-                  {touched.city && errors.city && (
-                    <div className="invalid-feedback">{errors.city}</div>
-                  )}
-                </div>
+                  <div className="form-group">
+                    <label htmlFor="city">Ciutat</label>
+                    <Field
+                      type="text"
+                      id="city"
+                      name="city"
+                      placeholder="Escriu la ciutat"
+                      className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
+                    />
+                    {touched.city && errors.city && (
+                      <div className="invalid-feedback">{errors.city}</div>
+                    )}
+                  </div>
                 )}
                 <div className="form-group">
                   <label htmlFor="cp">Codi Postal</label>
@@ -417,7 +445,6 @@ function Proveidors() {
             )}
           </Formik>
         </Modal.Body>
-
       </Modal>
     </>
   );
