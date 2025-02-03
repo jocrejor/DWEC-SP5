@@ -319,7 +319,8 @@ function OrderPickingReception() {
                         <thead>
                             <tr>
                                 <th>Emmagatzemat</th>
-                                <th>ID</th>
+                                <th>Ordre ID</th>
+                                <th>Producte</th>
                                 <th>Fecha</th>
                                 <th>Operari</th>
                             </tr>
@@ -330,12 +331,14 @@ function OrderPickingReception() {
                                 .filter(order => order.operator_id === parseInt(usuariFiltrar))
                                 .map(order => {
                                     const user = users.find(u => u.id === order.operator_id);
+                                    const product = products.find(p => p.id === order.product_id);
                                         return (
                                             <tr key={order.id}>
                                                 <td class="d-flex justify-content-center align-items-center">
                                                     <i class="bi bi-arrow-down" onClick={() => completarOrderPicking(order.order_line_reception_id, order.id)}></i>
                                                 </td>
                                                 <td>{order.id}</td>
+                                                <td>{product.name}</td>
                                                 <td>{order.create_date}</td>
                                                 <td>{user.name}</td>
                                             </tr>
