@@ -132,6 +132,7 @@ function OrderPickingReception() {
             const space = spaces.find((s) => s.product_id === line.product_id);
 
             const newOrderPickingReception = {
+                order_line_reception_id: line.id,
                 product_id: line.product_id,
                 quantity: line.quantity_received,
                 storage_id: space.storage_id,
