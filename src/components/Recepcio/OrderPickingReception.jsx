@@ -76,7 +76,7 @@ function OrderPickingReception() {
                     lines.forEach((line) => {
                         const space = spaces.find((space) => space.product_id === line.product_id);
                         if (space) {
-                            console.log(order.id, line.id, line.product_id, line.quantity_received, space.storage_id, space.street_id, space.selft_id, space.id);
+                            console.log(order.id, line.id, line.product_id, line.quantity_received, space.storage_id, space.street_id, space.shelf_id, space.id);
                             const objTemporal = {
                                 order_reception_id: order.id,
                                 order_line_reception_id: line.id,
@@ -84,7 +84,7 @@ function OrderPickingReception() {
                                 quantity_received: line.quantity_received,
                                 storage_id: space.storage_id,
                                 street_id: space.street_id,
-                                selft_id: space.selft_id,
+                                shelf_id: space.shelf_id,
                                 space_id: space.id
                             }
                             tempPickings.push(objTemporal);
@@ -117,38 +117,39 @@ function OrderPickingReception() {
             console.log(seleccio);
             setOrderSelected(seleccio);
         }
+
     }
+
 
     const aceptarOrderPickingReception = async () => {
         const operari = document.getElementById("operari").value;
 
-        const newOrderPickingReception = {
-            operator_id: operari,
-            create_date: new Date().toISOString(),
-            productos: orderSelected.map((orderLineId) => {
-                const line = orderLineReception.find((l) => l.id === orderLineId);
-                const space = spaces.find((s) => s.product_id === line.product_id);
-                return {
-                    product_id: line.product_id,
-                    quantity: line.quantity_received,
-                    storage_id: space.storage_id,
-                    street_id: space.street_id,
-                    shelf_id: space.selft_id,
-                    space_id: space.id
-                };
-            }),
-        };
+        orderSelected.forEach((order) => {
+            const line = orderLineReception.find((l) => l.id === parseInt(order));
+            const space = spaces.find((s) => s.product_id === line.product_id);
 
-        axios.post(`${url}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
-            .then((response) => {
-                console.log(response.data);
-                alert("Order picking reception creat correctament");
-                canviEstatModal();
-            }
-        ).catch((error) => {        
-            console.error('Error order picking reception:', error.response.data);
-        }); 
-}
+            const newOrderPickingReception = {
+                product_id: line.product_id,
+                quantity: line.quantity_received,
+                storage_id: space.storage_id,
+                street_id: space.street_id,
+                shelf_id: space.shelf_id,
+                space_id: space.id,
+                operator_id: operari,
+                create_date: new Date().toISOString(),
+            };
+
+            axios.post(`${url}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
+                .then((response) => {
+                    console.log(response.data);
+                    alert("Order picking reception creat correctament");
+                }
+                ).catch((error) => {        
+                console.error('Error order picking reception:', error.response.data);
+            }); 
+        });
+        canviEstatModal();
+    }
 
     const mostrarOrder = (orderId) => {
         setOrderVisualitzar(orderId);
@@ -193,7 +194,7 @@ function OrderPickingReception() {
                                         <td>{temporalPicking.order_reception_id}</td>
                                         <td>{product.name}</td>
                                         <td>{temporalPicking.quantity_received}</td>
-                                        <td>{temporalPicking.storage_id} / {temporalPicking.street_id} / {temporalPicking.selft_id} / {temporalPicking.space_id}</td>
+                                        <td>{temporalPicking.storage_id} / {temporalPicking.street_id} / {temporalPicking.shelf_id} / {temporalPicking.space_id}</td>
                                         <td><input type="checkbox" value={temporalPicking.order_line_reception_id} /></td>
                                     </tr>
                                 );
@@ -238,7 +239,7 @@ function OrderPickingReception() {
                                                     <tr key={order}>
                                                         <td>{product.name}</td>
                                                         <td>{lines.quantity_received}</td>
-                                                        <td>{space.storage_id} / {space.street_id} / {space.selft_id} / {space.id}</td>
+                                                        <td>{space.storage_id} / {space.street_id} / {space.shelf_id} / {space.id}</td>
                                                     </tr>
                                                 );
                                             })}
