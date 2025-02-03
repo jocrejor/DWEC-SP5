@@ -182,7 +182,7 @@ function OrderPickingReception() {
             .catch((error) => {
                 console.error("Error en esborra order picking",error.response.data);
             });
-        
+
         //crear moviments
         const space = spaces.find(space => space.product_id === lineActualitzar.product_id);
         if (space) {
@@ -192,6 +192,7 @@ function OrderPickingReception() {
             movMagatzem(lineActualitzar.product_id, lineActualitzar.operator_id, lineActualitzar.quantity_received, "General", space.storage_id, space.storage_id, space.street_id, space.shelf_id, space.id);
             console.log("Moviment entrada realitzat");
         }
+        alert("Order picking completada");
     };
 
     const mostrarOrder = (orderId) => {
