@@ -7,29 +7,28 @@ import Filtres from "../Filtres";
 import Header from "../Header";
 
 function OrderPickingReception() {
-    const [orderPickingReception, setOrderPickingReception] = useState([]);
-    const [orderreception, setOrderReception] = useState([]);
-    const [orderLineReception, setOrderLineReception] = useState([]);
-    const [products, setProducts] = useState([]);
-    const [temporalPickings, setTemporalPickings] = useState([]);
-    const [spaces, setSpaces] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [currentuser, setCurrentUser] = useState(null);
+    const [orderPickingReception, setOrderPickingReception] = useState([]); //order picking reception
+    const [orderreception, setOrderReception] = useState([]); //order reception
+    const [orderLineReception, setOrderLineReception] = useState([]); //order line reception
+    const [products, setProducts] = useState([]); //product
+    const [temporalPickings, setTemporalPickings] = useState([]); //temporal pickings
+    const [spaces, setSpaces] = useState([]); //space
+    const [users, setUsers] = useState([]); //user
+    const [operariSeleccionat, setOperariSeleccionat] = useState(""); //operari seleccionat al crear order picking
+    const [usuariFiltrar, setUsuariFiltrar] = useState(""); //usuari a filtrar en la taula order picking 
 
-    const [showModal, setShowModal] = useState(false);
-    const [tipoModal, setTipoModal] = useState("Alta");
-    const [orderVisualitzar, setOrderVisualitzar] = useState(null);
-    const [tabla, setTabla] = useState("CrearOrder");
+    const [showModal, setShowModal] = useState(false); //mostrar modal
+    const [tipoModal, setTipoModal] = useState("Alta"); //tipus de modal Alta/Visualitzar
+    const [orderVisualitzar, setOrderVisualitzar] = useState(null); //order a visualitzar
+    const [tabla, setTabla] = useState("CrearOrder"); //taula CrearOrder/ListarOrder
 
-    const [orderSelected, setOrderSelected] = useState([]);
+    const [orderSelected, setOrderSelected] = useState([]); //order seleccionat per crear order picking
+    
+    //const apiUrl = url;
     const apiUrl = import.meta.env.VITE_API_URL; 
-        //const apiUrl = url;
-        const token = localStorage.getItem("token");
-
+    const token = localStorage.getItem("token");
 
     useEffect(() => {
-        
-
         //order line reception
         axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } 
         })
@@ -69,31 +68,30 @@ function OrderPickingReception() {
         //recorrer orden reception pendent (desempaquetada)
         const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 1);
 
-            const tempPickings = [];
-            orderPendent.map((order) => {
-                //recorrer line reception de cada orden reception
-                const lines = orderLineReception.filter((line) => line.order_reception_id === order.id);
-                //obtindre product.name, product.quantitat, product.space
-                lines.forEach((line) => {
-                    const space = spaces.find((space) => space.product_id === line.product_id);
-                    if (space) {
-                        console.log(order.id, line.id, line.product_id, line.quantity_received, space.storage_id, space.street_id, space.shelf_id, space.id);
-                        const objTemporal = {
-                            order_reception_id: order.id,
-                            order_line_reception_id: line.id,
-                            product_id: line.product_id,
-                            quantity_received: line.quantity_received,
-                            storage_id: space.storage_id,
-                            street_id: space.street_id,
-                            shelf_id: space.shelf_id,
-                            space_id: space.id
-                        }
-                        tempPickings.push(objTemporal);
-                        }
-                    });
-                });
-            setTemporalPickings(tempPickings);
-        
+        const tempPickings = [];
+        orderPendent.map((order) => {
+            //recorrer line reception de cada orden reception
+            const lines = orderLineReception.filter((line) => line.order_reception_id === order.id);
+            //obtindre product.name, product.quantitat, product.space
+            lines.forEach((line) => {
+                const space = spaces.find((space) => space.product_id === line.product_id);
+                if (space) {
+                    console.log(order.id, line.id, line.product_id, line.quantity_received, space.storage_id, space.street_id, space.shelf_id, space.id);
+                    const objTemporal = {
+                        order_reception_id: order.id,
+                        order_line_reception_id: line.id,
+                        product_id: line.product_id,
+                        quantity_received: line.quantity_received,
+                        storage_id: space.storage_id,
+                        street_id: space.street_id,
+                        shelf_id: space.shelf_id,
+                        space_id: space.id
+                    }
+                    tempPickings.push(objTemporal);
+                }
+            });
+        });
+        setTemporalPickings(tempPickings);
     }, []);
 
     const canviEstatModal = () => {
@@ -118,13 +116,13 @@ function OrderPickingReception() {
             console.log(seleccio);
             setOrderSelected(seleccio);
         }
-
     }
 
+    const handleInputChange = (event) => {
+        setOperariSeleccionat(event.target.value);
+    };
+    
     const aceptarOrderPickingReception = async () => {
-        const operari = parseInt(document.getElementById("operari").value);
-        console.log(operari);
-
         orderSelected.forEach((order) => {
             const line = orderLineReception.find((l) => l.id === parseInt(order));
             const space = spaces.find((s) => s.product_id === line.product_id);
@@ -136,9 +134,8 @@ function OrderPickingReception() {
                 street_id: space.street_id,
                 shelf_id: space.shelf_id,
                 space_id: space.id,
-                operator_id: operari
+                operator_id: parseInt(operariSeleccionat)
             };
-
 
             axios.post(`${apiUrl}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
                 .then((response) => {
@@ -212,8 +209,8 @@ function OrderPickingReception() {
                             {tipoModal === "Alta" && (
                                 <>
                                     <label htmlFor="operari"></label>
-                                    <select name="operari" id="operari">
-                                        <option value={currentuser ? currentuser : ""} selected disabled>Operari Actual</option>
+                                    <select name="operari" id="operari" value= {operariSeleccionat} onChange={handleInputChange}>
+                                        <option value="" selected disabled>Selecciona un operari</option>
                                         {users.map((user) => {
                                             return (
                                                 <option value={user.id}>{user.name}</option>
@@ -261,30 +258,45 @@ function OrderPickingReception() {
                         setTabla("CrearOrder");
                     }}>Enrrere</Button>
 
+                    <select
+                        value={usuariFiltrar}
+                        onChange={(e) => setUsuariFiltrar(e.target.value)}
+                    >
+                    <option value="" disbled selected>Selecciona un operari</option>
+                    {users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                            {user.name}
+                        </option>
+                    ))}
+                    </select>
+
                     <Table striped bordered hover>
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Fecha</th>
-                                <th>Operari</th>
+                                <th>Operari ID</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            {orderPickingReception.map(order => {
-                                const user = users.find(u => u.id === order.user_id);
-                                return (
-                                    <tr key={order.id}>
-                                        <td>{order.id}</td>
-                                        <td>{order.create_date}</td>
-                                        <td>{user ? user.id : "Desconegut"}</td>
-                                        <td><Button variant="success" onClick={() => {
-                                            mostrarOrder(order.id);
-                                        }}>Visualizar</Button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                            {orderPickingReception
+                                .filter(order => order.operator_id === parseInt(usuariFiltrar))
+                                .map(order => {
+                                    const user = users.find(u => u.id === order.operator_id);
+                                        return (
+                                            <tr key={order.id}>
+                                                <td>{order.id}</td>
+                                                <td>{order.created_date}</td>
+                                                <td>{user.name}</td>
+                                                <td>
+                                                    <Button variant="success" onClick={() => mostrarOrder(order.id)}>
+                                                        Visualizar
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        );
+                                })}
                         </tbody>
                     </Table>
 
