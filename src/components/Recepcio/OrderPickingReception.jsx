@@ -273,9 +273,10 @@ function OrderPickingReception() {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
+                                <th>Emmagatzemat</th>
                                 <th>ID</th>
                                 <th>Fecha</th>
-                                <th>Operari ID</th>
+                                <th>Operari</th>
                             </tr>
                         </thead>
 
@@ -286,14 +287,12 @@ function OrderPickingReception() {
                                     const user = users.find(u => u.id === order.operator_id);
                                         return (
                                             <tr key={order.id}>
+                                                <td class="d-flex justify-content-center align-items-center">
+                                                    <i class="bi bi-arrow-down"></i>
+                                                </td>
                                                 <td>{order.id}</td>
                                                 <td>{order.created_date}</td>
                                                 <td>{user.name}</td>
-                                                <td>
-                                                    <Button variant="success" onClick={() => mostrarOrder(order.id)}>
-                                                        Visualizar
-                                                    </Button>
-                                                </td>
                                             </tr>
                                         );
                                 })}
