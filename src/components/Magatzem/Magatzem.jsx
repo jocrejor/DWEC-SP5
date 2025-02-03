@@ -54,43 +54,100 @@ function Storage() {
     navigate(`../carrer/${id}`);
   };
 
+  const canviEstatModal = () => {
+    setShowModal(!showModal);
+    setTipoModal("Crear");
+  };
+
   return (
     <>
+     
       <Filtres />
-      <h1> Magatzems</h1>
-      <Button variant='success' onClick={() => { setShowModal(true); setTipoModal("Crear"); }}>Alta Magatzem</Button>
-      
-      <table className="table table-striped text-center align-middle">
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Nom</th>
-            <th>Tipus</th>
-            <th>Adreça</th>
-            <th>Carrer</th>
-            <th>Modificar</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {storages.length === 0 ? (
-            <tr><td>No hi han magatzems</td></tr>
-          ) : (
-            storages.map((valors) => (
+      <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+        <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+          <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+            <div className="form-floating bg-white">
+              <select className="form-select" id="floatingSelect" aria-label="Seleccione una opció">
+                <option selected>Tria una opció</option>
+                <option value="1">Eliminar</option>
+              </select>
+              <label htmlFor="floatingSelect">Accions en lot</label>
+            </div>
+            <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button">
+              <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+            </button>
+          </div>
+        </div>
+        <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+        <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+          <div className="d-flex h-100 justify-content-xl-end">
+            <button type="button" onClick={canviEstatModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="table-responsive mt-3">
+        <table className="table table-striped text-center">
+          <thead className="table-active border-bottom border-dark-subtle">
+            <tr>
+              <th scope="col"><input className="form-check-input" type="checkbox" name="" id="" /></th>
+              <th scope="col">ID</th>
+              <th scope="col">Nom</th>
+              <th scope="col">Tipus</th>
+              <th scope="col">Adreça</th>
+              <th scope="col">Carrer</th>
+              <th scope="col">Visualitzar</th>
+              <th scope="col">Modificar</th>
+              <th scope="col">Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {storages.map((valors) => (
               <tr key={valors.id}>
+                <td scope="row" data-cell="Seleccionar">
+                  <input className="form-check-input" type="checkbox" name="" id="" />
+                </td>
                 <td>{valors.id}</td>
                 <td>{valors.name}</td>
                 <td>{valors.type}</td>
                 <td>{valors.address}</td>
                 <td><Button onClick={() => handleCarrerClick(valors.id)}>Carrer</Button></td>
-                <td><Button variant="warning" onClick={() => modificarStorage(valors)}>Modificar</Button></td>
-                <td><Button variant="danger" onClick={() => eliminarStorage(valors.id)}>Eliminar</Button></td>
+                <td>
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => {
+                      // Visualitzar Logic (e.g., navigate to a detailed view)
+                      console.log("Viewing", valors);
+                    }}
+                  >
+                    <i className="bi bi-eye p-2"></i>
+                  </Button>
+                </td>
+                <td>
+                  <Button
+                    variant="outline-success"
+                    onClick={() => { modificarStorage(valors); canviEstatModal(); }}
+                  >
+                    <i className="bi bi-pencil-square p-2"></i>
+                  </Button>
+                </td>
+                <td>
+                  <Button
+                    variant="outline-danger"
+                    onClick={() => eliminarStorage(valors.id)}
+                  >
+                    <i className="bi bi-trash p-2"></i>
+                  </Button>
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
+      {/* Modal for Create/Modify Storage */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Magatzem</Modal.Title>

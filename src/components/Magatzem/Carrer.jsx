@@ -9,146 +9,202 @@ import Filtres from '../Filtres';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const StreetSchema = Yup.object().shape({
-    name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
-    storage_id: Yup.number().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
+  name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
+  storage_id: Yup.number().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
 });
 
 function Street() {
-    const [streets, setStreet] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [tipoModal, setTipoModal] = useState("Crear");
-    const [valorsInicials, setValorsInicials] = useState({ name: '', storage_id: '' });
-    const [loading, setLoading] = useState(true); // Nueva variable de estado para el estado de carga
-    const navigate = useNavigate();
-    let { magatzem } = useParams();
+  const [streets, setStreets] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [tipoModal, setTipoModal] = useState("Crear");
+  const [valorsInicials, setValorsInicials] = useState({ name: '', storage_id: '' });
+  const navigate = useNavigate();
+  const { magatzem } = useParams();
 
-    useEffect(() => {
-        setLoading(true); // Al inicio de la carga
-        axios.get(`${apiUrl}/street?storage_id=${magatzem}`, {
-            headers: { "auth-token": localStorage.getItem("token") }
-        })
-            .then(response => {
-                setStreet(response.data);
-                setLoading(false); // Carga finalizada
-            })
-            .catch(error => {
-                console.log('Error fetching data:', error);
-                setLoading(false); // Carga fallida
-            });
-    }, [magatzem]);
+  useEffect(() => {
+    axios.get(`${apiUrl}/street?storage_id=${magatzem}`, {
+      headers: { "auth-token": localStorage.getItem("token") }
+    })
+      .then(response => {
+        setStreets(response.data);
+      })
+      .catch(error => {
+        console.log('Error fetching data:', error);
+      });
+  }, [magatzem]); 
 
-    const eliminarStreet = async (id) => {
-        try {
-            await axios.delete(`${apiUrl}/street/${id}`, {
-                headers: { "auth-token": localStorage.getItem("token") }
-            });
-            setStreet(streets.filter(item => item.id !== id));  
-        } catch (e) {
-            console.log('Error deleting street:', e);
-        }
-    };
+  const eliminarStreet = async (id) => {
+    try {
+      await axios.delete(`${apiUrl}/street/${id}`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      });
+      setStreets(streets.filter(item => item.id !== id));
+    } catch (e) {
+      console.log('Error deleting street:', e);
+    }
+  };
 
-    const modificarStreet = (valors) => {
-        setTipoModal("Modificar");
-        setValorsInicials(valors);
-        setShowModal(true);
-    };
+  const modificarStreet = (valors) => {
+    setTipoModal("Modificar");
+    setValorsInicials(valors);
+    setShowModal(true);
+  };
 
-    const handleCarrerClick = (id) => {
-        navigate(`../estanteria/${magatzem}/${id}`);
-    };
+  const handleStreetClick = (id) => {
+    navigate(`../estanteria/${magatzem}/${id}`);
+  };
 
-    return (
-        <>
-            <Filtres />
-            <h1>Magatzem: {magatzem}</h1>
-            <Button variant='success' onClick={() => { setShowModal(true); setTipoModal("Crear"); }}>Alta Carrer</Button>
-            
-            {/* Condicional para mostrar un mensaje mientras cargan los datos */}
-            {loading ? (
-                <p>Cargando...</p>
-            ) : (
-                <table className="table table-striped text-center align-middle">
-                    <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Nom</th>
-                            <th>ID Magatzem</th>
-                            <th>Estanteria</th>
-                            <th>Modificar</th>
-                            <th>Eliminar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {streets.length === 0 ? (
-                            <tr><td colSpan="6">No hi han carrers</td></tr>
-                        ) : (
-                            streets.map((valors) => (
-                                <tr key={valors.id}>
-                                    <td>{valors.id}</td>
-                                    <td>{valors.name}</td>
-                                    <td>{valors.storage_id}</td>
-                                    <td><Button onClick={() => handleCarrerClick(valors.id)}>Estanteria</Button></td>
-                                    <td><Button variant="warning" onClick={() => modificarStreet(valors)}>Modificar</Button></td>
-                                    <td><Button variant="danger" onClick={() => eliminarStreet(valors.id)}>Eliminar</Button></td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+  const canviEstatModal = () => {
+    setShowModal(!showModal);
+    setTipoModal("Crear");
+  };
+
+  return (
+    <>
+      <Filtres />
+      <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+        <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+          <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+            <div className="form-floating bg-white">
+              <select className="form-select" id="floatingSelect" aria-label="Seleccione una opció">
+                <option selected>Tria una opció</option>
+                <option value="1">Eliminar</option>
+              </select>
+              <label htmlFor="floatingSelect">Accions en lot</label>
+            </div>
+            <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button">
+              <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+            </button>
+          </div>
+        </div>
+        <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+        <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+          <div className="d-flex h-100 justify-content-xl-end">
+            <button type="button" onClick={canviEstatModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear Carrer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="table-responsive mt-3">
+        <table className="table table-striped text-center">
+          <thead className="table-active border-bottom border-dark-subtle">
+            <tr>
+              <th scope="col"><input className="form-check-input" type="checkbox" name="" id="" /></th>
+              <th scope="col">ID</th>
+              <th scope="col">Nom</th>
+              <th scope="col">ID Magatzem</th>
+              <th scope="col">Estanteria</th>
+              <th scope="col">Visualitzar</th>
+              <th scope="col">Modificar</th>
+              <th scope="col">Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {streets.map((valors) => (
+              <tr key={valors.id}>
+                <td scope="row" data-cell="Seleccionar">
+                  <input className="form-check-input" type="checkbox" name="" id="" />
+                </td>
+                <td>{valors.id}</td>
+                <td>{valors.name}</td>
+                <td>{valors.storage_id}</td>
+                <td><Button onClick={() => handleStreetClick(valors.id)}>Estanteria</Button></td>
+                <td>
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => {
+                      // Visualitzar Logic (e.g., navigate to a detailed view)
+                      console.log("Viewing", valors);
+                    }}
+                  >
+                    <i className="bi bi-eye p-2"></i>
+                  </Button>
+                </td>
+                <td>
+                  <Button
+                    variant="outline-success"
+                    onClick={() => { modificarStreet(valors); canviEstatModal(); }}
+                  >
+                    <i className="bi bi-pencil-square p-2"></i>
+                  </Button>
+                </td>
+                <td>
+                  <Button
+                    variant="outline-danger"
+                    onClick={() => eliminarStreet(valors.id)}
+                  >
+                    <i className="bi bi-trash p-2"></i>
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modal for Create/Modify Street */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{tipoModal} Carrer</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Formik
+            initialValues={tipoModal === 'Modificar' ? valorsInicials : { name: '', storage_id: '' }}
+            validationSchema={StreetSchema}
+            onSubmit={async (values) => {
+              try {
+                if (tipoModal === "Crear") {
+                  await axios.post(`${apiUrl}/street`, values, {
+                    headers: { "auth-token": localStorage.getItem("token") }
+                  });
+                } else {
+                  await axios.put(`${apiUrl}/street/${values.id}`, values, {
+                    headers: { "auth-token": localStorage.getItem("token") }
+                  });
+                }
+                setShowModal(false);
+                window.location.reload();
+              } catch (e) {
+                console.log('Error on submit:', e);
+              }
+            }}
+          >
+            {({ values, errors, touched }) => (
+              <Form>
+                <div>
+                  <label htmlFor='name'>Nom</label>
+                  <Field 
+                    type="text" 
+                    name="name" 
+                    placeholder="Nom del carrer" 
+                    autoComplete="off" 
+                    value={values.name} 
+                    className="form-control"
+                  />
+                  {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
+                </div>
+                <div>
+                  <label htmlFor='storage_id'>ID Magatzem</label>
+                  <Field 
+                    type="text" 
+                    name="storage_id" 
+                    placeholder="ID del magatzem" 
+                    autoComplete="off" 
+                    value={values.storage_id} 
+                    className="form-control"
+                  />
+                  {errors.storage_id && touched.storage_id && <div className="text-danger">{errors.storage_id}</div>}
+                </div>
+                <Button type="submit" variant="primary">{tipoModal === "Crear" ? "Crear" : "Modificar"}</Button>
+              </Form>
             )}
-
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{tipoModal} Carrer</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Formik
-                        initialValues={tipoModal === 'Modificar' ? valorsInicials : { name: '', storage_id: '' }}
-                        validationSchema={StreetSchema}
-                        onSubmit={async (values) => {
-                            try {
-                                if (tipoModal === "Crear") {
-                                    await axios.post(`${apiUrl}/street`, values, {
-                                        headers: { "auth-token": localStorage.getItem("token") }
-                                    });
-                                } else {
-                                    await axios.put(`${apiUrl}/street/${values.id}`, values, {
-                                        headers: { "auth-token": localStorage.getItem("token") }
-                                    });
-                                }
-                                setShowModal(false);
-
-                                // Actualizar la lista de calles después de crear o modificar
-                                const response = await axios.get(`${apiUrl}/street?storage_id=${magatzem}`, {
-                                    headers: { "auth-token": localStorage.getItem("token") }
-                                });
-                                setStreet(response.data);
-                            } catch (e) {
-                                console.log('Error on submit:', e);
-                            }
-                        }}
-                    >
-                        {({ values, errors, touched }) => (
-                            <Form>
-                                <div>
-                                    <label htmlFor='name'>Nom</label>
-                                    <Field type="text" name="name" placeholder="Nom del carrer" autoComplete="off" value={values.name} className="form-control" />
-                                    {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
-                                </div>
-                                <div>
-                                    <label htmlFor='storage_id'>ID Magatzem</label>
-                                    <Field type="text" name="storage_id" placeholder="Id del magatzem" autoComplete="off" value={values.storage_id} className="form-control" />
-                                    {errors.storage_id && touched.storage_id && <div className="text-danger">{errors.storage_id}</div>}
-                                </div>
-                                <Button type="submit" variant="primary">{tipoModal === "Crear" ? "Crear" : "Modificar"}</Button>
-                            </Form>
-                        )}
-                    </Formik>
-                </Modal.Body>
-            </Modal>
-        </>
-    );
+          </Formik>
+        </Modal.Body>
+      </Modal>
+    </>
+  );
 }
 
 export default Street;
