@@ -12,7 +12,7 @@ const supplierschema = Yup.object().shape({
   name: Yup.string().min(3, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
   nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit'),
-  phone: Yup.string().required('Valor requerit'),
+  phone: Yup.string().matches(/^(\+\d{1,3}\s?)?(\d{9}|\d{3}\s\d{3}\s\d{3})$/,'El telèfon ha de ser correcte (ex: +34 911234567, 621121124, 932 123 456)').required('Valor requerit'),
   email: Yup.string().email('Email no vàlid').required('Valor requerit'),
   state_id: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
   province: Yup.string().required('Valor requerit'),
@@ -89,11 +89,15 @@ function Proveidors() {
 
   const gravar = async (values) => {
     try {
+      const dataToSend = tipoModal === 'Modificar' ? { ...values, id: undefined } : values;
+  
       if (tipoModal === 'Crear') {
-        await axios.post(`${apiUrl}/supplier`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+        await axios.post(`${apiUrl}/supplier`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
       } else {
-        await axios.put(`${apiUrl}/supplier/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+        const { id, ...valuesWithoutId } = values;
+        await axios.put(`${apiUrl}/supplier/${id}`, valuesWithoutId, { headers: { "auth-token": localStorage.getItem("token") } });
       }
+  
       const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } });
       setSuppliers(updatedSuppliers.data);
       canviEstatModal();
@@ -101,7 +105,7 @@ function Proveidors() {
       console.error('Error guardant proveidors:', error);
     }
   };
-
+  
   return (
     <>
       <Header title="Llistat de proveidors" />
@@ -212,28 +216,32 @@ function Proveidors() {
 
       {/* Modal Visualitzar */}
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Visualitzar Proveidors</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div>
-            <p><b>Nom:</b> {valorsInicials.name}</p>
-            <p><b>Adreça:</b> {valorsInicials.address}</p>
-            <p><b>NIF:</b> {valorsInicials.nif}</p>
-            <p><b>Telèfon:</b> {valorsInicials.phone}</p>
-            <p><b>Email:</b> {valorsInicials.email}</p>
-            <p><b>Estat:</b> {valorsInicials.state_id}</p>
-            <p><b>Província:</b> {valorsInicials.province}</p>
-            <p><b>Ciutat:</b> {valorsInicials.city}</p>
-            <p><b>Codi Postal:</b> {valorsInicials.cp}</p>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
-            Tancar
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <Modal.Header closeButton>
+        <Modal.Title>Visualitzar Proveidors</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div>
+          <p><b>Nom:</b> {valorsInicials.name}</p>
+          <p><b>Adreça:</b> {valorsInicials.address}</p>
+          <p><b>NIF:</b> {valorsInicials.nif}</p>
+          <p><b>Telèfon:</b> {valorsInicials.phone}</p>
+          <p><b>Email:</b> {valorsInicials.email}</p>
+          <p><b>Estat:</b> {
+            // Buscar el nombre del estado
+            pais.find((state) => state.id === valorsInicials.state_id)?.name
+          }</p>
+          <p><b>Província:</b> {valorsInicials.province}</p>
+          <p><b>Ciutat:</b> {valorsInicials.city}</p>
+          <p><b>Codi Postal:</b> {valorsInicials.cp}</p>
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+          Tancar
+        </Button>
+      </Modal.Footer>
+    </Modal>
+
 
       {/* Modal Crear/Modificar */}
       <Modal show={showModal} onHide={canviEstatModal}>
