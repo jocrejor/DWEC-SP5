@@ -174,16 +174,16 @@ function Transportista() {
 
       <div className='container-fluid pt-3'>
 
-        <table className='table table-striped border mt-2'>
-          <thead>
+        <table className='table table-striped border m-2'>
+          <thead class="table-active border-bottom border-dark-subtle">
             <tr>
-              <th>ID</th>
-              <th>Nom</th>
-              <th>Adreça</th>
-              <th>NIF</th>
-              <th>Telèfon</th>
-              <th>Email</th>
-              <th>Accions</th>
+              <th scope="col">ID</th>
+              <th scope="col">Nom</th>
+              <th scope="col">Adreça</th>
+              <th scope="col">NIF</th>
+              <th scope="col">Telèfon</th>
+              <th scope="col">Email</th>
+              <th scope="col">Accions</th>
             </tr>
           </thead>
           <tbody>
@@ -194,40 +194,26 @@ function Transportista() {
             ) : (
               carriers.map((valors) => (
                 <tr key={valors.id}>
-                  <td>{valors.id}</td>
-                  <td>{valors.name}</td>
-                  <td>{valors.address}</td>
-                  <td>{valors.nif}</td>
-                  <td>{valors.phone}</td>
-                  <td>{valors.email}</td>
-                  <td>
-                    <Button
-                      variant="info"
-                      onClick={() => {
-                        verCarrier(valors);
-                      }}
-                    >
+                  <td data-cell="ID">{valors.id}</td>
+                  <td data-cell="Nom">{valors.name}</td>
+                  <td data-cell="Adreça">{valors.address}</td>
+                  <td data-cell="NIF">{valors.nif}</td>
+                  <td data-cell="Telèfon">{valors.phone}</td>
+                  <td data-cell="Email">{valors.email}</td>
+                  <td data-no-colon="true">
+                    <span onClick={() => verCarrier(valors)} style={{ cursor: "pointer" }}>
                       <i className="bi bi-eye"></i>
-                    </Button>
+                    </span>
 
-                    <Button
-                      variant="warning mx-2"
-                      onClick={() => {
-                        modCarriers(valors);
-                      }}
-                    >
+                    <span onClick={() => modCarriers(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
                       <i className="bi bi-pencil-square"></i>
-                    </Button>
+                    </span>
 
-                    <Button
-                      variant="danger"
-                      onClick={() => {
-                        delCarrier(valors.id);
-                      }}
-                    >
-                      <i className='bi bi-trash '></i>
-                    </Button>
+                    <span onClick={() => delCarrier(valors.id)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-trash"></i>
+                    </span>
                   </td>
+
                 </tr>
               ))
             )}
