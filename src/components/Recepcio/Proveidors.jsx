@@ -63,14 +63,21 @@ function Proveidors() {
   };
 
   const deleteSuppliers = async (id) => {
+    const confirmDelete = window.confirm("Segur que vols eliminar aquest proveidor?");
+    
+    if (!confirmDelete) return;
+  
     try {
-      await axios.delete(`${apiUrl}/supplier/${id}`, { headers: { "auth-token": localStorage.getItem("token") } });
+      await axios.delete(`${apiUrl}/supplier/${id}`, { 
+        headers: { "auth-token": localStorage.getItem("token") } 
+      });
       const newSuppliers = suppliers.filter((item) => item.id !== id);
       setSuppliers(newSuppliers);
     } catch (error) {
-      console.error('Error eliminant proveidors:', error);
+      console.error('Error eliminat el proveidor:', error);
     }
   };
+  
 
   const modSuppliers = (valors) => {
     setTipoModal('Modificar');
@@ -153,16 +160,16 @@ function Proveidors() {
 
       <div className='container-fluid pt-3'>
 
-        <table className='table table-striped border mt-2'>
-          <thead>
+        <table className='table table-striped border m-2'>
+          <thead class="table-active border-bottom border-dark-subtle">
             <tr>
-              <th>ID</th>
-              <th>Nom</th>
-              <th>Adreça</th>
-              <th>NIF</th>
-              <th>Telèfon</th>
-              <th>Email</th>
-              <th>Accions</th>
+              <th scope="col">ID</th>
+              <th scope="col">Nom</th>
+              <th scope="col">Adreça</th>
+              <th scope="col">NIF</th>
+              <th scope="col">Telèfon</th>
+              <th scope="col">Email</th>
+              <th scope="col">Accions</th>
             </tr>
           </thead>
           <tbody>
@@ -173,40 +180,26 @@ function Proveidors() {
             ) : (
               suppliers.map((valors) => (
                 <tr key={valors.id}>
-                  <td>{valors.id}</td>
-                  <td>{valors.name}</td>
-                  <td>{valors.address}</td>
-                  <td>{valors.nif}</td>
-                  <td>{valors.phone}</td>
-                  <td>{valors.email}</td>
-                  <td>
-                    <Button
-                      variant="info"
-                      onClick={() => {
-                        viewSupplier(valors);
-                      }}
-                    >
+                  <td data-cell="ID">{valors.id}</td>
+                  <td data-cell="Nom">{valors.name}</td>
+                  <td data-cell="Adreça">{valors.address}</td>
+                  <td data-cell="NIF">{valors.nif}</td>
+                  <td data-cell="Telèfon">{valors.phone}</td>
+                  <td data-cell="Email">{valors.email}</td>
+                  <td data-no-colon="true">
+                    <span onClick={() => viewSupplier(valors)} style={{ cursor: "pointer" }}>
                       <i className="bi bi-eye"></i>
-                    </Button>
+                    </span>
 
-                    <Button
-                      variant="warning mx-2"
-                      onClick={() => {
-                        modSuppliers(valors);
-                      }}
-                    >
+                    <span onClick={() => modSuppliers(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
                       <i className="bi bi-pencil-square"></i>
-                    </Button>
+                    </span>
 
-                    <Button
-                      variant="danger"
-                      onClick={() => {
-                        deleteSuppliers(valors.id);
-                      }}
-                    >
-                      <i className='bi bi-trash '></i>
-                    </Button>
+                    <span onClick={() => deleteSuppliers(valors.id)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-trash"></i>
+                    </span>
                   </td>
+
                 </tr>
               ))
             )}
@@ -454,6 +447,33 @@ function Proveidors() {
           </Formik>
         </Modal.Body>
       </Modal>
+      <nav>
+        <ul className="pagination justify-content-center">
+          <li className="page-item">
+            <a className="page-link" href="#">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+
+          <li className="page-item active" aria-current="page">
+            <a className="page-link" href="#">1</a>
+          </li>
+
+          <li className="page-item">
+            <a className="page-link" href="#">2</a>
+          </li>
+          <li className="page-item">
+            <a className="page-link" href="#">3</a>
+          </li>
+
+
+          <li className="page-item">
+            <a className="page-link" href="#">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </>
   );
 }
