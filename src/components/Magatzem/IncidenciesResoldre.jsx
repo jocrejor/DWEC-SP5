@@ -1,7 +1,7 @@
 import { useState, useEffect }                          from 'react'
 import { Formik, Form, Field }                          from 'formik'
 import * as Yup                                         from 'yup'
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud'
+import { deleteData }                    from '../../apiAccess/crud'
 import { Button, Modal }                                from 'react-bootstrap';
 import Header                                           from '../Header'
 import axios                                            from 'axios'
@@ -41,20 +41,54 @@ function IncidenciesResoldre() {
         const token = localStorage.getItem("token")
         console.log(token)
         axios.get(`${apiURL}/incident`, {headers: {"auth-token" : token}})
-            .then(response => setIncident(response))
+            .then(response => setIncident(response.data))
             .catch(error => console.log(error))
     }
 
-    useEffect(() => {      
+    const getDataProduct = () => {
+        const apiURL = import.meta.env.VITE_API_URL
+        const token = localStorage.getItem("token")
+        
+        axios.get(`${apiURL}/product`, {headers: {"auth-token" : token}})
+            .then(response => setProducts(response.data))
+            .catch(error => console.log(error))
+    }
+
+    const getDataOrderLineStatus = () => {
+        const apiURL    = import.meta.env.VITE_API_URL
+        const token     = localStorage.getItem("token")
+
+        axios.get(`${apiURL}/orderline_status`, {headers: {"auth-token" : token}})
+            .then(response  => setOrderlineStatus(response.data))
+            .catch(error    => console.log(error))
+    }
+
+    const postDataIncident = (newIncident) => {
+        const apiURL    = import.meta.env.VITE_API_URL
+        const token     = localStorage.getItem("token")
+
+        axios.post(`${apiURL}/incident`,newIncident, {headers: {"auth-token" : token}})
+            .then(response => {
+                setIncident(prevIncidents => [...prevIncidents, response.data])
+            })
+            .catch(error => console.log(error));
+    }
+
+    const updateDataIncident = (id, updatedData) => {
+        const apiURL    = import.meta.env.VITE_API_URL
+        const token     = localStorage.getItem("token")
+
+        axios.put(`${apiURL}/incident/${id}`, updatedData, {headers: {"auth-token" : token}})
+            .then(response => setIncident(prevIncidents =>
+                prevIncidents.map(incidents => incidents.id === id ? response.data : incidents)
+            ))
+            .catch(error => console.log(error));
+    }
+
+    useEffect(() => {
         getDataIncident();
-        (async () => {
-            const dataProduct = await getData(url, "Product")
-            setProducts(dataProduct)
-        })();
-        (async () => {
-            const dataOrderlineStatus = await getData(url, "OrderLineReception_Status")
-            setOrderlineStatus(dataOrderlineStatus)
-        })();
+        getDataProduct();
+        getDataOrderLineStatus();
     },  []);
 
 const eliminarIncident = (id) => {
@@ -126,7 +160,8 @@ const getStatusName = (statusId) => {
             validationSchema={IncidenciaSchema}
             onSubmit={values => {
                 console.log(values)
-                tipoModal==="Crear"?postData(url,"Incident", values):updateId(url,"Incident",values.id,values)
+                //(Utilitza la API del crud anterior) tipoModal==="Crear"?postData(url,"Incident", values):updateId(url,"Incident",values.id,values)
+                tipoModal==="Crear"?postDataIncident(values):updateDataIncident(values.id, values)
                 canviEstatModal()         
             }}
       >
