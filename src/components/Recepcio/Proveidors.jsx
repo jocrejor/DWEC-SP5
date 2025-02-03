@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal } from 'react-bootstrap';
 import axios from 'axios';
 
@@ -43,23 +42,35 @@ function Proveidors() {
   });
 
   useEffect(() => {
-    async function fetchData() {
-      const data = await getData(url, 'Supplier');
-      const pais = await getData(url, 'State');
-      const provincia = await getData(url, 'Province');
-      const ciutat = await getData(url, 'City');
-      setPais(pais);
-      setProvince(provincia);
-      setCity(ciutat);
-      setSuppliers(data);
-    }
     fetchData();
   }, []);
 
-  const deleteSuppliers = (id) => {
-    deleteData(url, 'Supplier', id);
-    const newSuppliers = suppliers.filter((item) => item.id !== id);
-    setSuppliers(newSuppliers);
+  const fetchData = async () => {
+    try {
+      const [suppliersResponse, paisResponse, provinciaResponse, ciutatResponse] = await Promise.all([
+        axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/state`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/province`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/city`, { headers: { "auth-token": localStorage.getItem("token") } }),
+      ]);
+
+      setSuppliers(suppliersResponse.data);
+      setPais(paisResponse.data);
+      setProvince(provinciaResponse.data);
+      setCity(ciutatResponse.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const deleteSuppliers = async (id) => {
+    try {
+      await axios.delete(`${apiUrl}/supplier/${id}`, { headers: { "auth-token": localStorage.getItem("token") } });
+      const newSuppliers = suppliers.filter((item) => item.id !== id);
+      setSuppliers(newSuppliers);
+    } catch (error) {
+      console.error('Error al eliminar un proveidor:', error);
+    }
   };
 
   const modSuppliers = (valors) => {
@@ -78,11 +89,11 @@ function Proveidors() {
 
   const gravar = async (values) => {
     if (tipoModal === 'Crear') {
-      await postData(url, 'Supplier', values);
+      await axios.post(`${apiUrl}/supplier`, values, { headers: { "auth-token": localStorage.getItem("token") } });
     } else {
-      await updateId(url, 'Supplier', values.id, values);
+      await axios.put(`${apiUrl}/carrier/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token")} });
     }
-    const info = await getData(url, 'Supplier');
+    const info = await axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } });
     await setSuppliers(info);
     canviEstatModal();
   };
