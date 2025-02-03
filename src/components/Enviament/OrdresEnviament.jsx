@@ -26,7 +26,7 @@ function OrdresEnviament() {
   const [status, setStatus] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [tipoModal, setTipoModal] = useState('Crear')
-  const [valorsInicials, setValorsInicials] = useState({ client_id: '', carrier_id: '', shipping_date: '', ordershipping_status_id: '' })
+  const [valorsInicials, setValorsInicials] = useState({ client_id: '', shipping_date: '', ordershipping_status_id: '' })
   const [valorsLineInicials, setValorsLineInicials] = useState({ shipping_order_id: '', product_id: '', quantity: '', orderline_status_id: ''})
   const [clientes, setClientes] = useState([])
   const [carriers, setCarriers] = useState([])
@@ -93,7 +93,7 @@ function OrdresEnviament() {
   }, [])
 
   const eliminarOrder = (id) => {
-    axios.delete(`${apiUrl}ordershipping/${id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.delete(`${apiUrl}ordershipping/${id}`, { headers: { "auth-token": localStorage.getItem("token")} })
       .then(() => {
         const newOrders = orders.filter(order => order.id !== id)
         setOrder(newOrders)
@@ -124,7 +124,7 @@ function OrdresEnviament() {
   const estatExistent = (id) => {
     console.log(status)
     console.log(id)
-    const existe = status.find(estat => estat.id === String(id))
+    const existe = status.find(estat => estat.id === id)
     if (existe) {
       return existe.name
     }
@@ -363,13 +363,12 @@ function OrdresEnviament() {
             })}
             validationSchema={OrderLineSchema}
             onSubmit={(values, { resetForm }) => {
-              // Agregar el producto al arrayProductos
               afegirProducte({
                 product_id: values.product_id,
                 quantity: values.quantity,
                 orderline_status_id: 1,
               });
-              resetForm(); // Limpiar el formulario después de agregar
+              resetForm(); 
             }}
           >
             {({
@@ -377,8 +376,6 @@ function OrdresEnviament() {
               errors,
               touched,
               handleSubmit
-
-              /* and other goodies */
             }) => (
               <Form>
 
