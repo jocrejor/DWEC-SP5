@@ -33,7 +33,7 @@ function Lots() {
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
   const [valorsInicials, setValorsInicials] = useState({
-    name: '',
+    id: '',
     product_id: '',
     supplier_id: '',
     quantity: '',
@@ -279,7 +279,7 @@ function Lots() {
 
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
-          <Modal.Title>{tipoModal} Lot</Modal.Title>
+          <Modal.Title>{tipoModal} Lot/Serie</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -316,8 +316,17 @@ function Lots() {
                     // Usamos los 'values' (datos del formulario) para agregar el lote
                     const newLot = {
                       ...values,
-                      id: response.data.results.insertId // Asigna el ID generado por la base de datos
+                      id: response.data.results.insertId, // Asigna el ID generado por la base de datos
+
+                      product_id: products.find((product) => product.id === values.product_id)?.name,
+                      supplier_id: suppliers.find((supplier) => supplier.id === values.supplier_id)?.name
                     };
+
+                    console.log("Valor producte", values.product_id)
+                    console.log("Valor supplier", values.supplier_id)
+
+                    console.log("Producte nom", products.find((product) => product.id === values.product_id)?.name);
+                    console.log("Supplier nom", suppliers.find((supplier) => supplier.id === values.supplier_id)?.name);
                 
                     setLot((prevLot) => {
                       const updatedLot = [...prevLot, newLot];
