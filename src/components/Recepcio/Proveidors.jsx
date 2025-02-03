@@ -8,6 +8,8 @@ import axios from 'axios';
 import Header from '../Header';
 import Filtres from '../Filtres';
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const supplierschema = Yup.object().shape({
   name: Yup.string().min(3, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
