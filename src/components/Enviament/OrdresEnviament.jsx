@@ -12,7 +12,6 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const OrderShippingSchema = yup.object().shape({
   client_id: yup.string().required('Valor requerit'),
   carrier_id: yup.string().required('Valor requerit'),
-  prepared_by: yup.string().required('Valor requerit'),
   shipping_date: yup.date().required('Data obligatoria'),
   ordershipping_status_id: yup.string().required('Valor requerit')
 })
@@ -27,8 +26,8 @@ function OrdresEnviament() {
   const [status, setStatus] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [tipoModal, setTipoModal] = useState('Crear')
-  const [valorsInicials, setValorsInicials] = useState({ client_id: '', carrier_id: '', prepared_by: '', shipping_date: '', ordershipping_status_id: '' })
-  const [valorsLineInicials, setValorsLineInicials] = useState({ shipping_order_id: '', product_id: '', quantity: '' })
+  const [valorsInicials, setValorsInicials] = useState({ client_id: '', carrier_id: '', shipping_date: '', ordershipping_status_id: '' })
+  const [valorsLineInicials, setValorsLineInicials] = useState({ shipping_order_id: '', product_id: '', quantity: '', orderline_status_id: ''})
   const [clientes, setClientes] = useState([])
   const [carriers, setCarriers] = useState([])
   const [users, setUsers] = useState([])
@@ -37,7 +36,7 @@ function OrdresEnviament() {
 
 
   useEffect(async () => {
-    axios.get(`${apiUrl}/ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setOrder(response.data)
       })
@@ -46,8 +45,9 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}/client`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}client`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
+        console.log(response)
         setClientes(response.data)
       })
       .catch(e => {
@@ -55,7 +55,7 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}carrier`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setCarriers(response.data)
       })
@@ -64,7 +64,7 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}/users`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}users`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setUsers(response.data)
       })
@@ -73,7 +73,7 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}product`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setProducts(response.data)
       })
@@ -82,7 +82,7 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}/ordershipping_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}ordershipping_status`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setStatus(response.data)
       })
@@ -95,7 +95,6 @@ function OrdresEnviament() {
   const eliminarOrder = (id) => {
     axios.delete(`${apiUrl}ordershipping/${id}`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(() => {
-        alert("Orden eliminada");
         const newOrders = orders.filter(order => order.id !== id)
         setOrder(newOrders)
       })
@@ -122,13 +121,6 @@ function OrdresEnviament() {
     }
   }
 
-  const transportistaExistente = (id) => {
-    const existe = carriers.find(carrier => carrier.id === id)
-    if (existe) {
-      return existe.name
-    }
-  }
-
   const estatExistent = (id) => {
     console.log(status)
     console.log(id)
@@ -142,7 +134,34 @@ function OrdresEnviament() {
     setShowModal(!showModal)
   }
 
-  const grabar = async (values) => {
+
+  const grabar = (values) => {
+    if (tipoModal === "Crear") {
+      if (arrayProductos.length > 0) {
+        axios.post(`${apiUrl}ordershipping`, values, { headers: { "auth-token": localStorage.getItem("token") } })
+          .then(response => {
+            const resultat = response.data;
+            console.log(response)
+            console.log(resultat.results.insertId)
+            arrayProductos.map(line => {
+              const novaId = resultat.results.insertId
+              line.shipping_order_id = novaId
+              
+              console.log(novaId)
+              console.log(line)
+              axios.post(`${apiUrl}orderlineshipping`, line, { headers: { "auth-token": localStorage.getItem("token") } })
+            })
+        })
+      }
+    }
+    else{
+      axios.put(`${apiUrl}ordershipping`, values.id, values, { headers: { "auth-token": localStorage.getItem("token") } })
+    }
+    canviEstatModal();
+    setArray([]);
+  }
+
+ /**  const grabar2 = async (values) => {
     if (tipoModal === "Crear") {
       if (arrayProductos.length > 0) {
         const data = await postData(url, "OrderShipping", values);
@@ -172,6 +191,7 @@ function OrdresEnviament() {
     canviEstatModal();
     setArray([]);
   };
+  */
 
   return (
     <>
@@ -193,7 +213,7 @@ function OrdresEnviament() {
         <div class="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div class="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div class="d-flex h-100 justify-content-xl-end">
-            <button type="button" class="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"><i class="bi bi-plus-circle text-white pe-1"></i>Crear</button>
+            <button type="button" onClick={() => canviEstatModal()} class="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"><i class="bi bi-plus-circle text-white pe-1"></i>Crear</button>
           </div>
         </div>
       </div>
@@ -215,7 +235,7 @@ function OrdresEnviament() {
             {orders.map((valors) => (
               <tr key={valors.id}>
                 <td scope="row" data-cell="Seleccionar">
-                  <input class="form-check-input" type="checkbox" name="" id=""/>
+                  <input class="form-check-input" type="checkbox" name="" id="" />
                 </td>
                 <td>{valors.id}</td>
                 <td>{clientExistent(valors.client_id)}</td>
@@ -281,13 +301,11 @@ function OrdresEnviament() {
             initialValues={(tipoModal === 'Modificar' ? valorsInicials : {
               client_id: '',
               carrier_id: '',
-              prepared_by: '',
               shipping_date: '',
               ordershipping_status_id: 1
             })}
             validationSchema={OrderShippingSchema}
             onSubmit={values => {
-              console.log(values)
               grabar(values)
             }}
           >
@@ -340,7 +358,8 @@ function OrdresEnviament() {
             initialValues={(tipoModal === 'Modificar' ? valorsLineInicials : {
               shipping_order_id: '',
               product_id: '',
-              quantity: ''
+              quantity: '',
+              orderline_status_id: '',
             })}
             validationSchema={OrderLineSchema}
             onSubmit={(values, { resetForm }) => {
@@ -348,6 +367,7 @@ function OrdresEnviament() {
               afegirProducte({
                 product_id: values.product_id,
                 quantity: values.quantity,
+                orderline_status_id: 1,
               });
               resetForm(); // Limpiar el formulario después de agregar
             }}
