@@ -127,7 +127,7 @@ function IncidenciesResoldre() {
         <>
         <Header title="Incidències"/>
         <Button variant='success' onClick={()=>{canviEstatModal(); setTipoModal("Crear")}}>Llistat ordres de recepció</Button>
-        <table>
+        <table className="table table-striped table-bordered table-hover table-responsive">
             <thead>
                 <tr>
                     <th>Data de creació</th>
@@ -135,15 +135,13 @@ function IncidenciesResoldre() {
                     <th>Producte</th>
                     <th>Unitats demanades</th>
                     <th>Unitats rebudes</th>
-                    <th>Estat</th>
-                    <th>Modificar</th>
-                    <th>Eliminar</th>
+                    <th>Accions</th>
                 </tr>
             </thead>
             <tbody>
                 {incidents.length === 0 ? (
                     <tr>
-                        <td colSpan="8">No hi han articles</td> 
+                        <td colSpan="8" className="text-center">No hi han articles</td> 
                     </tr>
                 ) : incidents.map((valors) => (
                     <tr key={valors.id}>
@@ -153,8 +151,9 @@ function IncidenciesResoldre() {
                         <td>{valors.quantity_ordered}</td>
                         <td>{valors.quantity_received}</td>          
                         <td>{getStatusName(valors.status)}</td>
-                        <td><Button variant="warning" onClick={() => { modificarIncident(valors); canviEstatModal(); }}>Modificar</Button></td>
-                        <td><Button variant="primary" onClick={() => { deleteIncident(valors.id) }}>Eliminar</Button></td>
+                        <td><Button variant="outline-success"><i className="bi bi-eye p-2"></i></Button></td> {/*Así anira el visualitza*/}
+                        <td><Button variant="outline-success" onClick={()   => { modificarIncident(valors); canviEstatModal(); }}><i className="bi bi-pencil-square p-2"></i></Button></td>
+                        <td><Button variant="outline-danger" onClick={()    => { deleteIncident(valors.id) }}><i className='bi bi-trash p-2'></i></Button></td>
                     </tr>
                 ))}
             </tbody>
