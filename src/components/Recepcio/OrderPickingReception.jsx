@@ -70,8 +70,12 @@ function OrderPickingReception() {
 
         const tempPickings = [];
         orderPendent.map((order) => {
-            //recorrer line reception de cada orden reception
-            const lines = orderLineReception.filter((line) => line.order_reception_id === order.id);
+            //filtrar lines en estat pendent o forçosa
+            const lines = orderLineReception.filter((line) =>
+                line.order_reception_id === order.id &&
+                (line.orderline_status_id === 1 || line.orderline_status_id === 4)
+            );
+
             //obtindre product.name, product.quantitat, product.space
             lines.forEach((line) => {
                 const space = spaces.find((space) => space.product_id === line.product_id);
