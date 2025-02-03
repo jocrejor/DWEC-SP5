@@ -295,7 +295,7 @@ function OrderPickingReception() {
                                                     <i class="bi bi-arrow-down"></i>
                                                 </td>
                                                 <td>{order.id}</td>
-                                                <td>{order.created_date}</td>
+                                                <td>{order.create_date}</td>
                                                 <td>{user.name}</td>
                                             </tr>
                                         );
