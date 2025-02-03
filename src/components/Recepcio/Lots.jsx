@@ -282,12 +282,6 @@ function Lots() {
                   )}
                 </tbody>
               </table>
-
-
-
-
-
-
               <nav aria-label="Page navigation example" className="d-block">
                 <ul className="pagination justify-content-center">
                   <li className="page-item">
