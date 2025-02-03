@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import {url,postData,getData,deleteData,updateId,} from "../../apiAccess/crud";
 import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
 import { Button, Modal } from "react-bootstrap";
@@ -31,6 +30,7 @@ const ClientSchema = yup.object().shape({
     .required("Valor Requerit."),
 });
 
+const apiUrl = import.meta.env.VITE_API_URL;
 function Client() {
   const [clients, setClients] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -257,17 +257,13 @@ function Client() {
               validationSchema={ClientSchema}
               onSubmit={async (values) => {
                 if (tipoModal === "Crear") {
-                  // Hacer la llamada a la API para crear el cliente
                   const newClient = await postData(url, "Client", values);
 
-                  // Si la creación es exitosa, añadir el nuevo cliente a la lista
                   setClients([...clients, newClient]);
                 } else if (tipoModal === "Modificar") {
-                  // Llamada a la API para modificar el cliente
                   await updateId(url, "Client", values.id, values);
                 }
 
-                // Cerrar el modal después de guardar
                 setShowModal(false);
               }}
             >
