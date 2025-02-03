@@ -107,6 +107,26 @@ function Transportista() {
     }
   };
 
+  const gravar2 = async (values) => {
+    try {
+      const { id, ...dataToSend } = values;
+
+      if (tipoModal === 'Crear') {
+        await axios.post(`${apiUrl}/carrier`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
+      } else {
+        const { id, ...dataToSendForUpdate } = values;
+        await axios.put(`${apiUrl}/carrier/${id}`, dataToSendForUpdate, { headers: { "auth-token": localStorage.getItem("token") } });
+      }
+
+      const updatedCarriers = await axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } });
+      setCarriers(updatedCarriers.data);
+      canviEstatModal();
+    } catch (error) {
+      console.error('Error guardant transportista:', error);
+    }
+  };
+
+
   return (
     <>
       <Header title="Llistat de transportistes" />
@@ -248,7 +268,7 @@ function Transportista() {
         <Modal.Body>
           <Formik
             initialValues={
-              tipoModal === 'Modificar'
+              tipoModal === 'Crear'
                 ? valorsInicials
                 : {
                   name: '',
@@ -443,9 +463,222 @@ function Transportista() {
                 </div>
                 <div className="form-group text-right">
                   <Button type="submit" variant="success">
-                    {tipoModal === 'Crear' ? 'Crear' : 'Modificar'}
+                    {tipoModal === 'Crear'}
                   </Button>
                 </div>
+              </Form>
+            )}
+          </Formik>
+        </Modal.Body>
+      </Modal>
+
+      {/*Modificar*/}
+      <Modal show={showModal} onHide={canviEstatModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{tipoModal} transportista</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Formik
+            initialValues={
+              tipoModal === 'Modificar'
+                ? valorsInicials
+                : {
+                  name: '',
+                  address: '',
+                  nif: '',
+                  phone: '',
+                  email: '',
+                  state_id: 0,
+                  province: '',
+                  city: '',
+                  cp: '',
+                }
+            }
+            validationSchema={carrierschema}
+            onSubmit={(values) => {
+              gravar2(values);
+            }}
+          >
+            {({ values, errors, touched }) => (
+              <Form>
+                <div className="form-group">
+                  <label htmlFor="name">Nom</label>
+                  <Field
+                    id="name"
+                    name="name"
+                    className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''
+                      }`}
+                  />
+                  {touched.name && errors.name ? (
+                    <div className="invalid-feedback">{errors.name}</div>
+                  ) : null}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="address">Adreça</label>
+                  <Field
+                    id="address"
+                    name="address"
+                    className={`form-control ${touched.address && errors.address ? 'is-invalid' : ''
+                      }`}
+                  />
+                  {touched.address && errors.address ? (
+                    <div className="invalid-feedback">{errors.address}</div>
+                  ) : null}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nif">NIF</label>
+                  <Field
+                    id="nif"
+                    name="nif"
+                    className={`form-control ${touched.nif && errors.nif ? 'is-invalid' : ''
+                      }`}
+                  />
+                  {touched.nif && errors.nif ? (
+                    <div className="invalid-feedback">{errors.nif}</div>
+                  ) : null}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="phone">Telèfon</label>
+                  <Field
+                    id="phone"
+                    name="phone"
+                    className={`form-control ${touched.phone && errors.phone ? 'is-invalid' : ''
+                      }`}
+                  />
+                  {touched.phone && errors.phone ? (
+                    <div className="invalid-feedback">{errors.phone}</div>
+                  ) : null}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="email">Email</label>
+                  <Field
+                    id="email"
+                    name="email"
+                    type="email"
+                    className={`form-control ${touched.email && errors.email ? 'is-invalid' : ''
+                      }`}
+                  />
+                  {touched.email && errors.email ? (
+                    <div className="invalid-feedback">{errors.email}</div>
+                  ) : null}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="state_id">Estat</label>
+                  <Field
+                    as="select"
+                    name="state_id"
+                    className={`form-control ${touched.state_id && errors.state_id ? 'is-invalid' : ''
+                      }`}
+                  >
+                    <option value="">Selecciona un estat</option>
+                    {pais.map((state) => (
+                      <option key={state.id} value={state.id}>
+                        {state.name}
+                      </option>
+                    ))}
+                  </Field>
+                  {touched.state_id && errors.state_id ? (
+                    <div className="invalid-feedback">{errors.state_id}</div>
+                  ) : null}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="province">Província</label>
+                  {values.state_id === '194' ? (
+                    <>
+                      <Field
+                        as="select"
+                        id="province"
+                        name="province"
+                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
+                          }`}
+                      >
+                        <option value="">Selecciona una província</option>
+                        {provincia.length > 0 ? (
+                          provincia.map((prov) => (
+                            <option key={prov.id} value={prov.name}>
+                              {prov.name}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="">No hi han províncies</option>
+                        )}
+                      </Field>
+                      {touched.province && errors.province && (
+                        <div className="invalid-feedback">{errors.province}</div>
+                      )}
+
+                    </>
+                  ) : (
+                    <>
+                      <Field
+                        type="text"
+                        id="province"
+                        name="province"
+                        placeholder="Escribe la provincia"
+                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
+                          }`}
+                      />
+                      {touched.province && errors.province && (
+                        <div className="invalid-feedback">{errors.province}</div>
+                      )}
+
+                    </>
+                  )}
+                </div>
+                {values.state_id === '194' && values.province ? (
+                  <div className="form-group">
+                    <label htmlFor="city">Ciutat</label>
+                    <Field
+                      as="select"
+                      id="city"
+                      name="city"
+                      className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
+                    >
+                      <option value="">Selecciona una ciutat</option>
+                      {ciutat.map((ciudad) => (
+                        <option key={ciudad.id} value={ciudad.name}>
+                          {ciudad.name}
+                        </option>
+                      ))}
+                    </Field>
+                    {touched.city && errors.city && (
+                      <div className="invalid-feedback">{errors.city}</div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="form-group">
+                    <label htmlFor="city">Ciutat</label>
+                    <Field
+                      type="text"
+                      id="city"
+                      name="city"
+                      placeholder="Escriu la ciutat"
+                      className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
+                    />
+                    {touched.city && errors.city && (
+                      <div className="invalid-feedback">{errors.city}</div>
+                    )}
+                  </div>
+                )}
+                <div className="form-group">
+                  <label htmlFor="cp">Codi Postal</label>
+                  <Field
+                    id="cp"
+                    name="cp"
+                    className={`form-control ${touched.cp && errors.cp ? 'is-invalid' : ''
+                      }`}
+                  />
+                  {touched.cp && errors.cp ? (
+                    <div className="invalid-feedback">{errors.cp}</div>
+                  ) : null}
+                </div>
+                <div className="form-group text-right">
+                  <Button type="submit" variant="success">
+                    {tipoModal === 'Modificar' ? 'Modificar Transportista' : 'Alta Transportista'}
+                  </Button>
+                </div>
+
               </Form>
             )}
           </Formik>
