@@ -5,6 +5,7 @@ import { Button, Table, Modal } from "react-bootstrap";
 import axios from "axios";
 import Filtres from "../Filtres";
 import Header from "../Header";
+import { movMagatzem } from "../Magatzem/movMagatzem"; 
 
 function OrderPickingReception() {
     const [orderPickingReception, setOrderPickingReception] = useState([]); //order picking reception
@@ -181,6 +182,16 @@ function OrderPickingReception() {
             .catch((error) => {
                 console.error("Error en esborra order picking",error.response.data);
             });
+        
+        //crear moviments
+        const space = spaces.find(space => space.product_id === lineActualitzar.product_id);
+        if (space) {
+            movMagatzem(lineActualitzar.product_id, lineActualitzar.operator_id, lineActualitzar.quantity_received, "Recepcio", space.storage_id, space.storage_id, space.street_id, space.shelf_id, space.id);
+            console.log("Moviment eixida realitzat");
+
+            movMagatzem(lineActualitzar.product_id, lineActualitzar.operator_id, lineActualitzar.quantity_received, "General", space.storage_id, space.storage_id, space.street_id, space.shelf_id, space.id);
+            console.log("Moviment entrada realitzat");
+        }
     };
 
     const mostrarOrder = (orderId) => {
