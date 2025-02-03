@@ -4,6 +4,7 @@ import * as yup from "yup";
 import { Button, Modal } from "react-bootstrap";
 import Header from "../Header";
 import Filtres from '../Filtres';
+import axios from 'axios';
 
 const ClientSchema = yup.object().shape({
   name: yup
@@ -31,6 +32,7 @@ const ClientSchema = yup.object().shape({
 });
 
 const apiUrl = import.meta.env.VITE_API_URL;
+
 function Client() {
   const [clients, setClients] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -48,7 +50,6 @@ function Client() {
   });
 
   const [clientToView, setClientToView] = useState(null);
-
   const [states, setStates] = useState([]);
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
@@ -57,15 +58,14 @@ function Client() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const clientsData = await getData(url, "Client");
+      const clientsData = await getData("client");
       setClients(clientsData);
 
-      const statesData = await getData(url, "State");
+      const statesData = await getData("State");
       setStates(statesData);
 
       if (statesData.length > 0) {
         const provincesData = await getData(
-          url,
           "Province?state_id=" + statesData[0].id
         );
         setProvinces(provincesData);
@@ -73,7 +73,6 @@ function Client() {
 
       if (statesData.length > 0 && provinces.length > 0) {
         const citiesData = await getData(
-          url,
           "City?province_id=" + provinces[0].id
         );
         setCities(citiesData);
@@ -83,11 +82,35 @@ function Client() {
     fetchData();
   }, []);
 
-  const eliminarClient = (id) => {
-    deleteData(url, "Client", id);
-    const newClients = clients.filter((client) => client.id !== id);
-    setClients(newClients);
+  const getData = async (endpoint) => {
+    try {
+      const response = await axios.get(`${apiUrl}/${endpoint}`, {
+        headers: {
+          'auth-token': localStorage.getItem("token")
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching data", error);
+    }
   };
+
+  const eliminarClient = async (id) => {
+    try {
+      await axios.delete(`${apiUrl}/client/delete/${id}`, {
+        headers: {
+          'auth-token': localStorage.getItem("token")
+        }
+      });
+  
+      const clientsData = await getData("client");
+      setClients(clientsData);
+    } catch (error) {
+      console.error("Error al eliminar el client", error);
+    }
+  };
+  
+  
 
   const modificarClient = (valors) => {
     setTipoModal("Modificar");
@@ -109,10 +132,7 @@ function Client() {
     const selectedStateId = e.target.value;
     setSelectedState(selectedStateId);
 
-    const provincesData = await getData(
-      url,
-      "Province?state_id=" + selectedStateId
-    );
+    const provincesData = await getData("Province?state_id=" + selectedStateId);
     setProvinces(provincesData);
 
     setSelectedProvince("");
@@ -123,17 +143,33 @@ function Client() {
     const selectedProvinceId = e.target.value;
     setSelectedProvince(selectedProvinceId);
 
-    const citiesData = await getData(
-      url,
-      "City?province_id=" + selectedProvinceId
-    );
+    const citiesData = await getData("City?province_id=" + selectedProvinceId);
     setCities(citiesData);
+  };
+
+  const postData = async (endpoint, data) => {
+    try {
+      const response = await axios.post(`${apiUrl}/${endpoint}`, data, {
+        headers: {
+          'auth-token': localStorage.getItem("token")
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error posting data", error);
+    }
+  };
+
+  const crearClient = async (values) => {
+    const newClient = await postData("client", values);
+    setClients((prevClients) => [...prevClients, newClient]);
+    setShowModal(false);
   };
 
   return (
     <>
-        <Header title="Clients" />
-        <Filtres />
+      <Header title="Clients" />
+      <Filtres />
       <div className='container-fluid pt-3'>
         <Button
           variant="success"
@@ -206,33 +242,15 @@ function Client() {
           {tipoModal === "Visualitzar" ? (
             clientToView ? (
               <>
-                <p>
-                  <strong>Nom:</strong> {clientToView.name}
-                </p>
-                <p>
-                  <strong>Email:</strong> {clientToView.email}
-                </p>
-                <p>
-                  <strong>Telèfon:</strong> {clientToView.phone}
-                </p>
-                <p>
-                  <strong>Adreça:</strong> {clientToView.address}
-                </p>
-                <p>
-                  <strong>NIF:</strong> {clientToView.nif}
-                </p>
-                <p>
-                  <strong>Estat:</strong> {clientToView.state_id}
-                </p>
-                <p>
-                  <strong>Província:</strong> {clientToView.province}
-                </p>
-                <p>
-                  <strong>Ciutat:</strong> {clientToView.city}
-                </p>
-                <p>
-                  <strong>Codi Postal:</strong> {clientToView.cp}
-                </p>
+                <p><strong>Nom:</strong> {clientToView.name}</p>
+                <p><strong>Email:</strong> {clientToView.email}</p>
+                <p><strong>Telèfon:</strong> {clientToView.phone}</p>
+                <p><strong>Adreça:</strong> {clientToView.address}</p>
+                <p><strong>NIF:</strong> {clientToView.nif}</p>
+                <p><strong>Estat:</strong> {clientToView.state_id}</p>
+                <p><strong>Província:</strong> {clientToView.province}</p>
+                <p><strong>Ciutat:</strong> {clientToView.city}</p>
+                <p><strong>Codi Postal:</strong> {clientToView.cp}</p>
               </>
             ) : (
               <p>No s'ha seleccionat cap client per visualitzar.</p>
@@ -255,126 +273,60 @@ function Client() {
                     }
               }
               validationSchema={ClientSchema}
-              onSubmit={async (values) => {
-                if (tipoModal === "Crear") {
-                  const newClient = await postData(url, "Client", values);
-
-                  setClients([...clients, newClient]);
-                } else if (tipoModal === "Modificar") {
-                  await updateId(url, "Client", values.id, values);
-                }
-
-                setShowModal(false);
-              }}
+              onSubmit={crearClient}
             >
               {({ values, errors, touched }) => (
                 <Form>
                   <div>
                     <label htmlFor="name">Nom del client</label>
-                    <Field
-                      type="text"
-                      name="name"
-                      placeholder="Nom del client"
-                      autoComplete="off"
-                      value={values.name}
-                    />
-                    {errors.name && touched.name ? (
-                      <div>{errors.name}</div>
-                    ) : null}
+                    <Field type="text" name="name" placeholder="Nom del client" autoComplete="off" value={values.name} />
+                    {errors.name && touched.name ? <div>{errors.name}</div> : null}
                   </div>
 
                   <div>
                     <label htmlFor="email">Email del client</label>
-                    <Field
-                      type="email"
-                      name="email"
-                      placeholder="Email del client"
-                      autoComplete="off"
-                      value={values.email}
-                    />
-                    {errors.email && touched.email ? (
-                      <div>{errors.email}</div>
-                    ) : null}
+                    <Field type="email" name="email" placeholder="Email del client" autoComplete="off" value={values.email} />
+                    {errors.email && touched.email ? <div>{errors.email}</div> : null}
                   </div>
 
                   <div>
                     <label htmlFor="phone">Telèfon del client</label>
-                    <Field
-                      type="text"
-                      name="phone"
-                      placeholder="Telèfon del client"
-                      autoComplete="off"
-                      value={values.phone}
-                    />
-                    {errors.phone && touched.phone ? (
-                      <div>{errors.phone}</div>
-                    ) : null}
+                    <Field type="text" name="phone" placeholder="Telèfon del client" autoComplete="off" value={values.phone} />
+                    {errors.phone && touched.phone ? <div>{errors.phone}</div> : null}
                   </div>
 
                   <div>
                     <label htmlFor="address">Adreça</label>
-                    <Field
-                      type="text"
-                      name="address"
-                      placeholder="Adreça"
-                      autoComplete="off"
-                      value={values.address}
-                    />
-                    {errors.address && touched.address ? (
-                      <div>{errors.address}</div>
-                    ) : null}
+                    <Field type="text" name="address" placeholder="Adreça" autoComplete="off" value={values.address} />
+                    {errors.address && touched.address ? <div>{errors.address}</div> : null}
                   </div>
 
                   <div>
                     <label htmlFor="nif">NIF</label>
-                    <Field
-                      type="text"
-                      name="nif"
-                      placeholder="NIF"
-                      autoComplete="off"
-                      value={values.nif}
-                    />
+                    <Field type="text" name="nif" placeholder="NIF" autoComplete="off" value={values.nif} />
                     {errors.nif && touched.nif ? <div>{errors.nif}</div> : null}
                   </div>
 
                   <div>
                     <label htmlFor="state_id">Estat</label>
-                    <Field
-                      as="select"
-                      name="state_id"
-                      onChange={handleStateChange}
-                      value={selectedState}
-                    >
+                    <Field as="select" name="state_id" onChange={handleStateChange} value={selectedState}>
                       <option value="">Seleccionar Estat</option>
                       {states.map((state) => (
-                        <option key={state.id} value={state.id}>
-                          {state.name}
-                        </option>
+                        <option key={state.id} value={state.id}>{state.name}</option>
                       ))}
                     </Field>
-                    {errors.state_id && touched.state_id ? (
-                      <div>{errors.state_id}</div>
-                    ) : null}
+                    {errors.state_id && touched.state_id ? <div>{errors.state_id}</div> : null}
                   </div>
 
                   <div>
                     <label htmlFor="province_id">Província</label>
-                    <Field
-                      as="select"
-                      name="province_id"
-                      onChange={handleProvinceChange}
-                      value={selectedProvince}
-                    >
+                    <Field as="select" name="province_id" onChange={handleProvinceChange} value={selectedProvince}>
                       <option value="">Seleccionar Província</option>
                       {provinces.map((province) => (
-                        <option key={province.id} value={province.id}>
-                          {province.name}
-                        </option>
+                        <option key={province.id} value={province.id}>{province.name}</option>
                       ))}
                     </Field>
-                    {errors.province_id && touched.province_id ? (
-                      <div>{errors.province_id}</div>
-                    ) : null}
+                    {errors.province_id && touched.province_id ? <div>{errors.province_id}</div> : null}
                   </div>
 
                   <div>
@@ -382,53 +334,24 @@ function Client() {
                     <Field as="select" name="city_id" value={values.city_id}>
                       <option value="">Seleccionar Ciutat</option>
                       {cities.map((city) => (
-                        <option key={city.id} value={city.id}>
-                          {city.name}
-                        </option>
+                        <option key={city.id} value={city.id}>{city.name}</option>
                       ))}
                     </Field>
-                    {errors.city_id && touched.city_id ? (
-                      <div>{errors.city_id}</div>
-                    ) : null}
+                    {errors.city_id && touched.city_id ? <div>{errors.city_id}</div> : null}
                   </div>
 
                   <div>
                     <label htmlFor="cp">Codi Postal</label>
-                    <Field
-                      type="text"
-                      name="cp"
-                      placeholder="Codi Postal"
-                      autoComplete="off"
-                      value={values.cp}
-                    />
+                    <Field type="text" name="cp" placeholder="Codi Postal" autoComplete="off" value={values.cp} />
                     {errors.cp && touched.cp ? <div>{errors.cp}</div> : null}
                   </div>
 
-                  <div>
-                    <Button
-                      onClick={() => setShowModal(false)}
-                      variant="secondary"
-                    >
-                      Tancar
-                    </Button>
-                    <Button
-                      variant={tipoModal === "Crear" ? "success" : "warning"}
-                      type="submit"
-                    >
-                      {tipoModal}
-                    </Button>
-                  </div>
+                  <Button type="submit">{tipoModal === "Modificar" ? "Modificar" : "Crear"}</Button>
                 </Form>
               )}
             </Formik>
           )}
         </Modal.Body>
-
-        <Modal.Footer>
-          <Button variant="secondary" onClick={canviEstatModal}>
-            Tancar
-          </Button>
-        </Modal.Footer>
       </Modal>
     </>
   );
