@@ -4,7 +4,7 @@ export const movMagatzem = (product,operator,quantity,origin,origin_id,storage,s
     const apiUrl = import.meta.env.VITE_API_URL;
 
     // imoptar token
-    token = localStorage.getItem('token')
+    const token = localStorage.getItem('token')
     // crear objeto 
     const data ={
         "product_id":product,
@@ -18,12 +18,12 @@ export const movMagatzem = (product,operator,quantity,origin,origin_id,storage,s
         "space_id": space 
     }
     
-    axios.post(apiUrl,data,{
+    axios.post(`${apiUrl}/movement`,data,{
         headers: {
             'Content-Type': 'multipart/form-data',
             'auth-token' : `${token}`
         },
     })
-    .then((resultat) => console.log(resultat))
-    .catch((error) =>console.error(error))
+    .then((resultat) => console.log(resultat.data.message))
+    .catch((error) =>console.error(error.data))
 }
