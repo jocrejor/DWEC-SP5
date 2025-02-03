@@ -24,11 +24,16 @@ function OrderPickingReception() {
     const [orderSelected, setOrderSelected] = useState([]);
 
     useEffect(() => {
-        const apiUrl = import.meta.env.VITE_API_URL;
+        const apiUrl = import.meta.env.VITE_API_URL; 
         //const apiUrl = url;
         const token = localStorage.getItem("token");
 
-        const fetchData = async () => {
+            //order line reception
+            axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } 
+            })
+            .then((response) => {setOrderLineReception(response.data);})
+            .catch((error) => {console.error('Error order line:', error);});
+
             //order picking reception
             axios.get(`${apiUrl}orderpickingreception`, { headers: { "auth-token": token } 
             })
@@ -41,12 +46,7 @@ function OrderPickingReception() {
             .then((response) => {setOrderReception(response.data);})
             .catch((error) => {console.error('Error order reception:', error);});
 
-            //order line reception
-            axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } 
-            })
-            .then((response) => {setOrderLineReception(response.data);})
-            .catch((error) => {console.error('Error order line:', error);});
-
+            
             //product
             axios.get(`${apiUrl}product`, { headers: { "auth-token": token } 
             })
@@ -58,46 +58,41 @@ function OrderPickingReception() {
             })
             .then((response) => {setSpaces(response.data);})
             .catch((error) => {console.error('Error space:', error);});
-
+            orderLineReception
             //user
             axios.get(`${apiUrl}users`, { headers: { "auth-token": token } 
             })
             .then((response) => {setUsers(response.data);})
             .catch((error) => {console.error('Error user:', error);});
 
-
-            //setCurrentUser(localStorage.getItem("currentuser"));
-
             //recorrer orden reception pendent (desempaquetada)
-            
-        };
-        fetchData();
-        const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 1);
+            const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 1);
 
-            const tempPickings = [];
-            orderPendent.map((order) => {
-                //recorrer line reception de cada orden reception
-                const lines = orderLineReception.filter((line) => line.order_reception_id === order.id);
-                //obtindre product.name, product.quantitat, product.space
-                lines.forEach((line) => {
-                    const space = spaces.find((space) => space.product_id === line.product_id);
-                    if (space) {
-                        console.log(order.id, line.id, line.product_id, line.quantity_received, space.storage_id, space.street_id, space.selft_id, space.id);
-                        const objTemporal = {
-                            order_reception_id: order.id,
-                            order_line_reception_id: line.id,
-                            product_id: line.product_id,
-                            quantity_received: line.quantity_received,
-                            storage_id: space.storage_id,
-                            street_id: space.street_id,
-                            selft_id: space.selft_id,
-                            space_id: space.id
+                const tempPickings = [];
+                orderPendent.map((order) => {
+                    //recorrer line reception de cada orden reception
+                    const lines = orderLineReception.filter((line) => line.order_reception_id === order.id);
+                    //obtindre product.name, product.quantitat, product.space
+                    lines.forEach((line) => {
+                        const space = spaces.find((space) => space.product_id === line.product_id);
+                        if (space) {
+                            console.log(order.id, line.id, line.product_id, line.quantity_received, space.storage_id, space.street_id, space.selft_id, space.id);
+                            const objTemporal = {
+                                order_reception_id: order.id,
+                                order_line_reception_id: line.id,
+                                product_id: line.product_id,
+                                quantity_received: line.quantity_received,
+                                storage_id: space.storage_id,
+                                street_id: space.street_id,
+                                selft_id: space.selft_id,
+                                space_id: space.id
+                            }
+                            tempPickings.push(objTemporal);
                         }
-                        tempPickings.push(objTemporal);
-                    }
+                    });
                 });
-            });
             setTemporalPickings(tempPickings);
+        
     }, []);
 
     const canviEstatModal = () => {
@@ -144,8 +139,16 @@ function OrderPickingReception() {
             }),
         };
 
-        await axios.post(`${url}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }});
-    }
+        axios.post(`${url}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
+            .then((response) => {
+                console.log(response.data);
+                alert("Order picking reception creat correctament");
+                canviEstatModal();
+            }
+        ).catch((error) => {        
+            console.error('Error order picking reception:', error.response.data);
+        }); 
+}
 
     const mostrarOrder = (orderId) => {
         setOrderVisualitzar(orderId);
@@ -228,7 +231,7 @@ function OrderPickingReception() {
 
                                         <tbody>
                                             {orderSelected.map(order => {
-                                                const lines = orderLineReception.find(line => line.id === order);
+                                                const lines = orderLineReception.find(line => line.id === parseInt(order));
                                                 const product = products.find(p => p.id === lines.product_id);
                                                 const space = spaces.find((space) => space.product_id === lines.product_id);
                                                 return (
@@ -242,7 +245,7 @@ function OrderPickingReception() {
                                         </tbody>
                                     </Table>
                                     <Button variant="success" onClick={() => {
-                                        canviEstatModal();
+                                        
                                         aceptarOrderPickingReception();
                                     }}>Aceptar</Button>
                                 </>
