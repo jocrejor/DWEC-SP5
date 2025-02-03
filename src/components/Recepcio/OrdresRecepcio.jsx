@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
-import Header from '../Header'
+import Header from '../Header';
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const OrderReceptionSchema = Yup.object().shape({
   supplier_id: Yup.number().required('Proveïdor requerit'),
   estimated_reception_date: Yup.date().required('Data estimada requerida'),
-  OrderLineReception_Status: Yup.string().min(1, "Valor mínim d'1 caràcter.").max(25, 'El valor màxim és de 25 caràcters.').required('Estat requerit'),
+  ordrerline_status: Yup.string()
+    .min(1, "Valor mínim d'1 caràcter.")
+    .max(25, 'El valor màxim és de 25 caràcters.')
+    .required('Estat requerit'),
 });
 
-function OrdreRecepcio() {
+function OrderReception() {
   const [orderReceptions, setOrderReceptions] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [statuses, setStatuses] = useState([]);
@@ -23,7 +28,7 @@ function OrdreRecepcio() {
   const [valorsInicials, setValorsInicials] = useState({
     supplier_id: '',
     estimated_reception_date: '',
-    OrderLineReception_Status: '',
+    ordrerline_status: '',
   });
   const [error, setError] = useState(null);
   const [productId, setProductId] = useState('');
@@ -32,18 +37,19 @@ function OrdreRecepcio() {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [orders, suppliersData, statusesData, productsData] = await Promise.all([
-        getData(url, 'OrderReception'),
-        getData(url, 'Supplier'),
-        getData(url, 'OrderReception_Status'),
-        getData(url, 'Product'),
+      const [ordersRes, suppliersRes, statusesRes, productsRes] = await Promise.all([
+        axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/orderreception_status`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } }),
       ]);
-      setOrderReceptions(orders);
-      setSuppliers(suppliersData);
-      setStatuses(statusesData);
-      setProducts(productsData);
+      setOrderReceptions(ordersRes.data);
+      setSuppliers(suppliersRes.data);
+      setStatuses(statusesRes.data);
+      setProducts(productsRes.data);
       setError(null);
     } catch (err) {
+      console.error("Error al carregar dades:", err);
       setError('Error carregant les dades.');
     } finally {
       setLoading(false);
@@ -57,9 +63,10 @@ function OrdreRecepcio() {
   const eliminarOrdre = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquesta ordre?')) {
       try {
-        await deleteData(url, 'OrderReception', id);
-        setOrderReceptions((prev) => prev.filter((item) => item.id !== id));
+        await axios.delete(`${apiUrl}/orderreception/${id}`, { headers: { "auth-token": localStorage.getItem("token") } });
+        setOrderReceptions(prev => prev.filter((item) => item.id !== id));
       } catch (err) {
+        console.error("Error eliminant ordre:", err);
         setError("Error eliminant l'ordre.");
       }
     }
@@ -67,38 +74,36 @@ function OrdreRecepcio() {
 
   const modificarOrdre = (valors) => {
     setTipoModal('Modificar');
+    // Carreguem els valors inicials de l'ordre a modificar
     setValorsInicials(valors);
-    setSelectedProducts(valors.products || []); // Assignar productes existents si n'hi ha
+    // Carreguem els productes ja assignats (o un array buit si no n'hi ha)
+    setSelectedProducts(valors.products || []);
     setShowModal(true);
   };
 
   const canviEstatModal = () => {
     setShowModal(!showModal);
-    setSelectedProducts([]); // Reiniciar la llista de productes seleccionats
+    // Reiniciem els camps per afegir productes
+    setSelectedProducts([]);
     setProductId('');
     setQuantity('');
   };
 
   const afegirProducte = () => {
-    if (!productId || !quantity || isNaN(quantity) || quantity <= 0) {
+    if (!productId || !quantity || isNaN(quantity) || Number(quantity) <= 0) {
       alert('Selecciona un producte vàlid i una quantitat positiva!');
       return;
     }
 
-    // Trobar el producte per ID
-    const product = products.find((p) => p.id === productId);
+    const product = products.find((p) => p.name === productId);
     if (!product) {
       alert('Producte no trobat!');
       return;
     }
-
-    // Afegir el producte a la llista de productes seleccionats
     setSelectedProducts((prev) => [
       ...prev,
       { product_id: product.id, name: product.name, quantity: parseInt(quantity) },
     ]);
-
-    // Reiniciar els camps de producte i quantitat
     setProductId('');
     setQuantity('');
   };
@@ -109,16 +114,29 @@ function OrdreRecepcio() {
 
   const handleSubmit = async (values) => {
     try {
+      if (selectedProducts.length === 0) {
+        alert("Afegir com a mínim un producte a l'ordre.");
+        return;
+      }
       const dataToSend = { ...values, products: selectedProducts };
+      console.log("Data to send:", dataToSend);
       if (tipoModal === 'Crear') {
-        await postData(url, 'OrderReception', dataToSend);
+        const res = await axios.post(`${apiUrl}/orderreception`, dataToSend, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
+        console.log("Resposta creació:", res.data);
       } else {
-        await updateId(url, 'OrderReception', values.id, dataToSend);
+        const res = await axios.put(`${apiUrl}/orderreception/${values.id}`, dataToSend, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
+        console.log("Resposta modificació:", res.data);
       }
       await fetchInitialData();
       canviEstatModal();
       setError(null);
     } catch (err) {
+      // Mostrem més informació sobre l'error per depurar
+      console.error("Error en la creació/modificació de l'ordre:", err.response ? err.response.data : err);
       setError("Error en l'operació.");
     }
   };
@@ -133,7 +151,7 @@ function OrdreRecepcio() {
           setValorsInicials({
             supplier_id: '',
             estimated_reception_date: '',
-            OrderLineReception_Status: '',
+            ordrerline_status: '',
           });
           canviEstatModal();
         }}
@@ -164,7 +182,7 @@ function OrdreRecepcio() {
                 <td>{valors.id}</td>
                 <td>{suppliers.find((sup) => sup.id === valors.supplier_id)?.name}</td>
                 <td>{valors.estimated_reception_date}</td>
-                <td>{statuses.find((status) => status.id === valors.OrderLineReception_Status)?.name}</td>
+                <td>{statuses.find((status) => status.id === valors.ordrerline_status)?.name}</td>
                 <td>
                   <Button variant="warning" onClick={() => modificarOrdre(valors)}>
                     Modificar
@@ -186,6 +204,7 @@ function OrdreRecepcio() {
         </Modal.Header>
         <Modal.Body>
           <Formik
+            enableReinitialize
             initialValues={valorsInicials}
             validationSchema={OrderReceptionSchema}
             onSubmit={handleSubmit}
@@ -219,8 +238,12 @@ function OrdreRecepcio() {
                     )}
                 </div>
                 <div>
-                  <label htmlFor="OrderLineReception_Status">Estat</label>
-                  <Field as="select" id="OrderLineReception_Status" name="OrderLineReception_Status">
+                  <label htmlFor="ordrerline_status">Estat</label>
+                  <Field
+                    as="select"
+                    id="ordrerline_status"
+                    name="ordrerline_status"
+                  >
                     <option value="">Selecciona un estat</option>
                     {statuses.map((status) => (
                       <option key={status.id} value={status.id}>
@@ -228,22 +251,24 @@ function OrdreRecepcio() {
                       </option>
                     ))}
                   </Field>
-                  {errors.OrderLineReception_Status && touched.OrderLineReception_Status && (
-                    <div>{errors.OrderLineReception_Status}</div>
-                  )}
+                  {errors.ordrerline_status &&
+                    touched.ordrerline_status && (
+                      <div>{errors.ordrerline_status}</div>
+                    )}
                 </div>
                 <div>
                   <label htmlFor="product">Producte</label>
                   <Field
                     as="select"
-                    id="Product"
-                    name="Product"
+                    id="product"
+                    name="product"
                     onChange={(e) => setProductId(e.target.value)}
+                    value={productId}
                   >
-                    <option value="">Selecciona un Producte</option>
-                    {products.map((Product) => (
-                      <option key={Product.id} value={Product.id}>
-                        {Product.name}
+                    <option value="">Selecciona un producte</option>
+                    {products.map((product) => (
+                      <option key={product.id} value={product.name}>
+                        {product.name}
                       </option>
                     ))}
                   </Field>
@@ -278,7 +303,9 @@ function OrdreRecepcio() {
                           <td>{prod.name}</td>
                           <td>{prod.quantity}</td>
                           <td>
-                            <button onClick={() => eliminarProducte(index)}>Eliminar</button>
+                            <button type="button" onClick={() => eliminarProducte(index)}>
+                              Eliminar
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -297,4 +324,4 @@ function OrdreRecepcio() {
   );
 }
 
-export default OrdreRecepcio;
+export default OrderReception;
