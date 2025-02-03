@@ -154,6 +154,35 @@ function OrderPickingReception() {
         canviEstatModal();
     }
 
+    const completarOrderPicking = async (lineId, orderPickingId) => {
+         // filtrar la linea de la order picking
+        const lineActualitzar = orderLineReception.find((line) => line.id === lineId);
+    
+        // Actualitzar estat a completada
+        const updatedLine = {
+            ...lineActualitzar,
+            orderline_status_id: 3,
+        };
+        
+        //actualitzar order line
+        axios.put(`${apiUrl}orderlinereception/${lineId}`, updatedLine, {headers: { "auth-token": token }})
+            .then((response) => {
+                console.log("Linea actualitzada correctament", response.data);
+            })
+            .catch((error) => {
+                console.error("Error en actualitzar",error.response.data);
+            });
+        
+        // eliminar la order picking
+        await axios.delete(`${apiUrl}orderpickingreception/${orderPickingId}`, {headers: { "auth-token": token }})
+            .then((response) => {
+                console.log("order picking esborrada", response.data);
+            })
+            .catch((error) => {
+                console.error("Error en esborra order picking",error.response.data);
+            });
+    };
+
     const mostrarOrder = (orderId) => {
         setOrderVisualitzar(orderId);
         setTipoModal("Visualitzar");
@@ -293,7 +322,7 @@ function OrderPickingReception() {
                                         return (
                                             <tr key={order.id}>
                                                 <td class="d-flex justify-content-center align-items-center">
-                                                    <i class="bi bi-arrow-down"></i>
+                                                    <i class="bi bi-arrow-down" onClick={() => completarOrderPicking(order.order_line_reception_id, order.id)}></i>
                                                 </td>
                                                 <td>{order.id}</td>
                                                 <td>{order.create_date}</td>
