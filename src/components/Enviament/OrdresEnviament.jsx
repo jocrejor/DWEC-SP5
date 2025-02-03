@@ -33,7 +33,6 @@ function OrdresEnviament() {
   const [products, setProducts] = useState([])
   const [arrayProductos, setArray] = useState([])
 
-
   useEffect(() => {
     axios.get(`${apiUrl}ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
@@ -83,6 +82,19 @@ function OrdresEnviament() {
       )
   }, [])
 
+  const crearOrdre = () => {
+    setTipoModal('Crear')
+    canviEstatModal()
+  }
+
+  const modificarOrdre = (valors) => {
+    setTipoModal('Modificar')
+    console.log(valors)
+    const fechaFormateada = formateaFecha(valors.shipping_date); 
+    setValorsInicials({ ...valors, shipping_date: fechaFormateada });
+    setValorsLineInicials(valors)
+  }
+
   const eliminarOrder = (id) => {
     axios.get(`${apiUrl}orderlineshipping`, { headers: { "auth-token": localStorage.getItem("token")} })
     .then((response) => {
@@ -115,14 +127,6 @@ function OrdresEnviament() {
     console.log(arrayProductos)
   }
 
-  const modificarOrdre = (valors) => {
-    setTipoModal('Modificar')
-    console.log(valors)
-    const fechaFormateada = formateaFecha(valors.shipping_date); 
-    setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-    setValorsLineInicials(valors)
-  }
-
   const clientExistent = (id) => {
     const existe = clientes.find(client => client.id === id)
     if (existe) {
@@ -153,8 +157,8 @@ function OrdresEnviament() {
 
   const canviEstatModal = () => {
     setShowModal(!showModal)
+    setArray([])
   }
-
 
   const grabar = (values) => {
     if (tipoModal === "Crear") {  
@@ -171,6 +175,11 @@ function OrdresEnviament() {
               axios.post(`${apiUrl}orderlineshipping`, line, { headers: { "auth-token": localStorage.getItem("token") } })
             })
         })
+        actualitzaDades();
+      }
+      else{
+        alert("Has d'afegir un producte a la ordre")
+        return
       }
     }
     else{
@@ -178,7 +187,6 @@ function OrdresEnviament() {
       actualitzaDades();
     }
     actualitzaDades();
-    
     canviEstatModal();
     setArray([]);
   }
@@ -210,7 +218,7 @@ function OrdresEnviament() {
         <div class="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div class="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div class="d-flex h-100 justify-content-xl-end">
-            <button type="button" onClick={() => canviEstatModal()} class="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"><i class="bi bi-plus-circle text-white pe-1"></i>Crear</button>
+            <button type="button" onClick={() => crearOrdre()} class="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"><i class="bi bi-plus-circle text-white pe-1"></i>Crear</button>
           </div>
         </div>
       </div>
@@ -315,7 +323,6 @@ function OrdresEnviament() {
             }) => (
               <Form>
                 <div>
-                  <Button onClick={() => canviEstatModal()} variant="secondary">Tancar</Button>
                   <Button variant={tipoModal === "Crear" ? "success" : "info"} type='submit'>{tipoModal}</Button>
 
                 </div>
@@ -404,7 +411,16 @@ function OrdresEnviament() {
                     <tr key={producto.product_id}>
                       <td>{producteExistent(producto.product_id)}</td>
                       <td>{producto.quantity}</td>
-                      
+                      <td>
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => {
+                            eliminarProducte(producto.product_id);
+                          }}
+                        >
+                          <i className="bi bi-trash p-2"></i>
+                        </Button>
+                    </td>
                     </tr>
                     
                   ))}
