@@ -109,7 +109,6 @@ function Inventaris() {
     //let dataInventory = new Date().toLocaleString('es-ES');
 
     let newInventory = {
-      //date: dataInventory,
       created_by: 1,
       inventory_status: 1,
       storage_id: values.storage_id
