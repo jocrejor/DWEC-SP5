@@ -22,72 +22,73 @@ function OrderPickingReception() {
     const [tabla, setTabla] = useState("CrearOrder");
 
     const [orderSelected, setOrderSelected] = useState([]);
-
-    useEffect(() => {
-        const apiUrl = import.meta.env.VITE_API_URL; 
+    const apiUrl = import.meta.env.VITE_API_URL; 
         //const apiUrl = url;
         const token = localStorage.getItem("token");
 
-            //order line reception
-            axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } 
-            })
-            .then((response) => {setOrderLineReception(response.data);})
-            .catch((error) => {console.error('Error order line:', error);});
 
-            //order picking reception
-            axios.get(`${apiUrl}orderpickingreception`, { headers: { "auth-token": token } 
-            })
-            .then((response) => {setOrderPickingReception(response.data);})
-            .catch((error) => {console.error('Error order picking:', error);});
+    useEffect(() => {
+        
 
-            //order reception
-            axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } 
-            })
-            .then((response) => {setOrderReception(response.data);})
-            .catch((error) => {console.error('Error order reception:', error);});
+        //order line reception
+        axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } 
+        })
+        .then((response) => {setOrderLineReception(response.data);})
+        .catch((error) => {console.error('Error order line:', error);});
 
-            
-            //product
-            axios.get(`${apiUrl}product`, { headers: { "auth-token": token } 
-            })
-            .then((response) => {setProducts(response.data);})
-            .catch((error) => {console.error('Error product:', error);});
+        //order picking reception
+        axios.get(`${apiUrl}orderpickingreception`, { headers: { "auth-token": token } 
+        })
+        .then((response) => {setOrderPickingReception(response.data);})
+        .catch((error) => {console.error('Error order picking:', error);});
 
-            //space
-            axios.get(`${apiUrl}space`, { headers: { "auth-token": token } 
-            })
-            .then((response) => {setSpaces(response.data);})
-            .catch((error) => {console.error('Error space:', error);});
-            orderLineReception
-            //user
-            axios.get(`${apiUrl}users`, { headers: { "auth-token": token } 
-            })
-            .then((response) => {setUsers(response.data);})
-            .catch((error) => {console.error('Error user:', error);});
+        //order reception
+        axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } 
+        })
+        .then((response) => {setOrderReception(response.data);})
+        .catch((error) => {console.error('Error order reception:', error);});
+    
+        //product
+        axios.get(`${apiUrl}product`, { headers: { "auth-token": token } 
+        })
+        .then((response) => {setProducts(response.data);})
+        .catch((error) => {console.error('Error product:', error);});
 
-            //recorrer orden reception pendent (desempaquetada)
-            const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 1);
+        //space
+        axios.get(`${apiUrl}space`, { headers: { "auth-token": token } 
+        })
+        .then((response) => {setSpaces(response.data);})
+        .catch((error) => {console.error('Error space:', error);});
+        
+        //user
+        axios.get(`${apiUrl}users`, { headers: { "auth-token": token } 
+        })
+        .then((response) => {setUsers(response.data);})
+        .catch((error) => {console.error('Error user:', error);});
 
-                const tempPickings = [];
-                orderPendent.map((order) => {
-                    //recorrer line reception de cada orden reception
-                    const lines = orderLineReception.filter((line) => line.order_reception_id === order.id);
-                    //obtindre product.name, product.quantitat, product.space
-                    lines.forEach((line) => {
-                        const space = spaces.find((space) => space.product_id === line.product_id);
-                        if (space) {
-                            console.log(order.id, line.id, line.product_id, line.quantity_received, space.storage_id, space.street_id, space.shelf_id, space.id);
-                            const objTemporal = {
-                                order_reception_id: order.id,
-                                order_line_reception_id: line.id,
-                                product_id: line.product_id,
-                                quantity_received: line.quantity_received,
-                                storage_id: space.storage_id,
-                                street_id: space.street_id,
-                                shelf_id: space.shelf_id,
-                                space_id: space.id
-                            }
-                            tempPickings.push(objTemporal);
+        //recorrer orden reception pendent (desempaquetada)
+        const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 1);
+
+            const tempPickings = [];
+            orderPendent.map((order) => {
+                //recorrer line reception de cada orden reception
+                const lines = orderLineReception.filter((line) => line.order_reception_id === order.id);
+                //obtindre product.name, product.quantitat, product.space
+                lines.forEach((line) => {
+                    const space = spaces.find((space) => space.product_id === line.product_id);
+                    if (space) {
+                        console.log(order.id, line.id, line.product_id, line.quantity_received, space.storage_id, space.street_id, space.shelf_id, space.id);
+                        const objTemporal = {
+                            order_reception_id: order.id,
+                            order_line_reception_id: line.id,
+                            product_id: line.product_id,
+                            quantity_received: line.quantity_received,
+                            storage_id: space.storage_id,
+                            street_id: space.street_id,
+                            shelf_id: space.shelf_id,
+                            space_id: space.id
+                        }
+                        tempPickings.push(objTemporal);
                         }
                     });
                 });
@@ -120,9 +121,9 @@ function OrderPickingReception() {
 
     }
 
-
     const aceptarOrderPickingReception = async () => {
-        const operari = document.getElementById("operari").value;
+        const operari = parseInt(document.getElementById("operari").value);
+        console.log(operari);
 
         orderSelected.forEach((order) => {
             const line = orderLineReception.find((l) => l.id === parseInt(order));
@@ -135,11 +136,11 @@ function OrderPickingReception() {
                 street_id: space.street_id,
                 shelf_id: space.shelf_id,
                 space_id: space.id,
-                operator_id: operari,
-                create_date: new Date().toISOString(),
+                operator_id: operari
             };
 
-            axios.post(`${url}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
+
+            axios.post(`${apiUrl}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
                 .then((response) => {
                     console.log(response.data);
                     alert("Order picking reception creat correctament");

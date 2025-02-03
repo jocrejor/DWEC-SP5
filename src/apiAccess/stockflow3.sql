@@ -437,7 +437,7 @@ DROP TABLE IF EXISTS `orderpickingreception`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `orderpickingreception` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `product_id` int DEFAULT NULL,
   `quantity` decimal(10,2) DEFAULT NULL,
   `storage_id` int DEFAULT NULL,
@@ -473,7 +473,7 @@ DROP TABLE IF EXISTS `orderpickingshipping`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `orderpickingshipping` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `product_id` int NOT NULL,
   `quantity` decimal(10,2) NOT NULL,
   `storage_id` varchar(2) DEFAULT NULL,
