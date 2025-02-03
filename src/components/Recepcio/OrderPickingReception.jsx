@@ -24,57 +24,60 @@ function OrderPickingReception() {
     const [orderSelected, setOrderSelected] = useState([]);
 
     useEffect(() => {
-        //const apiUrl = import.meta.env.VITE_API_URL;
-        const apiUrl = url;
-        //const token = JSON.parse(localStorage.getItem("token"));
+        const apiUrl = import.meta.env.VITE_API_URL;
+        //const apiUrl = url;
+        const token = localStorage.getItem("token");
 
         const fetchData = async () => {
             //order picking reception
-            axios.get(`${apiUrl}OrderPickingReception`, { //headers: { "auth-token": token } 
+            axios.get(`${apiUrl}orderpickingreception`, { headers: { "auth-token": token } 
             })
             .then((response) => {setOrderPickingReception(response.data);})
-            .catch((error) => {console.error('Error:', error);});
+            .catch((error) => {console.error('Error order picking:', error);});
 
             //order reception
-            axios.get(`${apiUrl}OrderReception`, { //headers: { "auth-token": token } 
+            axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } 
             })
             .then((response) => {setOrderReception(response.data);})
-            .catch((error) => {console.error('Error:', error);});
+            .catch((error) => {console.error('Error order reception:', error);});
 
             //order line reception
-            axios.get(`${apiUrl}OrderLineReception`, { //headers: { "auth-token": token } 
+            axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } 
             })
             .then((response) => {setOrderLineReception(response.data);})
-            .catch((error) => {console.error('Error:', error);});
+            .catch((error) => {console.error('Error order line:', error);});
 
             //product
-            axios.get(`${apiUrl}Product`, { //headers: { "auth-token": token } 
+            axios.get(`${apiUrl}product`, { headers: { "auth-token": token } 
             })
             .then((response) => {setProducts(response.data);})
-            .catch((error) => {console.error('Error:', error);});
+            .catch((error) => {console.error('Error product:', error);});
 
             //space
-            axios.get(`${apiUrl}Space`, { //headers: { "auth-token": token } 
+            axios.get(`${apiUrl}space`, { headers: { "auth-token": token } 
             })
             .then((response) => {setSpaces(response.data);})
-            .catch((error) => {console.error('Error:', error);});
+            .catch((error) => {console.error('Error space:', error);});
 
             //user
-            axios.get(`${apiUrl}User`, { //headers: { "auth-token": token } 
+            axios.get(`${apiUrl}users`, { headers: { "auth-token": token } 
             })
             .then((response) => {setUsers(response.data);})
-            .catch((error) => {console.error('Error:', error);});
+            .catch((error) => {console.error('Error user:', error);});
 
 
-            setCurrentUser(localStorage.getItem("currentuser"));
+            //setCurrentUser(localStorage.getItem("currentuser"));
 
             //recorrer orden reception pendent (desempaquetada)
-            const orderPendent = orderreception.filter((order) => order.orderreception_status_id === "ceba");
+            
+        };
+        fetchData();
+        const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 1);
 
             const tempPickings = [];
             orderPendent.map((order) => {
                 //recorrer line reception de cada orden reception
-                const lines = orderLine.filter((line) => line.order_reception_id === order.id);
+                const lines = orderLineReception.filter((line) => line.order_reception_id === order.id);
                 //obtindre product.name, product.quantitat, product.space
                 lines.forEach((line) => {
                     const space = spaces.find((space) => space.product_id === line.product_id);
@@ -91,12 +94,10 @@ function OrderPickingReception() {
                             space_id: space.id
                         }
                         tempPickings.push(objTemporal);
-                        setTemporalPickings(tempPickings);
                     }
                 });
             });
-        };
-        fetchData();
+            setTemporalPickings(tempPickings);
     }, []);
 
     const canviEstatModal = () => {
@@ -143,7 +144,7 @@ function OrderPickingReception() {
             }),
         };
 
-        await postData(url, "OrderPickingReception", newOrderPickingReception);
+        await axios.post(`${url}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }});
     }
 
     const mostrarOrder = (orderId) => {
