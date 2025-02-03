@@ -6,6 +6,7 @@ import { Row, Col, Modal, Table, Button, Tab } from 'react-bootstrap/'
 import Header from '../Header'
 import Filtres from '../Filtres'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 const InventorySchema = Yup.object().shape({
   storage_id: Yup.string().required('Required'),
@@ -13,82 +14,69 @@ const InventorySchema = Yup.object().shape({
 });
 
 function Inventaris() {
+  const apiURL = import.meta.env.VITE_API_URL;
+  const navigate = useNavigate();
+
   const [inventory, setInventory] = useState([]);
   const [storages, setStorages] = useState([]);
   const [streets, setStreets] = useState([]);
   const [selectedStoragerId, setSelectedStorageId] = useState('');
   const [availableStreets, setAvailableStreets] = useState([]);
   const [spaces, setSpaces] = useState([]);
-  const [modalType, setModalType] = useState('Iventariar');
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [selectedInventory, setSelectedInventory] = useState(null);
   const [inventoryLines, setInventoryLines] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedInventoryLines, setSelectedInventoryLines] = useState([]);
   const [inventoryStatus, setInventoryStatus] = useState([]);
-  
 
-  const apiURL = import.meta.env.VITE_API_URL;
-  
+
+
 
   useEffect(() => {
-    //const stock = await getData(url, "Inventory");
-    axios.get(`${apiURL}inventory`, {headers: {"auth-token": localStorage.getItem('token')}})
+    axios.get(`${apiURL}inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventory(response.data);
       })
-      .catch(e => {console.log(e.response.data)})
+      .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}inventory_status`, {headers: {"auth-token": localStorage.getItem('token')}})
+    axios.get(`${apiURL}inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventoryStatus(response.data);
       })
-      .catch(e => {console.log(e.response.data)})
+      .catch(e => { console.log(e.response.data) })
 
-    axios.get(`${apiURL}storage`, {headers: {"auth-token": localStorage.getItem('token')}})
+    axios.get(`${apiURL}storage`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setStorages(response.data);
       })
-      .catch(e => {console.log(e)})
+      .catch(e => { console.log(e) })
 
-    axios.get(`${apiURL}street`, {headers: {"auth-token": localStorage.getItem('token')}})
-    .then(response => {
-      setStreets(response.data);
-    })
-    .catch(e => {console.log(e)})
+    axios.get(`${apiURL}street`, { headers: { "auth-token": localStorage.getItem('token') } })
+      .then(response => {
+        setStreets(response.data);
+      })
+      .catch(e => { console.log(e) })
 
-    axios.get(`${apiURL}space`, {headers: {"auth-token": localStorage.getItem('token')}})
+    axios.get(`${apiURL}space`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setSpaces(response.data);
       })
-      .catch(e => {console.log(e)})
+      .catch(e => { console.log(e) })
 
-    axios.get(`${apiURL}product`, {headers: {"auth-token": localStorage.getItem('token')}})
-    .then(response => {
-      setProducts(response.data);
-    })
-    .catch(e => {console.log(e)})
+    axios.get(`${apiURL}product`, { headers: { "auth-token": localStorage.getItem('token') } })
+      .then(response => {
+        setProducts(response.data);
+      })
+      .catch(e => { console.log(e) })
 
-    axios.get(`${apiURL}inventoryline`, {headers: {"auth-token": localStorage.getItem('token')}})
+    axios.get(`${apiURL}inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventoryLines(response.data);
       })
-      .catch(e => {console.log(e)})
+      .catch(e => { console.log(e) })
 
-      console.log("hola")
-
-   /*const store = await getData(url, "Storage");
-    //const street = await getData(url, "Street");
-    //const space = await getData(url, "Space");
-    //const lines = await getData(url, "InventoryLine");
-    //const prod = await getData(url, "Product");
-
-    setInventory(stock);
-    setStorages(store);
-    setStreets(street);
-    setSpaces(space);
-    setInventoryLines(lines);
-    setProducts(prod);*/
+    console.log("hola")
   }, []);
 
   useEffect(() => {
@@ -118,7 +106,7 @@ function Inventaris() {
       filteredSpaces = spaces.filter(space => space.storage_id === values.street_id)
     };
 
-    let dataInventory = new Date().toLocaleString('es-ES');
+    //let dataInventory = new Date().toLocaleString('es-ES');
 
     let newInventory = {
       //date: dataInventory,
@@ -129,8 +117,8 @@ function Inventaris() {
 
 
     // = await postData(url, "Inventory", newInventory);
-    axios.post(`${apiURL}inventory`,newInventory, {headers: {"auth-token": localStorage.getItem('token')}})
-      .catch(e => {console.log(e.response.data)})
+    axios.post(`${apiURL}inventory`, newInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+      .catch(e => { console.log(e.response.data) })
 
     filteredSpaces.map(space => {
       let newInventoryLine = {
@@ -142,37 +130,28 @@ function Inventaris() {
         selft_id: space.selft_id,
         space_id: space.id
       }
-      console.log('new inventory line: '+ newInventoryLine)
-      //postData(url, "InventoryLine", newInventoryLine)
-      axios.post(`${apiURL}inventoryline`, newInventoryLine, {headers: {"auth-token": localStorage.getItem('token')}})
+      console.log('new inventory line: ' + newInventoryLine)
+      axios.post(`${apiURL}inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
     });
-    //const data = await getData(url, "Inventory")
-    //setInventory(data)
-    axios.get(`${apiURL}inventory`, {headers: {"auth-token": localStorage.getItem('token')}})
+  
+    axios.get(`${apiURL}inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
-        setInventory(response.data);
-        
+        setInventory(response);
+
       })
-      .catch(e => {console.log(e)})
+      .catch(e => { console.log(e) })
   }
 
   /************* ELIMINAR INVENTARIO ***************/
   const deleteInventory = (id) => {
     if (confirm("¿Estàs segur de que vols esborrar aquest inventari?")) {
-      deleteData(url, 'Inventory', id)
-      const newInventory = inventory.filter(item => item.id != id);
-      setInventory(newInventory);
+      axios.delete(`${apiURL}inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
+      .then(response => {
+        setInventory(response);
+
+      })
     }
   }
-
-  /*const displayInventoryModal = (values) => {
-    setSelectedInventory(values);
-    console.log(values.id)
-    // const filteredInventoryLines = inventoryLines.filter(line => line.inventory_id === values.id);
-    // setInventoryLines(filteredInventoryLines);
-
-    changeModalStatus();
-  }*/
 
   //********* MODAL *********
   const [show, setShow] = useState(false);
@@ -193,7 +172,7 @@ function Inventaris() {
       <Row>
         <Col>
           <div className='px-3 pt-3'>
-            <Button variant='secondary' className='mb-3' onClick={handleShow}>Crear</Button>
+            <Button variant='secondary' className='mb-3 btn btn-success' onClick={handleShow}>Crear</Button>
 
             <Modal show={show} onHide={handleClose} animation={true} >
               <Modal.Header closeButton>
@@ -288,21 +267,21 @@ function Inventaris() {
                           </td>
                           <td>{values.id}</td>
                           <td>{values.created_at}</td>
-                          <td>{values.inventory_status}</td>
+                          <td>{(inventoryStatus.find(inventory => inventory.id === values.inventory_status))?.name}</td>
                           <td>{(storages.find(storage => storage.id === values.storage_id)).name}</td>
                           <td>
                             {
-                              (values.inventory_status === 'Pendent') ?
-                              <a href={`/inventaris/inventariar/${values.id}`} className='text-decoration-none text-orange cursor-pointer'>Inventariar</a>
-                               :
-                                (values.inventory_status === 'Fent-se') ?
-                                  <a  href={`/inventaris/completarInventari/${values.id}`} className='text-decoration-none text-orange cursor-pointer'>Completar</a> :
+                              (values.inventory_status === 1) ?
+                                <Button onClick={() => navigate(`/inventaris/inventariar/${values.id}`)} variant="outline-primary">Inventariar</Button>
+                                :
+                                (values.inventory_status === 2) ?
+                                  <Button onClick={() => navigate(`/inventaris/completarInventari/${values.id}`)} variant="outline-warning">Completar</Button> :
                                   ""
                             }
                           </td>
                           <td>
-                            <Button variant='link' onClick={() => { changeModalStatus(); setModalType('Detall') }}><i className="bi bi-eye text-light-blue"></i></Button>
-                            <Button variant='link' onClick={() => deleteInventory(values.id)}><i className="bi bi-trash text-light-blue"></i></Button>
+                            <Button variant='outline-secondary' onClick={() => { setSelectedInventory(values); changeModalStatus() }}><i className="bi bi-eye"></i></Button>
+                            <Button variant='outline-danger mx-3' onClick={() => deleteInventory(values.id)}><i className="bi bi-trash"></i></Button>
                           </td>
                         </tr>
                       )
@@ -314,7 +293,7 @@ function Inventaris() {
 
             <Modal show={showInventoryModal} onHide={changeModalStatus} animation={true} size='xl'>
               <Modal.Header closeButton>
-                <Modal.Title className='text-light-blue'>{modalType} Inventari</Modal.Title>
+                <Modal.Title className='text-light-blue'>Detall Inventari</Modal.Title>
               </Modal.Header>
               <Modal.Body>
 
@@ -333,46 +312,14 @@ function Inventaris() {
                       <tbody>
                         <tr>
                           <td>{selectedInventory.id}</td>
-                          <td>{selectedInventory.date}</td>
+                          <td>{selectedInventory.created_at}</td>
                           <td>{selectedInventory.inventory_status}</td>
-                          <td>{(storages.find(storage => storage.id === selectedInventory.storage_id)).name}</td>
+                          <td>{(storages.find(storage => storage.id === selectedInventory.storage_id))?.name}</td>
                         </tr>
                       </tbody>
                     </Table>
 
-                    {
-                      ((modalType === 'Completar') ?
-                        <Table>
-                          <thead>
-                            <tr>
-                              <th scope="col" className='text-light-blue'>Producte</th>
-                              <th scope="col" className='text-light-blue'>Quantitat Estimada</th>
-                              <th scope="col" className='text-light-blue'>Quantitat Real</th>
-                              <th scope="col" className='text-light-blue'>Justificació</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {
-                              (selectedInventoryLines.length === 0) ?
-                                <tr><td colSpan={4} className='text-center'>No hay nada</td></tr> :
-                                selectedInventoryLines.map((value) => {
-              
-                                  return (
-                                    <tr key={value.id}>
-                                      <td>{(products.find(product => product.id === value.product_id))?.name}</td>
-                                      <td>{value.quantity_estimated}</td>
-                                      <td>cantidad real</td>
-                                      <td>justificacion</td>
-                                      <td></td>
-                                    </tr>
-                                  )
-                                })
-
-                            }
-
-                          </tbody>
-                        </Table>
-                        :
+                   
                         <Table>
                           <thead>
                             <tr>
@@ -380,6 +327,7 @@ function Inventaris() {
                               <th scope="col" className='text-light-blue'>Estanteria</th>
                               <th scope="col" className='text-light-blue'>Espacio</th>
                               <th scope="col" className='text-light-blue'>Producte</th>
+                              <th scope="col" className='text-light-blue'>Quantitat Estimada</th>
                               <th scope="col" className='text-light-blue'>Quantitat Real</th>
                             </tr>
                           </thead>
@@ -396,24 +344,21 @@ function Inventaris() {
                                       <td>{value.selft_id}</td>
                                       <td>{value.space_id}</td>
                                       <td>{(products.find(product => product.id === value.product_id))?.name}</td>
-                                      <td></td>
+                                      <td>{value.quantity_estimated}</td>
+                                      <td>{value.real_quantity}</td>
                                     </tr>)
                                 })
                             }
                           </tbody>
 
                         </Table>
-                      )}
+                    
 
                   </>
                 )}
 
                 <div className='py-3 text-end'>
                   <Button variant='secondary' onClick={() => changeModalStatus()}>Cerrar</Button>
-                  {
-                    ((modalType === 'Inventariar' || modalType === 'Completar') ? <Button type='submit' className='ms-2 orange-button'>{modalType}</Button> : "")
-
-                  }
                 </div>
 
               </Modal.Body>
