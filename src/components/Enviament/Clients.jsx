@@ -3,7 +3,7 @@ import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
 import { Button, Modal } from "react-bootstrap";
 import Header from "../Header";
-import Filtres from "../Filtres";
+import Filtres from "./FiltresClients";
 import axios from "axios";
 
 // Validación de esquema con Yup
