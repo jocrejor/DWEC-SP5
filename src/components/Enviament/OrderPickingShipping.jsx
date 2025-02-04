@@ -365,10 +365,10 @@ function OrderPickingShipping() {
                                   }
                                 />
                               </td>
-                              <td>{temporalPicking.order_reception_id}</td>
-                              <td>{product.name}</td>
-                              <td>{temporalPicking.quantity}</td>
-                              <td>
+                              <td data-cell="Id">{temporalPicking.order_reception_id}</td>
+                              <td data-cell="Nom">{product.name}</td>
+                              <td data-cell="Quantitat">{temporalPicking.quantity}</td>
+                              <td data-cell="Ubicació">
                                 {temporalPicking.storage_id} /{" "}
                                 {temporalPicking.street_id} /{" "}
                                 {temporalPicking.selft_id} /{" "}
