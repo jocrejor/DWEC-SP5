@@ -13,7 +13,7 @@ body{
 }
 
 td, th{
-    color: var(--lightBlue) !important;
+    color: var(--blauClar) !important;
 }
 
 /********* BARRA LATERAL CON BOOTSTRAP *********/
@@ -122,7 +122,25 @@ li:hover i{
         margin-top: 5.8em;
     }
 
-    
+    /*Taula responsive*/
+
+    th{
+        display: none;
+    }
+
+    td{
+        display: block;
+    }
+
+    td::before{
+        content: attr(data-cell) ": ";
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    td[data-no-colon="true"]::before {
+        content: ""; 
+    }
 
     /*********** DESPLAZAMIENTO DEL MENÚ ***********/
     @keyframes slideDown {
