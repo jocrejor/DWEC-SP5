@@ -194,24 +194,26 @@ function Transportista() {
             ) : (
               carriers.map((valors) => (
                 <tr key={valors.id}>
-                  <td data-cell="ID">{valors.id}</td>
-                  <td data-cell="Nom">{valors.name}</td>
-                  <td data-cell="Adreça">{valors.address}</td>
-                  <td data-cell="NIF">{valors.nif}</td>
-                  <td data-cell="Telèfon">{valors.phone}</td>
-                  <td data-cell="Email">{valors.email}</td>
-                  <td data-no-colon="true">
+                  <td data-cell="ID" className='text-center'>{valors.id}</td>
+                  <td data-cell="Nom" className='text-center'>{valors.name}</td>
+                  <td data-cell="Adreça" className='text-center'>{valors.address}</td>
+                  <td data-cell="NIF" className='text-center'>{valors.nif}</td>
+                  <td data-cell="Telèfon" className='text-center'>{valors.phone}</td>
+                  <td data-cell="Email" className='text-center'>{valors.email}</td>
+                  <td data-no-colon="true" className='text-center'>
+                    <div className="d-lg-flex justify-content-lg-center">
                     <span onClick={() => verCarrier(valors)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-eye"></i>
+                      <i className="bi bi-eye icono"></i>
                     </span>
 
                     <span onClick={() => modCarriers(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
-                      <i className="bi bi-pencil-square"></i>
+                      <i className="bi bi-pencil-square icono"></i>
                     </span>
 
                     <span onClick={() => delCarrier(valors.id)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-trash"></i>
+                      <i className="bi bi-trash icono"></i>
                     </span>
+                    </div>
                   </td>
 
                 </tr>
@@ -240,7 +242,7 @@ function Transportista() {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+          <Button className='orange-button' onClick={() => setShowViewModal(false)}>
             Tancar
           </Button>
         </Modal.Footer>
@@ -659,8 +661,8 @@ function Transportista() {
                     <div className="invalid-feedback">{errors.cp}</div>
                   ) : null}
                 </div>
-                <div className="form-group text-right">
-                  <Button type="submit" variant="success">
+                <div className="form-group d-flex justify-content-end">
+                  <Button type="submit" className='orange-button mt-2'>
                     {tipoModal === 'Modificar' ? 'Modificar Transportista' : 'Alta Transportista'}
                   </Button>
                 </div>
@@ -679,7 +681,7 @@ function Transportista() {
           </li>
 
           <li className="page-item active" aria-current="page">
-            <a className="page-link" href="#">1</a>
+            <a className="page-link " href="#">1</a>
           </li>
 
           <li className="page-item">
