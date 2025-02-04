@@ -90,6 +90,7 @@ function OrdresEnviament() {
 
   const modificarOrdre = async (valors) => {
     setTipoModal('Modificar');
+    canviEstatModal();
     console.log(valors);
 
     const fechaFormateada = formateaFecha(valors.shipping_date);
