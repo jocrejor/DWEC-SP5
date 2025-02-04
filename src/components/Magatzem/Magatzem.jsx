@@ -31,7 +31,7 @@ function Storage() {
       .catch(error => {
         console.log('Error fetching data:', error);
       });
-  }, []); 
+  }, []);
 
   const eliminarStorage = async (id) => {
     try {
@@ -61,7 +61,6 @@ function Storage() {
 
   return (
     <>
-     
       <Filtres />
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
@@ -145,6 +144,23 @@ function Storage() {
             ))}
           </tbody>
         </table>
+        <nav aria-label="Page navigation example" className="d-block">
+          <ul className="pagination justify-content-center">
+            <li className="page-item">
+              <a className="page-link text-light-blue" href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+            <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+            <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+            <li className="page-item">
+              <a className="page-link text-light-blue" href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
       </div>
 
       {/* Modal for Create/Modify Storage */}
@@ -178,36 +194,36 @@ function Storage() {
               <Form>
                 <div>
                   <label htmlFor='name'>Nom</label>
-                  <Field 
-                    type="text" 
-                    name="name" 
-                    placeholder="Nom del magatzem" 
-                    autoComplete="off" 
-                    value={values.name} 
+                  <Field
+                    type="text"
+                    name="name"
+                    placeholder="Nom del magatzem"
+                    autoComplete="off"
+                    value={values.name}
                     className="form-control"
                   />
                   {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
                 </div>
                 <div>
                   <label htmlFor='type'>Tipus</label>
-                  <Field 
-                    type="text" 
-                    name="type" 
-                    placeholder="Tipus de magatzem" 
-                    autoComplete="off" 
-                    value={values.type} 
+                  <Field
+                    type="text"
+                    name="type"
+                    placeholder="Tipus de magatzem"
+                    autoComplete="off"
+                    value={values.type}
                     className="form-control"
                   />
                   {errors.type && touched.type && <div className="text-danger">{errors.type}</div>}
                 </div>
                 <div>
                   <label htmlFor='address'>Adreça</label>
-                  <Field 
-                    type="text" 
-                    name="address" 
-                    placeholder="Adreça del magatzem" 
-                    autoComplete="off" 
-                    value={values.address} 
+                  <Field
+                    type="text"
+                    name="address"
+                    placeholder="Adreça del magatzem"
+                    autoComplete="off"
+                    value={values.address}
                     className="form-control"
                   />
                   {errors.address && touched.address && <div className="text-danger">{errors.address}</div>}
