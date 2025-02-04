@@ -99,19 +99,19 @@ function Space() {
                     <table className="table table-striped text-center">
                         <thead className="table-active border-bottom border-dark-subtle">
                             <tr>
-                                <th><input className="form-check-input" type="checkbox" /></th>
-                                <th>ID</th>
-                                <th>Nom</th>
-                                <th>ID Producte</th>
-                                <th>Quantitat</th>
-                                <th>Volumen</th>
-                                <th>Pes</th>
-                                <th>ID Magatzem</th>
-                                <th>ID Carrer</th>
-                                <th>ID Estanteria</th>
+                                <th scope="col"><input className="form-check-input" type="checkbox" /></th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Nom</th>
+                                <th scope="col">ID Producte</th>
+                                <th scope="col">Quantitat</th>
+                                <th scope="col">Volumen</th>
+                                <th scope="col">Pes</th>
+                                <th scope="col">ID Magatzem</th>
+                                <th scope="col">ID Carrer</th>
+                                <th scope="col">ID Estanteria</th>
                                 <th scope="col">Visualitzar</th>
-                                <th>Modificar</th>
-                                <th>Eliminar</th>
+                                <th scope="col">Modificar</th>
+                                <th scope="col">Eliminar</th>
                             </tr>
                         </thead>
                         <tbody>
