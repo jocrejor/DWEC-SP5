@@ -246,25 +246,51 @@ function Client() {
         <table className="table table-striped border mt-2 text-center">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Nom</th>
-              <th>Email</th>
-              <th>Telèfon</th>
-              <th>Adreça</th>
-              <th>NIF</th>
-              <th className="text-center ps-5">Accions</th>
+              <th scope="col" className="text-center">
+                ID
+              </th>
+              <th scope="col" className="text-center">
+                Nom
+              </th>
+              <th scope="col" className="text-center">
+                Adreça
+              </th>
+              <th scope="col" className="text-center">
+                NIF
+              </th>
+              <th scope="col" className="text-center">
+                Telèfon
+              </th>
+              <th scope="col" className="text-center">
+                Email
+              </th>
+              <th scope="col" className="text-center">
+                Accions
+              </th>
             </tr>
           </thead>
           <tbody>
             {clients.map((valors) => (
               <tr key={valors.id}>
-                <td>{valors.id}</td>
-                <td>{valors.name}</td>
-                <td>{valors.email}</td>
-                <td>{valors.phone}</td>
-                <td>{valors.address}</td>
-                <td>{valors.nif}</td>
-                <td className="text-center ps-5">
+                <td data-cell="ID" className="text-center">
+                  {valors.id}
+                </td>
+                <td data-cell="Nom" className="text-center">
+                  {valors.name}
+                </td>
+                <td data-cell="Adreça" className="text-center">
+                  {valors.address}
+                </td>
+                <td data-cell="NIF" className="text-center">
+                  {valors.nif}
+                </td>
+                <td data-cell="Telèfon" className="text-center">
+                  {valors.phone}
+                </td>
+                <td data-cell="Email" className="text-center">
+                  {valors.email}
+                </td>
+                <td data-no-colon="true" className="text-center">
                   <span
                     onClick={() => visualizarClient(valors)}
                     style={{ cursor: "pointer" }}
