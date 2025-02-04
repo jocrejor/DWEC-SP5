@@ -365,9 +365,13 @@ function OrderPickingShipping() {
                                   }
                                 />
                               </td>
-                              <td data-cell="Id">{temporalPicking.order_reception_id}</td>
+                              <td data-cell="Id">
+                                {temporalPicking.order_reception_id}
+                              </td>
                               <td data-cell="Nom">{product.name}</td>
-                              <td data-cell="Quantitat">{temporalPicking.quantity}</td>
+                              <td data-cell="Quantitat">
+                                {temporalPicking.quantity}
+                              </td>
                               <td data-cell="Ubicació">
                                 {temporalPicking.storage_id} /{" "}
                                 {temporalPicking.street_id} /{" "}
@@ -379,6 +383,38 @@ function OrderPickingShipping() {
                         })}
                       </tbody>
                     </table>
+                    <nav>
+                      <ul className="pagination justify-content-center">
+                        <li className="page-item">
+                          <a className="page-link" href="#">
+                            <span aria-hidden="true">&laquo;</span>
+                          </a>
+                        </li>
+
+                        <li className="page-item active" aria-current="page">
+                          <a className="page-link " href="#">
+                            1
+                          </a>
+                        </li>
+
+                        <li className="page-item">
+                          <a className="page-link" href="#">
+                            2
+                          </a>
+                        </li>
+                        <li className="page-item">
+                          <a className="page-link" href="#">
+                            3
+                          </a>
+                        </li>
+
+                        <li className="page-item">
+                          <a className="page-link" href="#">
+                            <span aria-hidden="true">&raquo;</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </nav>
                     <Modal show={showModal} onHide={canviEstatModal}>
                       <Modal.Header closeButton>
                         <Modal.Title>{tipoModal}</Modal.Title>
