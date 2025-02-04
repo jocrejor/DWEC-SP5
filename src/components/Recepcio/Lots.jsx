@@ -6,6 +6,7 @@ import axios from "axios";
 
 import Header from '../Header';
 import Filtres from '../Filtres';
+import LotsLotOSerie from './LotsLotOSerie';
 const apiUrl = import.meta.env.VITE_API_URL;
 // const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
 const token = localStorage.getItem('token');
@@ -262,10 +263,10 @@ function Lots() {
                               type="button"
                               className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
                               onClick={() => {
-                                modificarLot(valors);
                                 canviEstatModal();
+                                setTipoModal('Crear');
                               }}>
-                              Crear
+                              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
                             </Button>
                           </td>
 
@@ -303,7 +304,7 @@ function Lots() {
                   )}
                 </tbody>
               </table>
-              
+
               <nav aria-label="Page navigation example" className="d-block">
                 <ul className="pagination justify-content-center">
                   <li className="page-item">
@@ -335,7 +336,7 @@ function Lots() {
         <Modal.Body>
           <Formik
             initialValues={
-              tipoModal === 'Modificar' || tipoModal === 'Visualitzar'
+              tipoModal === 'Crear'
                 ? valorsInicials
                 : {
                   order_reception_id: '',
@@ -419,7 +420,7 @@ function Lots() {
               }
             }}
           >
-            {({ values, errors, touched }) => (
+            {({ errors, touched }) => (
               /**FORMULARIO CON SELECTS Y DEMÁS (CORRECTO) */
               <Form>
                 {/* <div className="form-group">
@@ -538,6 +539,103 @@ function Lots() {
                     ))}
                   </Field>
                   {errors.orderlinereception_id && touched.orderlinereception_id && <div className="text-danger mt-1">{errors.orderlinereception_id}</div>}
+                </div> */}
+
+                {/* <div className="form-group d-flex mt-3">
+                  <div>
+                    <div className='text-center fs-4'>
+                      <label htmlFor="lot">Lot</label>
+                    </div>
+
+                    <div className="d-flex gap-2">
+                      <div className="d-flex align-items-center">
+                        <Field
+                          type="number"
+                          name="lot_quantity"
+                          placeholder="Quantitat del lot"
+                          className="form-control"
+                        />
+                      </div>
+                      <div className="d-flex align-items-center">
+                        <Field
+                          type="text"
+                          name="lot_name"
+                          placeholder="Nom del lot"
+                          className="form-control"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="form-group d-flex mt-3">
+                  <div className="ms-3">
+                    <div className='text-center fs-4'>
+                      <label htmlFor="serie">Serie</label>
+                    </div>
+
+                    <div className="d-flex gap-2">
+                      <div className="d-flex align-items-center">
+                        <Field
+                          type="number"
+                          name="serie_quantity"
+                          placeholder="Quantitat de la serie"
+                          className="form-control"
+                        />
+                      </div>
+                      <div className="d-flex align-items-center">
+                        <Field
+                          type="text"
+                          name="serie_name"
+                          placeholder="Nom de la serie"
+                          className="form-control"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div> */}
+
+                <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="serie" />
+
+
+                {/* <div className="form-group d-flex mt-3">
+                  <div>
+                    <div className='text-center fs-4'>
+                      <label htmlFor="lot">Lot</label>
+                    </div>
+                    <div className="input-group flex-nowrap">
+                      <Field
+                        type="number"
+                        name="lot_quantity"
+                        className="form-control w-25"
+                      />
+
+                      <Field
+                        type="text"
+                        name="lot_name"
+                        placeholder="Nom del lot"
+                        className="form-control w-100"
+                      />
+                    </div>
+
+
+                    <div className='text-center fs-4'>
+                      <label htmlFor="serie">Serie</label>
+                    </div>
+                    <div className="input-group flex-nowrap">
+                      <Field
+                        type="number"
+                        name="serie_quantity"
+                        className="form-control w-25"
+                      />
+
+                      <Field
+                        type="text"
+                        name="serie_name"
+                        placeholder="Nom de la serie"
+                        className="form-control w-100"
+                      />
+                    </div>
+                  </div>
                 </div> */}
 
                 <div className="form-group d-flex justify-content-between mt-3">
