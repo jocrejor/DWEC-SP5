@@ -331,22 +331,45 @@ function OrderPickingReception() {
                         <Modal.Body>
                             {tipoModal === "Alta" && (
                                 <>
-                                    <label htmlFor="operari"></label>
-                                    <select name="operari" id="operari" value= {operariSeleccionat} onChange={handleInputChange}>
-                                        <option value="" selected disabled>Selecciona un operari</option>
-                                        {users.map((user) => {
-                                            return (
-                                                <option value={user.id}>{user.name}</option>
-                                            );
-                                        })}
-                                    </select>
+                                    <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+                                        <div className="order-1 pb-2 col-6 order-md-0 d-flex">
+                                            <div className="d-flex rounded border mt-2">
+                                                <div className="form-floating bg-white">
+                                                    <select className="form-select" name="operari" id="operari" aria-label="Seleccione un operari" 
+                                                    value= {operariSeleccionat} onChange={handleInputChange}
+                                                    >
+                                                        <option value="" selected disabled>Tria una opció</option>
+                                                        {users.map((user) => {
+                                                            return (
+                                                                <option value={user.id}>{user.name}</option>
+                                                            );
+                                                        })}
+                                                    </select>
+                                                    <label htmlFor="operari">Operari</label>
+                                                </div>
+                                            </div>
+                                        </div> 
 
-                                    <Table striped bordered hover>
-                                        <thead>
+                                        <div className="col-6 order-0 order-md-1 oder-xl-2 pb-2 pb-md-0">
+                                            <div className="d-flex h-100 justify-content-xl-end">
+                                                <button onClick={() => {
+                                                    aceptarOrderPickingReception();
+                                                }}
+                                                type="button"
+                                                className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+                                                >
+                                                    Aceptar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <table className="table table-striped text-center">
+                                        <thead className="table-active border-bottom border-dark-subtle">
                                             <tr>
-                                                <th>Producte</th>
-                                                <th>Quantitat</th>
-                                                <th>Magatzem / Carrer / Estantería / Espai</th>
+                                                <th scope="col">Producte</th>
+                                                <th scope="col">Quantitat</th>
+                                                <th scope="col">Magatzem / Carrer / Estantería / Espai</th>
                                             </tr>
                                         </thead>
 
@@ -358,18 +381,16 @@ function OrderPickingReception() {
                                                 const space = spaces.find((space) => space.product_id === lines.product_id);
                                                 return (
                                                     <tr key={order}>
-                                                        <td>{product.name}</td>
-                                                        <td>{lines.quantity_received}</td>
-                                                        <td>{space.storage_id} / {space.street_id} / {space.shelf_id} / {space.id}</td>
+                                                        <td data-cell="Producte">{product.name}</td>
+                                                        <td data-cell="Quantitat">{lines.quantity_received}</td>
+                                                        <td data-cell="Magatzem / Carrer / Estantería / Espai">
+                                                            {space.storage_id} / {space.street_id} / {space.shelf_id} / {space.id}
+                                                        </td>
                                                     </tr>
                                                 );
                                             })}
                                         </tbody>
-                                    </Table>
-                                    <Button variant="success" onClick={() => {
-                                        
-                                        aceptarOrderPickingReception();
-                                    }}>Aceptar</Button>
+                                    </table>
                                 </>
                             )}
                         </Modal.Body>
@@ -458,7 +479,7 @@ function OrderPickingReception() {
                                                 })}
                                         </tbody>
                                     </table>
-                                    
+                            
                                     <nav aria-label="Page navigation example" class="d-block">
                                         <ul class="pagination justify-content-center">
                                             <li class="page-item">
