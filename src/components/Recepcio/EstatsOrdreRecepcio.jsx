@@ -3,6 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
+import Filtres from "../Filtres";
 import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -87,58 +88,41 @@ function OrderReception_Status() {
   return (
     <>
       <Header title="Llistat Estats de Ordre" />
-      <Button
-        variant="success"
-        onClick={() => {
-          setTipoModal('Crear');
-          setValorsInicials({ name: '' });
-          canviEstatModal();
-        }}
-      >
-        Nou Estat de Ordre
-      </Button>
-      {loading ? (
-        <Spinner animation="border" />
-      ) : error ? (
-        <div>{error}</div>
-      ) : ordersReceptionStatus.length === 0 ? (
-        <div>No hi ha estats</div>
-      ) : (
+      <Filtres />
+      <div className="container-fluid pt-3">
         <Table striped bordered hover>
-          <thead>
+          <thead className="table-active border-bottom border-dark-subtle text-center">
             <tr>
-              <th>Id</th>
+              <th>ID</th>
               <th>Nom</th>
-              <th>Modificar</th>
-              <th>Eliminar</th>
+              <th>Accions</th>
             </tr>
           </thead>
           <tbody>
-            {ordersReceptionStatus.map((valors) => (
-              <tr key={valors.id}>
-                <td>{valors.id}</td>
-                <td>{valors.name}</td>
-                <td>
-                  <Button
-                    variant="warning"
-                    onClick={() => modificarEstat(valors)}
-                  >
-                    Modificar
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="danger"
-                    onClick={() => eliminarEstat(valors.id)}
-                  >
-                    Eliminar
-                  </Button>
-                </td>
+            {ordersReceptionStatus.length === 0 ? (
+              <tr>
+                <td colSpan="3">No hi ha estats de ordre</td>
               </tr>
-            ))}
+            ) : (
+              ordersReceptionStatus.map((valors) => (
+                <tr key={valors.id}>
+                  <td className='text-center'>{valors.id}</td>
+                  <td className='text-center'>{valors.name}</td>
+                  <td className='text-center'>
+                    <span onClick={() => modificarEstat(valors)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-pencil-square"></i>
+                    </span>
+                    <span onClick={() => eliminarEstat(valors.id)} className="mx-2" style={{ cursor: "pointer" }}>
+                      <i className="bi bi-trash"></i>
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </Table>
-      )}
+      </div>
+      
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Estat de Línia</Modal.Title>
@@ -151,7 +135,7 @@ function OrderReception_Status() {
           >
             {({ errors, touched }) => (
               <Form>
-                <div>
+                <div className="form-group">
                   <label htmlFor="name">Nom</label>
                   <Field
                     id="name"
@@ -159,16 +143,20 @@ function OrderReception_Status() {
                     name="name"
                     placeholder="Nom del estat de línia"
                     autoComplete="off"
+                    className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''}`}
                   />
-                  {errors.name && touched.name && <div>{errors.name}</div>}
+                  {errors.name && touched.name && (
+                    <div className="invalid-feedback">{errors.name}</div>
+                  )}
                 </div>
-                <div>
+                <div className="form-group text-right">
                   <Button variant="secondary" onClick={canviEstatModal}>
                     Tanca
                   </Button>
                   <Button
                     variant={tipoModal === 'Modificar' ? 'success' : 'info'}
                     type="submit"
+                    className="ml-2"
                   >
                     {tipoModal}
                   </Button>
