@@ -132,7 +132,7 @@ function Inventariar() {
     if (updatedInventoryLines.length != selectedInventoryLines.length) {
       console.log(updatedInventoryLines.length + " - " + selectedInventory.length)
       alert("Introdueix totes les quantitats reals");
-    } else if (updatedInventoryLines === null){
+    } else if (updatedInventoryLines === null) {
       alert("No hi ha res a inventariar");
     } else {
       const updatedLines = selectedInventoryLines.map(async (line) => {
@@ -140,18 +140,18 @@ function Inventariar() {
 
         if (updatedLine) {
           line = { ...line, quantity_real: updatedLine?.quantity_real, justification: updatedLine?.justification };
-          
+
           await axios.put(`${apiURL}inventoryline/${line.id}`, line, { headers: { "auth-token": localStorage.getItem('token') } })
-            
-          
-            
-      
+
+
+
+
           return line;
         }
         return line;
       })
 
-      const updatedSelectedInventory = {...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Fent-se').id}
+      const updatedSelectedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Fent-se').id }
       console.log(updatedSelectedInventory)
 
       await axios.put(`${apiURL}inventory/${selectedInventory.id}`, updatedSelectedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
@@ -173,8 +173,8 @@ function Inventariar() {
       <Row>
         <Col>
           <div className='px-3 py-3'>
-            <Table striped bordered hover>
-              <thead className='active'>
+            <Table className='table table-striped text-center'>
+              <thead className="table-active border-bottom border-dark-subtle">
                 <tr>
                   <th className='text-light-blue'>ID Inventari</th>
                   <th className='text-light-blue'>Data</th>
@@ -182,18 +182,18 @@ function Inventariar() {
                   <th className='text-light-blue'>Magatzem</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className='text-light-blue'>
                 <tr>
-                  <td>{selectedInventory?.id}</td>
-                  <td>{selectedInventory?.created_at}</td>
-                  <td>{(inventoryStatus.find(inventory => inventory.id === selectedInventory?.inventory_status))?.name}</td>
-                  <td>{(storages.find(storage => storage.id === selectedInventory?.storage_id))?.name}</td>
+                  <td data-cell="ID Inventari: ">{selectedInventory?.id}</td>
+                  <td data-cell="Data: ">{selectedInventory?.created_at}</td>
+                  <td data-cell="Estat: ">{(inventoryStatus.find(inventory => inventory.id === selectedInventory?.inventory_status))?.name}</td>
+                  <td data-cell="Magatzem">{(storages.find(storage => storage.id === selectedInventory?.storage_id))?.name}</td>
                 </tr>
               </tbody>
             </Table>
 
-            <Table>
-              <thead>
+            <Table className='table table-striped text-center'>
+              <thead className="table-active border-bottom border-dark-subtle">
                 <tr>
                   <th scope="col" className='text-light-blue'>Carrer</th>
                   <th scope="col" className='text-light-blue'>Estanteria</th>
@@ -202,18 +202,18 @@ function Inventariar() {
                   <th scope="col" className='text-light-blue'>Quantitat Real</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className='text-light-blue'>
                 {
                   (selectedInventoryLines.length === 0) ?
                     <tr><td colSpan={5} className='text-center'>No hay nada</td></tr> :
                     selectedInventoryLines.map((value) => {
                       return (
                         <tr key={value.id}>
-                          <td>{value.street_id}</td>
-                          <td>{value.selft_id}</td>
-                          <td>{value.space_id}</td>
-                          <td>{(products.find(product => product.id === value.product_id))?.name}</td>
-                          <td>
+                          <td data-cell="Carrer: ">{value.street_id}</td>
+                          <td data-cell="Estanteria: ">{value.selft_id}</td>
+                          <td data-cell="Espacio: ">{value.space_id}</td>
+                          <td data-cell="Producte: ">{(products.find(product => product.id === value.product_id))?.name}</td>
+                          <td data-cell="Quantitat Real: ">
                             <input
                               type='number'
                               name={value.id}
@@ -246,8 +246,10 @@ function Inventariar() {
               </tbody>
 
             </Table>
-            <Button variant='secondary' onClick={() => navigate('/inventaris')}>Tornar</Button>
-            <Button onClick={handleSubmit}>Inventariar</Button>
+            <div className='text-end'>
+              <Button variant='secondary' onClick={() => navigate('/inventaris')}>Tornar</Button>
+              <Button onClick={handleSubmit} className='orange-button ms-3'>Inventariar</Button>
+            </div>
 
           </div>
         </Col>
