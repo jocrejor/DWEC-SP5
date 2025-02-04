@@ -1,14 +1,13 @@
 import { useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate,useLocation } from "react-router-dom";
 import './App.css'
-
+import error404 from './assets/404Error.png';
 
 
 import Lateral from './components/Lateral'
 import Login from './components/login';
-import Logout from './components/logout';
 import Home from './components/Home.jsx'
-
+import Header from "./components/Header.jsx";
 import Productes from './components/Recepcio/Productes';
 import Usuaris from './components/Administracio/Usuaris';
 import Rols from './components/Administracio/Rols';
@@ -44,8 +43,10 @@ import OrderPickingShipping from './components/Enviament/OrderPickingShipping';
 
 
 function App() {
+  
+ 
   const navigate = useNavigate(); 
-
+  const location = useLocation();
   const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => { 
@@ -54,19 +55,28 @@ function App() {
     }
   }, [navigate]);
 
+  
+
+
   return (
     <>
       <div className="container-fluid">
+
+       
+
         <div className="row">
-          <Lateral />
+       
+          {(location.pathname==='/login' )?(
+              <Login />
+          ):(
+              <>
+              <Lateral /> 
+          
           <div className="col-12 col-xl-10 px-0">
-            <div>
 
               <Routes>
 
                 <Route path="/login" element={<Login />} />
-
-                <Route path="/logout" element={<Logout />} />
 
                 <Route path="/usuaris" element={<Usuaris />} />
 
@@ -120,10 +130,14 @@ function App() {
               </Routes>
 
 
-            </div>
           </div>
+          </>
+
+        )}
         </div>
       </div>
+
+
 
     </>
   )
@@ -133,7 +147,10 @@ function Error404() {
 
   return (
     <div>
-      <h2>ERROR 404</h2>
+      <Header title="Pàgina no trobada" />
+      <div className="d-flex justify-content-center align-items-center" >
+      <img  className="img-fluid m-4" src={error404}/>
+      </div>
     </div>
   );
 }
