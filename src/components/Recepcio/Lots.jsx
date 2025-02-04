@@ -24,7 +24,7 @@ function Lots() {
   const [products, setProduct] = useState([]);
   const [suppliers, setSupplier] = useState([]);
   // de momento no hay orderReception
-  // const [orderReceptions, setOrderReception] = useState([]);
+  const [orderreception, setOrderReception] = useState([]);
   const [orderreception_status, setOrderReceptionStatus] = useState([]);
   const [orderline_status, setOrderLineStatus] = useState([]);
   const [orderLineReceptions, setOrderLineReception] = useState([]);
@@ -76,15 +76,15 @@ function Lots() {
           }
         )
 
-      // axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
-      //   // axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
-      //   .then(response => {
-      //     setOrderReception(response.data)
-      //   })
-      //   .catch(error => {
-      //     console.log(error)
-      //   }
-      //   )
+      axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
+        // axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
+        .then(response => {
+          setOrderReception(response.data)
+        })
+        .catch(error => {
+          console.log(error)
+        }
+        )
 
       axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
         // axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
@@ -98,7 +98,7 @@ function Lots() {
           }
         )
 
-        axios.get(`${apiUrl}orderreception_status`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}orderreception_status`, { headers: { "auth-token": token } })
         .then(
           response => {
             setOrderReceptionStatus(response.data)
@@ -109,7 +109,7 @@ function Lots() {
           }
         )
 
-        axios.get(`${apiUrl}orderline_status`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}orderline_status`, { headers: { "auth-token": token } })
         .then(
           response => {
             setOrderLineStatus(response.data)
@@ -207,8 +207,9 @@ function Lots() {
                       <input className='form-check-input' type="checkbox" />
                     </th>
                     <th scope='col' className="align-middle">ID</th>
-                    <th scope='col' className="align-middle">ID ordre recepció</th>
-                    <th scope='col' className="align-middle">Estat ordre de línea recepció</th>
+                    <th scope='col' className="align-middle">Proveïdor</th>
+                    <th scope='col' className="align-middle">Estat ordre línia de recepció</th>
+                    <th scope='col' className="align-middle">Estat ordre de recepció</th>
                     <th scope='col' className="align-middle">Producte</th>
                     <th scope='col' className="align-middle">Quantitat</th>
                     <th scope='col' className="align-middle">Lot/Serie</th>
@@ -229,12 +230,31 @@ function Lots() {
                           <td scope='row' data-cell="Seleccionar">
                             <input className='form-check-input' type="checkbox" />
                           </td>
+
                           <td data-cell="ID">{valors.id}</td>
 
-                          <td data-cell="Estat ordre línia recepció">{orderline_status.find((status) => status.id === valors.order_reception_id)?.name || "Estat no trobat"}</td>
+                          <td data-cell="Proveïdor">
+                            {(() => {
+                              const orderReceptions = orderreception.find(
+                                (or) => or.id === valors.order_reception_id
+                              );
+                              const supplier = suppliers.find((s) => s.id === orderReceptions?.supplier_id);
+                              return supplier ? supplier.name : "Proveïdor no trobat";
+                            })()}
+                          </td>
 
-                          <td data-cell="Estat ordre línia recepció">{orderreception_status.find((status) => status.id === valors.orderline_status_id)?.name || "Estat no trobat"}</td>
-                          <td data-cell="Producte">{products.find((product) => product.id === valors.product_id)?.name || "Desconegut"}</td>
+                          <td data-cell="Estat ordre línia de recepció">
+                            {orderline_status.find((status) => status.id === valors.order_reception_id)?.name || "Estat no trobat"}
+                          </td>
+
+                          <td data-cell="Estat ordre de recepció">
+                            {orderreception_status.find((status) => status.id === valors.orderline_status_id)?.name || "Estat no trobat"}
+                          </td>
+
+                          <td data-cell="Producte">
+                            {products.find((product) => product.id === valors.product_id)?.name || "Desconegut"}
+                          </td>
+
                           <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
 
                           <td data-no-colon="true">
@@ -283,12 +303,7 @@ function Lots() {
                   )}
                 </tbody>
               </table>
-
-
-
-
-
-
+              
               <nav aria-label="Page navigation example" className="d-block">
                 <ul className="pagination justify-content-center">
                   <li className="page-item">
