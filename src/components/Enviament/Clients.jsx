@@ -193,27 +193,48 @@ function Client() {
     <>
       <Header title="Clients" />
       <Filtres />
+
+      <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+        <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+          <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+            <div className="form-floating bg-white">
+              <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
+                <option selected>Tria una opció</option>
+                <option value="1">Eliminar</option>
+              </select>
+              <label for="floatingSelect">Accions en lot</label>
+            </div>
+            <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button"><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+          </div>
+        </div>
+        <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+        <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+          <div className="d-flex h-100 justify-content-xl-end">
+            <Button
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+              variant="success"
+              onClick={() => {
+                setValorsInicials({
+                  name: "",
+                  email: "",
+                  phone: "",
+                  address: "",
+                  nif: "",
+                  state_id: "",
+                  province_id: "",
+                  city_id: "",
+                  cp: "",
+                });
+                setTipoModal("Crear");
+                setShowModal(true);
+              }}
+            >
+              <i class="bi bi-plus-circle text-white pe-1"></i>Crear
+            </Button>
+          </div>
+        </div>
+      </div>
       <div className="container-fluid pt-3">
-        <Button
-          variant="success"
-          onClick={() => {
-            setValorsInicials({
-              name: "",
-              email: "",
-              phone: "",
-              address: "",
-              nif: "",
-              state_id: "",
-              province_id: "",
-              city_id: "",
-              cp: "",
-            });
-            setTipoModal("Crear");
-            setShowModal(true);
-          }}
-        >
-          Alta Client
-        </Button>
         <table className="table table-striped border mt-2">
           <thead>
             <tr>
