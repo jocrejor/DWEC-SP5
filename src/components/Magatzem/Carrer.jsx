@@ -59,6 +59,22 @@ function Street() {
     setTipoModal("Crear");
   };
 
+  // Define the missing functions
+  const viewSupplier = (valors) => {
+    console.log("Viewing supplier:", valors);
+    // Implement the viewing logic (e.g., navigate to a detailed view)
+  };
+
+  const modSuppliers = (valors) => {
+    console.log("Modifying supplier:", valors);
+    modificarStreet(valors); // Reusing the existing modificarStreet logic
+  };
+
+  const deleteSuppliers = (id) => {
+    console.log("Deleting supplier:", id);
+    eliminarStreet(id); // Reusing the existing eliminarStreet logic
+  };
+
   return (
     <>
       <Filtres />
@@ -96,9 +112,7 @@ function Street() {
               <th scope="col">Nom</th>
               <th scope="col">ID Magatzem</th>
               <th scope="col">Estanteria</th>
-              <th scope="col">Visualitzar</th>
-              <th scope="col">Modificar</th>
-              <th scope="col">Eliminar</th>
+              <th scope="col">Accions</th>
             </tr>
           </thead>
           <tbody>
@@ -111,33 +125,19 @@ function Street() {
                 <td>{valors.name}</td>
                 <td>{valors.storage_id}</td>
                 <td><Button onClick={() => handleStreetClick(valors.id)}>Estanteria</Button></td>
-                <td>
-                  <Button
-                    variant="outline-secondary"
-                    onClick={() => {
-                      // Visualitzar Logic (e.g., navigate to a detailed view)
-                      console.log("Viewing", valors);
-                    }}
-                  >
-                    <i className="bi bi-eye p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-success"
-                    onClick={() => { modificarStreet(valors); canviEstatModal(); }}
-                  >
-                    <i className="bi bi-pencil-square p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-danger"
-                    onClick={() => eliminarStreet(valors.id)}
-                  >
-                    <i className="bi bi-trash p-2"></i>
-                  </Button>
-                </td>
+                <td data-no-colon="true">
+                    <span onClick={() => viewSupplier(valors)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-eye"></i>
+                    </span>
+
+                    <span onClick={() => modSuppliers(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
+                      <i className="bi bi-pencil-square"></i>
+                    </span>
+
+                    <span onClick={() => deleteSuppliers(valors.id)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-trash"></i>
+                    </span>
+                  </td>
               </tr>
             ))}
           </tbody>

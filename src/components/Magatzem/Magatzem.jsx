@@ -50,6 +50,22 @@ function Storage() {
     setShowModal(true);
   };
 
+  const modSuppliers = (valors) => {
+    modificarStorage(valors); // Reuse modificarStorage logic
+  };
+
+  const viewSupplier = (valors) => {
+    // Implement viewSupplier functionality (for example, open a details page)
+    console.log("Viewing supplier", valors);
+  };
+
+  const deleteSuppliers = async (id) => {
+    // Implement deleteSuppliers functionality
+    if (window.confirm("Are you sure you want to delete this storage?")) {
+      await eliminarStorage(id);
+    }
+  };
+
   const handleCarrerClick = (id) => {
     navigate(`../carrer/${id}`);
   };
@@ -97,9 +113,7 @@ function Storage() {
               <th scope="col">Tipus</th>
               <th scope="col">Adreça</th>
               <th scope="col">Carrer</th>
-              <th scope="col">Visualitzar</th>
-              <th scope="col">Modificar</th>
-              <th scope="col">Eliminar</th>
+              <th scope="col">Accions</th>
             </tr>
           </thead>
           <tbody>
@@ -113,32 +127,18 @@ function Storage() {
                 <td>{valors.type}</td>
                 <td>{valors.address}</td>
                 <td><Button onClick={() => handleCarrerClick(valors.id)}>Carrer</Button></td>
-                <td>
-                  <Button
-                    variant="outline-secondary"
-                    onClick={() => {
-                      // Visualitzar Logic (e.g., navigate to a detailed view)
-                      console.log("Viewing", valors);
-                    }}
-                  >
-                    <i className="bi bi-eye p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-success"
-                    onClick={() => { modificarStorage(valors); canviEstatModal(); }}
-                  >
-                    <i className="bi bi-pencil-square p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-danger"
-                    onClick={() => eliminarStorage(valors.id)}
-                  >
-                    <i className="bi bi-trash p-2"></i>
-                  </Button>
+                <td data-no-colon="true">
+                  <span onClick={() => viewSupplier(valors)} style={{ cursor: "pointer" }}>
+                    <i className="bi bi-eye"></i>
+                  </span>
+
+                  <span onClick={() => modSuppliers(valors)} className="mx-2" style={{ cursor: "pointer" }}>
+                    <i className="bi bi-pencil-square"></i>
+                  </span>
+
+                  <span onClick={() => deleteSuppliers(valors.id)} style={{ cursor: "pointer" }}>
+                    <i className="bi bi-trash"></i>
+                  </span>
                 </td>
               </tr>
             ))}

@@ -50,6 +50,11 @@ function Space() {
         }
     };
 
+    // Define the missing functions
+    const viewSupplier = (valors) => {
+        console.log("Viewing supplier:", valors);
+        // Implement the viewing logic (e.g., navigate to a detailed view)
+    };
     const editSpace = (values) => {
         setModalType("Modificar");
         setInitialValues(values);
@@ -111,9 +116,7 @@ function Space() {
                                 <th scope="col">ID Magatzem</th>
                                 <th scope="col">ID Carrer</th>
                                 <th scope="col">ID Estanteria</th>
-                                <th scope="col">Visualitzar</th>
-                                <th scope="col">Modificar</th>
-                                <th scope="col">Eliminar</th>
+                                <th scope="col">Accions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -129,19 +132,19 @@ function Space() {
                                     <td>{values.storage_id}</td>
                                     <td>{values.street_id}</td>
                                     <td>{values.selft_id}</td>
-                                    <td>
-                                        <Button
-                                            variant="outline-secondary"
-                                            onClick={() => {
-                                                // Aquí puedes ir a la vista detallada del Espai
-                                                navigate(`/espai/${magatzem}/${carrer}/${estanteria}/${values.id}`);
-                                            }}
-                                        >
-                                            <i className="bi bi-eye p-2"></i>
-                                        </Button>
+                                    <td data-no-colon="true">
+                                        <span onClick={() => viewSupplier(values)} style={{ cursor: "pointer" }}>
+                                            <i className="bi bi-eye"></i>
+                                        </span>
+
+                                        <span onClick={() => editSpace(values)} className="mx-2" style={{ cursor: "pointer" }}>
+                                            <i className="bi bi-pencil-square"></i>
+                                        </span>
+
+                                        <span onClick={() => deleteSpace(values.id)} style={{ cursor: "pointer" }}>
+                                            <i className="bi bi-trash"></i>
+                                        </span>
                                     </td>
-                                    <td><Button variant="outline-success" onClick={() => editSpace(values)}><i className="bi bi-pencil-square"></i></Button></td>
-                                    <td><Button variant="outline-danger" onClick={() => deleteSpace(values.id)}><i className="bi bi-trash"></i></Button></td>
                                 </tr>
                             ))}
                         </tbody>

@@ -36,7 +36,7 @@ function Shelf() {
     }
   }, [magatzem, carrer]);
 
-  const deleteShelf = async (id) => {
+  const viewSupplier = async (id) => {
     try {
       await axios.delete(`${apiUrl}/shelf/${id}`, {
         headers: { "auth-token": localStorage.getItem("token") }
@@ -47,7 +47,19 @@ function Shelf() {
     }
   };
 
-  const editShelf = (values) => {
+  const deleteSuppliers = async (id) => {
+    try {
+      await axios.delete(`${apiUrl}/supplier/${id}`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      });
+      // After deleting the supplier, you may want to update the list
+      setShelves(shelves.filter(item => item.id !== id));
+    } catch (error) {
+      console.log('Error deleting supplier:', error);
+    }
+  };
+
+  const modSuppliers = (values) => {
     setModalType("Modificar");
     setInitialValues(values);
     setShowModal(true);
@@ -101,9 +113,8 @@ function Shelf() {
               <th scope="col">ID Magatzem</th>
               <th scope="col">ID Carrer</th>
               <th scope="col">Espai</th>
-              <th scope="col">Visualitzar</th>
-              <th scope="col">Modificar</th>
-              <th scope="col">Eliminar</th>
+              <th scope="col">Accions</th>
+              
             </tr>
           </thead>
           <tbody>
@@ -117,32 +128,18 @@ function Shelf() {
                 <td>{values.storage_id}</td>
                 <td>{values.street_id}</td>
                 <td><Button onClick={() => handleShelfClick(values.id)}>Espai</Button></td>
-                <td>
-                  <Button
-                    variant="outline-secondary"
-                    onClick={() => {
-                      // Visualitzar Logic (e.g., navigate to a detailed view)
-                      console.log("Viewing", valors);
-                    }}
-                  >
-                    <i className="bi bi-eye p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-success"
-                    onClick={() => { editShelf(values); openModal(); }}
-                  >
-                    <i className="bi bi-pencil-square p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-danger"
-                    onClick={() => deleteShelf(values.id)}
-                  >
-                    <i className="bi bi-trash p-2"></i>
-                  </Button>
+                <td data-no-colon="true">
+                    <span onClick={() => viewSupplier(values)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-eye"></i>
+                    </span>
+
+                    <span onClick={() => modSuppliers(values)} className="mx-2" style={{ cursor: "pointer" }}>
+                      <i className="bi bi-pencil-square"></i>
+                    </span>
+
+                    <span onClick={() => deleteSuppliers(values.id)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-trash"></i>
+                    </span>
                 </td>
               </tr>
             ))}
