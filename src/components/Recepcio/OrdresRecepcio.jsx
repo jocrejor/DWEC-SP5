@@ -4,6 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
+import Filtres from "../Filtres";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -53,26 +54,86 @@ function OrderReception() {
     fetchInitialData();
   }, []);
 
+  // Aconseguir el format de data desitjat DD-MM-YYYY
+  const formateaFecha = (fecha) => {
+    const fechaSoloFecha = fecha.split('T')[0];
+    const [year, month, day] = fechaSoloFecha.split('-');
+    return `${day}-${month}-${year}`;
+  };
+
+
+
   // Funció per eliminar ordre de recepció
   const eliminarOrdre = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquesta ordre?')) {
       try {
-        await axios.delete(`${apiUrl}/orderreception/${id}`, { headers: { "auth-token": localStorage.getItem("token") } });
+        const response = await axios.get(`${apiUrl}/orderlinereception`, {
+          headers: { "auth-token": localStorage.getItem("token") }
+        });
+  
+        const responseData = response.data;
+  
+        if (responseData.length > 0) {
+          const deletePromises = responseData
+            .filter(orderLine => orderLine.order_reception_id === id)
+            .map(orderLine =>
+              axios.delete(`${apiUrl}/orderlinereception/${orderLine.id}`, {
+                headers: { "auth-token": localStorage.getItem("token") }
+              })
+            );
+  
+          await Promise.all(deletePromises);
+        }
+  
+        await axios.delete(`${apiUrl}/orderreception/${id}`, {
+          headers: { "auth-token": localStorage.getItem("token") }
+        });
+  
         setOrderReceptions(prev => prev.filter((item) => item.id !== id));
+  
       } catch (err) {
         console.error("Error eliminant ordre:", err);
         setError("Error eliminant l'ordre.");
       }
     }
   };
+  
 
   // Funció per modificar ordre de recepció
-  const modificarOrdre = (valors) => {
+  const [loadingModal, setLoadingModal] = useState(false);
+
+  // Modificar Ordre
+  const modificarOrdre = async (ordre) => {
     setTipoModal('Modificar');
-    setValorsInicials(valors);
-    setSelectedProducts(valors.products || []);
+    setLoadingModal(true);
+  
+    try {
+      const res = await axios.get(`${apiUrl}/orderlinereception/${ordre.id}`, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+  
+      const productesAssociats = res.data.map((linea) => ({
+        product_id: linea.product_id,
+        name: products.find((p) => p.id === linea.product_id)?.name || 'Producte desconegut',
+        quantity: linea.quantity_ordered,
+      }));
+  
+      setSelectedProducts(productesAssociats);
+  
+      setValorsInicials({
+        supplier_id: ordre.supplier_id,
+        estimated_reception_date: formateaFecha(ordre.estimated_reception_date),
+      });
+    } catch (err) {
+      console.error("Error carregant línies d'ordre:", err);
+      setSelectedProducts([]);
+    }
+  
+    setLoadingModal(false); // Quan les dades estiguin carregades, mostrem el modal
     setShowModal(true);
   };
+  
+
 
   const canviEstatModal = () => {
     setShowModal(!showModal);
@@ -133,36 +194,30 @@ function OrderReception() {
   // Funció per enviar el formulari (crear ordre i línies associades)
   const handleSubmit = async (values) => {
     //try {
-      const ordreDeRecepcio = {
-        ...values,
-        orderreception_status_id: 1,
-      };
-      
-      // Crear l'Ordre de Recepció
-      const resultat = await crearOrdreDeRecepcio(ordreDeRecepcio);
-      const ordreIdValue = resultat
-      
-      for (let product of selectedProducts) {
-        const liniaOrdre = {
-          order_reception_id: ordreIdValue,
-          product_id: product.product_id,
-          quantity_ordered: product.quantity,
-          orderline_status_id: 1,
-          quantity_received: 0,
-        };
-        await crearLiniaOrdreDeRecepcio(liniaOrdre);
-      }
+    const ordreDeRecepcio = {
+      ...values,
+      orderreception_status_id: 1,
+    };
 
-      // Actualitzar la llista de dades
-      await fetchInitialData();
-      canviEstatModal();
-      setError(null);
-/*
-    } catch (err) {
-      console.error("Error en crear ordre i línies d'ordre:", err);
-      setError("Error creant ordre de recepció i línies.");
+    // Crear l'Ordre de Recepció
+    const resultat = await crearOrdreDeRecepcio(ordreDeRecepcio);
+    const ordreIdValue = resultat
+
+    for (let product of selectedProducts) {
+      const liniaOrdre = {
+        order_reception_id: ordreIdValue,
+        product_id: product.product_id,
+        quantity_ordered: product.quantity,
+        orderline_status_id: 1,
+        quantity_received: 0,
+      };
+      await crearLiniaOrdreDeRecepcio(liniaOrdre);
     }
-      */
+
+    // Actualitzar la llista de dades
+    await fetchInitialData();
+    canviEstatModal();
+    setError(null);
   };
 
   return (
@@ -204,7 +259,7 @@ function OrderReception() {
               <tr key={valors.id}>
                 <td>{valors.id}</td>
                 <td>{suppliers.find((sup) => sup.id === valors.supplier_id)?.name}</td>
-                <td>{valors.estimated_reception_date}</td>
+                <td>{formateaFecha(valors.estimated_reception_date)}</td>
                 <td>{valors.orderreception_status}</td>
                 <td>
                   <Button variant="warning" onClick={() => modificarOrdre(valors)}>
@@ -229,102 +284,110 @@ function OrderReception() {
           <Modal.Title>{tipoModal} Ordre de Recepció</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Formik
-            enableReinitialize
-            initialValues={valorsInicials}
-            validationSchema={OrderReceptionSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ errors, touched }) => (
-              <Form>
-                <div>
-                  <label htmlFor="supplier_id">Proveïdor</label>
-                  <Field as="select" id="supplier_id" name="supplier_id">
-                    <option value="">Selecciona un proveïdor</option>
-                    {suppliers.map((sup) => (
-                      <option key={sup.id} value={sup.id}>
-                        {sup.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.supplier_id && touched.supplier_id && (
-                    <div>{errors.supplier_id}</div>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor="estimated_reception_date">Data Estimada</label>
-                  <Field
-                    id="estimated_reception_date"
-                    type="date"
-                    name="estimated_reception_date"
-                  />
-                  {errors.estimated_reception_date &&
-                    touched.estimated_reception_date && (
-                      <div>{errors.estimated_reception_date}</div>
-                    )}
-                </div>
-                <div>
-                  <label htmlFor="product">Producte</label>
-                  <Field
-                    as="select"
-                    id="product"
-                    name="product"
-                    onChange={(e) => setProductId(e.target.value)}
-                    value={productId}
-                  >
-                    <option value="">Selecciona un producte</option>
-                    {products.map((product) => (
-                      <option key={product.id} value={product.name}>
-                        {product.name}
-                      </option>
-                    ))}
-                  </Field>
-                </div>
-                <div>
-                  <label htmlFor="quantity">Quantitat</label>
-                  <input
-                    type="number"
-                    id="quantity"
-                    name="quantity"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    min="1"
-                  />
-                </div>
-                <button type="button" onClick={afegirProducte}>
-                  Afegir Producte
-                </button>
-                <div>
-                  <h4>Productes Afegits</h4>
-                  <Table striped bordered hover>
-                    <thead>
-                      <tr>
-                        <th>Producte</th>
-                        <th>Quantitat</th>
-                        <th>Eliminar</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedProducts.map((prod, index) => (
-                        <tr key={index}>
-                          <td>{prod.name}</td>
-                          <td>{prod.quantity}</td>
-                          <td>
-                            <button type="button" onClick={() => eliminarProducte(index)}>
-                              Eliminar
-                            </button>
-                          </td>
-                        </tr>
+          {loadingModal ? (
+            <Spinner animation="border" />
+          ) : (
+            <Formik
+              enableReinitialize
+              initialValues={valorsInicials}
+              validationSchema={OrderReceptionSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ errors, touched }) => (
+                <Form>
+                  <div>
+                    <label htmlFor="supplier_id">Proveïdor</label>
+                    <Field as="select" id="supplier_id" name="supplier_id">
+                      <option value="">Selecciona un proveïdor</option>
+                      {suppliers.map((sup) => (
+                        <option key={sup.id} value={sup.id}>
+                          {sup.name}
+                        </option>
                       ))}
-                    </tbody>
-                  </Table>
-                </div>
-                <Button variant="primary" type="submit">
-                  {tipoModal === 'Crear' ? 'Crear' : 'Modificar'}
-                </Button>
-              </Form>
-            )}
-          </Formik>
+                    </Field>
+                    {errors.supplier_id && touched.supplier_id && (
+                      <div>{errors.supplier_id}</div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="estimated_reception_date">Data Estimada</label>
+                    <Field
+                      id="estimated_reception_date"
+                      type="date"
+                      name="estimated_reception_date"
+                    />
+                    {errors.estimated_reception_date &&
+                      touched.estimated_reception_date && (
+                        <div>{errors.estimated_reception_date}</div>
+                      )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="product">Producte</label>
+                    <Field
+                      as="select"
+                      id="product"
+                      name="product"
+                      onChange={(e) => setProductId(e.target.value)}
+                      value={productId}
+                    >
+                      <option value="">Selecciona un producte</option>
+                      {products.map((product) => (
+                        <option key={product.id} value={product.name}>
+                          {product.name}
+                        </option>
+                      ))}
+                    </Field>
+                  </div>
+
+                  <div>
+                    <label htmlFor="quantity">Quantitat</label>
+                    <input
+                      type="number"
+                      id="quantity"
+                      name="quantity"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      min="1"
+                    />
+                  </div>
+                  <button type="button" onClick={afegirProducte}>
+                    Afegir Producte
+                  </button>
+
+                  <div>
+                    <h4>Productes Afegits</h4>
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>Producte</th>
+                          <th>Quantitat</th>
+                          <th>Eliminar</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedProducts.map((prod, index) => (
+                          <tr key={index}>
+                            <td>{prod.name}</td>
+                            <td>{prod.quantity}</td>
+                            <td>
+                              <button type="button" onClick={() => eliminarProducte(index)}>
+                                Eliminar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                  <Button variant="primary" type="submit">
+                    {tipoModal === 'Crear' ? 'Crear' : 'Modificar'}
+                  </Button>
+                </Form>
+              )}
+            </Formik>
+          )}
         </Modal.Body>
       </Modal>
     </>
