@@ -18,6 +18,7 @@ const LotSchema = Yup.object().shape({
   quantity_received: Yup.number().min(0, 'El valor no pot ser negatiu').required('Valor requerit')
 });
 
+/* LOTS */
 function Lots() {
   const [lot, setLot] = useState([]);
   const [products, setProduct] = useState([]);
