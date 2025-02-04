@@ -159,7 +159,7 @@ function CompletarInventari() {
     })
 
     const updatedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Completat').id }
-
+    
     //await updateId(url, 'Inventory', selectedInventory.id, updatedInvetory);
     axios.put(`${apiURL}inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
@@ -174,8 +174,8 @@ function CompletarInventari() {
       <Row>
         <Col>
           <div className='px-3 py-3'>
-            <Table className='table table-striped text-center'>
-              <thead className="table-active border-bottom border-dark-subtle">
+            <Table striped bordered hover>
+              <thead className='active'>
                 <tr>
                   <th className='text-light-blue'>ID Inventari</th>
                   <th className='text-light-blue'>Data</th>
@@ -183,18 +183,18 @@ function CompletarInventari() {
                   <th className='text-light-blue'>Magatzem</th>
                 </tr>
               </thead>
-              <tbody className='text-light-blue'>
+              <tbody>
                 <tr>
-                  <td data-cell="ID Inventari: ">{selectedInventory?.id}</td>
-                  <td data-cell="Data: ">{selectedInventory?.created_at}</td>
-                  <td data-cell="Estat: ">{selectedInventory?.inventory_status}</td>
-                  <td data-cell="Magatzem: ">{(storages.find(storage => storage.id === selectedInventory?.storage_id))?.name}</td>
+                  <td>{selectedInventory?.id}</td>
+                  <td>{selectedInventory?.created_at}</td>
+                  <td>{selectedInventory?.inventory_status}</td>
+                  <td>{(storages.find(storage => storage.id === selectedInventory?.storage_id))?.name}</td>
                 </tr>
               </tbody>
             </Table>
 
-            <Table className='table table-striped text-center'>
-              <thead className="table-active border-bottom border-dark-subtle">
+            <Table>
+              <thead>
                 <tr>
                   <th scope="col" className='text-light-blue'>Producte</th>
                   <th scope="col" className='text-light-blue'>Quantitat Estimada</th>
@@ -210,10 +210,10 @@ function CompletarInventari() {
 
                       return (
                         <tr key={value.id}>
-                          <td data-cell="Producte: ">{(products.find(product => product.id === value.product_id))?.name}</td>
-                          <td data-cell="Quantitat Estimada: ">{value.quantity_estimated}</td>
-                          <td data-cell="Quantitat Real: ">{value.real_quantity}</td>
-                          <td data-cell="Justificació: ">
+                          <td>{(products.find(product => product.id === value.product_id))?.name}</td>
+                          <td>{value.quantity_estimated}</td>
+                          <td>{value.real_quantity}</td>
+                          <td>
                             <select
                               name={value.id}
                               className='form-select'
@@ -235,10 +235,8 @@ function CompletarInventari() {
                 }
               </tbody>
             </Table>
-            <div className='text-end'>
-              <Button variant='secondary' onClick={() => navigate('/inventaris')}>Tornar</Button>
-              <Button type="submit" onClick={handleSubmit} className='orange-button ms-3'>Completar</Button>
-            </div>
+            <Button variant='secondary' onClick={() => navigate('/inventaris')}>Tornar</Button>
+            <Button type="submit" onClick={handleSubmit}>Completar</Button>
           </div>
         </Col>
       </Row>
