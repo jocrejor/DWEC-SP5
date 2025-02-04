@@ -186,6 +186,99 @@ function IncidenciesResoldre() {
             </tbody>
         </table>
 
+        {/*<div class="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+        <div class="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+          <div class="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+            <div class="form-floating bg-white">
+              <select class="form-select" id="floatingSelect" aria-label="Seleccione una opción">
+                <option selected>Tria una opció</option>
+                <option value="1">Eliminar</option>
+              </select>
+              <label for="floatingSelect">Accions en lot</label>
+            </div>
+            <button class="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button"><i class="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+          </div>
+        </div>
+        <div class="d-none d-xl-block col-xl-4 order-xl-1"></div>
+        <div class="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+          <div class="d-flex h-100 justify-content-xl-end">
+            <button type="button" onClick={() => crearOrdre()} class="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"><i class="bi bi-plus-circle text-white pe-1"></i>Crear</button>
+          </div>
+        </div>
+      </div>
+      <div className="table-responsive mt-3">
+        <table class="table table-striped text-center">
+          <thead className="table-active border-bottom border-dark-subtle">
+            <tr>
+              <th scope='col'><input class="form-check-input" type="checkbox" name="" id="" /></th>
+              <th scope='col'>ID</th>
+              <th scope='col'>Client</th>
+              <th scope='col'>Data Estimada</th>
+              <th scope='col'>Estat</th>
+              <th scope='col'>Visualitzar</th>
+              <th scope='col'>Modificar</th>
+              <th scope='col'>Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((valors) => (
+              <tr key={valors.id}>
+                <td scope="row" data-cell="Seleccionar">
+                  <input class="form-check-input" type="checkbox" name="" id="" />
+                </td>
+                <td>{valors.id}</td>
+                <td>{clientExistent(valors.client_id)}</td>
+                <td>{formateaFecha(valors.shipping_date)}</td>
+                <td>{estatExistent(valors.ordershipping_status_id)}</td>
+                <td>
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => {
+                      visualitzarOrdre(valors);
+                    }}
+                  >
+                    <i className="bi bi-eye p-2"></i>
+                  </Button>
+                </td>
+                <td>
+                  <Button
+                    variant="outline-success"
+                    onClick={() => { modificarOrdre(valors); canviEstatModal(); }}
+                  >
+                    <i className="bi bi-pencil-square p-2"></i>
+                  </Button>
+                </td>
+                <td>
+                  <Button
+                    variant="outline-danger"
+                    onClick={() => eliminarOrder(valors.id)}
+                  >
+                    <i className='bi bi-trash p-2'></i>
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <nav aria-label="Page navigation example" class="d-block">
+          <ul class="pagination justify-content-center">
+            <li class="page-item">
+              <a class="page-link text-light-blue" href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
+            <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
+            <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
+            <li class="page-item">
+              <a class="page-link text-light-blue" href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>*/}
+
             <Modal show={showModal} onHide={canviEstatModal}>
                 <Modal.Header closeButton >
                     <Modal.Title>{tipoModal} Incidència</Modal.Title>
