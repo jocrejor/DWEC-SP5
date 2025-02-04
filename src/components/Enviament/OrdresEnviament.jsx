@@ -256,8 +256,8 @@ function OrdresEnviament() {
           </div>
         </div>
       </div>
-      <div className="table-responsive mt-3">
-        <table class="table table-striped text-center">
+      <div className='container-fluid pt-3'>
+        <table className='table table-striped border m-2'>
           <thead className="table-active border-bottom border-dark-subtle">
             <tr>
               <th scope='col'><input class="form-check-input" type="checkbox" name="" id="" /></th>
@@ -265,47 +265,34 @@ function OrdresEnviament() {
               <th scope='col'>Client</th>
               <th scope='col'>Data Estimada</th>
               <th scope='col'>Estat</th>
-              <th scope='col'>Visualitzar</th>
-              <th scope='col'>Modificar</th>
-              <th scope='col'>Eliminar</th>
+              <th scope='col'>Accions</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((valors) => (
               <tr key={valors.id}>
-                <td scope="row" data-cell="Seleccionar">
+                <td scope="row" data-cell="Seleccionar" className='text-center'>
                   <input class="form-check-input" type="checkbox" name="" id="" />
                 </td>
-                <td>{valors.id}</td>
-                <td>{clientExistent(valors.client_id)}</td>
-                <td>{formateaFecha(valors.shipping_date)}</td>
-                <td>{estatExistent(valors.ordershipping_status_id)}</td>
-                <td>
-                  <Button
-                    variant="outline-secondary"
-                    onClick={() => {
-                      visualitzarOrdre(valors);
-                    }}
-                  >
-                    <i className="bi bi-eye p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-success"
-                    onClick={() => { modificarOrdre(valors); canviEstatModal(); }}
-                  >
-                    <i className="bi bi-pencil-square p-2"></i>
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="outline-danger"
-                    onClick={() => eliminarOrder(valors.id)}
-                  >
-                    <i className='bi bi-trash p-2'></i>
-                  </Button>
-                </td>
+                <td data-cell="ID" className='text-center'>{valors.id}</td>
+                <td data-cell="Client" className='text-center'>{clientExistent(valors.client_id)}</td>
+                <td data-cell="Data Estimada" className='text-center'>{formateaFecha(valors.shipping_date)}</td>
+                <td data-cell="Estat" className='text-center'>{estatExistent(valors.ordershipping_status_id)}</td>
+                <td data-no-colon="true" className='text-center'>
+                    <div className="d-lg-flex justify-content-lg-center">
+                    <span onClick={() => visualitzarOrdre(valors)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-eye icono"></i>
+                    </span>
+
+                    <span onClick={() => modificarOrdre(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
+                      <i className="bi bi-pencil-square icono"></i>
+                    </span>
+
+                    <span onClick={() => eliminarOrder(valors.id)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-trash icono"></i>
+                    </span>
+                    </div>
+                  </td>
               </tr>
             ))}
           </tbody>
