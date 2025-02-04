@@ -81,7 +81,7 @@ function Storage() {
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
             <button type="button" onClick={canviEstatModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
-              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear Magatzem
             </button>
           </div>
         </div>
