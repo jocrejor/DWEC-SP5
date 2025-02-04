@@ -6,6 +6,7 @@ import axios from "axios";
 
 import Header from '../Header';
 import Filtres from '../Filtres';
+import LotsLotOSerie from './LotsLotOSerie';
 const apiUrl = import.meta.env.VITE_API_URL;
 // const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
 const token = localStorage.getItem('token');
@@ -18,12 +19,13 @@ const LotSchema = Yup.object().shape({
   quantity_received: Yup.number().min(0, 'El valor no pot ser negatiu').required('Valor requerit')
 });
 
+/* LOTS */
 function Lots() {
   const [lot, setLot] = useState([]);
   const [products, setProduct] = useState([]);
   const [suppliers, setSupplier] = useState([]);
   // de momento no hay orderReception
-  // const [orderReceptions, setOrderReception] = useState([]);
+  const [orderreception, setOrderReception] = useState([]);
   const [orderreception_status, setOrderReceptionStatus] = useState([]);
   const [orderline_status, setOrderLineStatus] = useState([]);
   const [orderLineReceptions, setOrderLineReception] = useState([]);
@@ -75,15 +77,15 @@ function Lots() {
           }
         )
 
-      // axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
-      //   // axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
-      //   .then(response => {
-      //     setOrderReception(response.data)
-      //   })
-      //   .catch(error => {
-      //     console.log(error)
-      //   }
-      //   )
+      axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
+        // axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
+        .then(response => {
+          setOrderReception(response.data)
+        })
+        .catch(error => {
+          console.log(error)
+        }
+        )
 
       axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
         // axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
@@ -97,7 +99,7 @@ function Lots() {
           }
         )
 
-        axios.get(`${apiUrl}orderreception_status`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}orderreception_status`, { headers: { "auth-token": token } })
         .then(
           response => {
             setOrderReceptionStatus(response.data)
@@ -108,7 +110,7 @@ function Lots() {
           }
         )
 
-        axios.get(`${apiUrl}orderline_status`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}orderline_status`, { headers: { "auth-token": token } })
         .then(
           response => {
             setOrderLineStatus(response.data)
@@ -206,8 +208,9 @@ function Lots() {
                       <input className='form-check-input' type="checkbox" />
                     </th>
                     <th scope='col' className="align-middle">ID</th>
-                    <th scope='col' className="align-middle">ID ordre recepció</th>
-                    <th scope='col' className="align-middle">Estat ordre de línea recepció</th>
+                    <th scope='col' className="align-middle">Proveïdor</th>
+                    <th scope='col' className="align-middle">Estat ordre línia de recepció</th>
+                    <th scope='col' className="align-middle">Estat ordre de recepció</th>
                     <th scope='col' className="align-middle">Producte</th>
                     <th scope='col' className="align-middle">Quantitat</th>
                     <th scope='col' className="align-middle">Lot/Serie</th>
@@ -228,12 +231,31 @@ function Lots() {
                           <td scope='row' data-cell="Seleccionar">
                             <input className='form-check-input' type="checkbox" />
                           </td>
+
                           <td data-cell="ID">{valors.id}</td>
 
-                          <td data-cell="Estat ordre línia recepció">{orderline_status.find((status) => status.id === valors.order_reception_id)?.name || "Estat no trobat"}</td>
+                          <td data-cell="Proveïdor">
+                            {(() => {
+                              const orderReceptions = orderreception.find(
+                                (or) => or.id === valors.order_reception_id
+                              );
+                              const supplier = suppliers.find((s) => s.id === orderReceptions?.supplier_id);
+                              return supplier ? supplier.name : "Proveïdor no trobat";
+                            })()}
+                          </td>
 
-                          <td data-cell="Estat ordre línia recepció">{orderreception_status.find((status) => status.id === valors.orderline_status_id)?.name || "Estat no trobat"}</td>
-                          <td data-cell="Producte">{products.find((product) => product.id === valors.product_id)?.name || "Desconegut"}</td>
+                          <td data-cell="Estat ordre línia de recepció">
+                            {orderline_status.find((status) => status.id === valors.order_reception_id)?.name || "Estat no trobat"}
+                          </td>
+
+                          <td data-cell="Estat ordre de recepció">
+                            {orderreception_status.find((status) => status.id === valors.orderline_status_id)?.name || "Estat no trobat"}
+                          </td>
+
+                          <td data-cell="Producte">
+                            {products.find((product) => product.id === valors.product_id)?.name || "Desconegut"}
+                          </td>
+
                           <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
 
                           <td data-no-colon="true">
@@ -241,10 +263,10 @@ function Lots() {
                               type="button"
                               className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
                               onClick={() => {
-                                modificarLot(valors);
                                 canviEstatModal();
+                                setTipoModal('Crear');
                               }}>
-                              Crear
+                              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
                             </Button>
                           </td>
 
@@ -313,7 +335,7 @@ function Lots() {
         <Modal.Body>
           <Formik
             initialValues={
-              tipoModal === 'Modificar' || tipoModal === 'Visualitzar'
+              tipoModal === 'Crear'
                 ? valorsInicials
                 : {
                   order_reception_id: '',
@@ -397,7 +419,7 @@ function Lots() {
               }
             }}
           >
-            {({ values, errors, touched }) => (
+            {({ errors, touched }) => (
               /**FORMULARIO CON SELECTS Y DEMÁS (CORRECTO) */
               <Form>
                 {/* <div className="form-group">
@@ -516,6 +538,103 @@ function Lots() {
                     ))}
                   </Field>
                   {errors.orderlinereception_id && touched.orderlinereception_id && <div className="text-danger mt-1">{errors.orderlinereception_id}</div>}
+                </div> */}
+
+                {/* <div className="form-group d-flex mt-3">
+                  <div>
+                    <div className='text-center fs-4'>
+                      <label htmlFor="lot">Lot</label>
+                    </div>
+
+                    <div className="d-flex gap-2">
+                      <div className="d-flex align-items-center">
+                        <Field
+                          type="number"
+                          name="lot_quantity"
+                          placeholder="Quantitat del lot"
+                          className="form-control"
+                        />
+                      </div>
+                      <div className="d-flex align-items-center">
+                        <Field
+                          type="text"
+                          name="lot_name"
+                          placeholder="Nom del lot"
+                          className="form-control"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="form-group d-flex mt-3">
+                  <div className="ms-3">
+                    <div className='text-center fs-4'>
+                      <label htmlFor="serie">Serie</label>
+                    </div>
+
+                    <div className="d-flex gap-2">
+                      <div className="d-flex align-items-center">
+                        <Field
+                          type="number"
+                          name="serie_quantity"
+                          placeholder="Quantitat de la serie"
+                          className="form-control"
+                        />
+                      </div>
+                      <div className="d-flex align-items-center">
+                        <Field
+                          type="text"
+                          name="serie_name"
+                          placeholder="Nom de la serie"
+                          className="form-control"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div> */}
+
+                <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="serie" />
+
+
+                {/* <div className="form-group d-flex mt-3">
+                  <div>
+                    <div className='text-center fs-4'>
+                      <label htmlFor="lot">Lot</label>
+                    </div>
+                    <div className="input-group flex-nowrap">
+                      <Field
+                        type="number"
+                        name="lot_quantity"
+                        className="form-control w-25"
+                      />
+
+                      <Field
+                        type="text"
+                        name="lot_name"
+                        placeholder="Nom del lot"
+                        className="form-control w-100"
+                      />
+                    </div>
+
+
+                    <div className='text-center fs-4'>
+                      <label htmlFor="serie">Serie</label>
+                    </div>
+                    <div className="input-group flex-nowrap">
+                      <Field
+                        type="number"
+                        name="serie_quantity"
+                        className="form-control w-25"
+                      />
+
+                      <Field
+                        type="text"
+                        name="serie_name"
+                        placeholder="Nom de la serie"
+                        className="form-control w-100"
+                      />
+                    </div>
+                  </div>
                 </div> */}
 
                 <div className="form-group d-flex justify-content-between mt-3">
