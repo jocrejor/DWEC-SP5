@@ -322,10 +322,10 @@ function OrderPickingReception() {
                             </div>
                         </div>
                     </div>
-
+  
                     <Modal show={showModal} onHide={canviEstatModal}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>{tipoModal}</Modal.Title>
+                        <Modal.Header closeButton className="bg-orange">
+                            <Modal.Title className="text-white">{tipoModal}</Modal.Title>
                         </Modal.Header>
 
                         <Modal.Body>

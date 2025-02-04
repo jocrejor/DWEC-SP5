@@ -36,6 +36,8 @@ td, th{
     background-color: var(--taronja);
 }
 
+
+
 .bg-grey {
     background-color: var(--gris);
 }
@@ -94,6 +96,10 @@ li:hover i{
 .activo-2{
     background-color: var(--blauClar) !important;
     border: 1px solid var(--blauClar);
+    color: white !important;
+}
+
+.btn-close {
     color: white !important;
 }
 
@@ -165,3 +171,4 @@ li:hover i{
         
     }
 }
+
