@@ -165,9 +165,6 @@ function Usuaris() {
         </div>
       </div>
 
-      <Button variant="success" onClick={obrirModal} className="mb-3">
-        Alta Usuari
-      </Button>
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -184,13 +181,19 @@ function Usuaris() {
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
-            <button type="button" className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"><i className="bi bi-plus-circle text-white pe-1"></i>Crear</button>
+            <button
+              type="button"
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+              onClick={obrirModal}
+            >
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+            </button>
           </div>
         </div>
       </div>
       <div className="d-flex justify-content-center text-light-blue">
-      <Table className="table table-striped text-light-blue" borderless>
-      <thead className="table-active border-bottom border-dark-subtle">
+        <Table className="table table-striped text-light-blue" borderless>
+          <thead className="table-active border-bottom border-dark-subtle">
             <tr>
               <th>Id</th>
               <th>Nom</th>
@@ -198,9 +201,7 @@ function Usuaris() {
               <th>Password</th>
               <th>Rol</th>
               <th>Image</th>
-              <th>Modificar</th>
-              <th>Eliminar</th>
-              <th>Visualitzar</th>
+              <th>Accions</th>
             </tr>
           </thead>
           <tbody>
@@ -218,18 +219,14 @@ function Usuaris() {
                   <td>{user.role}</td>
                   <td>{user.image}</td>
                   <td>
-                    <Button variant="warning" onClick={() => modificarUsuari(user)} className="btn-sm">
-                      Modificar
+                    <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => modificarUsuari(user)} className="btn-sm">
+                      <i style={{ color: 'gray' }} className="bi bi-pencil-square"></i>
                     </Button>
-                  </td>
-                  <td>
-                    <Button variant="danger" onClick={() => eliminarUsuari(user.id)} className="btn-sm">
-                      Eliminar
+                    <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => eliminarUsuari(user.id)} className="btn-sm">
+                      <i className="bi bi-trash" style={{ color: 'gray' }}></i>
                     </Button>
-                  </td>
-                  <td>
-                    <Button variant="info" onClick={() => visualitzarUsuari(user)} className="btn-sm">
-                      Visualitzar
+                    <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => visualitzarUsuari(user)} className="btn-sm">
+                      <i className="bi bi-eye px-3" style={{ color: 'gray' }}></i>
                     </Button>
                   </td>
                 </tr>
@@ -274,6 +271,7 @@ function Usuaris() {
               initialValues={tipoModal === 'Modificar' ? valorsInicials : { name: '', email: '', password: '', role: '', image: '' }}
               validationSchema={UserSchema}
               onSubmit={async (values) => {
+                console.log("Enviar valors:", values);
                 try {
                   if (tipoModal === "Crear") {
                     await axios.post(`${apiUrl}/users`, values);
@@ -318,9 +316,6 @@ function Usuaris() {
                     {errors.image && touched.image && <div className="text-danger">{errors.image}</div>}
                   </div>
                   <div className="d-flex justify-content-between">
-                    <Button variant="secondary" onClick={tancarModal}>
-                      Tancar
-                    </Button>
                     <Button variant="primary" type="submit">
                       {tipoModal}
                     </Button>
