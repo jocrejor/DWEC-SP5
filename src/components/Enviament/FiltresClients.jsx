@@ -19,7 +19,7 @@ function FiltresClients() {
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
                         <label for="telefon" className="form-label">Telèfon</label>
-                        <input type="text" placeholder='+34 743883232' className="form-control" id="telefon" />
+                        <input type="text" placeholder='743883232' className="form-control" id="telefon" />
                     </div>
                 </div>
                 <div className="col-12 col-md-6 col-xl-4">
