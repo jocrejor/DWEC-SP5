@@ -5,7 +5,7 @@ import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header';
 import Filtres from '../Filtres';
 import axios from 'axios';
-
+import '../../App.css';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const supplierschema = Yup.object().shape({
@@ -61,6 +61,7 @@ function Proveidors() {
       console.error('Error fetching data:', error);
     }
   };
+  
 
   const deleteSuppliers = async (id) => {
     const confirmDelete = window.confirm("Segur que vols eliminar aquest proveidor?");
@@ -160,7 +161,7 @@ function Proveidors() {
 
       <div className='container-fluid pt-3'>
 
-        <table className='table table-striped border m-2'>
+        <table className='table table-striped border m-2 text-center'>
           <thead class="table-active border-bottom border-dark-subtle">
             <tr>
               <th scope="col">ID</th>
@@ -208,8 +209,8 @@ function Proveidors() {
       </div>
 
       {/* Modal Visualitzar */}
-      <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
-      <Modal.Header closeButton>
+      <Modal className='text-light-blue' show={showViewModal} onHide={() => setShowViewModal(false)}>
+      <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
         <Modal.Title>Visualitzar Proveidors</Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -237,8 +238,8 @@ function Proveidors() {
 
 
       {/* Modal Crear/Modificar */}
-      <Modal show={showModal} onHide={canviEstatModal}>
-        <Modal.Header closeButton>
+      <Modal className='text-light-blue' show={showModal} onHide={canviEstatModal}>
+        <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
           <Modal.Title>{tipoModal} proveidors</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -266,11 +267,11 @@ function Proveidors() {
             {({ values, errors, touched }) => (
               <Form>
                 <div className="form-group">
-                  <label htmlFor="name">Nom</label>
+                  <label className='fw-bolder' htmlFor="name">Nom</label>
                   <Field
                     id="name"
                     name="name"
-                    className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''
+                    className={`text-light-blue form-control ${touched.name && errors.name ? 'is-invalid' : ''
                       }`}
                   />
                   {touched.name && errors.name ? (
@@ -278,11 +279,11 @@ function Proveidors() {
                   ) : null}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="address">Adreça</label>
+                  <label className='fw-bolder' htmlFor="address">Adreça</label>
                   <Field
                     id="address"
                     name="address"
-                    className={`form-control ${touched.address && errors.address ? 'is-invalid' : ''
+                    className={`text-light-blue form-control ${touched.address && errors.address ? 'is-invalid' : ''
                       }`}
                   />
                   {touched.address && errors.address ? (
@@ -290,11 +291,11 @@ function Proveidors() {
                   ) : null}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="nif">NIF</label>
+                  <label className='fw-bolder' htmlFor="nif">NIF</label>
                   <Field
                     id="nif"
                     name="nif"
-                    className={`form-control ${touched.nif && errors.nif ? 'is-invalid' : ''
+                    className={`text-light-blue form-control ${touched.nif && errors.nif ? 'is-invalid' : ''
                       }`}
                   />
                   {touched.nif && errors.nif ? (
@@ -302,11 +303,11 @@ function Proveidors() {
                   ) : null}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="phone">Telèfon</label>
+                  <label className='fw-bolder' htmlFor="phone">Telèfon</label>
                   <Field
                     id="phone"
                     name="phone"
-                    className={`form-control ${touched.phone && errors.phone ? 'is-invalid' : ''
+                    className={`text-light-blue form-control ${touched.phone && errors.phone ? 'is-invalid' : ''
                       }`}
                   />
                   {touched.phone && errors.phone ? (
@@ -314,12 +315,12 @@ function Proveidors() {
                   ) : null}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="email">Email</label>
+                  <label className='fw-bolder' htmlFor="email">Email</label>
                   <Field
                     id="email"
                     name="email"
                     type="email"
-                    className={`form-control ${touched.email && errors.email ? 'is-invalid' : ''
+                    className={`text-light-blue form-control ${touched.email && errors.email ? 'is-invalid' : ''
                       }`}
                   />
                   {touched.email && errors.email ? (
@@ -328,11 +329,11 @@ function Proveidors() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="state_id">Estat</label>
+                  <label className='fw-bolder' htmlFor="state_id">Estat</label>
                   <Field
                     as="select"
                     name="state_id"
-                    className={`form-control ${touched.state_id && errors.state_id ? 'is-invalid' : ''
+                    className={`text-light-blue form-control ${touched.state_id && errors.state_id ? 'is-invalid' : ''
                       }`}
                   >
                     <option value="">Selecciona un estat</option>
@@ -347,14 +348,14 @@ function Proveidors() {
                   ) : null}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="province">Província</label>
-                  {values.state_id === '194' ? (
+                  <label className='fw-bolder' htmlFor="province">Província</label>
+                  {String(values.state_id) === '194' ? (
                     <>
                       <Field
                         as="select"
                         id="province"
                         name="province"
-                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
+                        className={`text-light-blue form-control ${touched.province && errors.province ? 'is-invalid' : ''
                           }`}
                       >
                         <option value="">Selecciona una província</option>
@@ -380,7 +381,7 @@ function Proveidors() {
                         id="province"
                         name="province"
                         placeholder="Escribe la provincia"
-                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
+                        className={`text-light-blue form-control ${touched.province && errors.province ? 'is-invalid' : ''
                           }`}
                       />
                       {touched.province && errors.province && (
@@ -390,14 +391,14 @@ function Proveidors() {
                     </>
                   )}
                 </div>
-                {values.state_id === '194' && values.province ? (
+                {String(values.state_id) === '194' && values.province ? (
                   <div className="form-group">
-                    <label htmlFor="city">Ciutat</label>
+                    <label className='fw-bolder' htmlFor="city">Ciutat</label>
                     <Field
                       as="select"
                       id="city"
                       name="city"
-                      className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
+                      className={`text-light-blue form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
                     >
                       <option value="">Selecciona una ciutat</option>
                       {ciutat.map((ciudad) => (
@@ -426,51 +427,43 @@ function Proveidors() {
                   </div>
                 )}
                 <div className="form-group">
-                  <label htmlFor="cp">Codi Postal</label>
+                  <label className='fw-bolder' htmlFor="cp">Codi Postal</label>
                   <Field
                     id="cp"
                     name="cp"
-                    className={`form-control ${touched.cp && errors.cp ? 'is-invalid' : ''
+                    className={`text-light-blue form-control ${touched.cp && errors.cp ? 'is-invalid' : ''
                       }`}
                   />
                   {touched.cp && errors.cp ? (
                     <div className="invalid-feedback">{errors.cp}</div>
                   ) : null}
                 </div>
+                <Modal.Footer>
                 <div className="form-group text-right">
-                  <Button type="submit" variant="success">
+                  <Button className='orange-button' type="submit" variant="success">
                     {tipoModal === 'Crear' ? 'Crear' : 'Modificar'}
                   </Button>
                 </div>
+                </Modal.Footer>
               </Form>
             )}
           </Formik>
         </Modal.Body>
       </Modal>
-      <nav>
-        <ul className="pagination justify-content-center">
-          <li className="page-item">
-            <a className="page-link" href="#">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
+      <nav aria-label="Page navigation example" class="d-block">
+        <ul class="pagination justify-content-center">
+          <li class="page-item">
+                <a class="page-link text-light-blue" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
           </li>
-
-          <li className="page-item active" aria-current="page">
-            <a className="page-link" href="#">1</a>
-          </li>
-
-          <li className="page-item">
-            <a className="page-link" href="#">2</a>
-          </li>
-          <li className="page-item">
-            <a className="page-link" href="#">3</a>
-          </li>
-
-
-          <li className="page-item">
-            <a className="page-link" href="#">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
+          <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
+          <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
+          <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
+          <li class="page-item">
+                <a class="page-link text-light-blue" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
           </li>
         </ul>
       </nav>
