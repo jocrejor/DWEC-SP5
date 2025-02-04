@@ -529,12 +529,12 @@ function OrderPickingShipping() {
 
                       <tbody>
                         {orderPickingShipping
-                          .filter((order) => {
-                            order.operator_id === parseInt(usuariFiltrar);
-                          })
+                          // .filter((order) => {
+                          //   order.operator_id === parseInt(usuariFiltrar);
+                          // })
                           .map((order) => {
                             const user = users.find(
-                              (u) => u.id === order.user_id
+                              (u) => u.id === order.operator_id
                             );
                             const product = products.find(
                               (p) => p.id === order.product_id
@@ -554,7 +554,7 @@ function OrderPickingShipping() {
                                 </td>
                                 <td>{order.id}</td>
                                 <td>{product.name}</td>
-                                <td>{order.create_date}</td>
+                                <td>{order.created_date}</td>
                                 <td>{user.name}</td>
                                 <td>
                                   <Button
