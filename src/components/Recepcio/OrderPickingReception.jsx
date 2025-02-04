@@ -207,7 +207,7 @@ function OrderPickingReception() {
             <Filtres />
             {tabla === "CrearOrder" ? (
                 <>
-                    <div>
+                    {/*<div>
                         <h2>Llistat Order Reception</h2>
                     </div>
 
@@ -217,34 +217,109 @@ function OrderPickingReception() {
 
                     <Button variant="success" onClick={() => {
                         setTabla("ListarOrder");
-                    }}>Llistar Order Picking</Button>
+                    }}>Llistar Order Picking</Button>*/}
 
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>ID Order</th>
-                                <th>Producte</th>
-                                <th>Quantitat</th>
-                                <th>Magatzem / Carrer / Estantería / Espai</th>
-                                <th></th>
-                            </tr>
-                        </thead>
+                    <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+                        <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+                            <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+                                <div className="form-floating bg-white">
+                                    <select
+                                        className="form-select"
+                                        id="floatingSelect"
+                                        aria-label="Seleccione una opción"
+                                    >
+                                        <option selected>Tria una opció</option>
+                                        <option value="1">Eliminar</option>
+                                    </select>
+                                    <label htmlFor="floatingSelect">Accions en lot</label>
+                                </div>
+                                <button
+                                    className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0"
+                                    type="button"
+                                >
+                                    <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+                                </button>
+                            </div>
+                        </div>
+                        <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+                        <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+                            <div className="d-flex h-100 justify-content-xl-end">
+                                <button onClick={() => {
+                                    crearOrderPickingReception();
+                                }}
+                                type="button"
+                                className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+                                >
+                                    <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+                                </button>
+                                <button onClick={() => {
+                                    setTabla("ListarOrder");
+                                }}
+                                type="button"
+                                className="btn btn-dark ms-2 border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+                                >
+                                    Llistar Orders Picking
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="row">
+                        <div className="col-12">
+                            <div>
+                                <table className="table table-striped text-center">
+                                    <thead className="table-active border-bottom border-dark-subtle">
+                                        <tr>
+                                            <th scope="col">
+                                                <input className="form-check-input" type="checkbox"/>
+                                            </th>
+                                            <th scope="col">ID Order</th>
+                                            <th scope="col">Producte</th>
+                                            <th scope="col">Quantitat</th>
+                                            <th scope="col">Magatzem / Carrer / Estantería / Espai</th>
+                                        </tr>
+                                    </thead>
 
-                        <tbody>
-                            {temporalPickings.map(temporalPicking => {
-                                const product = products.find(p => p.id === temporalPicking.product_id);
-                                return (
-                                    <tr key={temporalPicking.order_reception_id}>
-                                        <td>{temporalPicking.order_reception_id}</td>
-                                        <td>{product.name}</td>
-                                        <td>{temporalPicking.quantity_received}</td>
-                                        <td>{temporalPicking.storage_id} / {temporalPicking.street_id} / {temporalPicking.shelf_id} / {temporalPicking.space_id}</td>
-                                        <td><input type="checkbox" value={temporalPicking.order_line_reception_id} /></td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </Table>
+                                    <tbody>
+                                        {temporalPickings.map(temporalPicking => {
+                                            const product = products.find(p => p.id === temporalPicking.product_id);
+                                            return (
+                                                <tr key={temporalPicking.order_reception_id}>
+                                                    <td scope="row" data-cell="Seleccionar">
+                                                        <input className="form-check-input" type="checkbox" value={temporalPicking.order_line_reception_id}/>
+                                                    </td>
+                                                    <td data-cell="Ordre ID">{temporalPicking.order_reception_id}</td>
+                                                    <td data-cell="Producte">{product.name}</td>
+                                                    <td data-cell="Quantitat">{temporalPicking.quantity_received}</td>
+                                                    <td data-cell="Magatzem / Carrer / Estantería / Espai">
+                                                        {temporalPicking.storage_id} / {temporalPicking.street_id} / {temporalPicking.shelf_id} / {temporalPicking.space_id}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+
+                                <nav aria-label="Page navigation example" class="d-block">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item">
+                                             <a class="page-link text-light-blue" href="#" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
+                                        <li class="page-item">
+                                            <a class="page-link text-light-blue" href="#" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
 
                     <Modal show={showModal} onHide={canviEstatModal}>
                         <Modal.Header closeButton>
@@ -300,7 +375,7 @@ function OrderPickingReception() {
                 </>
             ) : (
                 <>
-                    <Button variant="success" onClick={() => {
+                    {/*<Button variant="success" onClick={() => {
                         setTabla("CrearOrder");
                     }}>Enrrere</Button>
 
@@ -314,39 +389,76 @@ function OrderPickingReception() {
                             {user.name}
                         </option>
                     ))}
-                    </select>
+                    </select>*/}
 
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>Emmagatzemat</th>
-                                <th>Ordre ID</th>
-                                <th>Producte</th>
-                                <th>Fecha</th>
-                                <th>Operari</th>
-                            </tr>
-                        </thead>
+                    <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+                        <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+                            <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+                                <div className="form-floating bg-white">
+                                    <select className="form-select" id="floatingSelect" aria-label="Seleccione un operari" value={usuariFiltrar} onChange={(e) => setUsuariFiltrar(e.target.value)}>
+                                        <option value="" disbled selected>Tria un operari</option>
+                                        {users.map((user) => (
+                                            <option key={user.id} value={user.id}>
+                                                {user.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <label htmlFor="floatingSelect">Operari</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+                        <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+                            <div className="d-flex h-100 justify-content-xl-end">
+                                <button onClick={() => {
+                                    setTabla("CrearOrder");
+                                }}
+                                type="button"
+                                className="btn btn-dark ms-2 border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+                                >
+                                    Enrrere
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="row">
+                        <div className="col-12">
+                            <div>
+                                <table className="table table-striped text-center">
+                                    <thead className="table-active border-bottom border-dark-subtle">
+                                        <tr>
+                                            <th scope="col">Emmagatzemat</th>
+                                            <th scope="col">Ordre ID</th>
+                                            <th scope="col">Producte</th>
+                                            <th scope="col">Data</th>
+                                            <th scope="col">Operari</th>
+                                        </tr>
+                                    </thead>
 
-                        <tbody>
-                            {orderPickingReception
-                                .filter(order => order.operator_id === parseInt(usuariFiltrar))
-                                .map(order => {
-                                    const user = users.find(u => u.id === order.operator_id);
-                                    const product = products.find(p => p.id === order.product_id);
-                                        return (
-                                            <tr key={order.id}>
-                                                <td class="d-flex justify-content-center align-items-center">
-                                                    <i class="bi bi-arrow-down" onClick={() => completarOrderPicking(order.order_line_reception_id, order.id)}></i>
-                                                </td>
-                                                <td>{order.id}</td>
-                                                <td>{product.name}</td>
-                                                <td>{order.create_date}</td>
-                                                <td>{user.name}</td>
-                                            </tr>
-                                        );
-                                })}
-                        </tbody>
-                    </Table>
+                                    <tbody>
+                                        {orderPickingReception
+                                            .filter(order => order.operator_id === parseInt(usuariFiltrar))
+                                            .map(order => {
+                                                const user = users.find(u => u.id === order.operator_id);
+                                                const product = products.find(p => p.id === order.product_id);
+                                                return (
+                                                    <tr key={order.id}>
+                                                        <td class="d-flex justify-content-center align-items-center">
+                                                            <i class="bi bi-arrow-down" onClick={() => completarOrderPicking(order.order_line_reception_id, order.id)}></i>
+                                                        </td>
+                                                        <td data-cell="Ordre ID">{order.id}</td>
+                                                        <td data-cell="Producte">{product.name}</td>
+                                                        <td data-cell="Data">{order.create_date}</td>
+                                                        <td data-cell="Operari">{user.name}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
 
                     <Modal show={showModal} onHide={canviEstatModal}>
                         <Modal.Header closeButton>
