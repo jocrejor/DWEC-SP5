@@ -428,7 +428,7 @@ function OrderPickingShipping() {
           </div>
         </div>
       </div>
-      {tabla === "CrearOrder" ? (
+      {/* {tabla === "CrearOrder" ? (
         <>
           <Button
             variant="success"
@@ -658,7 +658,7 @@ function OrderPickingShipping() {
             </Modal.Body>
           </Modal>
         </>
-      )}
+      )} */}
     </>
   );
 }
