@@ -1,27 +1,28 @@
 :root{
-    --blauFosc: #222831;
-    --blauClar: #30475E;
-    --taronja: #FF7000;
-    --gris: #ECECEC;
+    --darkBlue: #222831;
+    --lightBlue: #30475E;
+    --orange: #FF7000;
+    --grey: #ECECEC;
     --title: #FF7F50;
     --badge: #DC3545;
     --logout: #A52A2A;
 }
 
-body{
+* {
     font-family: "Noto Serif", serif;
+    color: var(--lightBlue);
 }
 
 td, th{
     color: var(--lightBlue) !important;
 }
 
-/********* BARRA LATERAL CON BOOTSTRAP *********/
 .fondo-azul{
-    background-color: var(--blauFosc);
+    background-color: var(--darkBlue);
 }
+
 .fondo-azul-claro{
-    background-color: var(--blauClar);
+    background-color: var(--lightBlue);
 }
 
 .logout{
@@ -33,25 +34,21 @@ td, th{
 }
 
 .bg-orange{
-    background-color: var(--taronja);
-}
-
-.bg-grey {
-    background-color: var(--gris);
+    background-color: var(--orange);
 }
 
 .orange-button{
-    background-color: var(--taronja);
-    border-color: var(--taronja);
+    background-color: var(--orange);
+    border-color: var(--orange);
 }
 
-.cursor-pointer{
-    cursor: pointer;
+.bg-grey {
+    background-color: var(--grey);
 }
 
 .orange-button:hover{
-    background-color: var(--blauClar);
-    border-color: var(--blauClar);
+    background-color: var(--lightBlue);
+    border-color: var(--lightBlue);
 }
 
 li:hover{
@@ -60,30 +57,26 @@ li:hover{
 
 li:hover a,
 li:hover i{
-    color: var(--blauClar) !important;
+    color: var(--lightBlue) !important;
 }
 
 .text-light-blue{
-    color: var(--blauClar) !important;
-}
-
-.text-orange{
-    color: var(--taronja) !important;
+    color: var(--lightBlue) !important;
 }
 
 .activo{
-    background-color: var(--gris);
-    color: var(--blauFosc) !important;
-    border: 1px solid var(--blauClar) !important;
+    background-color: var(--grey);
+    color: var(--darkBlue) !important;
+    border: 1px solid var(--lightBlue) !important;
     border-left: none !important;
 }
 
 .activo a {
-    color: var(--blauFosc)
+    color: var(--darkBlue)
 }
 
 .no-hover:hover{
-    background-color: var(--blauFosc);
+    background-color: var(--darkBlue);
     color: white !important;
 }
 
@@ -92,9 +85,19 @@ li:hover i{
 }
 
 .activo-2{
-    background-color: var(--blauClar) !important;
-    border: 1px solid var(--blauClar);
+    background-color: var(--lightBlue) !important;
+    border: 1px solid var(--lightBlue);
     color: white !important;
+}
+
+#dropdown{
+    display: none;
+}
+
+
+/*HOVER ICONOS*/
+.icono:hover{
+    color: var(--orange) !important;
 }
 
 @media only screen and (max-width: 1199px)
@@ -119,7 +122,25 @@ li:hover i{
         width: 5em;
     }
 
-    
+    /*Taula responsive*/
+
+    th{
+        display: none;
+    }
+
+    td{
+        display: block;
+    }
+
+    td::before{
+        content: attr(data-cell) ": ";
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    td[data-no-colon="true"]::before {
+        content: ""; 
+    }
 
     /*********** DESPLAZAMIENTO DEL MENÚ ***********/
     @keyframes slideDown {
