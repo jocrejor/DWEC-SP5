@@ -111,7 +111,7 @@ function OrderReception() {
       const res = await axios.post(`${apiUrl}/orderreception`, ordreDeRecepcio, {
         headers: { "auth-token": localStorage.getItem("token") }
       });
-      return res.data.id;
+      return res.data.results.insertId;
     } catch (err) {
       console.error("Error creant ordre de recepció:", err);
       throw new Error("No s'ha pogut crear l'ordre de recepció.");
@@ -132,22 +132,21 @@ function OrderReception() {
 
   // Funció per enviar el formulari (crear ordre i línies associades)
   const handleSubmit = async (values) => {
-    try {
+    //try {
       const ordreDeRecepcio = {
         ...values,
         orderreception_status_id: 1,
       };
-
+      
       // Crear l'Ordre de Recepció
-      const ordreId = await crearOrdreDeRecepcio(ordreDeRecepcio);
-      const ordreIdValue = ordreId.id;
-
+      const resultat = await crearOrdreDeRecepcio(ordreDeRecepcio);
+      const ordreIdValue = resultat
+      
       for (let product of selectedProducts) {
         const liniaOrdre = {
           order_reception_id: ordreIdValue,
           product_id: product.product_id,
           quantity_ordered: product.quantity,
-          orderreception_status_id: 1,
           orderline_status_id: 1,
           quantity_received: 0,
         };
@@ -158,11 +157,12 @@ function OrderReception() {
       await fetchInitialData();
       canviEstatModal();
       setError(null);
-
+/*
     } catch (err) {
       console.error("Error en crear ordre i línies d'ordre:", err);
       setError("Error creant ordre de recepció i línies.");
     }
+      */
   };
 
   return (
@@ -221,6 +221,9 @@ function OrderReception() {
           </tbody>
         </Table>
       )}
+
+
+
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Ordre de Recepció</Modal.Title>
