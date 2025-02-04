@@ -7,7 +7,10 @@ import {
   // updateId,
 } from "../../apiAccess/crud";
 import { Button, Table, Modal } from "react-bootstrap";
+import Header from "../Header";
+import Filtres from "../Filtres";
 import axios from "axios";
+import { movMagatzem } from "../Magatzem/movMagatzem";
 
 function OrderPickingShipping() {
   const [orderPickingShipping, setOrderPickingShipping] = useState([]);
@@ -17,7 +20,8 @@ function OrderPickingShipping() {
   const [temporalPickings, setTemporalPickings] = useState([]);
   const [spaces, setSpaces] = useState([]);
   const [users, setUsers] = useState([]);
-  const [currentuser, setCurrentUser] = useState(null);
+  const [operaraiSeleccionat, setOperariSeleccionat] = useState("");
+  const [usuariFiltrar, setUsuariFiltrar] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Alta");
@@ -26,112 +30,109 @@ function OrderPickingShipping() {
 
   const [orderSelected, setOrderSelected] = useState([]);
 
-  const apiUrl = url;
+  // const apiUrl = url;
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
-    // const apiUrl = import.meta.env.VITE_API_URL;
-    // const token = localStorage.getItem("token");
+    axios
+      .get(`${apiUrl}orderpickingshipping`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setOrderPickingShipping(res.data);
+      })
+      .catch((error) => console.error(error));
 
-    const fetchData = async () => {
-      axios
-        .get(`${apiUrl}OrderPickingshipping`, {
-          // headers: { "auth-token": token },
-        })
-        .then((res) => {
-          setOrderPickingShipping(res.data);
-        })
-        .catch((error) => console.log(error));
+    axios
+      .get(`${apiUrl}ordershipping`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setOrderShipping(res.data);
+      })
+      .catch((error) => console.error(error));
 
-      axios
-        .get(`${apiUrl}OrderShipping`, {
-          // headers: { "auth-token": token },
-        })
-        .then((res) => {
-          setOrderShipping(res.data);
-        })
-        .catch((error) => console.log(error));
+    axios
+      .get(`${apiUrl}orderlineshipping`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setOrderLineShipping(res.data);
+      })
+      .catch((error) => console.error(error));
 
-      const orderLine = axios
-        .get(`${apiUrl}OrderLineShipping`, {
-          // headers: { "auth-token": token },
-        })
-        .then((res) => {
-          setOrderLineShipping(res.data);
-        })
-        .catch((error) => console.log(error));
+    axios
+      .get(`${apiUrl}product`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setProducts(res.data);
+      })
+      .catch((error) => console.error(error));
 
-      axios
-        .get(`${apiUrl}Product`, {
-          // headers: { "auth-token": token },
-        })
-        .then((res) => {
-          setProducts(res.data);
-        })
-        .catch((error) => console.log(error));
+    axios
+      .get(`${apiUrl}space`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setSpaces(res.data);
+      })
+      .catch((error) => console.error(error));
 
-      axios
-        .get(`${apiUrl}Space`, {
-          // headers: { "auth-token": token },
-        })
-        .then((res) => {
-          setSpaces(res.data);
-        })
-        .catch((error) => console.log(error));
+    axios
+      .get(`${apiUrl}users`, {
+        headers: { "auth-token": token },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      })
+      .catch((error) => console.error(error));
 
-      axios
-        .get(`${apiUrl}User`, {
-          // headers: { "auth-token": token },
-        })
-        .then((res) => {
-          setUsers(res.data);
-        })
-        .catch((error) => console.log(error));
+    //recorrer orden reception pendent (desempaquetada)
+    const orderPendent = orderShipping.filter(
+      (order) => order.ordershipping_status_id === 1
+    );
 
-      setCurrentUser(localStorage.getItem("currentuser"));
-
-      //recorrer orden reception pendent (desempaquetada)
-      const orderPendent = orderShipping.filter(
-        (order) => order.ordershipping_status_id === 1
+    const tempPickings = [];
+    orderPendent.map((order) => {
+      //filtrar lines en estat pendent
+      const lines = orderLineShipping.filter(
+        (line) =>
+          line.shipping_order_id === order.id && line.orderline_status_id === 1
       );
 
-      const tempPickings = [];
-      orderPendent.map((order) => {
-        //recorrer line reception de cada orden reception
-        const lines = orderLine.data.filter(
-          (line) => line.shipping_order_id === order.id
+      //obtindre product.name, product.quantitat, product.space
+      lines.forEach((line) => {
+        const space = spaces.find(
+          (space) => space.product_id === line.product_id
         );
-        //obtindre product.name, product.quantitat, product.space
-        lines.forEach((line) => {
-          const space = spaces.find(
-            (space) => space.product_id === line.product_id
+        if (space) {
+          console.log(
+            order.id,
+            line.id,
+            line.product_id,
+            line.quantity_received,
+            space.storage_id,
+            space.street_id,
+            space.selft_id,
+            space.id
           );
-          if (space) {
-            console.log(
-              order.id,
-              line.id,
-              line.product_id,
-              line.quantity_received,
-              space.storage_id,
-              space.street_id,
-              space.selft_id,
-              space.id
-            );
-            const objTemporal = {
-              order_reception_id: order.id,
-              order_line_reception_id: line.id,
-              product_id: line.product_id,
-              quantity: line.quantity,
-              storage_id: space.storage_id,
-              street_id: space.street_id,
-              selft_id: space.selft_id,
-              space_id: space.id,
-            };
-            tempPickings.push(objTemporal);
-            setTemporalPickings(tempPickings);
-          }
-        });
+          const objTemporal = {
+            order_reception_id: order.id,
+            order_line_reception_id: line.id,
+            product_id: line.product_id,
+            quantity: line.quantity,
+            storage_id: space.storage_id,
+            street_id: space.street_id,
+            selft_id: space.selft_id,
+            space_id: space.id,
+          };
+          tempPickings.push(objTemporal);
+        }
       });
-    };
-    fetchData();
+    });
+    setTemporalPickings(tempPickings);
   }, []);
 
   const canviEstatModal = () => {
@@ -160,23 +161,110 @@ function OrderPickingShipping() {
     }
   };
 
-  const aceptarOrderPickingShipping = async () => {
-    const operari = document.getElementById("operari").value;
+  const handleInputChange = (event) => {
+    setOperariSeleccionat(event.target.value);
+  };
 
-    const newOrderPickingShipping = {
-      user_id: operari,
-      create_date: new Date().toISOString(),
-      productos: orderSelected.map((orderLineId) => {
-        const line = orderLineShipping.find((l) => l.id === orderLineId);
-        return {
-          product_id: line.product_id,
-          quantity: line.quantity_received,
-        };
-      }),
+  const aceptarOrderPickingShipping = async () => {
+    orderSelected.forEach((order) => {
+      const line = orderLineShipping.find((l) => l.id === parseInt(order));
+      const space = spaces.find((s) => s.product_id === line.product_id);
+
+      const newOrderPickingShipping = {
+        order_line_shipping_id: line.id,
+        product_id: line.product_id,
+        quantity: line.quantity,
+        storage_id: space.storage_id,
+        street_id: space.street_id,
+        shelf_id: space.shelf_id,
+        space_id: space.id,
+        operator_id: parseInt(operariSeleccionat),
+      };
+
+      axios
+        .post(`${apiUrl}orderpickingshipping`, newOrderPickingShipping, {
+          headers: { "auth-token": token },
+        })
+        .then((res) => {
+          console.log(res.data);
+          alert("Order Picking Shipping creat correctament");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+    canviEstatModal();
+  };
+
+  const completarOrderPicking = async (lineId, orderPickingId) => {
+    // filtrar la linea de la order picking
+    const lineActualitzar = orderLineShipping.find(
+      (line) => line.id === lineId
+    );
+
+    // Actualitzar estat a completada
+    const updatedLine = {
+      ...lineActualitzar,
+      orderline_status_id: 3,
     };
 
-    await postData(url, "OrderPickingshipping", newOrderPickingShipping);
-  };
+    //actualitzar order line
+    axios
+      .put(`${apiUrl}orderlineshipping/${lineId}`, updatedLine, {
+        headers: { "auth-token": token },
+      })
+      .then((response) => {
+        console.log("Linea actualitzada correctament", response.data);
+      })
+      .catch((error) => {
+        console.error("Error en actualitzar", error.response.data);
+      });
+
+      // eliminar la order picking
+    await axios
+    .delete(`${apiUrl}orderpickingshipping/${orderPickingId}`, {
+      headers: { "auth-token": token },
+    })
+    .then((response) => {
+      console.log("order picking esborrada", response.data);
+    })
+    .catch((error) => {
+      console.error("Error en esborra order picking", error.response.data);
+    });
+
+    //crear moviments
+    const space = spaces.find(
+      (space) => space.product_id === lineActualitzar.product_id
+    );
+    if (space) {
+      movMagatzem(
+        lineActualitzar.product_id,
+        lineActualitzar.operator_id,
+        lineActualitzar.quantity,
+        "General",
+        space.storage_id,
+        space.storage_id,
+        space.street_id,
+        space.shelf_id,
+        space.id
+      );
+      console.log("Moviment eixida realitzat");
+
+      movMagatzem(
+        lineActualitzar.product_id,
+        lineActualitzar.operator_id,
+        lineActualitzar.quantity,
+        "Enviament",
+        space.storage_id,
+        space.storage_id,
+        space.street_id,
+        space.shelf_id,
+        space.id
+      );
+      console.log("Moviment entrada realitzat");
+    }
+    alert("Order picking completada");
+  }
 
   const mostrarOrder = (orderId) => {
     setOrderVisualitzar(orderId);
@@ -187,62 +275,9 @@ function OrderPickingShipping() {
   return (
     <>
       <div>
-        <h1 className="text-center py-4 fs-4 fw-bold m-0 text-white bg-title">
-          Llistat Order Picking Shipping
-        </h1>
-        <p className="position-absolute top-0 end-0 me-4 m-customized mt-xl-4 fw-bold fs-5 text-white">
-          <i className="bi bi-person-circle pe-2"></i>
-          Usuari Admin
-        </p>
+        <Header title="Order picking Shipping" />
+        <Filtres />
         <div className="container-fluid">
-          <div className="row bg-grey pt-3 px-2">
-            <div className="col-12 col-md-6 col-xl-4">
-              <div className="mb-3 text-light-blue">
-                <label htmlFor="nom" className="form-label">
-                  Nom
-                </label>
-                <input type="email" className="form-control" id="nom" />
-              </div>
-            </div>
-            <div className="col-12 col-md-6 col-xl-4">
-              <div className="mb-3 text-light-blue">
-                <label htmlFor="dni-nif" className="form-label">
-                  DNI/NIF
-                </label>
-                <input type="email" className="form-control" id="dni-nif" />
-              </div>
-            </div>
-            <div className="col-12 col-md-6 col-xl-4">
-              <div className="mb-3 text-light-blue">
-                <label htmlFor="telefon" className="form-label">
-                  Telèfon
-                </label>
-                <input type="email" className="form-control" id="telefon" />
-              </div>
-            </div>
-            <div className="col-12 col-md-6 col-xl-4">
-              <div className="mb-3 text-light-blue">
-                <label htmlFor="correo" className="form-label">
-                  Correu
-                </label>
-                <input type="email" className="form-control" id="correo" />
-              </div>
-            </div>
-            <div className="col-xl-4"></div>
-            <div className="col-xl-4"></div>
-          </div>
-          <div className="row bg-grey pb-3">
-            <div className="col-xl-4"></div>
-            <div className="col-xl-4"></div>
-            <div className="col-12 col-xl-4 text-end">
-              <button className="btn btn-secondary me-2 ps-2 text-white">
-                <i className="bi bi-trash px-1 text-white"></i>Netejar
-              </button>
-              <button className="btn btn-primary me-2 ps-2 orange-button text-white">
-                <i className="bi bi-funnel px-1 text-white"></i>Filtrar
-              </button>
-            </div>
-          </div>
           <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
             <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
               <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
