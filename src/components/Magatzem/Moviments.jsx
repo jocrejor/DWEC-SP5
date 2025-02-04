@@ -151,9 +151,7 @@ function Moviments() {
     return product ? product.name : "No funciona";
   };
 
-  // Función que recibe los filtros activos desde el componente de filtros
   const handleFilter = (activeFilters) => {
-    // Reinicia la paginación al aplicar nuevos filtros
     setCurrentPage(1);
 
     if (Object.keys(activeFilters).length === 0) {
@@ -203,7 +201,7 @@ function Moviments() {
     setFilteredMoviments(newFiltered);
   };
 
-  // Calcula las sugerencias para cada campo usando useMemo para no recalcular en cada render.
+  // Autocomplete
   const suggestions = useMemo(() => {
     return {
       magatzem: Array.from(new Set(moviments.map(m => m.storage_id.toString()))).sort(),
@@ -251,7 +249,6 @@ function Moviments() {
         <Header title="Moviments" />
         <FiltresMoviments onFilter={handleFilter} suggestions={suggestions} />
 
-        {/* Resto de controles (acciones en lote, botón Crear, etc.) */}
         <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
           <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">  
             <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -276,29 +273,29 @@ function Moviments() {
             </div>
           </div>                                                    
         </div>
-
-        <div className="mb-3"></div>
-        <div className="table-responsive">
-          <table className='table table-striped text-center'>
-            <thead className='table-active border-bottom border-dark-subtle'>
-              <tr>
-                <th className="d-none d-md-table-cell">
-                  <input className="form-check-input" type="checkbox" />
-                </th>
-                <th className="d-none d-md-table-cell">ID</th>
-                <th className="d-none d-md-table-cell">Id Producte</th>
-                <th className="d-none d-md-table-cell">Magatzem</th>
-                <th className="d-none d-md-table-cell">Carrer</th>
-                <th className="d-none d-md-table-cell">Estanteria</th>
-                <th className="d-none d-md-table-cell">Espai</th>
-                <th className="d-none d-md-table-cell">Quantitat</th>
-                <th className="d-none d-md-table-cell">Data</th>
-                <th className="d-none d-md-table-cell">Operari</th>
-                <th className="d-none d-md-table-cell">Origen</th>
-                <th className="d-none d-md-table-cell">Accions</th>
-              </tr>
-            </thead>
-            <tbody>
+<div className='row'> 
+<div className="col-12">
+<div>
+<table className="table table-striped text-center align-middle"> 
+<thead className="table-active border-bottom border-dark-subtle">
+<tr>
+   <th className='align-middle' scope='col'>
+            <input className='form-check-input' type="checkbox" />
+                  </th>
+                  <th scope='col' className="align-middle">ID</th>
+                <th scope='col' className="align-middle">Id Producte</th>
+                <th scope='col' className="align-middle">Magatzem</th>
+                <th scope='col' className="align-middle">Carrer</th>
+                <th scope='col' className="align-middle">Estanteria</th>
+                <th scope='col' className="align-middle">Espai</th>
+                <th scope='col' className="align-middle">Quantitat</th>
+                <th scope='col' className="align-middle">Data</th>
+                <th scope='col' className="align-middle">Operari</th>
+                <th scope='col' className="align-middle">Origen</th>
+                <th scope='col' className="align-middle">Accions</th>
+          </tr>
+</thead>
+<tbody>
               {currentItems.length === 0 ? (
                 <tr>
                   <td colSpan="12">No hi han proveidors</td>
@@ -306,38 +303,38 @@ function Moviments() {
               ) : (
                 currentItems.map((valors) => (
                   <tr key={valors.id}>
-                    <td className='d-block d-md-table-cell'>
+                    <td data-cell="Seleccionar" >
                       <input className="form-check-input" type="checkbox" />
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">ID:</p> {valors.id}
+                    <td  data-cell="ID">
+                     {valors.id}
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">Producto:</p> {nomProducte(valors.product_id)}
+                    <td  data-cell="Producto">
+                    {nomProducte(valors.product_id)}
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">Magatzem:</p> {valors.storage_id}
+                    <td  data-cell="Magatzem">
+                    {valors.storage_id}
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">Carrer:</p> {valors.street_id}
+                    <td  data-cell="Carrer">
+                    {valors.street_id}
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">Estanteria:</p> {valors.shelf_id}
+                    <td  data-cell="Estanteria">
+                     {valors.shelf_id}
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">Espai:</p> {valors.space_id}
+                    <td  data-cell="Espai">
+                     {valors.space_id}
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">Quantitat:</p> {valors.quantity}
+                    <td  data-cell="Quantitat">
+                      {valors.quantity}
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">Data:</p> {valors.movement_date}
+                    <td  data-cell="Data">
+                      {valors.movement_date}
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">Operari:</p> {usuari(valors.operator_id)}
+                    <td  data-cell="Operari">
+                     {usuari(valors.operator_id)}
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <p className="d-sm-inline d-md-none">Origen:</p>
+                    <td  data-cell="Origen">
+                     
                       <a
                         href="#"
                         className="text-decoration-none text-dark"
@@ -347,17 +344,20 @@ function Moviments() {
                         {valors.origin}
                       </a>
                     </td>
-                    <td className='d-block d-md-table-cell'>
-                      <i className="bi bi-eye px-2" style={{ cursor: 'pointer' }} onClick={() => handleShow(valors)}></i>
+                    <td data-cell="Visualitzar">
+                      <i  className="bi bi-eye px-2" style={{ cursor: 'pointer' }} onClick={() => handleShow(valors)}></i>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
-          </table>
-        </div>
 
-   
+</table>
+
+</div>
+      </div>
+      </div>
+         
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -419,11 +419,11 @@ function Moviments() {
   <Modal.Body>
     {selectedInventory ? (
       <div>
-        <p><strong>ID:</strong> {selectedInventory.id}</p>
-        <p><strong>Date:</strong> {selectedInventory.created_at}</p>
-        <p><strong>Created By:</strong> {selectedInventory.created_by}</p>
-        <p><strong>Inventory Status:</strong> {selectedInventory.inventory_status}</p>
-        <p><strong>Storage ID:</strong> {selectedInventory.storage_id}</p>
+        <p className='fw-bold'>ID: {selectedInventory.id}</p>
+        <p className='fw-bold'>Date:{selectedInventory.created_at}</p>
+        <p className='fw-bold'>Created By: {selectedInventory.created_by}</p>
+        <p className='fw-bold'>Inventory Status:{selectedInventory.inventory_status}</p>
+        <p className='fw-bold'>Storage ID: {selectedInventory.storage_id}</p>
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -444,11 +444,11 @@ function Moviments() {
   <Modal.Body>
     {selectedOrderReception ? (
       <div>
-        <p><strong>ID:</strong> {selectedOrderReception.id}</p>
-        <p><strong>Supplier ID:</strong> {selectedOrderReception.supplier_id}</p>
-        <p><strong>Estimated Reception Date:</strong> {selectedOrderReception.estimated_reception_date}</p>
-        <p><strong>Created By:</strong> {selectedOrderReception.created_by}</p>
-        <p><strong>Order Reception Status ID:</strong> {selectedOrderReception.orderreception_status_id}</p>
+        <p className='fw-bold'>ID:{selectedOrderReception.id}</p>
+        <p className='fw-bold'>Supplier ID:{selectedOrderReception.supplier_id}</p>
+        <p className='fw-bold'>Estimated Reception Date: {selectedOrderReception.estimated_reception_date}</p>
+        <p className='fw-bold'>Created By: {selectedOrderReception.created_by}</p>
+        <p className='fw-bold'>Order Reception Status ID: {selectedOrderReception.orderreception_status_id}</p>
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -469,11 +469,11 @@ function Moviments() {
   <Modal.Body>
     {selectedOrderLine ? (
       <div>
-        <p><strong>ID:</strong> {selectedOrderLine.id}</p>
-        <p><strong>Order Reception ID:</strong> {selectedOrderLine.order_reception_id}</p>
-        <p><strong>Product ID:</strong> {selectedOrderLine.product_id}</p>
-        <p><strong>Quantity Ordered:</strong> {selectedOrderLine.quantity_ordered}</p>
-        <p><strong>Quantity Received:</strong> {selectedOrderLine.quantity_received}</p>
+        <p className='fw-bold'>ID: {selectedOrderLine.id}</p>
+        <p className='fw-bold' >Order Reception ID:{selectedOrderLine.order_reception_id}</p>
+        <p className='fw-bold'>Product ID: {selectedOrderLine.product_id}</p>
+        <p className='fw-bold'>Quantity Ordered: {selectedOrderLine.quantity_ordered}</p>
+        <p className='fw-bold'>Quantity Received: {selectedOrderLine.quantity_received}</p>
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -507,8 +507,7 @@ function Moviments() {
     </Button>
   </Modal.Footer>
 </Modal>
-
-     
+    
       </div>
     </>
   );
