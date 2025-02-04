@@ -25,9 +25,10 @@ function OrdresEnviament() {
   const [status, setStatus] = useState([])
   const [orderLine, setOrderLine] = useState([])
   const [showModal, setShowModal] = useState(false)
+  const [showModalVisualitza, setShowModalVisualitza] = useState(false)
   const [tipoModal, setTipoModal] = useState('Crear')
   const [valorsInicials, setValorsInicials] = useState({ client_id: '', shipping_date: '', ordershipping_status_id: '' })
-  const [valorsLineInicials, setValorsLineInicials] = useState({ shipping_order_id: '', product_id: '', quantity: '', orderline_status_id: ''})
+  const [valorsLineInicials, setValorsLineInicials] = useState({ shipping_order_id: '', product_id: '', quantity: '', orderline_status_id: '' })
   const [clientes, setClientes] = useState([])
   const [users, setUsers] = useState([])
   const [products, setProducts] = useState([])
@@ -87,36 +88,45 @@ function OrdresEnviament() {
     canviEstatModal()
   }
 
-  const modificarOrdre = (valors) => {
-    setTipoModal('Modificar')
-    console.log(valors)
-    const fechaFormateada = formateaFecha(valors.shipping_date); 
+  const modificarOrdre = async (valors) => {
+    setTipoModal('Modificar');
+    console.log(valors);
+
+    const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-    setValorsLineInicials(valors)
-  }
+
+    const orderLinesData = await obtindreOrderLine(); // Espera los datos antes de filtrar
+
+    const filteredOrders = orderLinesData.filter(order => order.shipping_order_id === valors.id);
+    setOrderLine(filteredOrders);
+    setValorsLineInicials(filteredOrders);
+
+    console.log(filteredOrders);
+    console.log(orderLine)
+  };
 
   const eliminarOrder = (id) => {
-    axios.get(`${apiUrl}orderlineshipping`, { headers: { "auth-token": localStorage.getItem("token")} })
-    .then((response) => {
-      console.log(response);
-      const responseData = response.data;
-      console.log(responseData)
-      const idOrderLine = responseData.id;
-      console.log(idOrderLine);
-      responseData.map(orderLine =>{
-        if(id === orderLine.shipping_order_id){
-          axios.delete(`${apiUrl}orderlineshipping/${orderLine.id}`, { headers: { "auth-token": localStorage.getItem("token")} })
-        }
+    axios.get(`${apiUrl}orderlineshipping`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then((response) => {
+        console.log(response);
+        const responseData = response.data;
+        console.log(responseData)
+        const idOrderLine = responseData.id;
+        console.log(idOrderLine);
+        responseData.map(orderLine => {
+          if (id === orderLine.shipping_order_id) {
+            axios.delete(`${apiUrl}orderlineshipping/${orderLine.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+          }
+        })
+        axios.delete(`${apiUrl}ordershipping/${id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+          .then(() => {
+            const newOrders = orders.filter(order => order.id !== id)
+            setOrder(newOrders)
+          })
       })
-      axios.delete(`${apiUrl}ordershipping/${id}`, { headers: { "auth-token": localStorage.getItem("token")} })
-      .then(() => {
-        const newOrders = orders.filter(order => order.id !== id)
-        setOrder(newOrders)
-      })
-    })
   }
 
-  const eliminarProducte = (id) =>{
+  const eliminarProducte = (id) => {
     setArray(prevProductos => prevProductos.filter(producto => producto.product_id !== id));
   }
 
@@ -150,7 +160,7 @@ function OrdresEnviament() {
 
   const producteExistent = (id) => {
     const existe = products.find(estat => estat.id === Number(id))
-    if(existe){
+    if (existe) {
       return existe.name
     }
   }
@@ -160,8 +170,20 @@ function OrdresEnviament() {
     setArray([])
   }
 
+  const visualitzarOrdre = (valors) => {
+    setTipoModal("Visualitzar");
+    const fechaFormateada = formateaFecha(valors.shipping_date);
+    setValorsInicials({ ...valors, shipping_date: fechaFormateada });
+    setValorsLineInicials(valors)
+    canviEstatModalVisualitza();
+  }
+
+  const canviEstatModalVisualitza = () => {
+    setShowModalVisualitza(!showModalVisualitza)
+  }
+
   const grabar = (values) => {
-    if (tipoModal === "Crear") {  
+    if (tipoModal === "Crear") {
       if (arrayProductos.length > 0) {
         axios.post(`${apiUrl}ordershipping`, values, { headers: { "auth-token": localStorage.getItem("token") } })
           .then(response => {
@@ -169,20 +191,20 @@ function OrdresEnviament() {
             arrayProductos.map(line => {
               const novaId = resultat.results.insertId
               line.shipping_order_id = novaId
-              
+
               console.log(novaId)
               console.log(line)
               axios.post(`${apiUrl}orderlineshipping`, line, { headers: { "auth-token": localStorage.getItem("token") } })
             })
-        })
+          })
         actualitzaDades();
       }
-      else{
+      else {
         alert("Has d'afegir un producte a la ordre")
         return
       }
     }
-    else{
+    else {
       axios.put(`${apiUrl}ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
       actualitzaDades();
     }
@@ -193,10 +215,22 @@ function OrdresEnviament() {
 
   const actualitzaDades = () => {
     axios.get(`${apiUrl}ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
-    .then(response => {
-      setOrder(response.data)
-    })
+      .then(response => {
+        setOrder(response.data)
+      })
   }
+
+  const obtindreOrderLine = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}orderlineshipping`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      });
+      return response.data; // Devolvemos los datos
+    } catch (error) {
+      console.error("Error al obtener las líneas de orden:", error);
+      return []; // Retornamos un array vacío en caso de error
+    }
+  };
 
   return (
     <>
@@ -250,7 +284,7 @@ function OrdresEnviament() {
                   <Button
                     variant="outline-secondary"
                     onClick={() => {
-                      visualitzaOrder(valors);
+                      visualitzarOrdre(valors);
                     }}
                   >
                     <i className="bi bi-eye p-2"></i>
@@ -301,7 +335,6 @@ function OrdresEnviament() {
         </Modal.Header>
 
         <Modal.Body className='p-4 bg-white rounded-lg shadow-md'>
-
           <Formik
             initialValues={(tipoModal === 'Modificar' ? valorsInicials : {
               client_id: '',
@@ -318,15 +351,13 @@ function OrdresEnviament() {
               errors,
               touched,
               handleSubmit
-
-              /* and other goodies */
             }) => (
               <Form>
                 <div>
                   <Button variant={tipoModal === "Crear" ? "success" : "info"} type='submit'>{tipoModal}</Button>
 
                 </div>
-                {/* NOM PRODUCTE */}
+
                 <div className='pb-3'>
                   <label htmlFor='client_id' className='block text-sm font-medium text-gray-700 pe-2'>Client</label>
                   <Field as="select" name="client_id" values={values.client_id} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
@@ -361,7 +392,7 @@ function OrdresEnviament() {
                 quantity: values.quantity,
                 orderline_status_id: 1,
               });
-              resetForm(); 
+              resetForm();
             }}
           >
             {({
@@ -373,7 +404,7 @@ function OrdresEnviament() {
               <Form>
 
                 <h4>Afegeix productes a la ordre:</h4>
-                <div className='pb-3'>     
+                <div className='pb-3'>
                   <label htmlFor='product_id' className='block text-sm font-medium text-gray-700 pe-2'>Producte</label>
                   <Field as="select" name="product_id" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     <option value="">Selecciona un producte</option>
@@ -398,35 +429,35 @@ function OrdresEnviament() {
                 </div>
 
                 <div>
-                <table class="table table-striped text-center">
-                  <thead className="table-active border-bottom border-dark-subtle">
-                    <tr>
-                    <th>Producte</th>
-                    <th>Quantitat</th>
-                    <th>Accions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  {arrayProductos.map((producto)=>(
-                    <tr key={producto.product_id}>
-                      <td>{producteExistent(producto.product_id)}</td>
-                      <td>{producto.quantity}</td>
-                      <td>
-                        <Button
-                          variant="outline-secondary"
-                          onClick={() => {
-                            eliminarProducte(producto.product_id);
-                          }}
-                        >
-                          <i className="bi bi-trash p-2"></i>
-                        </Button>
-                    </td>
-                    </tr>
-                    
-                  ))}
-                  </tbody>
+                  <table class="table table-striped text-center">
+                    <thead className="table-active border-bottom border-dark-subtle">
+                      <tr>
+                        <th>Producte</th>
+                        <th>Quantitat</th>
+                        <th>Accions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {arrayProductos.map((producto) => (
+                        <tr key={producto.product_id}>
+                          <td>{producteExistent(producto.product_id)}</td>
+                          <td>{producto.quantity}</td>
+                          <td>
+                            <Button
+                              variant="outline-secondary"
+                              onClick={() => {
+                                eliminarProducte(producto.product_id);
+                              }}
+                            >
+                              <i className="bi bi-trash p-2"></i>
+                            </Button>
+                          </td>
+                        </tr>
 
-                  
+                      ))}
+                    </tbody>
+
+
                   </table>
                 </div>
 
@@ -440,6 +471,55 @@ function OrdresEnviament() {
             )}
           </Formik>
 
+        </Modal.Body>
+      </Modal>
+      <Modal show={showModalVisualitza}>
+        <Modal.Header closeButton onHide={canviEstatModalVisualitza} className='bg-gray-200 border-b'>
+          <Modal.Title className='text-lg font-semibold text-gray-800'>{tipoModal} Ordre Enviament</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Formik
+            initialValues={(tipoModal === 'Visualitzar' ? valorsInicials : {
+              client_id: '',
+              shipping_date: '',
+              ordershipping_status_id: 1
+            })}
+            validationSchema={OrderShippingSchema}
+            onSubmit={values => {
+              grabar(values)
+            }}
+          >
+            {({
+              values,
+              errors,
+              touched,
+              handleSubmit
+            }) => (
+              <Form>
+                <div>
+                  <Button variant={tipoModal === "Crear" ? "success" : "info"} type='submit'>{tipoModal}</Button>
+
+                </div>
+
+                <div className='pb-3'>
+                  <label htmlFor='client_id' className='block text-sm font-medium text-gray-700 pe-2'>Client</label>
+                  <Field as="select" name="client_id" values={values.client_id} className="w-full border border-0 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" disabled>
+                    <option value="">Selecciona un client:</option>
+                    {clientes.map(cliente => {
+                      return <option key={cliente.id} value={cliente.id}>{cliente.name}</option>
+                    })}
+                  </Field>
+                  {errors.client_id && touched.client_id ? <div className="text-red-500 text-sm">{errors.client_id}</div> : null}
+                </div>
+
+                <div className='pb-3'>
+                  <label htmlFor='shipping_date' className='block text-sm font-medium text-gray-700 pe-2'>Data estimada</label>
+                  <Field type="date" name="shipping_date" values={values.shipping_date} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" disabled />
+                  {errors.shipping_date && touched.shipping_date ? <div className="text-red-500 text-sm">{errors.shipping_date}</div> : null}
+                </div>
+              </Form>
+            )}
+          </Formik>
         </Modal.Body>
       </Modal>
     </>

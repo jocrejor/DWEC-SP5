@@ -1,52 +1,54 @@
 import { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
-import Header from '../Header'
+import Header from '../Header';
+import Filtres from "../Filtres";
+import axios from 'axios';
 
-const OrderReception_StatusSchema = Yup.object().shape({
+const apiUrl = import.meta.env.VITE_API_URL;
+
+const OrderShippingStatusSchema = Yup.object().shape({
   name: Yup.string()
     .min(1, "Valor mínim d'1 caràcter.")
     .max(25, 'El valor màxim és de 25 caràcters.')
     .required('Valor requerit'),
 });
 
-
-export default function EstatsOrdreEnviament() {
-  const [ordersShippingStatus, setOrdersShippingStatus] = useState([]);
+function OrderShipping_Status() {
+  const [orderShippingStatus, setOrderShippingStatus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
   const [valorsInicials, setValorsInicials] = useState({ name: '' });
   const [error, setError] = useState(null);
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const data = await getData(url, 'OrderShipping_Status');
-      setOrdersShippingStatus(data);
-      setError(null);
-    } catch (err) {
-      setError('Error carregant les dades.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/ordershipping_status`, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
+        setOrderShippingStatus(response.data);
+        setError(null);
+      } catch (err) {
+        setError('Error carregant les dades.');
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchOrders();
   }, []);
 
   const eliminarEstat = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquest estat?')) {
       try {
-        await deleteData(url, 'OrderReception_Status', id);
-        setOrdersShippingStatus((prev) =>
-          prev.filter((item) => item.id !== id)
-        );
+        await axios.delete(`${apiUrl}/ordershipping_status/${id}`, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
+        setOrderShippingStatus((prev) => prev.filter((item) => item.id !== id));
       } catch (err) {
-        setError('Error eliminant l\'estat.');
+        setError("Error eliminant l'estat.");
       }
     }
   };
@@ -64,85 +66,76 @@ export default function EstatsOrdreEnviament() {
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
-        await postData(url, 'OrderReception_Status', values);
+        await axios.post(`${apiUrl}/ordershipping_status`, values, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
       } else {
-        await updateId(url, 'OrderReception_Status', values.id, values);
+        await axios.put(`${apiUrl}/ordershipping_status/${values.id}`, values, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
       }
-      await fetchOrders();
+      const response = await axios.get(`${apiUrl}/ordershipping_status`, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+      setOrderShippingStatus(response.data);
       canviEstatModal();
       setError(null);
     } catch (err) {
-      setError('Error en l\'operaOrderReception_Statusció.');
+      setError("Error en l'operació.");
     }
   };
+
   return (
     <>
-      <Header title="Estats ordres d'enviament" />
-      <Button
-        variant="success"
-        onClick={() => {
-          setTipoModal('Crear');
-          setValorsInicials({ name: '' });
-          canviEstatModal();
-        }}
-      >
-        Nou Estat de línia
-      </Button>
-      {loading ? (
-        <Spinner animation="border" />
-      ) : error ? (
-        <div>{error}</div>
-      ) : ordersShippingStatus.length === 0 ? (
-        <div>No hi ha estats</div>
-      ) : (
+      <Header title="Llistat Estats de Ordre" />
+      <Filtres />
+      <div className="container-fluid pt-3">
         <Table striped bordered hover>
-          <thead>
+          <thead className="table-active border-bottom border-dark-subtle text-center">
             <tr>
-              <th>Id</th>
+              <th>ID</th>
               <th>Nom</th>
-              <th>Modificar</th>
-              <th>Eliminar</th>
+              <th>Accions</th>
             </tr>
           </thead>
           <tbody>
-            {ordersShippingStatus.map((valors) => (
-              <tr key={valors.id}>
-                <td>{valors.id}</td>
-                <td>{valors.name}</td>
-                <td>
-                  <Button
-                    variant="warning"
-                    onClick={() => modificarEstat(valors)}
-                  >
-                    Modificar
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="primary"
-                    onClick={() => eliminarEstat(valors.id)}
-                  >
-                    Eliminar
-                  </Button>
-                </td>
+            {orderShippingStatus.length === 0 ? (
+              <tr>
+                <td colSpan="3">No hi ha estats de ordre</td>
               </tr>
-            ))}
+            ) : (
+              orderShippingStatus.map((valors) => (
+                <tr key={valors.id}>
+                  <td className='text-center'>{valors.id}</td>
+                  <td className='text-center'>{valors.name}</td>
+                  <td className='text-center'>
+                    <span onClick={() => modificarEstat(valors)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-pencil-square"></i>
+                    </span>
+                    <span onClick={() => eliminarEstat(valors.id)} className="mx-2" style={{ cursor: "pointer" }}>
+                      <i className="bi bi-trash"></i>
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </Table>
-      )}
+      </div>
+      
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
-          <Modal.Title>{tipoModal} Estat de Ordres d'enviament</Modal.Title>
+          <Modal.Title>{tipoModal} Estat de Línia</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Formik
             initialValues={valorsInicials}
-            validationSchema={OrderReception_StatusSchema}
+            validationSchema={OrderShippingStatusSchema}
             onSubmit={handleSubmit}
           >
             {({ errors, touched }) => (
               <Form>
-                <div>
+                <div className="form-group">
                   <label htmlFor="name">Nom</label>
                   <Field
                     id="name"
@@ -150,16 +143,20 @@ export default function EstatsOrdreEnviament() {
                     name="name"
                     placeholder="Nom del estat de línia"
                     autoComplete="off"
+                    className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''}`}
                   />
-                  {errors.name && touched.name && <div>{errors.name}</div>}
+                  {errors.name && touched.name && (
+                    <div className="invalid-feedback">{errors.name}</div>
+                  )}
                 </div>
-                <div>
+                <div className="form-group text-right">
                   <Button variant="secondary" onClick={canviEstatModal}>
                     Tanca
                   </Button>
                   <Button
                     variant={tipoModal === 'Modificar' ? 'success' : 'info'}
                     type="submit"
+                    className="ml-2"
                   >
                     {tipoModal}
                   </Button>
@@ -171,6 +168,6 @@ export default function EstatsOrdreEnviament() {
       </Modal>
     </>
   );
-  
 }
 
+export default OrderShipping_Status;
