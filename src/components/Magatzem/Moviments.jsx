@@ -9,6 +9,7 @@ function Moviments() {
   const [moviments, setMoviments] = useState([]);
   const [filteredMoviments, setFilteredMoviments] = useState([]);
   const [producte, setProduct] = useState([]);
+  
   const [users, setUsers] = useState([]);
   const [selectMoviments, setSelectedMoviment] = useState(null);
   const [show, setShow] = useState(false);
