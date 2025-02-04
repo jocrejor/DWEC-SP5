@@ -386,30 +386,30 @@ function OrderPickingShipping() {
                     <nav>
                       <ul className="pagination justify-content-center">
                         <li className="page-item">
-                          <a className="page-link" href="#">
+                          <a className="page-link text-light-blue" href="#">
                             <span aria-hidden="true">&laquo;</span>
                           </a>
                         </li>
 
-                        <li className="page-item active" aria-current="page">
-                          <a className="page-link " href="#">
+                        <li className="page-item" aria-current="page">
+                          <a className="page-link activo-2" href="#">
                             1
                           </a>
                         </li>
 
                         <li className="page-item">
-                          <a className="page-link" href="#">
+                          <a className="page-link text-light-blue" href="#">
                             2
                           </a>
                         </li>
                         <li className="page-item">
-                          <a className="page-link" href="#">
+                          <a className="page-link text-light-blue" href="#">
                             3
                           </a>
                         </li>
 
                         <li className="page-item">
-                          <a className="page-link" href="#">
+                          <a className="page-link text-light-blue" href="#">
                             <span aria-hidden="true">&raquo;</span>
                           </a>
                         </li>
