@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import {
-  url,
-  postData,
-  // getData,
-  // deleteData,
-  // updateId,
-} from "../../apiAccess/crud";
+// import {
+//   url,
+//   postData,
+//   getData,
+//   deleteData,
+//   updateId,
+// } from "../../apiAccess/crud";
 import { Button, Table, Modal } from "react-bootstrap";
 import Header from "../Header";
 import Filtres from "../Filtres";
@@ -20,7 +20,7 @@ function OrderPickingShipping() {
   const [temporalPickings, setTemporalPickings] = useState([]);
   const [spaces, setSpaces] = useState([]);
   const [users, setUsers] = useState([]);
-  const [operaraiSeleccionat, setOperariSeleccionat] = useState("");
+  const [operariSeleccionat, setOperariSeleccionat] = useState("");
   const [usuariFiltrar, setUsuariFiltrar] = useState("");
 
   const [showModal, setShowModal] = useState(false);
@@ -36,7 +36,7 @@ function OrderPickingShipping() {
 
   useEffect(() => {
     axios
-      .get(`${apiUrl}orderpickingshipping`, {
+      .get(`${apiUrl}/orderpickingshipping`, {
         headers: { "auth-token": token },
       })
       .then((res) => {
@@ -45,7 +45,7 @@ function OrderPickingShipping() {
       .catch((error) => console.error(error));
 
     axios
-      .get(`${apiUrl}ordershipping`, {
+      .get(`${apiUrl}/ordershipping`, {
         headers: { "auth-token": token },
       })
       .then((res) => {
@@ -54,7 +54,7 @@ function OrderPickingShipping() {
       .catch((error) => console.error(error));
 
     axios
-      .get(`${apiUrl}orderlineshipping`, {
+      .get(`${apiUrl}/orderlineshipping`, {
         headers: { "auth-token": token },
       })
       .then((res) => {
@@ -63,7 +63,7 @@ function OrderPickingShipping() {
       .catch((error) => console.error(error));
 
     axios
-      .get(`${apiUrl}product`, {
+      .get(`${apiUrl}/product`, {
         headers: { "auth-token": token },
       })
       .then((res) => {
@@ -72,7 +72,7 @@ function OrderPickingShipping() {
       .catch((error) => console.error(error));
 
     axios
-      .get(`${apiUrl}space`, {
+      .get(`${apiUrl}/space`, {
         headers: { "auth-token": token },
       })
       .then((res) => {
@@ -81,7 +81,7 @@ function OrderPickingShipping() {
       .catch((error) => console.error(error));
 
     axios
-      .get(`${apiUrl}users`, {
+      .get(`${apiUrl}/users`, {
         headers: { "auth-token": token },
       })
       .then((res) => {
@@ -171,7 +171,6 @@ function OrderPickingShipping() {
       const space = spaces.find((s) => s.product_id === line.product_id);
 
       const newOrderPickingShipping = {
-        order_line_shipping_id: line.id,
         product_id: line.product_id,
         quantity: line.quantity,
         storage_id: space.storage_id,
@@ -179,10 +178,11 @@ function OrderPickingShipping() {
         shelf_id: space.shelf_id,
         space_id: space.id,
         operator_id: parseInt(operariSeleccionat),
+        order_line_shipping_id: line.id,
       };
 
       axios
-        .post(`${apiUrl}orderpickingshipping`, newOrderPickingShipping, {
+        .post(`${apiUrl}/orderpickingshipping`, newOrderPickingShipping, {
           headers: { "auth-token": token },
         })
         .then((res) => {
@@ -220,17 +220,17 @@ function OrderPickingShipping() {
         console.error("Error en actualitzar", error.response.data);
       });
 
-      // eliminar la order picking
+    // eliminar la order picking
     await axios
-    .delete(`${apiUrl}orderpickingshipping/${orderPickingId}`, {
-      headers: { "auth-token": token },
-    })
-    .then((response) => {
-      console.log("order picking esborrada", response.data);
-    })
-    .catch((error) => {
-      console.error("Error en esborra order picking", error.response.data);
-    });
+      .delete(`${apiUrl}orderpickingshipping/${orderPickingId}`, {
+        headers: { "auth-token": token },
+      })
+      .then((response) => {
+        console.log("order picking esborrada", response.data);
+      })
+      .catch((error) => {
+        console.error("Error en esborra order picking", error.response.data);
+      });
 
     //crear moviments
     const space = spaces.find(
@@ -264,7 +264,7 @@ function OrderPickingShipping() {
       console.log("Moviment entrada realitzat");
     }
     alert("Order picking completada");
-  }
+  };
 
   const mostrarOrder = (orderId) => {
     setOrderVisualitzar(orderId);
@@ -388,12 +388,13 @@ function OrderPickingShipping() {
                         {tipoModal === "Alta" && (
                           <>
                             <label htmlFor="operari"></label>
-                            <select name="operari" id="operari">
-                              <option
-                                value={currentuser ? currentuser : ""}
-                                selected
-                                disabled
-                              >
+                            <select
+                              name="operari"
+                              id="operari"
+                              value={operariSeleccionat}
+                              onChange={handleInputChange}
+                            >
+                              <option value="" selected disabled>
                                 Operari Actual
                               </option>
                               {users.map((user) => {
@@ -419,7 +420,7 @@ function OrderPickingShipping() {
                               <tbody>
                                 {orderSelected.map((order) => {
                                   const lines = orderLineShipping.find(
-                                    (line) => line.id === order
+                                    (line) => line.id === parseInt(order)
                                   );
                                   const product = products.find(
                                     (p) => p.id === lines.product_id
@@ -444,7 +445,6 @@ function OrderPickingShipping() {
                             <Button
                               variant="success"
                               onClick={() => {
-                                canviEstatModal();
                                 aceptarOrderPickingShipping();
                               }}
                             >
@@ -456,244 +456,150 @@ function OrderPickingShipping() {
                     </Modal>
                   </>
                 ) : (
-                  <></>
+                  <>
+                    <Button
+                      variant="success"
+                      onClick={() => {
+                        setTabla("CrearOrder");
+                      }}
+                    >
+                      Enrrere
+                    </Button>
+
+                    <select
+                      value={usuariFiltrar}
+                      onChange={(e) => setUsuariFiltrar(e.target.value)}
+                    >
+                      <option value="" disabled selected>
+                        Selecciona un operari
+                      </option>
+                      {users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {user.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>Emmagatzemat</th>
+                          <th>Ordre ID</th>
+                          <th>Producte</th>
+                          <th>Fecha</th>
+                          <th>Operari</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {orderPickingShipping
+                          .filter((order) => {
+                            order.operator_id === parseInt(usuariFiltrar);
+                          })
+                          .map((order) => {
+                            const user = users.find(
+                              (u) => u.id === order.user_id
+                            );
+                            const product = products.find(
+                              (p) => p.id === order.product_id
+                            );
+                            return (
+                              <tr key={order.id}>
+                                <td className="d-flex justify-content-center align-items-center">
+                                  <i
+                                    className="bi bi-arrow-up"
+                                    onClick={() =>
+                                      completarOrderPicking(
+                                        order.order_line_shipping_id,
+                                        order.id
+                                      )
+                                    }
+                                  ></i>
+                                </td>
+                                <td>{order.id}</td>
+                                <td>{product.name}</td>
+                                <td>{order.create_date}</td>
+                                <td>{user.name}</td>
+                                <td>
+                                  <Button
+                                    variant="success"
+                                    onClick={() => {
+                                      mostrarOrder(order.id);
+                                    }}
+                                  >
+                                    Visualizar
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </Table>
+
+                    <Modal show={showModal} onHide={canviEstatModal}>
+                      <Modal.Header closeButton>
+                        <Modal.Title>{tipoModal}</Modal.Title>
+                      </Modal.Header>
+
+                      <Modal.Body>
+                        {tipoModal === "Visualitzar" && (
+                          <>
+                            <Table striped bordered hover>
+                              <thead>
+                                <tr>
+                                  <th></th>
+                                  <th>Producte</th>
+                                  <th>Quantitat</th>
+                                  <th>
+                                    Magatzem / Carrer / Estantería / Espai
+                                  </th>
+                                </tr>
+                              </thead>
+
+                              <tbody>
+                                {orderPickingShipping
+                                  .find(
+                                    (order) => order.id === orderVisualitzar
+                                  )
+                                  .productos.map((producto) => {
+                                    const product = products.find(
+                                      (p) => p.id === producto.product_id
+                                    );
+
+                                    return (
+                                      <tr key={producto.product_id}>
+                                        <td></td>
+                                        <td>{product.name}</td>
+                                        <td>{producto.quantity}</td>
+                                        <td>
+                                          {producto.storage_id} /{" "}
+                                          {producto.street_id} /{" "}
+                                          {producto.selft_id} / {producto.id}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                              </tbody>
+                            </Table>
+                            <Button
+                              variant="success"
+                              onClick={() => {
+                                canviEstatModal();
+                              }}
+                            >
+                              Tancar
+                            </Button>
+                          </>
+                        )}
+                      </Modal.Body>
+                    </Modal>
+                  </>
                 )}
               </div>
             </div>
           </div>
         </div>
       </div>
-      {/* {tabla === "CrearOrder" ? (
-        <>
-          <Button
-            variant="success"
-            onClick={() => {
-              crearOrderPickingShipping();
-            }}
-          >
-            Crear Order Picking
-          </Button>
-
-          <Button
-            variant="success"
-            onClick={() => {
-              setTabla("ListarOrder");
-            }}
-          >
-            Llistar Order Picking
-          </Button>
-
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>ID Order</th>
-                <th>Producte</th>
-                <th>Quantitat</th>
-                <th>Magatzem / Carrer / Estantería / Espai</th>
-                <th></th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {temporalPickings.map((temporalPicking) => {
-                const product = products.find(
-                  (p) => p.id === temporalPicking.product_id
-                );
-                return (
-                  <tr key={temporalPicking.order_line_reception_id}>
-                    <td>{temporalPicking.order_reception_id}</td>
-                    <td>{product.name}</td>
-                    <td>{temporalPicking.quantity}</td>
-                    <td>
-                      {temporalPicking.storage_id} / {temporalPicking.street_id}{" "}
-                      / {temporalPicking.selft_id} / {temporalPicking.space_id}
-                    </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        value={temporalPicking.order_line_reception_id}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-
-          <Modal show={showModal} onHide={canviEstatModal}>
-            <Modal.Header closeButton>
-              <Modal.Title>{tipoModal}</Modal.Title>
-            </Modal.Header>
-
-            <Modal.Body>
-              {tipoModal === "Alta" && (
-                <>
-                  <label htmlFor="operari"></label>
-                  <select name="operari" id="operari">
-                    <option
-                      value={currentuser ? currentuser : ""}
-                      selected
-                      disabled
-                    >
-                      Operari Actual
-                    </option>
-                    {users.map((user) => {
-                      return (
-                        <option key={user.id} value={user.id}>
-                          {user.name}
-                        </option>
-                      );
-                    })}
-                  </select>
-
-                  <Table striped bordered hover>
-                    <thead>
-                      <tr>
-                        <th>Producte</th>
-                        <th>Quantitat</th>
-                        <th>Magatzem / Carrer / Estantería / Espai</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {orderSelected.map((order) => {
-                        const lines = orderLineShipping.find(
-                          (line) => line.id === order
-                        );
-                        const product = products.find(
-                          (p) => p.id === lines.product_id
-                        );
-                        const space = spaces.find(
-                          (space) => space.product_id === lines.product_id
-                        );
-                        return (
-                          <tr key={order}>
-                            <td>{product.name}</td>
-                            <td>{lines.quantity}</td>
-                            <td>
-                              {space.storage_id} / {space.street_id} /{" "}
-                              {space.selft_id} / {space.id}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
-                  <Button
-                    variant="success"
-                    onClick={() => {
-                      canviEstatModal();
-                      aceptarOrderPickingShipping();
-                    }}
-                  >
-                    Aceptar
-                  </Button>
-                </>
-              )}
-            </Modal.Body>
-          </Modal>
-        </>
-      ) : (
-        <>
-          <Button
-            variant="success"
-            onClick={() => {
-              setTabla("CrearOrder");
-            }}
-          >
-            Enrrere
-          </Button>
-
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Fecha</th>
-                <th>Operari</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {orderPickingShipping.map((order) => {
-                const user = users.find((u) => u.id === order.user_id);
-                return (
-                  <tr key={order.id}>
-                    <td>{order.id}</td>
-                    <td>{order.create_date}</td>
-                    <td>{user ? user.id : "Desconegut"}</td>
-                    <td>
-                      <Button
-                        variant="success"
-                        onClick={() => {
-                          mostrarOrder(order.id);
-                        }}
-                      >
-                        Visualizar
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-
-          <Modal show={showModal} onHide={canviEstatModal}>
-            <Modal.Header closeButton>
-              <Modal.Title>{tipoModal}</Modal.Title>
-            </Modal.Header>
-
-            <Modal.Body>
-              {tipoModal === "Visualitzar" && (
-                <>
-                  <Table striped bordered hover>
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th>Producte</th>
-                        <th>Quantitat</th>
-                        <th>Magatzem / Carrer / Estantería / Espai</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {orderPickingShipping
-                        .find((order) => order.id === orderVisualitzar)
-                        .productos.map((producto) => {
-                          const product = products.find(
-                            (p) => p.id === producto.product_id
-                          );
-                          const space = spaces.find(
-                            (s) => s.product_id === producto.product_id
-                          );
-
-                          return (
-                            <tr key={producto.product_id}>
-                              <td></td>
-                              <td>{product.name}</td>
-                              <td>{space.quantity}</td>
-                              <td>
-                                {space.storage_id} / {space.street_id} /{" "}
-                                {space.selft_id} / {space.id}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </Table>
-                  <Button
-                    variant="success"
-                    onClick={() => {
-                      canviEstatModal();
-                    }}
-                  >
-                    Tancar
-                  </Button>
-                </>
-              )}
-            </Modal.Body>
-          </Modal>
-        </>
-      )} */}
     </>
   );
 }
