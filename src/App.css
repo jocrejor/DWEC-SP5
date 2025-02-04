@@ -54,6 +54,10 @@ td, th{
     border-color: var(--blauClar);
 }
 
+.orange-button-login:hover {
+    background-color: #FF7F50;
+    border-color: #FF7F50;
+}
 li:hover{
     background-color: white;
 }
