@@ -210,7 +210,7 @@ function OrderPickingShipping() {
 
     //actualitzar order line
     axios
-      .put(`${apiUrl}orderlineshipping/${lineId}`, updatedLine, {
+      .put(`${apiUrl}/orderlineshipping/${lineId}`, updatedLine, {
         headers: { "auth-token": token },
       })
       .then((response) => {
@@ -222,7 +222,7 @@ function OrderPickingShipping() {
 
     // eliminar la order picking
     await axios
-      .delete(`${apiUrl}orderpickingshipping/${orderPickingId}`, {
+      .delete(`${apiUrl}/orderpickingshipping/${orderPickingId}`, {
         headers: { "auth-token": token },
       })
       .then((response) => {
