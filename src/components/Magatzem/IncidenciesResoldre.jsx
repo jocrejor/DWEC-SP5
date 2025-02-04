@@ -20,12 +20,13 @@ const IncidenciaSchema = Yup.object().shape({
 
 function IncidenciesResoldre() {
 
-    const [incidents, setIncident]                  = useState([])
-    const [products, setProducts]                   = useState([])
-    const [orderlineStatus, setOrderlineStatus]     = useState([])
-    const [showModal, setShowModal]                 = useState(false)
-    const [tipoModal, setTipoModal]                 = useState("Crear")
-    const [valorsInicials, setValorsInicials]       = useState({
+    const [incidents, setIncident]                          = useState([])
+    const [products, setProducts]                           = useState([])
+    const [orderlineStatus, setOrderlineStatus]             = useState([])
+    const [orderReceptionStatus, setOrderReceptionStatus]   = useState([])
+    const [showModal, setShowModal]                         = useState(false)
+    const [tipoModal, setTipoModal]                         = useState("Crear")
+    const [valorsInicials, setValorsInicials]               = useState({
         product: '',
         quantity_received: '',
         description: '',
@@ -62,6 +63,15 @@ function IncidenciesResoldre() {
 
         axios.get(`${apiURL}/orderline_status`, {headers: {"auth-token" : token}})
             .then(response  => setOrderlineStatus(response.data))
+            .catch(error    => console.log(error))
+    }
+
+    const getOrderReceptionStatus = () => {
+        const apiURL    = import.meta.env.VITE_API_URL
+        const token     = localStorage.getItem("token")
+
+        axios.get(`${apiURL}/orderreception_status`, {headers: {"auth-token" : token}})
+            .then(response  => setOrderReceptionStatus(response.data))
             .catch(error    => console.log(error))
     }
 
@@ -126,6 +136,11 @@ function IncidenciesResoldre() {
         return status ? status.name : "Estat desconegut";
     }
 
+    const getOrderReceptionStatusName = (statusId) => {
+        const status = orderlineStatus.find(s => s.id === statusId);
+        return status ? status.name : "Estat desconegut";
+    }
+
     return (
         <>
         <Header title="Incidències"/>
@@ -138,30 +153,32 @@ function IncidenciesResoldre() {
                     <th>Producte</th>
                     <th>Unitats demanades</th>
                     <th>Unitats rebudes</th>
+                    <th>Estat</th>
                     <th>Accions</th>
                 </tr>
             </thead>
             <tbody>
-                {incidents.length === 0 ? (
+                {products.length === 0 ? (
                     <tr>
                         <td colSpan="6" className="text-center">No hi ha incidències</td>
                     </tr>
                 ) : (
                     incidents.map((valors) => {
-                        console.log("Iterando incidente:", valors); // Ver qué llega a la tabla
-
+                        console.log("Iterando incidente:", valors);
                         return (
                             <tr key={valors.id}>
                                 <td>{valors.created_at}</td>
-                                <td>ffff</td> {/* Esto debería mostrarse siempre */}
                                 <td>{valors.description}</td>
                                 <td>{getProductName(valors.product)}</td>
                                 <td>{valors.quantity_ordered}</td>
                                 <td>{valors.quantity_received}</td>          
                                 <td>{getStatusName(valors.status)}</td>
-                                <td><Button variant="outline-success"><i className="bi bi-eye p-2"></i></Button></td>
-                                <td><Button variant="outline-success" onClick={()   => { modificarIncident(valors); canviEstatModal(); }}><i className="bi bi-pencil-square p-2"></i></Button></td>
-                                <td><Button variant="outline-danger" onClick={()    => { deleteIncident(valors.id) }}><i className='bi bi-trash p-2'></i></Button></td>
+                                {/*<td>{getOrderReceptionStatusName(valors.name)}</td>*/}
+                                <td>
+                                    <Button variant="outline-success"><i className="bi bi-eye p-2"></i></Button>
+                                    <Button variant="outline-success" onClick={()   => { modificarIncident(valors); canviEstatModal(); }}><i className="bi bi-pencil-square p-2"></i></Button>
+                                    <Button variant="outline-danger" onClick={()    => { deleteIncident(valors.id) }}><i className='bi bi-trash p-2'></i></Button>
+                                </td>
                             </tr>
                         );
                     })
