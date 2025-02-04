@@ -1,8 +1,12 @@
-import React from 'react'
+import {useState}from 'react'
 import logo from '../assets/logo_footer2.png';
 import '../App'
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+
+import Nav from 'react-bootstrap/Nav';
+import { Modal,Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 
 function Lateral() {
@@ -12,6 +16,19 @@ function Lateral() {
     const linkActive   = 'text-decoration-none d-block';
     const linkInactive = 'text-decoration-none text-white d-block';
 
+    const [showModal, setShowModal] = useState(false);
+  
+    const navigate = useNavigate();
+
+    const canviEstatModal = () =>{
+        setShowModal(!showModal)
+      }
+      
+      const borrarToken = ()=>{
+        localStorage.clear();
+        canviEstatModal()
+        navigate("/login")
+    }
     return (
         <>
         <div className="col-12 col-xl-2 p-0 fondo-azul">
@@ -47,6 +64,26 @@ function Lateral() {
                 <button id="dropdown" className="d-xl-none d-block me-4 fondo-azul border border-0"><i className="bi bi-list text-white fs-1"></i></button>
             </div>
         </div>
+
+        
+      <Modal show={showModal} onHide={canviEstatModal}>
+      <Modal.Header closeButton >
+        <Modal.Title>Tancar sessió</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+      <h4 >Vols eixir del teu perfil d'usuari?</h4>
+    
+    <Button type="submit"
+            id="enviar"
+            className="mt-2"
+            onClick={()=> borrarToken()}
+            >
+        Eixir
+    </Button>
+      </Modal.Body>
+      </Modal> 
+
         </>
     )
 }
