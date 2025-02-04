@@ -125,7 +125,7 @@ function OrderPickingShipping() {
             quantity: line.quantity,
             storage_id: space.storage_id,
             street_id: space.street_id,
-            selft_id: space.selft_id,
+            shelf_id: space.shelf_id,
             space_id: space.id,
           };
           tempPickings.push(objTemporal);
@@ -190,7 +190,7 @@ function OrderPickingShipping() {
           alert("Order Picking Shipping creat correctament");
         })
         .catch((error) => {
-          console.error(error);
+          console.error(error.response.data);
         });
     });
     canviEstatModal();
@@ -375,7 +375,7 @@ function OrderPickingShipping() {
                               <td data-cell="Ubicació">
                                 {temporalPicking.storage_id} /{" "}
                                 {temporalPicking.street_id} /{" "}
-                                {temporalPicking.selft_id} /{" "}
+                                {temporalPicking.shelf_id} /{" "}
                                 {temporalPicking.space_id}
                               </td>
                             </tr>
