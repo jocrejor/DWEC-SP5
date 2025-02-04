@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Filtres() {
+function Filtres(props) {
     return (
         <>
             <div className="row bg-grey pt-3 px-2 mx-0">

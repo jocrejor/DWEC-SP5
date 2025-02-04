@@ -44,7 +44,7 @@ function Lateral() {
                         <li className="list-group-item text-white logout"><a className="text-decoration-none text-white d-block" href="#"><i className="bi bi-box-arrow-right pe-1 text-white"></i>Tancar</a></li>
                     </ul>
                 </nav>
-                <button id="dropdown" className="d-xl-none d-block me-4 fondo-azul border border-0"><i className="bi bi-list text-white fs-1"></i></button>
+                <button id="dropdown" className="d-xl-none d-block me-4 fondo-azul border border-0"><i className="bi bi-list text-white fs-1"><span className="visually-hidden">Menú desplegable</span></i></button>
             </div>
         </div>
         </>
