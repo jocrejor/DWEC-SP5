@@ -175,7 +175,7 @@ function Transportista() {
       <div className='container-fluid pt-3'>
 
         <table className='table table-striped border m-2'>
-          <thead class="table-active border-bottom border-dark-subtle text-center ">
+          <thead class="table-active border-bottom border-dark-subtle">
             <tr>
               <th scope="col">ID</th>
               <th scope="col">Nom</th>
@@ -194,13 +194,13 @@ function Transportista() {
             ) : (
               carriers.map((valors) => (
                 <tr key={valors.id}>
-                  <td data-cell="ID" className='text-center'>{valors.id}</td>
-                  <td data-cell="Nom" className='text-center'>{valors.name}</td>
-                  <td data-cell="Adreça" className='text-center'>{valors.address}</td>
-                  <td data-cell="NIF" className='text-center'>{valors.nif}</td>
-                  <td data-cell="Telèfon" className='text-center'>{valors.phone}</td>
-                  <td data-cell="Email" className='text-center'>{valors.email}</td>
-                  <td data-no-colon="true" className='text-center'>
+                  <td data-cell="ID">{valors.id}</td>
+                  <td data-cell="Nom">{valors.name}</td>
+                  <td data-cell="Adreça">{valors.address}</td>
+                  <td data-cell="NIF">{valors.nif}</td>
+                  <td data-cell="Telèfon">{valors.phone}</td>
+                  <td data-cell="Email">{valors.email}</td>
+                  <td data-no-colon="true">
                     <span onClick={() => verCarrier(valors)} style={{ cursor: "pointer" }}>
                       <i className="bi bi-eye"></i>
                     </span>
