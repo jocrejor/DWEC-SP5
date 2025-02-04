@@ -105,6 +105,7 @@ function CompletarInventari() {
   useEffect(() => {
     console.log(updatedInventoryLines)
     console.log(selectedInventoryLines)
+    console.log("prueba")
 
   }, [updatedInventoryLines, selectedInventoryLines])
 
