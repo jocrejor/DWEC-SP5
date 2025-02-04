@@ -9,9 +9,9 @@ import Filtres from '../Filtres';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const ShelfSchema = Yup.object().shape({
-    name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
-    storage_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
-    street_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
+  name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
+  storage_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
+  street_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
 });
 
 function Shelf() {
@@ -27,12 +27,12 @@ function Shelf() {
       axios.get(`${apiUrl}/shelf?storage_id=${magatzem}&street_id=${carrer}`, {
         headers: { "auth-token": localStorage.getItem("token") }
       })
-      .then(response => {
-        setShelves(response.data);
-      })
-      .catch(error => {
-        console.log('Error fetching data:', error);
-      });
+        .then(response => {
+          setShelves(response.data);
+        })
+        .catch(error => {
+          console.log('Error fetching data:', error);
+        });
     }
   }, [magatzem, carrer]);
 
@@ -89,7 +89,8 @@ function Shelf() {
           </div>
         </div>
       </div>
-
+      <h2>Magatzem: {magatzem}</h2>
+      <h2>Carrer: {carrer}</h2>
       <div className="table-responsive mt-3">
         <table className="table table-striped text-center">
           <thead className="table-active border-bottom border-dark-subtle">
@@ -100,6 +101,7 @@ function Shelf() {
               <th scope="col">ID Magatzem</th>
               <th scope="col">ID Carrer</th>
               <th scope="col">Espai</th>
+              <th scope="col">Visualitzar</th>
               <th scope="col">Modificar</th>
               <th scope="col">Eliminar</th>
             </tr>
@@ -115,6 +117,17 @@ function Shelf() {
                 <td>{values.storage_id}</td>
                 <td>{values.street_id}</td>
                 <td><Button onClick={() => handleShelfClick(values.id)}>Espai</Button></td>
+                <td>
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => {
+                      // Visualitzar Logic (e.g., navigate to a detailed view)
+                      console.log("Viewing", valors);
+                    }}
+                  >
+                    <i className="bi bi-eye p-2"></i>
+                  </Button>
+                </td>
                 <td>
                   <Button
                     variant="outline-success"

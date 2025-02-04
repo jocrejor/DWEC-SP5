@@ -31,7 +31,7 @@ function Street() {
       .catch(error => {
         console.log('Error fetching data:', error);
       });
-  }, [magatzem]); 
+  }, [magatzem]);
 
   const eliminarStreet = async (id) => {
     try {
@@ -86,7 +86,7 @@ function Street() {
           </div>
         </div>
       </div>
-
+      <h2>Magatzem: {magatzem}</h2>
       <div className="table-responsive mt-3">
         <table className="table table-striped text-center">
           <thead className="table-active border-bottom border-dark-subtle">
@@ -175,24 +175,24 @@ function Street() {
               <Form>
                 <div>
                   <label htmlFor='name'>Nom</label>
-                  <Field 
-                    type="text" 
-                    name="name" 
-                    placeholder="Nom del carrer" 
-                    autoComplete="off" 
-                    value={values.name} 
+                  <Field
+                    type="text"
+                    name="name"
+                    placeholder="Nom del carrer"
+                    autoComplete="off"
+                    value={values.name}
                     className="form-control"
                   />
                   {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
                 </div>
                 <div>
                   <label htmlFor='storage_id'>ID Magatzem</label>
-                  <Field 
-                    type="text" 
-                    name="storage_id" 
-                    placeholder="ID del magatzem" 
-                    autoComplete="off" 
-                    value={values.storage_id} 
+                  <Field
+                    type="text"
+                    name="storage_id"
+                    placeholder="ID del magatzem"
+                    autoComplete="off"
+                    value={values.storage_id}
                     className="form-control"
                   />
                   {errors.storage_id && touched.storage_id && <div className="text-danger">{errors.storage_id}</div>}

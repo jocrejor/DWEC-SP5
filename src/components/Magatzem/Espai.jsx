@@ -26,6 +26,7 @@ function Space() {
     const [initialValues, setInitialValues] = useState({
         name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', selft_id: ''
     });
+
     const navigate = useNavigate();
     const { magatzem, carrer, estanteria } = useParams();
 
@@ -34,12 +35,8 @@ function Space() {
             axios.get(`${apiUrl}/space?storage_id=${magatzem}&street_id=${carrer}&selft_id=${estanteria}`, {
                 headers: { "auth-token": localStorage.getItem("token") }
             })
-                .then(response => {
-                    setSpaces(response.data);
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                });
+                .then(response => setSpaces(response.data))
+                .catch(error => console.error('Error fetching data:', error));
         }
     }, [magatzem, carrer, estanteria]);
 
@@ -60,23 +57,41 @@ function Space() {
         setShowModal(true);
     };
 
-    const openModal = () => {
+    const toggleModal = () => {
         setShowModal(!showModal);
         setModalType("Crear");
-    };
-
-    const handleSpaceClick = (id) => {
-        navigate(`../espai/${magatzem}/${carrer}/${estanteria}/${id}`);
     };
 
     return (
         <>
             <Filtres />
+
+            <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+                <div className="col-12 col-md-6 col-xl-4 d-flex">
+                    <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+                        <div className="form-floating bg-white">
+                            <select className="form-select">
+                                <option selected>Tria una opció</option>
+                                <option value="1">Eliminar</option>
+                            </select>
+                            <label>Accions en lot</label>
+                        </div>
+                        <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0">
+                            <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+                        </button>
+                    </div>
+                </div>
+                <div className="col-12 col-md-6 col-xl-4 d-flex justify-content-xl-end">
+                    <Button onClick={toggleModal} className="btn btn-dark border-white text-white mt-2 flex-grow-1 flex-xl-grow-0">
+                        <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+                    </Button>
+                </div>
+            </div>
+
             <h2>Magatzem: {magatzem}</h2>
             <h2>Carrer: {carrer}</h2>
             <h2>Estanteria: {estanteria}</h2>
-            <Button variant="success" onClick={openModal}>Alta Espai</Button>
-            
+
             {spaces.length === 0 ? (
                 <p>No hi han espais</p>
             ) : (
@@ -84,18 +99,19 @@ function Space() {
                     <table className="table table-striped text-center">
                         <thead className="table-active border-bottom border-dark-subtle">
                             <tr>
-                                <th scope="col"><input className="form-check-input" type="checkbox" /></th>
-                                <th scope="col">ID</th>
-                                <th scope="col">Nom</th>
-                                <th scope="col">ID Producte</th>
-                                <th scope="col">Quantitat</th>
-                                <th scope="col">Volumen</th>
-                                <th scope="col">Pes</th>
-                                <th scope="col">ID Magatzem</th>
-                                <th scope="col">ID Carrer</th>
-                                <th scope="col">ID Estanteria</th>
-                                <th scope="col">Modificar</th>
-                                <th scope="col">Eliminar</th>
+                                <th><input className="form-check-input" type="checkbox" /></th>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>ID Producte</th>
+                                <th>Quantitat</th>
+                                <th>Volumen</th>
+                                <th>Pes</th>
+                                <th>ID Magatzem</th>
+                                <th>ID Carrer</th>
+                                <th>ID Estanteria</th>
+                                <th scope="col">Visualitzar</th>
+                                <th>Modificar</th>
+                                <th>Eliminar</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -111,6 +127,17 @@ function Space() {
                                     <td>{values.storage_id}</td>
                                     <td>{values.street_id}</td>
                                     <td>{values.selft_id}</td>
+                                    <td>
+                                        <Button
+                                            variant="outline-secondary"
+                                            onClick={() => {
+                                                // Visualitzar Logic (e.g., navigate to a detailed view)
+                                                console.log("Viewing", valors);
+                                            }}
+                                        >
+                                            <i className="bi bi-eye p-2"></i>
+                                        </Button>
+                                    </td>
                                     <td><Button variant="outline-success" onClick={() => editSpace(values)}><i className="bi bi-pencil-square"></i></Button></td>
                                     <td><Button variant="outline-danger" onClick={() => deleteSpace(values.id)}><i className="bi bi-trash"></i></Button></td>
                                 </tr>
@@ -131,13 +158,9 @@ function Space() {
                         onSubmit={async (values) => {
                             try {
                                 if (modalType === "Crear") {
-                                    await axios.post(`${apiUrl}/space`, values, {
-                                        headers: { "auth-token": localStorage.getItem("token") }
-                                    });
+                                    await axios.post(`${apiUrl}/space`, values, { headers: { "auth-token": localStorage.getItem("token") } });
                                 } else {
-                                    await axios.put(`${apiUrl}/space/${values.id}`, values, {
-                                        headers: { "auth-token": localStorage.getItem("token") }
-                                    });
+                                    await axios.put(`${apiUrl}/space/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } });
                                 }
                                 setShowModal(false);
                                 window.location.reload();
@@ -146,52 +169,11 @@ function Space() {
                             }
                         }}
                     >
-                        {({ values, errors, touched }) => (
+                        {({ errors, touched }) => (
                             <Form>
-                                <div>
-                                    <label htmlFor="name">Nom</label>
-                                    <Field type="text" name="name" placeholder="Nom de l'espai" className="form-control" />
-                                    {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
-                                </div>
-                                <div>
-                                    <label htmlFor="product_id">ID Producte</label>
-                                    <Field type="text" name="product_id" placeholder="Id del producte" className="form-control" />
-                                    {errors.product_id && touched.product_id && <div className="text-danger">{errors.product_id}</div>}
-                                </div>
-                                <div>
-                                    <label htmlFor="quantity">Quantitat</label>
-                                    <Field type="number" name="quantity" placeholder="Quantitat" className="form-control" />
-                                    {errors.quantity && touched.quantity && <div className="text-danger">{errors.quantity}</div>}
-                                </div>
-                                <div>
-                                    <label htmlFor="maxVol">Volumen</label>
-                                    <Field type="number" name="maxVol" placeholder="Volumen" className="form-control" />
-                                    {errors.maxVol && touched.maxVol && <div className="text-danger">{errors.maxVol}</div>}
-                                </div>
-                                <div>
-                                    <label htmlFor="maxWeight">Pes</label>
-                                    <Field type="number" name="maxWeight" placeholder="Pes" className="form-control" />
-                                    {errors.maxWeight && touched.maxWeight && <div className="text-danger">{errors.maxWeight}</div>}
-                                </div>
-                                <div>
-                                    <label htmlFor="storage_id">ID Magatzem</label>
-                                    <Field type="text" name="storage_id" placeholder="Id del magatzem" className="form-control" />
-                                    {errors.storage_id && touched.storage_id && <div className="text-danger">{errors.storage_id}</div>}
-                                </div>
-                                <div>
-                                    <label htmlFor="street_id">ID Carrer</label>
-                                    <Field type="text" name="street_id" placeholder="Id del carrer" className="form-control" />
-                                    {errors.street_id && touched.street_id && <div className="text-danger">{errors.street_id}</div>}
-                                </div>
-                                <div>
-                                    <label htmlFor="selft_id">ID Estanteria</label>
-                                    <Field type="text" name="selft_id" placeholder="Id de l'estanteria" className="form-control" />
-                                    {errors.selft_id && touched.selft_id && <div className="text-danger">{errors.selft_id}</div>}
-                                </div>
-                                <div className="mt-3">
-                                    <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel·lar</Button>
-                                    <Button variant="primary" type="submit">{modalType === "Crear" ? "Crear" : "Modificar"}</Button>
-                                </div>
+                                <Field type="text" name="name" placeholder="Nom de l'espai" className="form-control" />
+                                {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
+                                <Button variant="primary" type="submit">{modalType === "Crear" ? "Crear" : "Modificar"}</Button>
                             </Form>
                         )}
                     </Formik>
