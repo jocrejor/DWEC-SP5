@@ -256,16 +256,16 @@ function OrdresEnviament() {
           </div>
         </div>
       </div>
-      <div className='container-fluid pt-3'>
+      <div className='container-fluid'>
         <table className='table table-striped border m-2'>
-          <thead className="table-active border-bottom border-dark-subtle">
+          <thead class="table-active border-bottom border-dark-subtle">
             <tr>
               <th scope='col'><input class="form-check-input" type="checkbox" name="" id="" /></th>
-              <th scope='col'>ID</th>
-              <th scope='col'>Client</th>
-              <th scope='col'>Data Estimada</th>
-              <th scope='col'>Estat</th>
-              <th scope='col'>Accions</th>
+              <th scope='col' className='text-center'>ID</th>
+              <th scope='col' className='text-center'>Client</th>
+              <th scope='col' className='text-center'>Data Estimada</th>
+              <th scope='col' className='text-center'>Estat</th>
+              <th scope='col' className='text-center'>Accions</th>
             </tr>
           </thead>
           <tbody>
@@ -281,15 +281,15 @@ function OrdresEnviament() {
                 <td data-no-colon="true" className='text-center'>
                     <div className="d-lg-flex justify-content-lg-center">
                     <span onClick={() => visualitzarOrdre(valors)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-eye icono"></i>
+                      <i className="bi bi-eye icono fs-5"></i>
                     </span>
 
                     <span onClick={() => modificarOrdre(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
-                      <i className="bi bi-pencil-square icono"></i>
+                      <i className="bi bi-pencil-square icono fs-5"></i>
                     </span>
 
                     <span onClick={() => eliminarOrder(valors.id)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-trash icono"></i>
+                      <i className="bi bi-trash icono fs-5"></i>
                     </span>
                     </div>
                   </td>

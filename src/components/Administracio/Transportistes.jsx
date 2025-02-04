@@ -172,18 +172,18 @@ function Transportista() {
         </div>
       </div>
 
-      <div className='container-fluid pt-3'>
+      <div className='container-fluid'>
 
         <table className='table table-striped border m-2'>
           <thead class="table-active border-bottom border-dark-subtle">
             <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Nom</th>
-              <th scope="col">Adreça</th>
-              <th scope="col">NIF</th>
-              <th scope="col">Telèfon</th>
-              <th scope="col">Email</th>
-              <th scope="col">Accions</th>
+              <th scope="col" className='text-center'>ID</th>
+              <th scope="col" className='text-center'>Nom</th>
+              <th scope="col" className='text-center'>Adreça</th>
+              <th scope="col" className='text-center'>NIF</th>
+              <th scope="col" className='text-center'>Telèfon</th>
+              <th scope="col" className='text-center'>Email</th>
+              <th scope="col" className='text-center'>Accions</th>
             </tr>
           </thead>
           <tbody>
@@ -202,17 +202,17 @@ function Transportista() {
                   <td data-cell="Email" className='text-center'>{valors.email}</td>
                   <td data-no-colon="true" className='text-center'>
                     <div className="d-lg-flex justify-content-lg-center">
-                    <span onClick={() => verCarrier(valors)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-eye icono"></i>
-                    </span>
+                      <span onClick={() => verCarrier(valors)} role='button'>
+                        <i className="bi bi-eye icono fs-5"></i>
+                      </span>
 
-                    <span onClick={() => modCarriers(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
-                      <i className="bi bi-pencil-square icono"></i>
-                    </span>
+                      <span onClick={() => modCarriers(valors)} className="mx-2" role='button'>
+                        <i className="bi bi-pencil-square icono fs-5 mx-2"></i>
+                      </span>
 
-                    <span onClick={() => delCarrier(valors.id)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-trash icono"></i>
-                    </span>
+                      <span onClick={() => delCarrier(valors.id)} role='button'>
+                        <i className="bi bi-trash icono fs-5"></i>
+                      </span>
                     </div>
                   </td>
 
@@ -672,28 +672,18 @@ function Transportista() {
           </Formik>
         </Modal.Body>
       </Modal>
-      <nav>
+      <nav aria-label="Page navigation example" className="d-block">
         <ul className="pagination justify-content-center">
           <li className="page-item">
-            <a className="page-link" href="#">
+            <a className="page-link text-light-blue" href="#" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
-
-          <li className="page-item active" aria-current="page">
-            <a className="page-link " href="#">1</a>
-          </li>
-
+          <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+          <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+          <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
           <li className="page-item">
-            <a className="page-link" href="#">2</a>
-          </li>
-          <li className="page-item">
-            <a className="page-link" href="#">3</a>
-          </li>
-
-
-          <li className="page-item">
-            <a className="page-link" href="#">
+            <a className="page-link text-light-blue" href="#" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
