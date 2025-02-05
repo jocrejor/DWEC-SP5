@@ -37,7 +37,7 @@ function Lateral() {
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/clients">Clients</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/ordresEnviament">Ordres d'enviament <span className="badge rounded-pill bg-danger px-3 ms-2 text-white">9</span></a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/orderpickingshipping">Ordes de Picking E.</a></li>
-                        <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/estatsOrdreEnviament">Estats O. d'enviament </a></li>
+                        <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/estatsOrdreEnviament">Estats Ordre d'enviament </a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/transportistes">Transportistes</a></li>
                         
                         <li className="list-group-item py-3 px-1 text-white fondo-azul border-top no-hover"><i className="bi bi-inboxes px-1 text-white"></i>Recepció</li>
@@ -45,7 +45,7 @@ function Lateral() {
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/ordresRecepcio">Ordres de Recepció</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/orderpickingreception">Ordes de Picking R.</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/estatsOrdreRecepcio">Estats Ordres Recepció</a></li>
-                        <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="estatsOrdreRecepcioLinia">Estats Línia O. Recepció</a></li>
+                        <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="estatsOrdreRecepcioLinia">Estats Línia d'Orde</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/productes">Productes</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/lots">Lots</a></li>
                         <li className="list-group-item py-3 px-1 text-white fondo-azul border-top no-hover"><i className="bi bi-shop-window px-1 text-white"></i>Magatzem</li>
