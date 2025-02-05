@@ -94,7 +94,7 @@ function App() {
 
                 <Route path="/lots" element={<Lots />} />
 
-                <Route path="/GestioMagatzem/*" element={<GestioMagatzem/>} / >
+                <Route path="/GestioMagatzem/*" element={<GestioMagatzem/>} />
                    
                                    
                 <Route path="/inventaris/" element={<Inventaris />} />

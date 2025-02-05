@@ -97,6 +97,32 @@ li:hover i{
     color: white !important;
 }
 
+.outline-orange{
+    color: var(--taronja);
+    border-color: var(--taronja);
+    background-color: transparent;
+}
+
+.outline-orange:hover{
+    background-color:var(--taronja);
+    color: white;
+    border-color: var(--taronja);
+}
+
+.outline-blue{
+    color: var(--blauClar);
+    border-color: var(--blauClar);
+    background-color: transparent;
+}
+
+.outline-blue:hover{
+    background-color:var(--blauClar);
+    color: white;
+    border-color: var(--blauClar);
+}
+
+
+
 @media only screen and (max-width: 1199px)
 {
 
@@ -104,7 +130,7 @@ li:hover i{
         display: none;
         top: 5.7em;
     }
-
+/*
     .show{
         border-top: 1px solid white;
         position: absolute;
@@ -113,7 +139,7 @@ li:hover i{
         max-height: calc(100vh - 5.7em);
         animation: slideDown 0.4s ease-in-out;
         z-index: 5;
-    }
+    }*/
 
     #logo {
         width: 5em;

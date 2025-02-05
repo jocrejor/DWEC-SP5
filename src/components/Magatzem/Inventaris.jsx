@@ -278,7 +278,7 @@ function Inventaris() {
             <thead className="table-active border-bottom border-dark-subtle">
               <tr >
                 <th>
-                  <input type="checkbox" name="" id="" className='form-check-input' />
+                  <input type="checkbox" name="" id="" className='form-check-input' aria-label='Seleccione todas las filas'/>
                 </th>
                 <th className='text-light-blue'>ID</th>
                 <th className='text-light-blue'>Data</th>
@@ -296,7 +296,7 @@ function Inventaris() {
                     return (
                       <tr key={values.id}>
                         <td scope="row" data-cell="Seleccionar: ">
-                          <input type="checkbox" className='form-check-input' name="" id="" />
+                          <input type="checkbox" className='form-check-input' name="" id="" aria-label={`Selecione la fila del inventario ${values.id}`}/>
                         </td>
                         <td data-cell="ID: ">{values.id}</td>
                         <td data-cell="Data: ">{values.created_at}</td>
@@ -305,10 +305,10 @@ function Inventaris() {
                         <td>
                           {
                             (values.inventory_status === inventoryStatus.find(status => status.name === 'Pendent')?.id) ?
-                              <Button onClick={() => navigate(`/inventaris/inventariar/${values.id}`)} variant="outline-primary">Inventariar</Button>
+                              <Button onClick={() => navigate(`/inventaris/inventariar/${values.id}`)} className="outline-orange">Inventariar</Button>
                               :
                               (values.inventory_status === inventoryStatus.find(status => status.name === 'Fent-se')?.id) && (user.name === 'Admin') ?
-                                <Button onClick={() => navigate(`/inventaris/completarInventari/${values.id}`)} variant="outline-warning">Completar</Button> :
+                                <Button onClick={() => navigate(`/inventaris/completarInventari/${values.id}`)} className="outline-blue">Completar</Button> :
                                 ""
                           }
                         </td>
