@@ -7,12 +7,8 @@ import Filtres from '../Filtres';
 import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;
-import axios from 'axios';
-
-const apiUrl = import.meta.env.VITE_API_URL;
 
 const carrierschema = Yup.object().shape({
-  name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
   nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit'),
@@ -29,7 +25,6 @@ const carrierschema = Yup.object().shape({
   cp: Yup.string().matches(/^\d{5}$/, 'El codi postal ha de tenir 5 dígits').required('Valor requerit'),
 });
 
-function Transportista() {
 function Transportista() {
   const [carriers, setCarriers] = useState([]);
   const [pais, setPais] = useState([]);
@@ -80,42 +75,14 @@ function Transportista() {
     } catch (error) {
       console.error('Error eliminant trasportista:', error);
     }
-  const fetchData = async () => {
-    try {
-      const [carriersResponse, paisResponse, provinciaResponse, ciutatResponse] = await Promise.all([
-        axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/state`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/province`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/city`, { headers: { "auth-token": localStorage.getItem("token") } }),
-      ]);
-
-      setCarriers(carriersResponse.data);
-      setPais(paisResponse.data);
-      setProvince(provinciaResponse.data);
-      setCity(ciutatResponse.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
-  const delCarrier = async (id) => {
-    try {
-      await axios.delete(`${apiUrl}/carrier/${id}`, { headers: { "auth-token": localStorage.getItem("token") } });
-      const newCarriers = carriers.filter((item) => item.id !== id);
-      setCarriers(newCarriers);
-    } catch (error) {
-      console.error('Error eliminant trasportista:', error);
-    }
   };
 
   const modCarriers = (valors) => {
     setTipoModal('Modificar');
     setValorsInicials(valors);
     setShowModal(true);
-    setShowModal(true);
   };
 
-  const verCarrier = (valors) => {
   const verCarrier = (valors) => {
     setValorsInicials(valors);
     setShowViewModal(true);
@@ -157,42 +124,10 @@ function Transportista() {
     } catch (error) {
       console.error('Error guardant transportista:', error);
     }
-    try {
-      if (tipoModal === 'Crear') {
-        await axios.post(`${apiUrl}/carrier`, values, { headers: { "auth-token": localStorage.getItem("token") } });
-      } else {
-        await axios.put(`${apiUrl}/carrier/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } });
-      }
-      const updatedCarriers = await axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } });
-      setCarriers(updatedCarriers.data);
-      canviEstatModal();
-    } catch (error) {
-      console.error('Error guardant transportista:', error);
-    }
-  };
-
-  const gravar2 = async (values) => {
-    try {
-      const { id, ...dataToSend } = values;
-
-      if (tipoModal === 'Crear') {
-        await axios.post(`${apiUrl}/carrier`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
-      } else {
-        const { id, ...dataToSendForUpdate } = values;
-        await axios.put(`${apiUrl}/carrier/${id}`, dataToSendForUpdate, { headers: { "auth-token": localStorage.getItem("token") } });
-      }
-
-      const updatedCarriers = await axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } });
-      setCarriers(updatedCarriers.data);
-      canviEstatModal();
-    } catch (error) {
-      console.error('Error guardant transportista:', error);
-    }
   };
 
   return (
     <>
-      <Header title="Llistat de transportistes" />
       <Header title="Llistat de transportistes" />
       <Filtres />
       <div className="container-fluid">
@@ -300,7 +235,6 @@ function Transportista() {
             <p><b>Telèfon:</b> {valorsInicials.phone}</p>
             <p><b>Email:</b> {valorsInicials.email}</p>
             <p><b>Estat:</b> {pais.find(state => state.id === valorsInicials.state_id)?.name || 'No disponible'}</p>
-            <p><b>Estat:</b> {pais.find(state => state.id === valorsInicials.state_id)?.name || 'No disponible'}</p>
             <p><b>Província:</b> {valorsInicials.province}</p>
             <p><b>Ciutat:</b> {valorsInicials.city}</p>
             <p><b>Codi Postal:</b> {valorsInicials.cp}</p>
@@ -321,7 +255,6 @@ function Transportista() {
         <Modal.Body>
           <Formik
             initialValues={
-              tipoModal === 'Crear'
               tipoModal === 'Crear'
                 ? valorsInicials
                 : {
@@ -517,7 +450,6 @@ function Transportista() {
                 </div>
                 <div className="form-group text-right">
                   <Button type="submit" variant="success">
-                    {tipoModal === 'Crear'}
                     {tipoModal === 'Crear'}
                   </Button>
                 </div>
@@ -760,5 +692,4 @@ function Transportista() {
   );
 }
 
-export default Transportista;
 export default Transportista;
