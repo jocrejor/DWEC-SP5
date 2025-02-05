@@ -188,7 +188,7 @@ function IncidenciesResoldre() {
                 <tbody>
                 {incidents.length === 0 ? (
                     <tr>
-                    <td colSpan="7" className="text-center">No hi ha incidències</td>
+                        <td colSpan="7" className="text-center">No hi ha incidències</td>
                     </tr>
                 ) : (
                     incidents.map((valors) => (
