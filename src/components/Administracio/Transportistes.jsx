@@ -190,72 +190,71 @@ function Transportista() {
     }
   };
 
-
-
   return (
     <>
       <Header title="Llistat de transportistes" />
       <Header title="Llistat de transportistes" />
       <Filtres />
-
-      <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
-        <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
-          <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
-            <div className="form-floating bg-white">
-              <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
-                <option selected>Tria una opció</option>
-                <option value="1">Eliminar</option>
-              </select>
-              <label for="floatingSelect">Accions en lot</label>
+      <div className="container-fluid">
+        <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+          <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+            <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+              <div className="form-floating bg-white">
+                <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
+                  <option selected>Tria una opció</option>
+                  <option value="1">Eliminar</option>
+                </select>
+                <label htmlFor="floatingSelect">Accions en lot</label>
+              </div>
+              <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button" aria-label="Aplicar accions en lot">
+                <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+              </button>
             </div>
-            <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button"><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+          </div>
+          <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+          <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+            <div className="d-flex h-100 justify-content-xl-end">
+              <Button
+                className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+                onClick={() => {
+                  canviEstatModal();
+                  setTipoModal('Crear');
+                  setValorsInicials({
+                    name: '',
+                    address: '',
+                    nif: '',
+                    phone: '',
+                    email: '',
+                    state_id: 0,
+                    province: '',
+                    city: '',
+                    cp: '',
+                  });
+                }}
+                aria-label="Crear nou transportista"
+              >
+                <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+              </Button>
+            </div>
           </div>
         </div>
-        <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
-        <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
-          <div className="d-flex h-100 justify-content-xl-end">
-            <Button
-              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
-              onClick={() => {
-                canviEstatModal();
-                setTipoModal('Crear');
-                setValorsInicials({
-                  name: '',
-                  address: '',
-                  nif: '',
-                  phone: '',
-                  email: '',
-                  state_id: 0,
-                  province: '',
-                  city: '',
-                  cp: '',
-                });
-              }}
-            >
-              <i class="bi bi-plus-circle text-white pe-1"></i>Crear
-            </Button>
-          </div>
-        </div>
-      </div>
 
-      <div className='container-fluid pt-3'>
-
-        <table className='table table-striped border m-2'>
-          <thead class="table-active border-bottom border-dark-subtle text-center ">
+        <table className='table table-striped border'>
+          <thead className="table-active border-bottom border-dark-subtle">
             <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Nom</th>
-              <th scope="col">Adreça</th>
-              <th scope="col">NIF</th>
-              <th scope="col">Telèfon</th>
-              <th scope="col">Email</th>
-              <th scope="col">Accions</th>
+              <th scope="col" className='text-center'>ID</th>
+              <th scope="col" className='text-center'>Nom</th>
+              <th scope="col" className='text-center'>Adreça</th>
+              <th scope="col" className='text-center'>NIF</th>
+              <th scope="col" className='text-center'>Telèfon</th>
+              <th scope="col" className='text-center'>Email</th>
+              <th scope="col" className='text-center'>Accions</th>
             </tr>
           </thead>
           <tbody>
             {carriers.length === 0 ? (
               <tr>
-                <td colSpan="13">No hi han transportistes</td>
+                <td colSpan="7">No hi han transportistes</td>
               </tr>
             ) : (
               carriers.map((valors) => (
@@ -267,27 +266,26 @@ function Transportista() {
                   <td data-cell="Telèfon" className='text-center'>{valors.phone}</td>
                   <td data-cell="Email" className='text-center'>{valors.email}</td>
                   <td data-no-colon="true" className='text-center'>
-                    <span onClick={() => verCarrier(valors)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-eye"></i>
-                    </span>
+                    <div className="d-lg-flex justify-content-lg-center">
+                      <span onClick={() => verCarrier(valors)} role='button' aria-label="Veure detalls del transportista">
+                        <i className="bi bi-eye icono fs-5"></i>
+                      </span>
 
-                    <span onClick={() => modCarriers(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
-                      <i className="bi bi-pencil-square"></i>
-                    </span>
+                      <span onClick={() => modCarriers(valors)} className="mx-2" role='button' aria-label="Modificar transportista">
+                        <i className="bi bi-pencil-square icono fs-5 mx-2"></i>
+                      </span>
 
-                    <span onClick={() => delCarrier(valors.id)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-trash"></i>
-                    </span>
+                      <span onClick={() => delCarrier(valors.id)} role='button' aria-label="Eliminar transportista">
+                        <i className="bi bi-trash icono fs-5"></i>
+                      </span>
+                    </div>
                   </td>
-
-
                 </tr>
               ))
             )}
           </tbody>
         </table>
-      </div>
-
+        </div>
 
       {/* Modal Visualitzar */}
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
@@ -309,7 +307,7 @@ function Transportista() {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button className='orange-button' onClick={() => setShowViewModal(false)}>
+          <Button className='orange-button' onClick={() => setShowViewModal(false)} aria-label="Tancar modal de visualització">
             Tancar
           </Button>
         </Modal.Footer>
@@ -730,8 +728,8 @@ function Transportista() {
                     <div className="invalid-feedback">{errors.cp}</div>
                   ) : null}
                 </div>
-                <div className="form-group text-right">
-                  <Button type="submit" variant="success">
+                <div className="form-group d-flex justify-content-end">
+                  <Button type="submit" className='orange-button mt-2'>
                     {tipoModal === 'Modificar' ? 'Modificar Transportista' : 'Alta Transportista'}
                   </Button>
                 </div>
@@ -741,28 +739,18 @@ function Transportista() {
           </Formik>
         </Modal.Body>
       </Modal>
-      <nav>
+      <nav aria-label="Page navigation example" className="d-block mt-4">
         <ul className="pagination justify-content-center">
           <li className="page-item">
-            <a className="page-link" href="#">
+            <a className="page-link text-light-blue" href="#" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
-
-          <li className="page-item active" aria-current="page">
-            <a className="page-link" href="#">1</a>
-          </li>
-
+          <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+          <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+          <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
           <li className="page-item">
-            <a className="page-link" href="#">2</a>
-          </li>
-          <li className="page-item">
-            <a className="page-link" href="#">3</a>
-          </li>
-
-
-          <li className="page-item">
-            <a className="page-link" href="#">
+            <a className="page-link text-light-blue" href="#" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
