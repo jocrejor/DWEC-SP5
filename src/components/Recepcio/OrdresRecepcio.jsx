@@ -30,7 +30,9 @@ function OrderReception() {
   const [quantity, setQuantity] = useState('');
   const [showReviewModal, setShowReviewModal] = useState(false); // Nou modal per revisar
   const [orderToReview, setOrderToReview] = useState(null);
+  const [orderReceptionStatuses, setOrderReceptionStatuses] = useState([]);
   const [orderLines, setOrderLines] = useState([]);
+
 
   const fetchInitialData = async () => {
     setLoading(true);
@@ -45,7 +47,7 @@ function OrderReception() {
       setOrderReceptions(ordersRes.data);
       setSuppliers(suppliersRes.data);
       setProducts(productsRes.data);
-      setOrderStatuses(statusesRes.data);
+      setOrderReceptionStatuses(statusesRes.data);
       setError(null);
     } catch (err) {
       console.error("Error al carregar dades:", err);
@@ -106,7 +108,7 @@ function OrderReception() {
     setLoadingModal(true);
   
     try {
-      const res = await axios.get(`${apiUrl}/orderlinereception/${ordre.id}`, {
+      const res = await axios.get(`${apiUrl}/orderreception/${ordre.id}`, {
         headers: { "auth-token": localStorage.getItem("token") },
       });
   
@@ -159,7 +161,7 @@ function OrderReception() {
   const revisarOrdre = async (ordre) => {
     setOrderToReview(ordre);
     try {
-      const orderLinesRes = await axios.get(`${apiUrl}/orderlinereception/${ordre.id}`, {
+      const orderLinesRes = await axios.get(`${apiUrl}/orderreception/${ordre.id}`, {
         headers: { "auth-token": localStorage.getItem("token") },
       });
       setOrderLines(orderLinesRes.data);
@@ -174,27 +176,33 @@ function OrderReception() {
 
   const descarregarOrdre = async (ordreId) => {
     try {
-      await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderline_status_id: 2 }, {
+      await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderreception_status_id: 2 }, {
         headers: { "auth-token": localStorage.getItem("token") },
       });
-      setOrderReceptions(prev => prev.map(order => 
-        order.id === ordreId ? { ...order, orderline_status_id: 2 } : order
+  
+      setOrderReceptions(prev => prev.map(order =>
+        order.id === ordreId ? { ...order, orderreception_status_id: 2 } : order
       ));
+  
       setShowReviewModal(false);
     } catch (err) {
       console.error("Error canviant l'estat de l'ordre:", err);
       setError("Error actualitzant l'estat de l'ordre.");
     }
   };
-
+  
 
   const eliminarProducte = (index) => {
     setSelectedProducts((prev) => prev.filter((_, i) => i !== index));
   };
 
   const getStatusName = (statusId) => {
-    const status = orderStatuses.find((status) => status.id === statusId);
-    return status ? status.name : 'Desconegut';
+    const status = orderReceptionStatuses.find((status) => status.id === statusId);
+    if (status) {
+      return status.name;
+    } else {
+      return 'Desconegut'; 
+    }
   };
 
   const crearOrdreDeRecepcio = async (ordreDeRecepcio) => {
@@ -287,7 +295,7 @@ function OrderReception() {
                 <td>{valors.id}</td>
                 <td>{suppliers.find((sup) => sup.id === valors.supplier_id)?.name}</td>
                 <td>{formateaFecha(valors.estimated_reception_date)}</td>
-                <td>{getStatusName(valors.orderline_status_id)}</td>
+                <td>{getStatusName(valors.orderreception_status_id)}</td>
                 <td>
                   <Button variant="info" onClick={() => revisarOrdre(valors)}>
                     Revisar
@@ -432,7 +440,7 @@ function OrderReception() {
               <p><strong>Id:</strong> {orderToReview.id}</p>
               <p><strong>Proveïdor:</strong> {suppliers.find((sup) => sup.id === orderToReview.supplier_id)?.name}</p>
               <p><strong>Data Estimada:</strong> {formateaFecha(orderToReview.estimated_reception_date)}</p>
-              <p><strong>Estat:</strong> {getStatusName(orderToReview.orderline_status_id)}</p>
+              <p><strong>Estat:</strong> {getStatusName(orderToReview.orderreception_status_id)}</p>
 
               {/* Taula de productes associats a l'ordre */}
               <h5>Productes:</h5>
