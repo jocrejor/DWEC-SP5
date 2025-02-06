@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Container, Row, Col, Card } from 'react-bootstrap';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Header from './Header';
 
 const SignupSchema = Yup.object().shape({
   email: Yup.string().email('Correo electrónico inválido').required('Campo obligatorio'),
@@ -41,43 +40,55 @@ function Login() {
   });
 
   return (
-    <div>
-      <Header title="Inici de sessió" />
-      {error && <div className="text-danger">{error}</div>}
-      <Form onSubmit={formik.handleSubmit}>
-        <Form.Group className="mb-3">
-          <Form.Label htmlFor="email">Correo Electrónico</Form.Label>
-          <Form.Control
-            type="email"
-            placeholder="name@example.com"
-            id="email"
-            name="email"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.email}
-          />
-          {formik.touched.email && formik.errors.email && (
-            <div className="text-danger">{formik.errors.email}</div>
-          )}
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Contraseña</Form.Label>
-          <Form.Control
-            type="password"
-            id="password"
-            name="password"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.password}
-          />
-          {formik.touched.password && formik.errors.password && (
-            <div className="text-danger">{formik.errors.password}</div>
-          )}
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Button variant="primary" type="submit">Enviar</Button>
-        </Form.Group>
-      </Form>
+    <div className="d-flex justify-content-center align-items-center min-vh-100 bg-grey">
+      <Container>
+        <Row className="justify-content-center">
+          <Col xs={12} md={6} xxl={4}> 
+            <Card className="p-4 shadow fondo-azul-claro">
+              <div className='text-center fs-3 text-white fw-bold'>Inici de Sessió</div>
+              {error && <div className="text-danger">{error}</div>}
+              <Form onSubmit={formik.handleSubmit}>
+                <Form.Group className="mb-3 mt-4">
+                  <Form.Control
+                    type="email"
+                    placeholder="Correu electrònic"
+                    id="email"
+                    name="email"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values.email}
+                    className='w-100' 
+                  />
+                  {formik.touched.email && formik.errors.email && (
+                    <div className="text-danger">{formik.errors.email}</div>
+                  )}
+                </Form.Group>
+                <Form.Group className="mb-3 mt-4">
+                  <Form.Control
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder='Contrasenya'
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values.password}
+                    className='w-100'
+                  />
+                  {formik.touched.password && formik.errors.password && (
+                    <div className="text-danger">{formik.errors.password}</div>
+                  )}
+                </Form.Group>
+                <Form.Group className="mb-3 mt-4">
+                  <Button variant="primary" type="submit" className="w-100 bg-orange orange-button-login border-0 fw-bold p-2">Iniciar Sessió</Button> 
+                </Form.Group>
+                <p className='pt-2 text-center'>
+                <a href="#" className='text-decoration-none text-white'>He oblidat la meua contrasenya</a>
+                </p>
+              </Form>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 }
