@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud'
 import { Formik, Form, Field } from 'formik'
 import * as yup from 'yup'
 import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header'
-import Filter from '../FiltresOrdresEnviament'
+import Filter from '../OrdreEnviamentFIltres'
 import axios from 'axios'
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -33,6 +32,7 @@ function OrdresEnviament() {
   const [users, setUsers] = useState([])
   const [products, setProducts] = useState([])
   const [arrayProductos, setArray] = useState([])
+  const [productosEliminados, setArrayEliminados] = useState([])
 
   useEffect(() => {
     axios.get(`${apiUrl}ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
@@ -53,7 +53,6 @@ function OrdresEnviament() {
         console.log(e)
       }
       )
-
 
     axios.get(`${apiUrl}users`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
@@ -81,7 +80,7 @@ function OrdresEnviament() {
         console.log(e)
       }
       )
-  }, [])
+  }, [valorsLineInicials])
 
   const crearOrdre = () => {
     setTipoModal('Crear')
@@ -92,16 +91,13 @@ function OrdresEnviament() {
     setTipoModal('Modificar');
     canviEstatModal();
     console.log(valors);
-
     const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-
-    const orderLinesData = await obtindreOrderLine(); // Espera los datos antes de filtrar
-
+    const orderLinesData = await obtindreOrderLine();
     const filteredOrders = orderLinesData.filter(order => order.shipping_order_id === valors.id);
     setOrderLine(filteredOrders);
     setValorsLineInicials(filteredOrders);
-
+    setArray(filteredOrders);
     console.log(filteredOrders);
     console.log(orderLine)
   };
@@ -109,11 +105,8 @@ function OrdresEnviament() {
   const eliminarOrder = (id) => {
     axios.get(`${apiUrl}orderlineshipping`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then((response) => {
-        console.log(response);
         const responseData = response.data;
-        console.log(responseData)
         const idOrderLine = responseData.id;
-        console.log(idOrderLine);
         responseData.map(orderLine => {
           if (id === orderLine.shipping_order_id) {
             axios.delete(`${apiUrl}orderlineshipping/${orderLine.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
@@ -127,15 +120,25 @@ function OrdresEnviament() {
       })
   }
 
-  const eliminarProducte = (id) => {
-    setArray(prevProductos => prevProductos.filter(producto => producto.product_id !== id));
-  }
+  const eliminarProducte = (idProducto) => {
+    // Buscar el producto en `arrayProductos` y obtener su `id` de `orderlineshipping`
+    const productoAEliminar = arrayProductos.find(producto => producto.product_id === idProducto);
+    console.log(productoAEliminar);
+
+    if (productoAEliminar) {
+      setArrayEliminados(prevEliminados => [...prevEliminados, productoAEliminar.id]);
+      setArray(prevProductos => prevProductos.filter(producto => producto.product_id !== idProducto));
+    }
+  };
+
 
   const afegirProducte = (producte) => {
-    const array = [...arrayProductos]
-    array.push(producte)
-    setArray(array)
-    console.log(arrayProductos)
+    console.log("Producte a agregar: ", producte)
+    setArray(prevProductos => {
+      const newArray = [...prevProductos, producte];
+      console.log("Nuevo array de productos:", newArray);
+      return newArray;
+    });
   }
 
   const clientExistent = (id) => {
@@ -171,11 +174,15 @@ function OrdresEnviament() {
     setArray([])
   }
 
-  const visualitzarOrdre = (valors) => {
+  const visualitzarOrdre = async (valors) => {
     setTipoModal("Visualitzar");
     const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-    setValorsLineInicials(valors)
+    const datos = await obtindreOrderLine();
+    if(datos.shipping_order_id === valors.id ){
+      setValorsLineInicials(datos)
+      
+    }
     canviEstatModalVisualitza();
   }
 
@@ -190,6 +197,7 @@ function OrdresEnviament() {
           .then(response => {
             const resultat = response.data;
             arrayProductos.map(line => {
+              console.log(arrayProductos)
               const novaId = resultat.results.insertId
               line.shipping_order_id = novaId
 
@@ -206,7 +214,23 @@ function OrdresEnviament() {
       }
     }
     else {
+      for (const idOrderLine of productosEliminados) {
+        console.log(idOrderLine);
+        axios.delete(`${apiUrl}orderlineshipping/${idOrderLine}`, { headers: { "auth-token": localStorage.getItem("token") } });
+      }
       axios.put(`${apiUrl}ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
+        .then(response => {
+          arrayProductos.map(line => {
+
+            if (line.id) {
+              axios.put(`${apiUrl}orderlineshipping/${line.id}`, line, { headers: { "auth-token": localStorage.getItem("token") } })
+            }
+            else {
+              const newProduct = { ...line, shipping_order_id: values.id };
+              axios.post(`${apiUrl}orderlineshipping`, newProduct, { headers: { "auth-token": localStorage.getItem("token") } });
+            }
+          })
+        })
       actualitzaDades();
     }
     actualitzaDades();
@@ -226,10 +250,11 @@ function OrdresEnviament() {
       const response = await axios.get(`${apiUrl}orderlineshipping`, {
         headers: { "auth-token": localStorage.getItem("token") }
       });
-      return response.data; // Devolvemos los datos
+      const datos = response.data;
+      return datos;
     } catch (error) {
       console.error("Error al obtener las líneas de orden:", error);
-      return []; // Retornamos un array vacío en caso de error
+      return [];
     }
   };
 
@@ -280,20 +305,20 @@ function OrdresEnviament() {
                 <td data-cell="Data Estimada" className='text-center'>{formateaFecha(valors.shipping_date)}</td>
                 <td data-cell="Estat" className='text-center'>{estatExistent(valors.ordershipping_status_id)}</td>
                 <td data-no-colon="true" className='text-center'>
-                    <div className="d-lg-flex justify-content-lg-center">
+                  <div className="d-lg-flex justify-content-lg-center">
                     <span onClick={() => visualitzarOrdre(valors)} style={{ cursor: "pointer" }}>
                       <i className="bi bi-eye icono fs-5"></i>
                     </span>
 
-                    <span onClick={() => modificarOrdre(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
+                    <span onClick={() => modificarOrdre(valors)} className="mx-2" style={{ cursor: "pointer" }}>
                       <i className="bi bi-pencil-square icono fs-5"></i>
                     </span>
 
                     <span onClick={() => eliminarOrder(valors.id)} style={{ cursor: "pointer" }}>
                       <i className="bi bi-trash icono fs-5"></i>
                     </span>
-                    </div>
-                  </td>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -367,6 +392,7 @@ function OrdresEnviament() {
           </Formik>
 
           <Formik
+            enableReinitialize={true} 
             initialValues={(tipoModal === 'Modificar' ? valorsLineInicials : {
               shipping_order_id: '',
               product_id: '',
@@ -488,7 +514,6 @@ function OrdresEnviament() {
                   <Button variant={tipoModal === "Crear" ? "success" : "info"} type='submit'>{tipoModal}</Button>
 
                 </div>
-
                 <div className='pb-3'>
                   <label htmlFor='client_id' className='block text-sm font-medium text-gray-700 pe-2'>Client</label>
                   <Field as="select" name="client_id" values={values.client_id} className="w-full border border-0 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" disabled>
@@ -505,7 +530,39 @@ function OrdresEnviament() {
                   <Field type="date" name="shipping_date" values={values.shipping_date} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" disabled />
                   {errors.shipping_date && touched.shipping_date ? <div className="text-red-500 text-sm">{errors.shipping_date}</div> : null}
                 </div>
+
+                <div>
+                  <table class="table table-striped text-center">
+                    <thead className="table-active border-bottom border-dark-subtle">
+                      <tr>
+                        <th>Producte</th>
+                        <th>Quantitat</th>
+                        <th>Accions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {arrayProductos.map((producto) => (
+                        <tr key={producto.product_id}>
+                          <td>{producteExistent(producto.product_id)}</td>
+                          <td>{producto.quantity}</td>
+                          <td>
+                            <Button
+                              variant="outline-secondary"
+                              onClick={() => {
+                                eliminarProducte(producto.product_id);
+                              }}
+                            >
+                              <i className="bi bi-trash p-2"></i>
+                            </Button>
+                          </td>
+                        </tr>
+
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </Form>
+              
             )}
           </Formik>
         </Modal.Body>
