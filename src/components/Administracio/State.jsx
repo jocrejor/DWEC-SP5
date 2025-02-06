@@ -14,10 +14,10 @@ const StateSchema = Yup.object().shape({
 
 function State() {
   const [states, setStates] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, mostrarmodal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Crear");
   const [valorsInicials, setValorsInicials] = useState({ name: '' });
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     axios.get(`${apiUrl}/state`, {
@@ -27,7 +27,7 @@ function State() {
       .catch(error => console.log('Error al obtener estados:', error));
   }, []);
 
-  const eliminarState = async (id) => {
+  const eliminarestat = async (id) => {
     try {
       await axios.delete(`${apiUrl}/state/${id}`, {
         headers: { "auth-token": localStorage.getItem("token") }
@@ -38,18 +38,14 @@ function State() {
     }
   };
 
-  const modificarState = (valors) => {
+  const modificarestat = (valors) => {
     setTipoModal("Modificar");
     setValorsInicials(valors);
-    setShowModal(true);
+    mostrarmodal(true);
   };
 
-  const handleStateClick = (id) => {
-    navigate(`../city/${id}`);
-  };
-
-  const canviEstatModal = () => {
-    setShowModal(!showModal);
+  const crearestat = () => {
+    mostrarmodal(!showModal);
     setTipoModal("Crear");
   };
 
@@ -58,7 +54,7 @@ function State() {
       <Filtres />
       <div className="d-flex justify-content-between my-3">
         <h2>Estados</h2>
-        <Button variant="dark" onClick={canviEstatModal}>+ Crear Estado</Button>
+        <Button variant="dark" onClick={crearestat}>+ Crear Estado</Button>
       </div>
       <table className="table table-striped text-center">
         <thead>
@@ -76,10 +72,10 @@ function State() {
               <td>{valors.name}</td>
            
               <td>
-                <span onClick={() => modificarState(valors)} style={{ cursor: "pointer" }}>
+                <span onClick={() => modificarestat(valors)} style={{ cursor: "pointer" }}>
                   <i className="bi bi-pencil-square"></i>
                 </span>
-                <span onClick={() => eliminarState(valors.id)} className="mx-2" style={{ cursor: "pointer" }}>
+                <span onClick={() => eliminarestat(valors.id)} className="mx-2" style={{ cursor: "pointer" }}>
                   <i className="bi bi-trash"></i>
                 </span>
               </td>
@@ -87,8 +83,8 @@ function State() {
           ))}
         </tbody>
       </table>
-      {/* Modal de Crear/Modificar Estado */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+
+      <Modal show={showModal} onHide={() => mostrarmodal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Estado</Modal.Title>
         </Modal.Header>
@@ -107,7 +103,7 @@ function State() {
                     headers: { "auth-token": localStorage.getItem("token") }
                   });
                 }
-                setShowModal(false);
+                mostrarmodal(false);
                 window.location.reload();
               } catch (e) {
                 console.log('Error al enviar:', e);

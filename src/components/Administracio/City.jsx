@@ -3,14 +3,13 @@ import { Button, Modal, Table } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';  // Añadir para la navegación
+import { useNavigate } from 'react-router-dom';  
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 
 const CitySchema = Yup.object().shape({
-  name: Yup.string()
-    .min(4, 'El valor mínim és de 4 caràcters.')
+  name: Yup.string().min(4, 'El valor mínim és de 4 caràcters.')
     .max(40, 'El valor màxim és de 40 caràcters.')
     .required('Valor requerit'),
   province_id: Yup.number()
@@ -20,13 +19,12 @@ const CitySchema = Yup.object().shape({
 
 function City() {
   const [showCreate, setShowCrear] = useState(false);
-  const [showView, setShowVisualitzar] = useState(false);
+  const [showView, modalvisualitzar] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [cities, setCities] = useState([]);
   const [currentCity, setCurrentCity] = useState(null);
-  const navigate = useNavigate();  // Hook para navegación
+  const navigate = useNavigate();  
 
-  // Función para cargar el listado de ciudades
   const cargarDatos = async () => {
     try {
       const response = await axios.get(`${apiUrl}/city`, {
@@ -42,10 +40,9 @@ function City() {
     cargarDatos();
   }, []);
 
-  // Crear ciudad
-  const handleCreateSubmit = (values, { setSubmitting, resetForm }) => {
-    axios
-      .post(`${apiUrl}/city`, values, {
+
+  const crearciutat = (values, { setSubmitting, resetForm }) => {
+    axios.post(`${apiUrl}/city`, values, {
         headers: { "auth-token": localStorage.getItem("token") },
       })
       .then(() => {
@@ -59,7 +56,6 @@ function City() {
       });
   };
 
-  // Eliminar ciudad
   const eliminarCity = (id) => {
     axios
       .delete(`${apiUrl}/city/${id}`, {
@@ -73,22 +69,18 @@ function City() {
       );
   };
 
-  // Visualizar ciudad: asigna la city actual y abre el modal de visualización
   const handleView = (city) => {
     setCurrentCity(city);
-    setShowVisualitzar(true);
+    modalvisualitzar(true);
   };
 
-  // Abrir modal de edición con la city actual.
-  const handleEdit = (city) => {
+  const edicio = (city) => {
     setCurrentCity(city);
     setShowEdit(true);
   };
 
-  // Enviar edición (PUT)
-  const handleEditSubmit = (values, { setSubmitting, resetForm }) => {
-    axios
-      .put(`${apiUrl}/city/${currentCity.id}`, values, {
+  const canviseditar = (values, { setSubmitting, resetForm }) => {
+    axios.put(`${apiUrl}/city/${currentCity.id}`, values, {
         headers: { "auth-token": localStorage.getItem("token") },
       })
       .then(() => {
@@ -108,10 +100,31 @@ function City() {
 
   return (
     <>
- 
-      <Button onClick={() => setShowCrear(true)} className="mb-3">
-        Nova Ciutat
-      </Button>
+   <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+          <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">  
+            <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+              <div className="form-floating bg-white">
+                <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
+                  <option defaultValue>Tria una opció</option>
+                  <option value="1">Eliminar</option>
+                </select>
+                <label htmlFor="floatingSelect">Accions en lot</label>
+              </div>
+              <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button">
+                <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+              </button>
+            </div>
+          </div>
+          <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+          <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+            <div className="d-flex h-100 justify-content-xl-end">
+              <button type="button" onClick={() => setShowCrear(true)}  className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+                <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+              </button>
+            </div>
+          </div>                                                    
+        </div>
+    
 
       <Modal show={showCreate} onHide={() => setShowCrear(false)}>
         <Modal.Header closeButton>
@@ -121,7 +134,7 @@ function City() {
           <Formik
             initialValues={{ name: '', province_id: '' }}
             validationSchema={CitySchema}
-            onSubmit={handleCreateSubmit}
+            onSubmit={crearciutat}
           >
             {({ errors, touched, isSubmitting }) => (
               <Form>
@@ -158,7 +171,7 @@ function City() {
         </Modal.Body>
       </Modal>
 
-      <Modal show={showView} onHide={() => setShowVisualitzar(false)}>
+      <Modal show={showView} onHide={() => modalvisualitzar(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Visualitzar City</Modal.Title>
         </Modal.Header>
@@ -180,13 +193,12 @@ function City() {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowVisualitzar(false)}>
+          <Button variant="secondary" onClick={() => modalvisualitzar(false)}>
             Tancar
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Modal de edición */}
       <Modal show={showEdit} onHide={() => setShowEdit(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Modificar City</Modal.Title>
@@ -199,7 +211,7 @@ function City() {
                 province_id: currentCity.province_id,
               }}
               validationSchema={CitySchema}
-              onSubmit={handleEditSubmit}
+              onSubmit={canviseditar}
               enableReinitialize
             >
               {({ errors, touched, isSubmitting }) => (
@@ -242,68 +254,37 @@ function City() {
         </Modal.Body>
       </Modal>
 
-      {/* Listado de cities */}
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>ID de la provincia</th>
-            <th>Accions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cities.map((city) => (
-            <tr key={city.id}>
-              <td>{city.id}</td>
-              <td>{city.name}</td>
-                   <td> 
-                     <Button
-                     
-                  variant="info"
-                  size="sm"
-                  onClick={() => navegarprovincies(city.province_id)}  // Navegar a la vista de Provincias
-                  title="Veure Provincias"
-                >
-                  Provincias
-                </Button>
+
+      <div className="row">
+        <div className="col-12">
+          <table className="table table-striped text-center align-middle">
+            <thead className="table-active border-bottom border-dark-subtle">
+              <tr>
+                <th className="align-middle" scope="col"><input className="form-check-input" type="checkbox" /></th>
+                <th scope="col">ID</th>
+                <th scope="col">Nom</th>
+                <th scope="col">ID de la provincia</th>
+                <th scope="col">Accions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cities.map((city) => (
+                <tr key={city.id}>
+                  <td data-cell="Seleccionar"><input className="form-check-input" type="checkbox" /></td>
+                  <td data-cell="ID">{city.id}</td>
+                  <td data-cell="Nom">{city.name}</td>
+                  <td><Button size="sm" onClick={() => navegarprovincies(city.province_id)} title="Veure Provincias">Provincias</Button></td>
+                  <td className="fs-5" data-no-colon="true">
+                   <i className="bi bi-pencil-square me-2"     title="Modificar" onClick={() => edicio(city)} ></i>
+                  <i className="bi bi-eye px-3 me-2" onClick={() => handleView(city)} title="Visualitzar" ></i>
+                   <i className="bi bi-trash"  title="Eliminar"  onClick={() => eliminarCity(city.id)}  ></i>
                 </td>
-              <td>
-       
-                {/* Botón para visualizar */}
-                <Button
-                  variant="info"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleView(city)}
-                  title="Visualitzar"
-                >
-                  <i className="bi bi-eye"></i>
-                </Button>
-                {/* Botón para editar */}
-                <Button
-                  variant="warning"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleEdit(city)}
-                  title="Modificar"
-                >
-                  <i className="bi bi-pencil"></i>
-                </Button>
-                {/* Botón para eliminar */}
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => eliminarCity(city.id)}
-                  title="Eliminar"
-                >
-                  <i className="bi bi-trash"></i>
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </>
   );
 }

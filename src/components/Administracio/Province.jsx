@@ -23,7 +23,6 @@ function Provincia() {
   const [provincias, setProvincias] = useState([]);
   const [currentProvince, setCurrentProvince] = useState(null);
 
-  // Cargar listado de provincias
   const cargarDatos = async () => {
     try {
       const response = await axios.get(`${apiUrl}/province`, {
@@ -39,10 +38,8 @@ function Provincia() {
     cargarDatos();
   }, []);
 
-  // Crear provincia (el id lo asigna la API automáticamente)
-  const handleCreateSubmit = (values, { setSubmitting, resetForm }) => {
-    axios
-      .post(`${apiUrl}/province`, values, {
+  const crearProvincia = (values, { setSubmitting, resetForm }) => {
+    axios.post(`${apiUrl}/province`, values, {
         headers: { "auth-token": localStorage.getItem("token") },
       })
       .then(() => {
@@ -56,7 +53,6 @@ function Provincia() {
       });
   };
 
-  // Eliminar provincia
   const eliminarProvincia = (id) => {
     axios
       .delete(`${apiUrl}/province/${id}`, {
@@ -70,20 +66,17 @@ function Provincia() {
       });
   };
 
-  // Visualizar provincia: asigna la provincia actual y abre modal de visualización.
-  const handleView = (prov) => {
+  const modalvisualitzar = (prov) => {
     setCurrentProvince(prov);
     setShowView(true);
   };
 
-  // Abrir modal de edición con la provincia actual.
-  const handleEdit = (prov) => {
+  const modaleditar = (prov) => {
     setCurrentProvince(prov);
     setShowEdit(true);
   };
 
-  // Enviar edición (PUT)
-  const handleEditSubmit = (values, { setSubmitting, resetForm }) => {
+  const editarprovincia = (values, { setSubmitting, resetForm }) => {
     axios
       .put(`${apiUrl}/province/${currentProvince.id}`, values, {
         headers: { "auth-token": localStorage.getItem("token") },
@@ -101,12 +94,11 @@ function Provincia() {
 
   return (
     <>
-      {/* Botón para crear nueva provincia */}
+  
       <Button onClick={() => setShowCreate(true)} className="mb-3">
         Nova Provincia
       </Button>
 
-      {/* Modal de creación */}
       <Modal show={showCreate} onHide={() => setShowCreate(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Nova Provincia</Modal.Title>
@@ -115,7 +107,7 @@ function Provincia() {
           <Formik
             initialValues={{ name: '', state_id: '' }}
             validationSchema={ProvinciaSchema}
-            onSubmit={handleCreateSubmit}
+            onSubmit={crearProvincia}
           >
             {({ errors, touched, isSubmitting }) => (
               <Form>
@@ -152,7 +144,7 @@ function Provincia() {
         </Modal.Body>
       </Modal>
 
-      {/* Modal de visualización */}
+     
       <Modal show={showView} onHide={() => setShowView(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Visualitzar Provincia</Modal.Title>
@@ -181,7 +173,6 @@ function Provincia() {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal de edición */}
       <Modal show={showEdit} onHide={() => setShowEdit(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Modificar Provincia</Modal.Title>
@@ -194,7 +185,7 @@ function Provincia() {
                 state_id: currentProvince.state_id,
               }}
               validationSchema={ProvinciaSchema}
-              onSubmit={handleEditSubmit}
+              onSubmit={editarprovincia}
               enableReinitialize
             >
               {({ errors, touched, isSubmitting }) => (
@@ -233,7 +224,6 @@ function Provincia() {
         </Modal.Body>
       </Modal>
 
-      {/* Listado de provincias */}
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -255,7 +245,7 @@ function Provincia() {
                   variant="info"
                   size="sm"
                   className="me-2"
-                  onClick={() => handleView(prov)}
+                  onClick={() => modalvisualitzar(prov)}
                   title="Visualitzar"
                 >
                   <i className="bi bi-eye"></i>
@@ -265,7 +255,7 @@ function Provincia() {
                   variant="warning"
                   size="sm"
                   className="me-2"
-                  onClick={() => handleEdit(prov)}
+                  onClick={() => modaleditar(prov)}
                   title="Modificar"
                 >
                   <i className="bi bi-pencil"></i>
