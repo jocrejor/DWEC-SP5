@@ -4,7 +4,6 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
-import Filtres from "../Filtres";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -18,6 +17,7 @@ function OrderReception() {
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [orderStatuses, setOrderStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
@@ -28,19 +28,24 @@ function OrderReception() {
   const [error, setError] = useState(null);
   const [productId, setProductId] = useState('');
   const [quantity, setQuantity] = useState('');
+  const [showReviewModal, setShowReviewModal] = useState(false); // Nou modal per revisar
+  const [orderToReview, setOrderToReview] = useState(null);
+  const [orderLines, setOrderLines] = useState([]);
 
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [ordersRes, suppliersRes, productsRes] = await Promise.all([
+      const [ordersRes, suppliersRes, productsRes, statusesRes] = await Promise.all([
         axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/orderreception_status`, { headers: { "auth-token": localStorage.getItem("token") } })
       ]);
       setOrderReceptions(ordersRes.data);
       setSuppliers(suppliersRes.data);
       setProducts(productsRes.data);
+      setOrderStatuses(statusesRes.data);
       setError(null);
     } catch (err) {
       console.error("Error al carregar dades:", err);
@@ -54,16 +59,12 @@ function OrderReception() {
     fetchInitialData();
   }, []);
 
-  // Aconseguir el format de data desitjat DD-MM-YYYY
   const formateaFecha = (fecha) => {
     const fechaSoloFecha = fecha.split('T')[0];
     const [year, month, day] = fechaSoloFecha.split('-');
     return `${day}-${month}-${year}`;
   };
 
-
-
-  // Funció per eliminar ordre de recepció
   const eliminarOrdre = async (id) => {
     if (window.confirm('Estàs segur que vols eliminar aquesta ordre?')) {
       try {
@@ -98,11 +99,8 @@ function OrderReception() {
     }
   };
   
-
-  // Funció per modificar ordre de recepció
   const [loadingModal, setLoadingModal] = useState(false);
 
-  // Modificar Ordre
   const modificarOrdre = async (ordre) => {
     setTipoModal('Modificar');
     setLoadingModal(true);
@@ -129,11 +127,9 @@ function OrderReception() {
       setSelectedProducts([]);
     }
   
-    setLoadingModal(false); // Quan les dades estiguin carregades, mostrem el modal
+    setLoadingModal(false);
     setShowModal(true);
   };
-  
-
 
   const canviEstatModal = () => {
     setShowModal(!showModal);
@@ -142,7 +138,6 @@ function OrderReception() {
     setQuantity('');
   };
 
-  // Funció per afegir producte a la llista de productes seleccionats
   const afegirProducte = () => {
     if (!productId || !quantity || isNaN(quantity) || Number(quantity) <= 0) {
       alert('Selecciona un producte vàlid i una quantitat positiva!');
@@ -161,12 +156,47 @@ function OrderReception() {
     setQuantity('');
   };
 
-  // Funció per eliminar producte de la llista seleccionada
+  const revisarOrdre = async (ordre) => {
+    setOrderToReview(ordre);
+    try {
+      const orderLinesRes = await axios.get(`${apiUrl}/orderlinereception/${ordre.id}`, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+      setOrderLines(orderLinesRes.data);
+
+    } catch (err) {
+      console.error("Error al carregar les línies de l'ordre:", err);
+      setError("Error carregant les línies de l'ordre.");
+    }
+
+    setShowReviewModal(true);
+  };
+
+  const descarregarOrdre = async (ordreId) => {
+    try {
+      await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderline_status_id: 2 }, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+      setOrderReceptions(prev => prev.map(order => 
+        order.id === ordreId ? { ...order, orderline_status_id: 2 } : order
+      ));
+      setShowReviewModal(false);
+    } catch (err) {
+      console.error("Error canviant l'estat de l'ordre:", err);
+      setError("Error actualitzant l'estat de l'ordre.");
+    }
+  };
+
+
   const eliminarProducte = (index) => {
     setSelectedProducts((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Funció per crear l'Ordre de Recepció
+  const getStatusName = (statusId) => {
+    const status = orderStatuses.find((status) => status.id === statusId);
+    return status ? status.name : 'Desconegut';
+  };
+
   const crearOrdreDeRecepcio = async (ordreDeRecepcio) => {
     try {
       const res = await axios.post(`${apiUrl}/orderreception`, ordreDeRecepcio, {
@@ -179,7 +209,6 @@ function OrderReception() {
     }
   };
 
-  // Funció per crear les línies d'Ordre de Recepció
   const crearLiniaOrdreDeRecepcio = async (liniaOrdreDeRecepcio) => {
     try {
       await axios.post(`${apiUrl}/orderlinereception`, liniaOrdreDeRecepcio, {
@@ -191,7 +220,6 @@ function OrderReception() {
     }
   };
 
-  // Funció per enviar el formulari (crear ordre i línies associades)
   const handleSubmit = async (values) => {
     //try {
     const ordreDeRecepcio = {
@@ -199,7 +227,6 @@ function OrderReception() {
       orderreception_status_id: 1,
     };
 
-    // Crear l'Ordre de Recepció
     const resultat = await crearOrdreDeRecepcio(ordreDeRecepcio);
     const ordreIdValue = resultat
 
@@ -214,7 +241,6 @@ function OrderReception() {
       await crearLiniaOrdreDeRecepcio(liniaOrdre);
     }
 
-    // Actualitzar la llista de dades
     await fetchInitialData();
     canviEstatModal();
     setError(null);
@@ -250,6 +276,7 @@ function OrderReception() {
               <th>Proveïdor</th>
               <th>Data Estimada</th>
               <th>Estat</th>
+              <th>Revisar</th>
               <th>Modificar</th>
               <th>Eliminar</th>
             </tr>
@@ -260,7 +287,12 @@ function OrderReception() {
                 <td>{valors.id}</td>
                 <td>{suppliers.find((sup) => sup.id === valors.supplier_id)?.name}</td>
                 <td>{formateaFecha(valors.estimated_reception_date)}</td>
-                <td>{valors.orderreception_status}</td>
+                <td>{getStatusName(valors.orderline_status_id)}</td>
+                <td>
+                  <Button variant="info" onClick={() => revisarOrdre(valors)}>
+                    Revisar
+                  </Button>
+                </td>
                 <td>
                   <Button variant="warning" onClick={() => modificarOrdre(valors)}>
                     Modificar
@@ -276,8 +308,6 @@ function OrderReception() {
           </tbody>
         </Table>
       )}
-
-
 
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
@@ -390,6 +420,57 @@ function OrderReception() {
           )}
         </Modal.Body>
       </Modal>
+
+      {/* Modal per Revisar Ordre */}
+      <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Revisió Ordre de Recepció</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {orderToReview ? (
+            <div>
+              <p><strong>Id:</strong> {orderToReview.id}</p>
+              <p><strong>Proveïdor:</strong> {suppliers.find((sup) => sup.id === orderToReview.supplier_id)?.name}</p>
+              <p><strong>Data Estimada:</strong> {formateaFecha(orderToReview.estimated_reception_date)}</p>
+              <p><strong>Estat:</strong> {getStatusName(orderToReview.orderline_status_id)}</p>
+
+              {/* Taula de productes associats a l'ordre */}
+              <h5>Productes:</h5>
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>Producte</th>
+                    <th>Quantitat</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orderLines.length > 0 ? (
+                    orderLines.map((linea, index) => (
+                      <tr key={index}>
+                        <td>{products.find((product) => product.id === linea.product_id)?.name}</td>
+                        <td>{linea.quantity_ordered}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr><td colSpan="2">No hi ha productes associats a aquesta ordre.</td></tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
+          ) : (
+            <Spinner animation="border" />
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowReviewModal(false)}>
+            Tancar
+          </Button>
+          <Button variant="success" onClick={() => descarregarOrdre(orderToReview.id)}>
+            Descarregada
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
     </>
   );
 }
