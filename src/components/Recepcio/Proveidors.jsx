@@ -25,6 +25,7 @@ function Proveidors() {
   const [pais, setPais] = useState([]);
   const [provincia, setProvince] = useState([]);
   const [ciutat, setCity] = useState([]);
+  const [filteredCities, setFilteredCities] = useState([]); // Filtros Ciudades
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
@@ -62,6 +63,15 @@ function Proveidors() {
     }
   };
   
+   // Filtrar ciudades según la provincia seleccionada
+   useEffect(() => {
+    if (valorsInicials.province) {
+      const citiesFiltered = ciutat.filter(city => city.province_id === parseInt(valorsInicials.province));
+      setFilteredCities(citiesFiltered);
+    } else {
+      setFilteredCities([]);
+    }
+  }, [valorsInicials.province, ciutat]);
 
   const deleteSuppliers = async (id) => {
     const confirmDelete = window.confirm("Segur que vols eliminar aquest proveidor?");
@@ -97,22 +107,43 @@ function Proveidors() {
 
   const gravar = async (values) => {
     try {
-      const dataToSend = tipoModal === 'Modificar' ? { ...values, id: undefined } : values;
+      console.log("Valores recibidos:", values);
   
-      if (tipoModal === 'Crear') {
-        await axios.post(`${apiUrl}/supplier`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
-      } else {
-        const { id, ...valuesWithoutId } = values;
-        await axios.put(`${apiUrl}/supplier/${id}`, valuesWithoutId, { headers: { "auth-token": localStorage.getItem("token") } });
+      const provinciaSeleccionada = provincia.find(p => p.id === parseInt(values.province));
+  
+      if (!provinciaSeleccionada) {
+        console.error("ERROR: La provincia seleccionada no es válida.");
+        return;
       }
   
-      const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } });
+      const dataToSend = {
+        ...values,
+        province: provinciaSeleccionada.name, // Enviar el nombre de la provincia, no el ID
+      };
+  
+      console.log("Datos enviados al backend:", dataToSend);
+  
+      if (tipoModal === 'Crear') {
+        await axios.post(`${apiUrl}/supplier`, dataToSend, {
+          headers: { "auth-token": localStorage.getItem("token") }
+        });
+      } else if (tipoModal === 'Modificar') {
+        const { id, ...valuesWithoutId } = dataToSend;
+        await axios.put(`${apiUrl}/supplier/${id}`, valuesWithoutId, {
+          headers: { "auth-token": localStorage.getItem("token") }
+        });
+      }
+  
+      const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      });
       setSuppliers(updatedSuppliers.data);
       canviEstatModal();
     } catch (error) {
-      console.error('Error guardant proveidors:', error);
+      console.error('Error guardant proveidors:', error.response ? error.response.data : error);
     }
   };
+  
   
   return (
     <>
@@ -127,7 +158,7 @@ function Proveidors() {
                 <option selected>Tria una opció</option>
                 <option value="1">Eliminar</option>
               </select>
-              <label for="floatingSelect">Accions en lot</label>
+              <label htmlFor="floatingSelect">Accions en lot</label>
             </div>
             <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button"><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
           </div>
@@ -162,7 +193,7 @@ function Proveidors() {
       <div className='container-fluid pt-3'>
 
         <table className='table table-striped border m-2 text-center'>
-          <thead class="table-active border-bottom border-dark-subtle">
+          <thead className="table-active border-bottom border-dark-subtle">
             <tr>
               <th scope="col">ID</th>
               <th scope="col">Nom</th>
@@ -246,7 +277,7 @@ function Proveidors() {
           <Formik
             initialValues={
               tipoModal === 'Modificar'
-                ? valorsInicials
+                ? (console.log("Valores Iniciales:", valorsInicials), valorsInicials)
                 : {
                   name: '',
                   address: '',
@@ -264,7 +295,7 @@ function Proveidors() {
               gravar(values);
             }}
           >
-            {({ values, errors, touched }) => (
+            {({ values, errors, touched, handleChange }) => (
               <Form>
                 <div className="form-group">
                   <label className='fw-bolder' htmlFor="name">Nom</label>
@@ -357,11 +388,15 @@ function Proveidors() {
                         name="province"
                         className={`text-light-blue form-control ${touched.province && errors.province ? 'is-invalid' : ''
                           }`}
+                        onChange={(e) => {
+                          handleChange(e);
+                          setValorsInicials(prev => ({ ...prev, province: e.target.value, city: '' })); // Reinicia ciudad
+                        }}
                       >
                         <option value="">Selecciona una província</option>
                         {provincia.length > 0 ? (
-                          provincia.map((prov) => (
-                            <option key={prov.id} value={prov.name}>
+                          provincia.sort((a, b) => a.name.localeCompare(b.name)).map((prov) => (
+                            <option key={prov.id} value={prov.id}>
                               {prov.name}
                             </option>
                           ))
@@ -401,7 +436,7 @@ function Proveidors() {
                       className={`text-light-blue form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
                     >
                       <option value="">Selecciona una ciutat</option>
-                      {ciutat.map((ciudad) => (
+                      {filteredCities.map((ciudad) => (
                         <option key={ciudad.id} value={ciudad.name}>
                           {ciudad.name}
                         </option>
@@ -450,18 +485,18 @@ function Proveidors() {
           </Formik>
         </Modal.Body>
       </Modal>
-      <nav aria-label="Page navigation example" class="d-block">
-        <ul class="pagination justify-content-center">
-          <li class="page-item">
-                <a class="page-link text-light-blue" href="#" aria-label="Previous">
+      <nav aria-label="Page navigation example" className="d-block">
+        <ul className="pagination justify-content-center">
+          <li className="page-item">
+                <a className="page-link text-light-blue" href="#" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
           </li>
-          <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
-          <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
-          <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
-          <li class="page-item">
-                <a class="page-link text-light-blue" href="#" aria-label="Next">
+          <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+          <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+          <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+          <li className="page-item">
+                <a className="page-link text-light-blue" href="#" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
           </li>
