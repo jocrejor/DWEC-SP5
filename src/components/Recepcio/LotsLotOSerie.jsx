@@ -46,6 +46,13 @@ function LotsLotOSerie({ products, errors, touched, nombre, lotOSerie }) {
               type="number"
               name={`${nombre}_quantity`}
               className="form-control w-25"
+              value={
+                lotOSerie === "Serie" ? (
+                  "1"
+                ) : null
+              }
+              disabled={
+                lotOSerie === "Serie"}
             />
             <Field
               type="text"
@@ -65,7 +72,7 @@ function LotsLotOSerie({ products, errors, touched, nombre, lotOSerie }) {
 
       {/* Campos adicionales solo para "Lot" */}
       {lotOSerie === "Lot" && (
-        <div className="form-group d-flex gap-2">
+        <div className="form-group d-flex gap-2 mt-3">
           {/* Production Date */}
           <div className="w-100">
             <label htmlFor="production_date">Data de producció</label>
