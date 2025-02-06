@@ -31,11 +31,12 @@ function Lots() {
   const [orderLineReceptions, setOrderLineReception] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
+  const [lotOSerie, setLotOSerie] = useState('Lot');
   const [valorsInicials, setValorsInicials] = useState({
-    order_reception_id: '',
-    orderlinereception_status_id: '',
+    // order_reception_id: '',
+    // orderlinereception_status_id: '',
     product_id: '',
-    quantity_ordered: 0,
+    // quantity_ordered: 0,
     quantity_received: 0
   });
 
@@ -213,7 +214,8 @@ function Lots() {
                     <th scope='col' className="align-middle">Estat ordre de recepció</th>
                     <th scope='col' className="align-middle">Producte</th>
                     <th scope='col' className="align-middle">Quantitat</th>
-                    <th scope='col' className="align-middle">Lot/Serie</th>
+                    <th scope='col' className="align-middle">Lot</th>
+                    <th scope='col' className="align-middle">Serie</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -259,7 +261,7 @@ function Lots() {
                           <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
 
                           <td data-no-colon="true">
-                            <Button
+                            {/* <Button
                               type="button"
                               className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
                               onClick={() => {
@@ -267,7 +269,30 @@ function Lots() {
                                 setTipoModal('Crear');
                               }}>
                               <i className="bi bi-plus-circle text-white pe-1"></i>Crear
-                            </Button>
+                            </Button> */}
+
+                            <i
+                              className="bi bi-plus-circle icono"
+                              role='button'
+                              onClick={() => {
+                                canviEstatModal();
+                                setTipoModal('Crear');
+                                setLotOSerie('Lot')
+                                setValorsInicials(valors);
+                              }}>
+                            </i>
+                          </td>
+                          <td>
+                            <i className="bi bi-plus-circle icono"
+                              role='button'
+                              onClick={() => {
+                                canviEstatModal();
+                                setTipoModal('Crear');
+                                setLotOSerie('Serie')
+                                setValorsInicials(valors);
+                              }}
+                            >
+                            </i>
                           </td>
 
                           {/* accions visualitzar, modificar, eliminar */}
@@ -329,7 +354,15 @@ function Lots() {
 
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
-          <Modal.Title>{tipoModal} Lot/Serie</Modal.Title>
+          <Modal.Title>
+            Crear
+            {lotOSerie === "Lot"
+              ? ("Lot")
+              : lotOSerie === "Serie"
+                ? ("Serie")
+                : null
+            }
+          </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -338,10 +371,10 @@ function Lots() {
               tipoModal === 'Crear'
                 ? valorsInicials
                 : {
-                  order_reception_id: '',
-                  orderlinereception_status_id: '',
+                  // order_reception_id: '',
+                  // orderlinereception_status_id: '',
                   product_id: '',
-                  quantity_ordered: 0,
+                  // quantity_ordered: 0,
                   quantity_received: 0
                 }
             }
@@ -422,178 +455,11 @@ function Lots() {
             {({ errors, touched }) => (
               /**FORMULARIO CON SELECTS Y DEMÁS (CORRECTO) */
               <Form>
-                {/* <div className="form-group">
-                  <label htmlFor="name">Nom del lot</label>
-                  <Field
-                    type="text"
-                    name="name"
-                    placeholder="Nom del lot"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.name && touched.name && <div className="text-danger mt-1">{errors.name}</div>}
-                </div> */}
-
-                {/* ID Product */}
-                {/* <div className="form-group">
-                  <label htmlFor="product_id">ID del Producte</label>
-                  <Field as="select" name="product_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona un producte</option>
-                    {products.map((product) => (
-                      <option key={product.id} value={product.id}>
-                        {product.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.product_id && touched.product_id && <div className="text-danger mt-1">{errors.product_id}</div>}
-                </div> */}
-
-                {/* producte */}
-                <div className="form-group">
-                  <label htmlFor="product_id">ID del Producte</label>
-                  <Field as="select" name="product_id" className="form-control" disabled>
-                    <option value="">Selecciona un producte</option>
-                    {products.map((product) => (
-                      <option key={product.id} value={product.id}>
-                        {product.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.product_id && touched.product_id && <div className="text-danger mt-1">{errors.product_id}</div>}
-                </div>
-
-                {/* ID Supplier */}
-                {/* <div className="form-group">
-                  <label htmlFor="supplier_id">ID del Proveïdor</label>
-                  <Field as="select" name="supplier_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona un proveïdor</option>
-                    {suppliers.map((supplier) => (
-                      <option key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.supplier_id && touched.supplier_id && <div className="text-danger mt-1">{errors.supplier_id}</div>}
-                </div> */}
-
-                {/* Quantitat */}
-                {/* <div className="form-group">
-                  <label htmlFor="quantity">Quantitat</label>
-                  <Field
-                    type="number"
-                    name="quantity"
-                    placeholder="Quantitat del lot"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.quantity && touched.quantity && <div className="text-danger mt-1">{errors.quantity}</div>}
-                </div> */}
-
-                {/* quantitat */}
-                <div className="form-group">
-                  <label htmlFor="quantity_received">Quantitat</label>
-                  <Field
-                    type="number"
-                    name="quantity_received"
-                    placeholder="Quantitat del lot"
-                    className="form-control"
-                    disabled
-                  />
-                  {errors.quantity_received && touched.quantity_received && <div className="text-danger mt-1">{errors.quantity_received}</div>}
-                </div>
-
-                {/* Production Date */}
-                {/* <div className="form-group">
-                  <label htmlFor="production_date">Data de producció</label>
-                  <Field
-                    type="date"
-                    name="production_date"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.production_date && touched.production_date && <div className="text-danger mt-1">{errors.production_date}</div>}
-                </div> */}
-
-                {/* Expiration Date */}
-                {/* <div className="form-group">
-                  <label htmlFor="expiration_date">Data d&apos;expiració</label>
-                  <Field
-                    type="date"
-                    name="expiration_date"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.expiration_date && touched.expiration_date && <div className="text-danger mt-1">{errors.expiration_date}</div>}
-                </div> */}
-
-                {/* Order Line Reception */}
-                {/* <div className="form-group">
-                  <label htmlFor="orderlinereception_id">ID Order Line Reception</label>
-                  <Field as="select" name="orderlinereception_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona un id de línea de orden de recepció</option>
-                    {orderLineReceptions.map((line) => (
-                      <option key={line.id} value={line.id}>
-                        {line.id}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.orderlinereception_id && touched.orderlinereception_id && <div className="text-danger mt-1">{errors.orderlinereception_id}</div>}
-                </div> */}
-
-                {/* <div className="form-group d-flex mt-3">
-                  <div>
-                    <div className='text-center fs-4'>
-                      <label htmlFor="lot">Lot</label>
-                    </div>
-
-                    <div className="d-flex gap-2">
-                      <div className="d-flex align-items-center">
-                        <Field
-                          type="number"
-                          name="lot_quantity"
-                          placeholder="Quantitat del lot"
-                          className="form-control"
-                        />
-                      </div>
-                      <div className="d-flex align-items-center">
-                        <Field
-                          type="text"
-                          name="lot_name"
-                          placeholder="Nom del lot"
-                          className="form-control"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="form-group d-flex mt-3">
-                  <div className="ms-3">
-                    <div className='text-center fs-4'>
-                      <label htmlFor="serie">Serie</label>
-                    </div>
-
-                    <div className="d-flex gap-2">
-                      <div className="d-flex align-items-center">
-                        <Field
-                          type="number"
-                          name="serie_quantity"
-                          placeholder="Quantitat de la serie"
-                          className="form-control"
-                        />
-                      </div>
-                      <div className="d-flex align-items-center">
-                        <Field
-                          type="text"
-                          name="serie_name"
-                          placeholder="Nom de la serie"
-                          className="form-control"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div> */}
-
-                <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="serie" />
+                {lotOSerie === "Lot" ? (
+                  <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="lot" lotOSerie={lotOSerie} />
+                ) : lotOSerie === "Serie" ? (
+                  <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="serie" lotOSerie={lotOSerie} />
+                ) : null}
 
 
                 {/* <div className="form-group d-flex mt-3">
@@ -646,12 +512,8 @@ function Lots() {
                     Tancar
                   </Button>
                   {tipoModal !== 'Visualitzar' && (
-                    <Button
-                      variant={tipoModal === 'Modificar' ? 'success' : 'info'}
-                      type="submit"
-                      className="btn"
-                    >
-                      {tipoModal}
+                    <Button className="btn text-white orange-button text-white" type="button">
+                      Gravar
                     </Button>
                   )}
                 </div>
