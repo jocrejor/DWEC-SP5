@@ -12,7 +12,7 @@ const carrierschema = Yup.object().shape({
   name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
   nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit'),
-  phone: Yup.string().matches(/^\d{9}$/,'El telèfon ha de ser correcte (ex: 911234567, 621121124)').required('Valor requerit'),
+  phone: Yup.string().matches(/^\d{9}$/, 'El telèfon ha de ser correcte (ex: 911234567, 621121124)').required('Valor requerit'),
   email: Yup.string().email('Email no vàlid').required('Valor requerit'),
   state_id: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
   province: Yup.string().required('Valor requerit'),
@@ -41,7 +41,7 @@ function Transportista() {
   });
 
   useEffect(() => {
-    fetchData();    
+    fetchData();
   }, []);
 
   const fetchData = async () => {
@@ -253,16 +253,16 @@ function Transportista() {
               tipoModal === 'Crear'
                 ? valorsInicials
                 : {
-                    name: '',
-                    address: '',
-                    nif: '',
-                    phone: '',
-                    email: '',
-                    state_id: 0,
-                    province: '',
-                    city: '',
-                    cp: '',
-                  }
+                  name: '',
+                  address: '',
+                  nif: '',
+                  phone: '',
+                  email: '',
+                  state_id: 0,
+                  province: '',
+                  city: '',
+                  cp: '',
+                }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
@@ -344,17 +344,22 @@ function Transportista() {
                         className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''}`}
                       >
                         <option value="">Selecciona una província</option>
-                        {provincia.length > 0 ? (
-                          provincia.map((prov) => (
-                            <option key={prov.id} value={prov.id}>
-                              {prov.name}
-                            </option>
-                          ))
+                        {Array.isArray(provincia) && provincia.length > 0 ? (
+                          provincia
+                            .slice()
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                            .map((prov) => (
+                              <option key={prov.name} value={prov.name}>
+                                {prov.name}
+                              </option>
+                            ))
                         ) : (
                           <option value="">No hi han províncies</option>
                         )}
                       </Field>
-                      {touched.province && errors.province && <div className="invalid-feedback">{errors.province}</div>}
+                      {touched.province && errors.province && (
+                        <div className="invalid-feedback">{errors.province}</div>
+                      )}
                     </>
                   ) : (
                     <>
@@ -365,10 +370,14 @@ function Transportista() {
                         placeholder="Escriu la província"
                         className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''}`}
                       />
-                      {touched.province && errors.province && <div className="invalid-feedback">{errors.province}</div>}
+                      {touched.province && errors.province && (
+                        <div className="invalid-feedback">{errors.province}</div>
+                      )}
                     </>
                   )}
                 </div>
+
+
                 {values.state_id === '194' && values.province ? (
                   <div className="form-group">
                     <label htmlFor="city">Ciutat</label>
@@ -434,16 +443,16 @@ function Transportista() {
               tipoModal === 'Modificar'
                 ? valorsInicials
                 : {
-                    name: '',
-                    address: '',
-                    nif: '',
-                    phone: '',
-                    email: '',
-                    state_id: 0,
-                    province: '',
-                    city: '',
-                    cp: '',
-                  }
+                  name: '',
+                  address: '',
+                  nif: '',
+                  phone: '',
+                  email: '',
+                  state_id: 0,
+                  province: '',
+                  city: '',
+                  cp: '',
+                }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
