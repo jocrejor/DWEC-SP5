@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { url, postData, getData, deleteData, updateId } from "../../apiAccess/crud";
 import { Button, Table, Modal } from "react-bootstrap";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 //import Filtres from "../Filtres";
 
 import { movMagatzem } from "../Magatzem/movMagatzem"; 
@@ -32,6 +32,7 @@ function OrderPickingReception() {
 
     // navigate
     const navigate =useNavigate();
+    const location = useLocation();
 
     const dataFetch = async ()=>{
         try{
@@ -272,7 +273,7 @@ function OrderPickingReception() {
                                         <i className="bi bi-plus-circle text-white pe-1"></i>Crear
                                     </button>
                                     <button onClick={() => {
-                                        navigate("/picking");
+                                        navigate(`/orderpickingreception/picking`);
                                     }}
                                     type="button"
                                     className="btn btn-dark ms-2 border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
