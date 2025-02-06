@@ -4,7 +4,7 @@ import * as Yup from 'yup'
 import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud'
 import { Button, Modal } from 'react-bootstrap';
 import axios from 'axios';
-
+import Header from '../Header';
 const ProducteSchema = Yup.object().shape({
   name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 60 caracters').required('Valor requerit'),
   description: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(200, 'El valor màxim és de 60 caracters'),
@@ -24,9 +24,34 @@ function Productes() {
   const [image, setImage] = useState({id:0, file: null})
   const [messageImage, setMessageImage] = useState('');
   const [messageError, setMessageError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
+  // Paginació
+  const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
+  
+  const indexOfLastItem = currentPage * elementsPaginacio;
+  const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
+  const totalPages = Math.ceil(products.length / elementsPaginacio);
+
+  // Función para cambiar de página
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Funciones para "anterior" y "siguiente"
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   useEffect( () => {
    
@@ -155,12 +180,63 @@ const upload =  async (e)=>{
 }
 return (
     <>
+<Header title="Llistat productes" />
+<div className="container-fluid">
+          <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+            <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+              <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+                <div className="form-floating bg-white">
+                  <select
+                    className="form-select"
+                    id="floatingSelect"
+                    aria-label="Seleccione una opción"
+                  >
+                    <option>Tria una opció</option>
+                    <option value="1">Eliminar</option>
+                  </select>
+                  <label htmlFor="floatingSelect">Accions en lot</label>
+                </div>
+                <button
+                  className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0"
+                  type="button"
+                >
+                  <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+                </button>
+              </div>
+            </div>
+            <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+            <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+              <div className="d-flex h-100 justify-content-xl-end">
+                <button
+                  onClick={() => {
+                    canviEstatModal(); 
+                    setTipoModal("Crear");
+                  }}
+                  type="button"
+                  className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+                >
+                  <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+                </button>
+                <button
+                  onClick={() => {
+                    setTabla("ListarOrder");
+                  }}
+                  type="button"
+                  className="btn btn-dark ms-2 border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+                >
+                  Llistar Orders Picking
+                </button>
+              </div>
+            </div>
+          </div>
 
-<div><h2>Llistat productes</h2></div>
-    <Button variant='success' onClick={()=>{canviEstatModal(); setTipoModal("Crear")}}>Alta Producte</Button>
-      <table className="table">
-        <thead>
+
+
+
+     <table className="table table-striped text-center">
+        <thead className="table-active border-bottom border-dark-subtle">
         <tr>
+        <th scope="col"></th>
           <th scope="col">Id</th>
           <th scope="col">Nom</th>
           <th scope="col">Descripció</th>
@@ -168,9 +244,8 @@ return (
           <th scope="col">Pes</th>
           <th scope="col">Control</th>
           <th scope="col">SKU</th>
-          <th scope="col">Imatge</th>
-          <th scope="col">Modificar</th>
-          <th scope="col">Eliminar</th>
+          <th scope="col" colSpan={3} >Accions</th>
+        
         </tr>
         </thead>
         <tbody>
@@ -188,14 +263,47 @@ return (
             <td>{valors.weight}</td>
             <td>{valors.lotorserial}</td>
             <td>{valors.sku}</td>
-            <td><Button variant="info"  onClick={()=> {updateImage(valors)}}>Imatge</Button></td>
-            <td><Button variant="warning"  onClick={()=> {modificarProducte(valors);canviEstatModal(); }}>Modificar</Button></td>
-            <td><Button variant="primary"  onClick={()=> {eliminarProducte(valors.id)}}>Eliminar</Button></td>
+            <td><span onClick={()=> {updateImage(valors)}}><i className="bi bi-image"></i></span></td>
+            <td><span onClick={()=> {modificarProducte(valors);canviEstatModal(); }}><i className="bi bi-pencil-square"></i></span></td>
+            <td><span  onClick={()=> {eliminarProducte(valors.id)}}> <i className="bi bi-trash"></i></span></td>
 
           </tr>)
         })}
         </tbody>
       </table>
+      
+      </div>      
+      
+      <nav aria-label="Page navigation example" className="d-block">
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => {/* e.preventDefault(); goToPreviousPage();*/ }}>
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                <a className="page-link text-light-blue" href="#" onClick={(e) => { /*e.preventDefault(); paginate(number); */}}>
+                  {number}
+                </a>
+              </li>
+            ))}
+            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {/* e.preventDefault(); goToNextPage(); */}}>
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+
+
+
+
+
+
+
 
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton >
