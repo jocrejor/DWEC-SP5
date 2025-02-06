@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 
-function FiltresInventaris() {
+
+function InventarisFiltres() {
     const [storages, setStorages] = useState([]);
     const apiURL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
-        axios.get(`${apiURL}storage`, { headers: { "auth-token": localStorage.getItem('token') } })
+        axios.get(`${apiURL}/storage`, { headers: { "auth-token": localStorage.getItem('token') } })
             .then(response => {
                 setStorages(response.data);
             })
             .catch(e => { console.log(e.response.data) })
     }, [])
-
     return (
         <>
             <div className="row bg-grey pt-3 px-2 mx-0">
@@ -67,4 +67,4 @@ function FiltresInventaris() {
     )
 }
 
-export default FiltresInventaris
+export default InventarisFiltres

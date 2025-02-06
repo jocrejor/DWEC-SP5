@@ -4,8 +4,7 @@ import { Formik, Form, Field } from 'formik'
 import * as Yup from 'yup'
 import { Row, Col, Modal, Table, Button, Tab } from 'react-bootstrap/'
 import Header from '../Header'
-import Filtres from '../Filtres'
-import FiltresInventaris from './FiltresInventaris'
+import InventarisFiltres from './InventarisFiltres'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
@@ -18,7 +17,7 @@ const InventorySchema = Yup.object().shape({
 function Inventaris() {
   const apiURL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+  var user = JSON.parse(localStorage.getItem('user'));
 
 
   const [inventory, setInventory] = useState([]);
@@ -33,49 +32,59 @@ function Inventaris() {
   const [products, setProducts] = useState([]);
   const [selectedInventoryLines, setSelectedInventoryLines] = useState([]);
   const [inventoryStatus, setInventoryStatus] = useState([]);
-  const [inputLocked, setInputLocked] = useState(false)
+  const [inputLocked, setInputLocked] = useState(false);
+  const [users, setUsers] = useState([]);
+
 
 
   useEffect(() => {
-    axios.get(`${apiURL}inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventory(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-    axios.get(`${apiURL}inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventoryStatus(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-    axios.get(`${apiURL}storage`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/storage`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setStorages(response.data);
       })
       .catch(e => { console.log(e) })
 
-    axios.get(`${apiURL}street`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/street`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setStreets(response.data);
       })
       .catch(e => { console.log(e) })
 
-    axios.get(`${apiURL}space`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/space`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setSpaces(response.data);
       })
       .catch(e => { console.log(e) })
 
-    axios.get(`${apiURL}product`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/product`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setProducts(response.data);
       })
       .catch(e => { console.log(e) })
 
-    axios.get(`${apiURL}inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventoryLines(response.data);
+      })
+      .catch(e => { console.log(e) })
+
+    axios.get(`${apiURL}/users`, { headers: { "auth-token": localStorage.getItem('token') } })
+      .then(response => {
+        setUsers(response.data);
+
+        
       })
       .catch(e => { console.log(e) })
 
@@ -123,12 +132,12 @@ function Inventaris() {
     };
 
     let newInventory = {
-      created_by: 1,
-      inventory_status: 1,
+      created_by: user.id,
+      inventory_status: inventoryStatus?.find(status => status.name === 'Pendent').id,
       storage_id: values.storage_id
     }
 
-    axios.post(`${apiURL}inventory`, newInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.post(`${apiURL}/inventory`, newInventory, { headers: { "auth-token": localStorage.getItem('token') } })
       .catch(e => { console.log(e.response.data) })
 
     filteredSpaces.map(space => {
@@ -141,10 +150,10 @@ function Inventaris() {
         selft_id: space.selft_id,
         space_id: space.id
       }
-      axios.post(`${apiURL}inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.post(`${apiURL}/inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
     });
 
-    await axios.get(`${apiURL}inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
+    await axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         console.log(response)
         console.log(response.data)
@@ -157,9 +166,9 @@ function Inventaris() {
   /************* ELIMINAR INVENTARIO ***************/
   const deleteInventory = (id) => {
     if (confirm("¿Estàs segur de que vols esborrar aquest inventari?")) {
-      axios.delete(`${apiURL}inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.delete(`${apiURL}/inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
 
-      axios.get(`${apiURL}inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setInventory(response.data);
 
@@ -183,7 +192,7 @@ function Inventaris() {
   return (
     <>
       <Header title='Inventaris'></Header>
-      <FiltresInventaris/>
+      <InventarisFiltres />
       <Row className="d-flex mx-3 bg-secondary rounded-top mt-3">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -200,7 +209,7 @@ function Inventaris() {
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
-            {(user.name === 'Admin') ?
+            {((users.find( u => u.id === user.id))?.userprofile_id === 1 || (users.find( u => u.id === user.id))?.userprofile_id === 2)  ?
               <button type="button" className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0" onClick={handleShow} aria-label="Crear inventario"><i className="bi bi-plus-circle text-white pe-1"></i>Crear</button> : null}
           </div>
         </div>
@@ -278,7 +287,7 @@ function Inventaris() {
             <thead className="table-active border-bottom border-dark-subtle">
               <tr >
                 <th>
-                  <input type="checkbox" name="" id="" className='form-check-input' aria-label='Seleccione todas las filas'/>
+                  <input type="checkbox" name="" id="" className='form-check-input' aria-label='Seleccione todas las filas' />
                 </th>
                 <th className='text-light-blue'>ID</th>
                 <th className='text-light-blue'>Data</th>
@@ -296,7 +305,7 @@ function Inventaris() {
                     return (
                       <tr key={values.id}>
                         <td scope="row" data-cell="Seleccionar: ">
-                          <input type="checkbox" className='form-check-input' name="" id="" aria-label={`Selecione la fila del inventario ${values.id}`}/>
+                          <input type="checkbox" className='form-check-input' name="" id="" aria-label={`Selecione la fila del inventario ${values.id}`} />
                         </td>
                         <td data-cell="ID: ">{values.id}</td>
                         <td data-cell="Data: ">{values.created_at}</td>
@@ -307,14 +316,14 @@ function Inventaris() {
                             (values.inventory_status === inventoryStatus.find(status => status.name === 'Pendent')?.id) ?
                               <Button onClick={() => navigate(`/inventaris/inventariar/${values.id}`)} className="outline-orange">Inventariar</Button>
                               :
-                              (values.inventory_status === inventoryStatus.find(status => status.name === 'Fent-se')?.id) && (user.name === 'Admin') ?
+                              (values.inventory_status === inventoryStatus.find(status => status.name === 'Fent-se')?.id) && ((users.find(u => u.id === user.id)?.userprofile_id === 1) || (users.find(u => u.id === user.id)?.userprofile_id === 2)) ?
                                 <Button onClick={() => navigate(`/inventaris/completarInventari/${values.id}`)} className="outline-blue">Completar</Button> :
                                 ""
                           }
                         </td>
                         <td>
-                          <button className='btn'  onClick={() => { setSelectedInventory(values); changeModalStatus() }}><i className="bi bi-eye text-light-blue fs-5"><span className="visually-hidden">Visaulitzar</span></i></button>
-                          <button  className="btn" onClick={() => deleteInventory(values.id)}><i className="bi bi-trash text-light-blue fs-5"><span className="visually-hidden">Eliminar</span></i></button>
+                          <button className='btn' onClick={() => { setSelectedInventory(values); changeModalStatus() }}><i className="bi bi-eye text-light-blue fs-5"><span className="visually-hidden">Visaulitzar</span></i></button>
+                          <button className="btn" onClick={() => deleteInventory(values.id)}><i className="bi bi-trash text-light-blue fs-5"><span className="visually-hidden">Eliminar</span></i></button>
                         </td>
                       </tr>
                     )

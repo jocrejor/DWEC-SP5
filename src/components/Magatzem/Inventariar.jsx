@@ -26,37 +26,37 @@ function Inventariar() {
 
   useEffect(() => {
 
-    axios.get(`${apiURL}inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setSelectedInventory(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-    axios.get(`${apiURL}inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventoryStatus(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-    axios.get(`${apiURL}inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventoryLines(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-    axios.get(`${apiURL}storage`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/storage`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setStorages(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-    axios.get(`${apiURL}product`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/product`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setProducts(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
-    axios.get(`${apiURL}inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.get(`${apiURL}/inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventoryReasons(response.data);
       })
@@ -104,7 +104,7 @@ function Inventariar() {
     const { name, value, type } = e.target;
     const lineId = name;
     const newValue = value;
-    const field = type === 'number' ? 'quantity_real' : 'justification';
+    const field = type === 'number' ? 'quantity_real' : 'inventory_reason_id';
 
     console.log(field + ' - ' + value + ' - ' + type)
     console.log(field)
@@ -139,9 +139,9 @@ function Inventariar() {
         const updatedLine = updatedInventoryLines.find((updated) => updated.id === line.id);
 
         if (updatedLine) {
-          line = { ...line, quantity_real: updatedLine?.quantity_real, justification: updatedLine?.justification };
+          line = { ...line, quantity_real: updatedLine?.quantity_real, inventory_reason_id: updatedLine?.inventory_reason_id };
 
-          await axios.put(`${apiURL}inventoryline/${line.id}`, line, { headers: { "auth-token": localStorage.getItem('token') } })
+          await axios.put(`${apiURL}/inventoryline/${line.id}`, line, { headers: { "auth-token": localStorage.getItem('token') } })
 
 
 
@@ -154,12 +154,12 @@ function Inventariar() {
       const updatedSelectedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Fent-se').id }
       console.log(updatedSelectedInventory)
 
-      await axios.put(`${apiURL}inventory/${selectedInventory.id}`, updatedSelectedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+      await axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedSelectedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
       setSelectedInventoryLines(updatedLines);
       setSelectedInventory(updatedSelectedInventory);
       setInputLocked(true);
-
+      console.log(updatedSelectedInventory)
       alert("Linia actualitzada amb èxit");
       navigate('/inventaris');
     }
@@ -200,6 +200,7 @@ function Inventariar() {
                   <th scope="col" className='text-light-blue'>Espacio</th>
                   <th scope="col" className='text-light-blue'>Producte</th>
                   <th scope="col" className='text-light-blue'>Quantitat Real</th>
+                  <th scope="col" className='text-light-blue'>Justificació</th>
                 </tr>
               </thead>
               <tbody className='text-light-blue'>
@@ -210,7 +211,7 @@ function Inventariar() {
                       return (
                         <tr key={value.id}>
                           <td data-cell="Carrer: ">{value.street_id}</td>
-                          <td data-cell="Estanteria: ">{value.selft_id}</td>
+                          <td data-cell="Estanteria: ">{value.shelf_id}</td>
                           <td data-cell="Espacio: ">{value.space_id}</td>
                           <td data-cell="Producte: ">{(products.find(product => product.id === value.product_id))?.name}</td>
                           <td data-cell="Quantitat Real: ">
@@ -230,7 +231,7 @@ function Inventariar() {
                               name={value.id}
                               className='form-select'
                               onChange={handleInputChange}
-                              value={value.justification}
+                              value={value?.inventory_reason_id}
                             >
                               <option>Selecciona una opció</option>
                               {inventoryReasons.map((reason) => {

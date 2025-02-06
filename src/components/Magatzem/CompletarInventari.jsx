@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Row, Col, Table, Button, Tab } from 'react-bootstrap/'
 import Header from '../Header'
 import axios from 'axios';
-
+import { movMagatzem } from './movMagatzem';
 
 
 
@@ -13,6 +13,8 @@ function CompletarInventari() {
   const { id } = useParams();
   const navigate = useNavigate();
   const apiURL = import.meta.env.VITE_API_URL;
+  const user = JSON.parse(localStorage.getItem('user'));
+
 
   const [storages, setStorages] = useState([]);
   const [selectedInventory, setSelectedInventory] = useState(null);
@@ -27,43 +29,43 @@ function CompletarInventari() {
 
   useEffect(() => {
     const fetchData = async () => {
-      axios.get(`${apiURL}inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setSelectedInventory(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setInventoryStatus(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setInventoryLines(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}storage`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/storage`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setStorages(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}product`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/product`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setProducts(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}space`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/space`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setSpaces(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setInventoryReasons(response.data);
         })
@@ -136,7 +138,7 @@ function CompletarInventari() {
       const updatedLine = updatedInventoryLines.find((updated) => updated.id === line.id);
 
       if (updatedLine) {
-        line = { ...line, justification: updatedLine?.justification }
+        line = { ...line, inventory_reason_id: updatedLine?.inventory_reason_id }
         console.log(line)
         //await updateId(url, "InventoryLine", line.id, line);
         return line;
@@ -155,17 +157,21 @@ function CompletarInventari() {
         const updatedSpace = { ...space, quantity: updatedQuantity || space.quantity }
         console.log(updatedSpace);
         //await updateId(url, 'Space', space.id, updatedSpace)
-        axios.put(`${apiURL}space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+       // axios.put(`${apiURL}/space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
       };
+
+
     })
 
     const updatedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Completat').id }
 
     //await updateId(url, 'Inventory', selectedInventory.id, updatedInvetory);
-    axios.put(`${apiURL}inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+    //axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+
+
 
     alert('Inventari completat amb èxit');
-    navigate('/inventaris');
+   // navigate('/inventaris');
 
   }
 
@@ -219,7 +225,7 @@ function CompletarInventari() {
                               name={value.id}
                               className='form-select'
                               onChange={handleInputChange}
-                              value={value.justification}
+                              value={value.inventory_reason_id}
                             >
                               <option>Selecciona una opció</option>
                               {inventoryReasons.map((reason) => {

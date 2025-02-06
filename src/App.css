@@ -95,27 +95,27 @@ li:hover i{
 }
 
 .outline-orange{
-    color: var(--taronja);
-    border-color: var(--taronja);
+    color: var(--orange);
+    border-color: var(--orange);
     background-color: transparent;
 }
 
 .outline-orange:hover{
-    background-color:var(--taronja);
+    background-color:var(--orange);
     color: white;
-    border-color: var(--taronja);
+    border-color: var(--orange);
 }
 
 .outline-blue{
-    color: var(--blauClar);
-    border-color: var(--blauClar);
+    color: var(--lightBlue);
+    border-color: var(--lightBlue);
     background-color: transparent;
 }
 
 .outline-blue:hover{
-    background-color:var(--blauClar);
+    background-color:var(--lightBlue);
     color: white;
-    border-color: var(--blauClar);
+    border-color: var(--lightBlue);
 }
 
 
