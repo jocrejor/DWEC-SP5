@@ -25,8 +25,10 @@ function IncidenciesResoldre() {
     const [products, setProducts]                           = useState([])
     const [orderlineStatus, setOrderlineStatus]             = useState([])
     const [orderReceptionStatus, setOrderReceptionStatus]   = useState([])
+    const [userProfile, setUserProfile]                     = useState ([])
     const [showModal, setShowModal]                         = useState(false)
     const [tipoModal, setTipoModal]                         = useState("Crear")
+    const [visualitzar, setVisualitzar]                     = useState(false)
     const [valorsInicials, setValorsInicials]               = useState({
         product: '',
         quantity_received: '',
@@ -76,6 +78,17 @@ function IncidenciesResoldre() {
             .catch(error    => console.log(error))
     }
 
+    const getDataUserProfile = () => {
+        const apiURL = import.meta.env.VITE_API_URL
+        const token = localStorage.getItem("token")
+        
+        axios.get(`${apiURL}/userProfile`, {headers: {"auth-token" : token}})
+            .then(response => {
+                setUserProfile(response.data)
+            })
+            .catch(error => console.log(error))
+    }
+
     const postDataIncident = (newIncident) => {
         const apiURL    = import.meta.env.VITE_API_URL
         const token     = localStorage.getItem("token")
@@ -116,7 +129,15 @@ function IncidenciesResoldre() {
         getDataProduct();
         getDataIncident();
         getDataOrderLineStatus();
+        getDataUserProfile();
     },  []);
+
+    const visualitzarIncident = (valors) => {
+        setTipoModal("Visualitzar");
+        setValorsInicials(valors);
+        setVisualitzar(true);
+        setShowModal(true);
+    };
 
     const modificarIncident = (valors) => {
         setTipoModal("Modificar");
@@ -141,6 +162,11 @@ function IncidenciesResoldre() {
         return status ? status.name : "Estat desconegut";
     }
 
+    const getUserProfileName = (operatorId) => {
+        const operador = userProfile.find(o => o.id === operatorId);
+        return operador ? operador.name : "Operari no trobat";
+    }
+
     const getOrderReceptionStatusName = (statusId) => {
         const status = orderlineStatus.find(s => s.id === statusId);
         return status ? status.name : "Estat desconegut";
@@ -148,9 +174,8 @@ function IncidenciesResoldre() {
 
     return (
         <>
-        <Header title="Incidències"/>
         <Filtres/>
-        <Button variant='success' onClick={()=>{canviEstatModal(); setTipoModal("Crear")}}>Llistat ordres de recepció</Button>
+        {/*Botó per a fer un alta <Button variant='success' onClick={()=>{canviEstatModal(); setTipoModal("Crear")}}>Llistat ordres de recepció</Button>*/}
         <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
             <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
                 <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -205,14 +230,14 @@ function IncidenciesResoldre() {
                         <td data-cell="Estat" className='text-center'>{getStatusId(valors.id)}</td>
                         <td data-no-colon="true" className='text-center'>
                         <div className="d-lg-flex justify-content-lg-center">
-                            <span onClick={() => console.log("Asi visualitzem")} role='button'>
-                            <i className="bi bi-eye icono fs-5"></i>
+                            <span onClick={() => visualitzarIncident(valors)} role='button'>
+                                <i className="bi bi-eye icono fs-5"></i>
                             </span>
                             <span onClick={() => modificarIncident(valors)} className="mx-2" role='button'>
-                            <i className="bi bi-pencil-square icono fs-5 mx-2"></i>
+                                <i className="bi bi-pencil-square icono fs-5 mx-2"></i>
                             </span>
                             <span onClick={() => console.log("Asi eliminarem")} role='button'>
-                            <i className="bi bi-trash icono fs-5"></i>
+                                <i className="bi bi-trash icono fs-5"></i>
                             </span>
                         </div>
                         </td>
@@ -240,37 +265,129 @@ function IncidenciesResoldre() {
                 >
                 {({ values, errors, touched }) => (
                 <Form>
-                    {/* ID Ordre de Recepció */}
+                    {/* ID Incidència */}
                     <div className="form-group">
-                        <label className='fw-bolder' htmlFor='id_ordre_recepcio'>ID Ordre de Recepció</label>
-                        <Field type="text" name="id_ordre_recepcio" disabled className="text-light-blue form-control" value={values.orderReception_id} />
+                        <label className='fw-bolder' htmlFor='id'>ID Incidència</label>
+                        <Field
+                            type="number"
+                            name="id"
+                            disabled
+                            className="text-light-blue form-control"
+                            value={values.id} />
+                        {errors.id && touched.id ? <div className="invalid-feedback">{errors.id}</div> : null}
+                    </div>
+
+                    {/* ID Ordre de Recepció -- Este camp no és el correcte*/}
+                    <div className="form-group">
+                        <label className='fw-bolder' htmlFor='orderline_status_id'>ID Ordre de Recepció</label>
+                        <Field
+                            type="number"
+                            name="orderline_status_id"
+                            disabled
+                            className="text-light-blue form-control"
+                            value={values.orderline_status_id} />
                         {errors.orderReception_id && touched.orderReception_id ? <div className="invalid-feedback">{errors.orderReception_id}</div> : null}
                     </div>
-                    
+
+                    {/* Descripció */}
+                    <div className="form-group">
+                        <label className='fw-bolder' htmlFor='description'>Descripció</label>
+                        <Field
+                            type="text"
+                            name="description"
+                            disabled
+                            className="text-light-blue form-control"
+                            value={values.description} />
+                        {errors.description && touched.description ? <div className="invalid-feedback">{errors.description}</div> : null}
+                    </div>
+
                     {/* Data creació */}
                     <div className="form-group">
                         <label className='fw-bolder' htmlFor='created_at'>Data creació</label>
-                        <Field type="date" name="created_at" disabled className="text-light-blue form-control" value={values.created_at} />
+                        <Field
+                            type="date"
+                            name="created_at"
+                            disabled
+                            className="text-light-blue form-control"
+                            value={values.created_at} />
                         {errors.created_at && touched.created_at ? <div className="invalid-feedback">{errors.created_at}</div> : null}
                     </div>
                     
                     {/* Producte */}
                     <div className="form-group">
                         <label className='fw-bolder' htmlFor='product'>Producte</label>
-                        <Field type="text" name="product" disabled className="text-light-blue form-control" value={getProductName(values.product)} />
+                        <Field
+                            type="text"
+                            name="product"
+                            disabled
+                            className="text-light-blue form-control"
+                            value={getProductName(values.product)} />
                         {errors.product && touched.product ? <div className="invalid-feedback">{errors.product}</div> : null}
                     </div>
-                    
+
+                    {/* Proveedor */}
+                    <div className="form-group">
+                        <label className='fw-bolder' htmlFor='supplier_id'>Proveedor</label>
+                        <Field
+                            type="text"
+                            name="supplier_id"
+                            disabled
+                            className="text-light-blue form-control"
+                            value={values.supplier_id} />
+                        {errors.supplier && touched.supplier ? <div className="invalid-feedback">{errors.supplier}</div> : null}
+                    </div>
+
+                    {/* Operador */}
+                    <div className="form-group">
+                        <label className='fw-bolder' htmlFor='operator_id'>Operador</label>
+                        <Field
+                            type="text"
+                            name="operator_id"
+                            disabled
+                            className="text-light-blue form-control"
+                            value={getUserProfileName(values.id)} />
+                        {errors.operator && touched.operator ? <div className="invalid-feedback">{errors.operator}</div> : null}
+                    </div>
+
                     {/* Estat */}
                     <div className="form-group">
                         <label className='fw-bolder' htmlFor='status'>Estat</label>
-                        <Field as='select' name="status" className="text-light-blue form-control">
+                        <Field 
+                            as='select' 
+                            name="status"
+                            className="text-light-blue form-control"
+                            disabled = {tipoModal == "Visualitzar"}
+                        >
                             <option value="Pendent">Pendent</option>
                             <option value="Rebutjada">Rebutjada</option>
                             <option value="Completada">Completada</option>
                             <option value="Forçada">Forçada</option>
                         </Field>
                         {errors.status && touched.status ? <div className="invalid-feedback">{errors.status}</div> : null}
+                    </div>
+
+                    {/* Cantidad pedida */}
+                    <div className="form-group">
+                        <label className='fw-bolder' htmlFor='quantity_ordered'>Cantitat demanada</label>
+                        <Field
+                            type="number"
+                            name="quantity_ordered"
+                            disabled
+                            className="text-light-blue form-control"
+                            value={values.quantity_ordered} />
+                        {errors.quantity_ordered && touched.quantity_ordered ? <div className="invalid-feedback">{errors.quantity_ordered}</div> : null}
+                    </div>
+
+                    {/* Cantidad recibida */}
+                    <div className="form-group">
+                        <label className='fw-bolder' htmlFor='quantity_received'>Cantitat recibida</label>
+                        <Field
+                            type="number"
+                            name="quantity_received"
+                            disabled
+                            className="text-light-blue form-control"
+                            value={values.quantity_received} />
+                        {errors.quantity_received && touched.quantity_received ? <div className="invalid-feedback">{errors.quantity_received}</div> : null}
                     </div>
                     
                     {/* Botones */}
