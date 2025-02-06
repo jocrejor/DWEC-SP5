@@ -34,6 +34,7 @@ function OrdresEnviament() {
   const [arrayProductos, setArray] = useState([])
   const [productosEliminados, setArrayEliminados] = useState([])
 
+
   useEffect(() => {
     axios.get(`${apiUrl}ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
@@ -258,10 +259,26 @@ function OrdresEnviament() {
     }
   };
 
+  const actualitzaFiltres = async (clients,identificador) => {
+    let ordersFiltradas = orders;
+    ordersFiltradas = ordersFiltradas.filter((order) => {
+      const matchesClient = clients ? parseInt(order.client_id) === parseInt(clients) : true;
+      const matchesId = identificador ? parseInt(order.id) === parseInt(identificador) : true;
+  
+      // Ambas condiciones deben ser verdaderas para que la orden pase el filtro
+      return matchesClient && matchesId;
+    });
+    setOrder(ordersFiltradas);    
+  }
+
+  const netejaFiltres = () => {
+    actualitzaDades();
+  }
+
   return (
     <>
       <Header title="Ordres d'Enviament" />
-      <Filter />
+      <Filter onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres}/>
       <div class="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div class="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div class="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -321,6 +338,9 @@ function OrdresEnviament() {
                 </td>
               </tr>
             ))}
+            {orders.length <= 0 && (
+              <tr>No se encontraron órdenes.</tr>
+            )}
           </tbody>
         </table>
         <nav aria-label="Page navigation example" class="d-block">

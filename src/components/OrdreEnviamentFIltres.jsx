@@ -1,6 +1,31 @@
-import React from 'react'
+import {useState, useEffect} from 'react'
+import axios from 'axios'
+const apiUrl = import.meta.env.VITE_API_URL;
 
-function Filtres() {
+function Filtres({onFilterChange, onFilterRestart}) {
+    const [clients,setClients] = useState([])
+
+    useEffect(() => {
+        axios.get(`${apiUrl}client`, { headers: { "auth-token": localStorage.getItem("token") } })
+        .then(response => {
+          console.log(response)
+          setClients(response.data)
+        })
+        .catch(e => {
+          console.log(e)
+        }
+        )
+    },[])
+
+    const filtrar = () => {
+        const clientValue = document.getElementById('client').value;
+        const idValue = document.getElementById('id').value;
+        onFilterChange(clientValue,idValue);
+    }
+
+    const netejaFiltre = () => {
+       onFilterRestart();
+    }
     return (
         <>
             <div className="row bg-grey pt-3 px-2 mx-0">
@@ -26,7 +51,10 @@ function Filtres() {
                     <div className="mb-3 text-light-blue">
                         <label for="client" className="form-label">Client</label>
                         <select className='form-control' name="client" id="client">
-                            <option value="" disabled>Selecciona un client:</option>
+                            <option value="">Selecciona un client:</option>
+                            {clients.map(client => {
+                                return <option key={client.id} value={client.id}>{client.name}</option>
+                            })}
                         </select>
                     </div>
                 </div>
@@ -38,8 +66,8 @@ function Filtres() {
                 <div className="col-xl-4"></div>
                 <div className="col-xl-4"></div>
                 <div className="col-12 col-xl-4 text-end">
-                    <button className="btn btn-secondary ps-2 me-2 text-white"><i className="bi bi-trash px-1 text-white"></i>Netejar</button>
-                    <button className="btn btn-primary me-2 ps-2 orange-button text-white"><i className="bi bi-funnel px-1 text-white"></i>Filtrar</button>
+                    <button className="btn btn-secondary ps-2 me-2 text-white" onClick={netejaFiltre}><i className="bi bi-trash px-1 text-white"></i>Netejar</button>
+                    <button className="btn btn-primary me-2 ps-2 orange-button text-white" onClick={filtrar}><i className="bi bi-funnel px-1 text-white"></i>Filtrar</button>
                 </div>
             </div>
         </>
