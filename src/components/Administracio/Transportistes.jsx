@@ -3,7 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header';
-import Filtres from '../Filtres';
+import Filtres from './FiltresTransportistes';
 import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -12,12 +12,7 @@ const carrierschema = Yup.object().shape({
   name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
   nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit'),
-  phone: Yup.string()
-    .matches(
-      /^(\+\d{1,3}\s?)?(\d{9}|\d{3}\s\d{3}\s\d{3})$/,
-      'El telèfon ha de ser correcte (ex: +34 911234567, 621121124, 932 123 456)'
-    )
-    .required('Valor requerit'),
+  phone: Yup.string().matches(/^\d{9}$/,'El telèfon ha de ser correcte (ex: 911234567, 621121124)').required('Valor requerit'),
   email: Yup.string().email('Email no vàlid').required('Valor requerit'),
   state_id: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
   province: Yup.string().required('Valor requerit'),
@@ -46,7 +41,7 @@ function Transportista() {
   });
 
   useEffect(() => {
-    fetchData();
+    fetchData();    
   }, []);
 
   const fetchData = async () => {
@@ -73,7 +68,7 @@ function Transportista() {
       const newCarriers = carriers.filter((item) => item.id !== id);
       setCarriers(newCarriers);
     } catch (error) {
-      console.error('Error eliminant trasportista:', error);
+      console.error('Error eliminant transportista:', error);
     }
   };
 
@@ -114,8 +109,7 @@ function Transportista() {
       if (tipoModal === 'Crear') {
         await axios.post(`${apiUrl}/carrier`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
       } else {
-        const { id, ...dataToSendForUpdate } = values;
-        await axios.put(`${apiUrl}/carrier/${id}`, dataToSendForUpdate, { headers: { "auth-token": localStorage.getItem("token") } });
+        await axios.put(`${apiUrl}/carrier/${id}`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
       }
 
       const updatedCarriers = await axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } });
@@ -205,11 +199,9 @@ function Transportista() {
                       <span onClick={() => verCarrier(valors)} role='button' aria-label="Veure detalls del transportista">
                         <i className="bi bi-eye icono fs-5"></i>
                       </span>
-
                       <span onClick={() => modCarriers(valors)} className="mx-2" role='button' aria-label="Modificar transportista">
                         <i className="bi bi-pencil-square icono fs-5 mx-2"></i>
                       </span>
-
                       <span onClick={() => delCarrier(valors.id)} role='button' aria-label="Eliminar transportista">
                         <i className="bi bi-trash icono fs-5"></i>
                       </span>
@@ -220,7 +212,7 @@ function Transportista() {
             )}
           </tbody>
         </table>
-        </div>
+      </div>
 
       {/* Modal Visualitzar */}
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
@@ -234,7 +226,10 @@ function Transportista() {
             <p><b>NIF:</b> {valorsInicials.nif}</p>
             <p><b>Telèfon:</b> {valorsInicials.phone}</p>
             <p><b>Email:</b> {valorsInicials.email}</p>
-            <p><b>Estat:</b> {pais.find(state => state.id === valorsInicials.state_id)?.name || 'No disponible'}</p>
+            <p>
+              <b>Estat:</b>{' '}
+              {pais.find((state) => state.id === valorsInicials.state_id)?.name || 'No disponible'}
+            </p>
             <p><b>Província:</b> {valorsInicials.province}</p>
             <p><b>Ciutat:</b> {valorsInicials.city}</p>
             <p><b>Codi Postal:</b> {valorsInicials.cp}</p>
@@ -258,16 +253,16 @@ function Transportista() {
               tipoModal === 'Crear'
                 ? valorsInicials
                 : {
-                  name: '',
-                  address: '',
-                  nif: '',
-                  phone: '',
-                  email: '',
-                  state_id: 0,
-                  province: '',
-                  city: '',
-                  cp: '',
-                }
+                    name: '',
+                    address: '',
+                    nif: '',
+                    phone: '',
+                    email: '',
+                    state_id: 0,
+                    province: '',
+                    city: '',
+                    cp: '',
+                  }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
@@ -281,48 +276,36 @@ function Transportista() {
                   <Field
                     id="name"
                     name="name"
-                    className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''}`}
                   />
-                  {touched.name && errors.name ? (
-                    <div className="invalid-feedback">{errors.name}</div>
-                  ) : null}
+                  {touched.name && errors.name && <div className="invalid-feedback">{errors.name}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="address">Adreça</label>
                   <Field
                     id="address"
                     name="address"
-                    className={`form-control ${touched.address && errors.address ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.address && errors.address ? 'is-invalid' : ''}`}
                   />
-                  {touched.address && errors.address ? (
-                    <div className="invalid-feedback">{errors.address}</div>
-                  ) : null}
+                  {touched.address && errors.address && <div className="invalid-feedback">{errors.address}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="nif">NIF</label>
                   <Field
                     id="nif"
                     name="nif"
-                    className={`form-control ${touched.nif && errors.nif ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.nif && errors.nif ? 'is-invalid' : ''}`}
                   />
-                  {touched.nif && errors.nif ? (
-                    <div className="invalid-feedback">{errors.nif}</div>
-                  ) : null}
+                  {touched.nif && errors.nif && <div className="invalid-feedback">{errors.nif}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="phone">Telèfon</label>
                   <Field
                     id="phone"
                     name="phone"
-                    className={`form-control ${touched.phone && errors.phone ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.phone && errors.phone ? 'is-invalid' : ''}`}
                   />
-                  {touched.phone && errors.phone ? (
-                    <div className="invalid-feedback">{errors.phone}</div>
-                  ) : null}
+                  {touched.phone && errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="email">Email</label>
@@ -330,21 +313,16 @@ function Transportista() {
                     id="email"
                     name="email"
                     type="email"
-                    className={`form-control ${touched.email && errors.email ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.email && errors.email ? 'is-invalid' : ''}`}
                   />
-                  {touched.email && errors.email ? (
-                    <div className="invalid-feedback">{errors.email}</div>
-                  ) : null}
+                  {touched.email && errors.email && <div className="invalid-feedback">{errors.email}</div>}
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="state_id">Estat</label>
                   <Field
                     as="select"
                     name="state_id"
-                    className={`form-control ${touched.state_id && errors.state_id ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.state_id && errors.state_id ? 'is-invalid' : ''}`}
                   >
                     <option value="">Selecciona un estat</option>
                     {pais.map((state) => (
@@ -353,9 +331,7 @@ function Transportista() {
                       </option>
                     ))}
                   </Field>
-                  {touched.state_id && errors.state_id ? (
-                    <div className="invalid-feedback">{errors.state_id}</div>
-                  ) : null}
+                  {touched.state_id && errors.state_id && <div className="invalid-feedback">{errors.state_id}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="province">Província</label>
@@ -365,13 +341,12 @@ function Transportista() {
                         as="select"
                         id="province"
                         name="province"
-                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
-                          }`}
+                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''}`}
                       >
                         <option value="">Selecciona una província</option>
                         {provincia.length > 0 ? (
                           provincia.map((prov) => (
-                            <option key={prov.id} value={prov.name}>
+                            <option key={prov.id} value={prov.id}>
                               {prov.name}
                             </option>
                           ))
@@ -379,10 +354,7 @@ function Transportista() {
                           <option value="">No hi han províncies</option>
                         )}
                       </Field>
-                      {touched.province && errors.province && (
-                        <div className="invalid-feedback">{errors.province}</div>
-                      )}
-
+                      {touched.province && errors.province && <div className="invalid-feedback">{errors.province}</div>}
                     </>
                   ) : (
                     <>
@@ -390,14 +362,10 @@ function Transportista() {
                         type="text"
                         id="province"
                         name="province"
-                        placeholder="Escribe la provincia"
-                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
-                          }`}
+                        placeholder="Escriu la província"
+                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''}`}
                       />
-                      {touched.province && errors.province && (
-                        <div className="invalid-feedback">{errors.province}</div>
-                      )}
-
+                      {touched.province && errors.province && <div className="invalid-feedback">{errors.province}</div>}
                     </>
                   )}
                 </div>
@@ -411,15 +379,16 @@ function Transportista() {
                       className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
                     >
                       <option value="">Selecciona una ciutat</option>
-                      {ciutat.map((ciudad) => (
-                        <option key={ciudad.id} value={ciudad.name}>
-                          {ciudad.name}
-                        </option>
-                      ))}
+                      {ciutat
+                        .filter((item) => item.province_id === parseInt(values.province, 10))
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((item) => (
+                          <option key={item.id} value={item.name}>
+                            {item.name}
+                          </option>
+                        ))}
                     </Field>
-                    {touched.city && errors.city && (
-                      <div className="invalid-feedback">{errors.city}</div>
-                    )}
+                    {touched.city && errors.city && <div className="invalid-feedback">{errors.city}</div>}
                   </div>
                 ) : (
                   <div className="form-group">
@@ -431,9 +400,7 @@ function Transportista() {
                       placeholder="Escriu la ciutat"
                       className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
                     />
-                    {touched.city && errors.city && (
-                      <div className="invalid-feedback">{errors.city}</div>
-                    )}
+                    {touched.city && errors.city && <div className="invalid-feedback">{errors.city}</div>}
                   </div>
                 )}
                 <div className="form-group">
@@ -441,16 +408,13 @@ function Transportista() {
                   <Field
                     id="cp"
                     name="cp"
-                    className={`form-control ${touched.cp && errors.cp ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.cp && errors.cp ? 'is-invalid' : ''}`}
                   />
-                  {touched.cp && errors.cp ? (
-                    <div className="invalid-feedback">{errors.cp}</div>
-                  ) : null}
+                  {touched.cp && errors.cp && <div className="invalid-feedback">{errors.cp}</div>}
                 </div>
                 <div className="form-group text-right">
                   <Button type="submit" variant="success">
-                    {tipoModal === 'Crear'}
+                    {tipoModal === 'Crear' ? 'Alta Transportista' : 'Modificar Transportista'}
                   </Button>
                 </div>
               </Form>
@@ -459,7 +423,7 @@ function Transportista() {
         </Modal.Body>
       </Modal>
 
-      {/*Modificar*/}
+      {/* Modal per modificar (còpia amb inicials diferents) */}
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} transportista</Modal.Title>
@@ -470,16 +434,16 @@ function Transportista() {
               tipoModal === 'Modificar'
                 ? valorsInicials
                 : {
-                  name: '',
-                  address: '',
-                  nif: '',
-                  phone: '',
-                  email: '',
-                  state_id: 0,
-                  province: '',
-                  city: '',
-                  cp: '',
-                }
+                    name: '',
+                    address: '',
+                    nif: '',
+                    phone: '',
+                    email: '',
+                    state_id: 0,
+                    province: '',
+                    city: '',
+                    cp: '',
+                  }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
@@ -493,48 +457,36 @@ function Transportista() {
                   <Field
                     id="name"
                     name="name"
-                    className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''}`}
                   />
-                  {touched.name && errors.name ? (
-                    <div className="invalid-feedback">{errors.name}</div>
-                  ) : null}
+                  {touched.name && errors.name && <div className="invalid-feedback">{errors.name}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="address">Adreça</label>
                   <Field
                     id="address"
                     name="address"
-                    className={`form-control ${touched.address && errors.address ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.address && errors.address ? 'is-invalid' : ''}`}
                   />
-                  {touched.address && errors.address ? (
-                    <div className="invalid-feedback">{errors.address}</div>
-                  ) : null}
+                  {touched.address && errors.address && <div className="invalid-feedback">{errors.address}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="nif">NIF</label>
                   <Field
                     id="nif"
                     name="nif"
-                    className={`form-control ${touched.nif && errors.nif ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.nif && errors.nif ? 'is-invalid' : ''}`}
                   />
-                  {touched.nif && errors.nif ? (
-                    <div className="invalid-feedback">{errors.nif}</div>
-                  ) : null}
+                  {touched.nif && errors.nif && <div className="invalid-feedback">{errors.nif}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="phone">Telèfon</label>
                   <Field
                     id="phone"
                     name="phone"
-                    className={`form-control ${touched.phone && errors.phone ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.phone && errors.phone ? 'is-invalid' : ''}`}
                   />
-                  {touched.phone && errors.phone ? (
-                    <div className="invalid-feedback">{errors.phone}</div>
-                  ) : null}
+                  {touched.phone && errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="email">Email</label>
@@ -542,21 +494,16 @@ function Transportista() {
                     id="email"
                     name="email"
                     type="email"
-                    className={`form-control ${touched.email && errors.email ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.email && errors.email ? 'is-invalid' : ''}`}
                   />
-                  {touched.email && errors.email ? (
-                    <div className="invalid-feedback">{errors.email}</div>
-                  ) : null}
+                  {touched.email && errors.email && <div className="invalid-feedback">{errors.email}</div>}
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="state_id">Estat</label>
                   <Field
                     as="select"
                     name="state_id"
-                    className={`form-control ${touched.state_id && errors.state_id ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.state_id && errors.state_id ? 'is-invalid' : ''}`}
                   >
                     <option value="">Selecciona un estat</option>
                     {pais.map((state) => (
@@ -565,9 +512,7 @@ function Transportista() {
                       </option>
                     ))}
                   </Field>
-                  {touched.state_id && errors.state_id ? (
-                    <div className="invalid-feedback">{errors.state_id}</div>
-                  ) : null}
+                  {touched.state_id && errors.state_id && <div className="invalid-feedback">{errors.state_id}</div>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="province">Província</label>
@@ -577,13 +522,12 @@ function Transportista() {
                         as="select"
                         id="province"
                         name="province"
-                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
-                          }`}
+                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''}`}
                       >
                         <option value="">Selecciona una província</option>
                         {provincia.length > 0 ? (
                           provincia.map((prov) => (
-                            <option key={prov.id} value={prov.name}>
+                            <option key={prov.id} value={prov.id}>
                               {prov.name}
                             </option>
                           ))
@@ -591,10 +535,7 @@ function Transportista() {
                           <option value="">No hi han províncies</option>
                         )}
                       </Field>
-                      {touched.province && errors.province && (
-                        <div className="invalid-feedback">{errors.province}</div>
-                      )}
-
+                      {touched.province && errors.province && <div className="invalid-feedback">{errors.province}</div>}
                     </>
                   ) : (
                     <>
@@ -602,14 +543,10 @@ function Transportista() {
                         type="text"
                         id="province"
                         name="province"
-                        placeholder="Escribe la provincia"
-                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''
-                          }`}
+                        placeholder="Escriu la província"
+                        className={`form-control ${touched.province && errors.province ? 'is-invalid' : ''}`}
                       />
-                      {touched.province && errors.province && (
-                        <div className="invalid-feedback">{errors.province}</div>
-                      )}
-
+                      {touched.province && errors.province && <div className="invalid-feedback">{errors.province}</div>}
                     </>
                   )}
                 </div>
@@ -623,15 +560,16 @@ function Transportista() {
                       className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
                     >
                       <option value="">Selecciona una ciutat</option>
-                      {ciutat.map((ciudad) => (
-                        <option key={ciudad.id} value={ciudad.name}>
-                          {ciudad.name}
-                        </option>
-                      ))}
+                      {ciutat
+                        .filter((item) => item.province_id === parseInt(values.province, 10))
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((item) => (
+                          <option key={item.id} value={item.name}>
+                            {item.name}
+                          </option>
+                        ))}
                     </Field>
-                    {touched.city && errors.city && (
-                      <div className="invalid-feedback">{errors.city}</div>
-                    )}
+                    {touched.city && errors.city && <div className="invalid-feedback">{errors.city}</div>}
                   </div>
                 ) : (
                   <div className="form-group">
@@ -643,9 +581,7 @@ function Transportista() {
                       placeholder="Escriu la ciutat"
                       className={`form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
                     />
-                    {touched.city && errors.city && (
-                      <div className="invalid-feedback">{errors.city}</div>
-                    )}
+                    {touched.city && errors.city && <div className="invalid-feedback">{errors.city}</div>}
                   </div>
                 )}
                 <div className="form-group">
@@ -653,19 +589,15 @@ function Transportista() {
                   <Field
                     id="cp"
                     name="cp"
-                    className={`form-control ${touched.cp && errors.cp ? 'is-invalid' : ''
-                      }`}
+                    className={`form-control ${touched.cp && errors.cp ? 'is-invalid' : ''}`}
                   />
-                  {touched.cp && errors.cp ? (
-                    <div className="invalid-feedback">{errors.cp}</div>
-                  ) : null}
+                  {touched.cp && errors.cp && <div className="invalid-feedback">{errors.cp}</div>}
                 </div>
                 <div className="form-group d-flex justify-content-end">
                   <Button type="submit" className='orange-button mt-2'>
                     {tipoModal === 'Modificar' ? 'Modificar Transportista' : 'Alta Transportista'}
                   </Button>
                 </div>
-
               </Form>
             )}
           </Formik>
