@@ -22,7 +22,7 @@ function OrderPickingShipping() {
   const [users, setUsers] = useState([]);
   const [operariSeleccionat, setOperariSeleccionat] = useState("");
   const [usuariFiltrar, setUsuariFiltrar] = useState("");
-
+  const [shippingFiltered,setShippingFiltered]= useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Alta");
   const [orderVisualitzar, setOrderVisualitzar] = useState(null);
@@ -208,7 +208,7 @@ function OrderPickingShipping() {
       ...lineActualitzar,
       orderline_status_id: 3,
     };
-
+ 
     //actualitzar order line
     axios
       .put(`${apiUrl}/orderlineshipping/${lineId}`, updatedLine, {
@@ -272,7 +272,15 @@ function OrderPickingShipping() {
     setTipoModal("Visualitzar");
     setShowModal(true);
   };
-
+ 
+  const filtrarShipping = (e) =>{
+    setUsuariFiltrar(e.target.value )
+    const arrayTemporal = orderPickingShipping
+    const filtre = arrayTemporal.filter((item) => { parseInt(e.target.value)=== item.operator_id })
+      console.log(filtre)
+      setShippingFiltered(filtre)
+  } 
+ 
   return (
     <>
       <div>
@@ -505,7 +513,7 @@ function OrderPickingShipping() {
 
                     <select
                       value={usuariFiltrar}
-                      onChange={(e) => setUsuariFiltrar(e.target.value)}
+                      onChange={(e) => filtrarShipping(e)}
                     >
                       <option value="" disabled>
                         Selecciona un operari
@@ -529,11 +537,9 @@ function OrderPickingShipping() {
                       </thead>
 
                       <tbody>
-                        {orderPickingShipping
-                          .filter((order) => {
-                            order.operator_id === parseInt(usuariFiltrar);
-                          })
-                          .map((order) => {
+                       
+                          {shippingFiltered.map((order) => {
+                            console.log(orderPickingShipping)
                             const user = users.find(
                               (u) => u.id === order.operator_id
                             );
