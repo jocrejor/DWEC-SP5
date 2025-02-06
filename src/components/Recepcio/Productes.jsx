@@ -25,15 +25,21 @@ function Productes() {
   const [messageImage, setMessageImage] = useState('');
   const [messageError, setMessageError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  
+  const [totalPages, setTotalPages] = useState(1);
+  const [productsPage,setProductsPage]= useState([]);
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
+  
   // Paginació
   const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
   
-  const indexOfLastItem = currentPage * elementsPaginacio;
-  const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
-  const totalPages = Math.ceil(products.length / elementsPaginacio);
+ 
+  // Obtindreels index. 
+  useEffect (()=>{
+    const totalPages = Math.ceil(products.length / elementsPaginacio);
+    setTotalPages(totalPages);
+    console.log(totalPages)
+  },[products])
 
   // Función para cambiar de página
   const paginate = (pageNumber) => {
@@ -52,6 +58,14 @@ function Productes() {
       setCurrentPage(currentPage + 1);
     }
   };
+
+  useEffect(()=> {
+    const indexOfLastItem = currentPage * elementsPaginacio;
+    const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
+    const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
+    setProductsPage(currentItems)
+  },[currentPage,products])
+
 
   useEffect( () => {
    
@@ -249,10 +263,10 @@ return (
         </tr>
         </thead>
         <tbody>
-        {(products.length == 0)?
+        {(productsPage.length == 0)?
           <tr><th>No hi han articles</th></tr>
            
-        :products.map((valors) => {
+        :productsPage.map((valors) => {
           return (
           <tr key={valors.id}>
             <td><img src={valors.image_url}  height="50"/></td>
@@ -277,20 +291,20 @@ return (
       <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => {/* e.preventDefault(); goToPreviousPage();*/ }}>
+              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
             
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
               <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
-                <a className="page-link text-light-blue" href="#" onClick={(e) => { /*e.preventDefault(); paginate(number); */}}>
+                <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
                   {number}
                 </a>
               </li>
             ))}
             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {/* e.preventDefault(); goToNextPage(); */}}>
+              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {e.preventDefault(); goToNextPage(); }}>
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
