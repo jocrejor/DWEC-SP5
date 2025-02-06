@@ -109,6 +109,7 @@ function OrderPickingShipping() {
         );
         if (space) {
           console.log(
+            "objTemporal",
             order.id,
             line.id,
             line.product_id,
@@ -287,7 +288,7 @@ function OrderPickingShipping() {
                     id="floatingSelect"
                     aria-label="Seleccione una opción"
                   >
-                    <option selected>Tria una opció</option>
+                    <option>Tria una opció</option>
                     <option value="1">Eliminar</option>
                   </select>
                   <label htmlFor="floatingSelect">Accions en lot</label>
@@ -430,8 +431,8 @@ function OrderPickingShipping() {
                               value={operariSeleccionat}
                               onChange={handleInputChange}
                             >
-                              <option value="" selected disabled>
-                                Operari Actual
+                              <option value="" disabled>
+                                Selecciona un operari
                               </option>
                               {users.map((user) => {
                                 return (
@@ -506,7 +507,7 @@ function OrderPickingShipping() {
                       value={usuariFiltrar}
                       onChange={(e) => setUsuariFiltrar(e.target.value)}
                     >
-                      <option value="" disabled selected>
+                      <option value="" disabled>
                         Selecciona un operari
                       </option>
                       {users.map((user) => (
@@ -529,9 +530,9 @@ function OrderPickingShipping() {
 
                       <tbody>
                         {orderPickingShipping
-                          // .filter((order) => {
-                          //   order.operator_id === parseInt(usuariFiltrar);
-                          // })
+                          .filter((order) => {
+                            order.operator_id === parseInt(usuariFiltrar);
+                          })
                           .map((order) => {
                             const user = users.find(
                               (u) => u.id === order.operator_id
@@ -556,7 +557,7 @@ function OrderPickingShipping() {
                                 <td>{product.name}</td>
                                 <td>{order.created_date}</td>
                                 <td>{user.name}</td>
-                                <td>
+                                {/* <td>
                                   <Button
                                     variant="success"
                                     onClick={() => {
@@ -565,14 +566,14 @@ function OrderPickingShipping() {
                                   >
                                     Visualizar
                                   </Button>
-                                </td>
+                                </td> */}
                               </tr>
                             );
                           })}
                       </tbody>
                     </Table>
 
-                    <Modal show={showModal} onHide={canviEstatModal}>
+                    {/* <Modal show={showModal} onHide={canviEstatModal}>
                       <Modal.Header closeButton>
                         <Modal.Title>{tipoModal}</Modal.Title>
                       </Modal.Header>
@@ -628,7 +629,7 @@ function OrderPickingShipping() {
                           </>
                         )}
                       </Modal.Body>
-                    </Modal>
+                    </Modal> */}
                   </>
                 )}
               </div>
