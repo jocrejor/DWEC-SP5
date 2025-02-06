@@ -40,22 +40,25 @@ function OrderPickingReception() {
         catch{(error) => {console.error('Error order picking:', error);}};
 
         //product
-        axios.get(`${apiUrl}product`, { headers: { "auth-token": token } 
-        })
-        .then((response) => {setProducts(response.data);})
-        .catch((error) => {console.error('Error product:', error);});
+        try {
+            const product = await axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
+            setProducts(product.data);
+        }
+        catch{(error) => {console.error('Error product:', error);}};
 
         //space
-        axios.get(`${apiUrl}space`, { headers: { "auth-token": token } 
-        })
-        .then((response) => {setSpaces(response.data);})
-        .catch((error) => {console.error('Error space:', error);});
+        try {
+            const space = await axios.get(`${apiUrl}space`, { headers: { "auth-token": token } })
+            setSpaces(space.data);
+        }
+        catch{(error) => {console.error('Error space:', error);}};
 
         //user
-        axios.get(`${apiUrl}users`, { headers: { "auth-token": token } 
-        })
-        .then((response) => {setUsers(response.data);})
-        .catch((error) => {console.error('Error user:', error);});
+        try {
+            const user = await axios.get(`${apiUrl}users`, { headers: { "auth-token": token } })
+            setUsers(user.data);
+        }
+        catch{(error) => {console.error('Error user:', error);}};
     }
 
     useEffect(() => {
