@@ -82,7 +82,7 @@ function App() {
 
                 <Route path="/rols" element={<Rols />} />
 
-                <Route path="/dadesGeografiques" element={<DadesGeografiques />} />
+                <Route path="/dadesGeografiques/*" element={<DadesGeografiques />} />
 
                 <Route path="/transportistes" element={<Transportistes />} />
 
@@ -117,9 +117,9 @@ function App() {
 
                 <Route path="/moviments" element={<Moviments />} />
                 
-                <Route path="/orderpickingreception" element={<OrderPickingReception />} />
+                <Route path="/orderpickingreception/*" element={<OrderPickingReception />} />
 
-                <Route path="/orderpickingshipping" element={<OrderPickingShipping />} />
+                <Route path="/orderpickingshipping/*" element={<OrderPickingShipping />} />
 
                 <Route path="/" element={<Home />} />
 

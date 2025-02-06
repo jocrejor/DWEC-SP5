@@ -1,7 +1,13 @@
 import React from 'react'
+import { useParams } from 'react-router-dom' 
 
 export default function Provincia() {
+
+  let {pais} = useParams();
+    console.log(pais);
+
   return (
-    <div>Provincia</div>
+
+    <div>Provincies del pais id {pais}</div>
   )
 }
