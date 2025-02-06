@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { url, postData, getData, deleteData, updateId } from "../../apiAccess/crud";
-import { Button, Table, Modal } from "react-bootstrap";
+import {Modal } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate,useLocation } from "react-router-dom";
 

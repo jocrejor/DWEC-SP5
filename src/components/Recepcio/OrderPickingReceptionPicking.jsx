@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { url, postData, getData, deleteData, updateId } from "../../apiAccess/crud";
-import { Button, Table, Modal } from "react-bootstrap";
 import axios from "axios";
 import { movMagatzem } from "../Magatzem/movMagatzem"; 
 import { useNavigate,useLocation } from "react-router-dom";
@@ -13,9 +11,11 @@ function OrderPickingReception() {
     const [users, setUsers] = useState([]); //user
     const [usuariFiltrar, setUsuariFiltrar] = useState(""); //usuari a filtrar en la taula order picking 
 
-    const [showModal, setShowModal] = useState(false); //mostrar modal
+    // Estats paginació
+    const [pagActual, setpagActual] = useState(1);
+    const filesPerPag = 10; 
 
-    //const apiUrl = url;
+    //url api, token
     const apiUrl = import.meta.env.VITE_API_URL; 
     const token = localStorage.getItem("token");
 
@@ -26,16 +26,14 @@ function OrderPickingReception() {
     const dataFetch = async ()=>{
         try{
         //order line reception
-        const orderLineReception = await axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } 
-        })
-        setOrderLineReception(orderLineReception.data)
+            const orderLineReception = await axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token }})
+            setOrderLineReception(orderLineReception.data)
         }catch{(error) => {console.error('Error order line:', error);}};
 
         //order picking reception
         try {
-        const orderpickingreception = await axios.get(`${apiUrl}orderpickingreception`, { headers: { "auth-token": token } 
-        })
-        setOrderPickingReception(orderpickingreception.data);
+            const orderpickingreception = await axios.get(`${apiUrl}orderpickingreception`, { headers: { "auth-token": token } })
+            setOrderPickingReception(orderpickingreception.data);
         }
         catch{(error) => {console.error('Error order picking:', error);}};
 
@@ -64,10 +62,6 @@ function OrderPickingReception() {
     useEffect(() => {
         dataFetch()
     }, []);
-
-    const canviEstatModal = () => {
-        setShowModal(!showModal);
-    }
 
     const completarOrderPicking = async (lineId, orderPickingId) => {
          // filtrar la linea de la order picking
