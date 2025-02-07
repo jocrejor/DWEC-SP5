@@ -55,11 +55,16 @@ function Client() {
   const [cities, setCities] = useState([]);
   const [selectedState, setSelectedState] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredClients, setFilteredClients] = useState([]);
+  const [sortField, setSortField] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc"); 
+  
   useEffect(() => {
     const fetchData = async () => {
       const clientsData = await getData("client");
       setClients(clientsData);
+      setFilteredClients(clientsData);
 
       const statesData = await getData("State");
       setStates(statesData);
@@ -79,6 +84,56 @@ function Client() {
 
     fetchData();
   }, []);
+
+  const handleFilter = (filters) => {
+    console.log("Filtros aplicados:", filters);
+  
+    // Filtrado de los clientes por todos los campos
+    const filtered = clients.filter(client => {
+      return (
+        (filters.name ? client.name.toLowerCase().includes(filters.name.toLowerCase()) : true) &&
+        (filters.email ? client.email.toLowerCase().includes(filters.email.toLowerCase()) : true) &&
+        (filters.phone ? client.phone.includes(filters.phone) : true) &&
+        (filters.address ? client.address.toLowerCase().includes(filters.address.toLowerCase()) : true) &&
+        (filters.nif ? client.nif.includes(filters.nif) : true)
+      );
+    });
+  
+    // Ordenación
+    const sorted = filtered.sort((a, b) => {
+      if (sortField === "name") {
+        return sortOrder === "asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      }
+      if (sortField === "email") {
+        return sortOrder === "asc"
+          ? a.email.localeCompare(b.email)
+          : b.email.localeCompare(a.email);
+      }
+      if (sortField === "phone") {
+        return sortOrder === "asc"
+          ? a.phone.localeCompare(b.phone)
+          : b.phone.localeCompare(a.phone);
+      }
+      if (sortField === "address") {
+        return sortOrder === "asc"
+          ? a.address.localeCompare(b.address)
+          : b.address.localeCompare(a.address);
+      }
+      if (sortField === "nif") {
+        return sortOrder === "asc"
+          ? a.nif.localeCompare(b.nif)
+          : b.nif.localeCompare(a.nif);
+      }
+      return 0;
+    });
+  
+    setFilteredClients(sorted); 
+  };
+  
+  
+
 
   const getData = async (endpoint) => {
     try {
@@ -103,6 +158,7 @@ function Client() {
 
       const clientsData = await getData("client");
       setClients(clientsData);
+      setFilteredClients(clientsData); 
     } catch (error) {
       console.error("Error al eliminar el client", error);
     }
@@ -160,7 +216,6 @@ function Client() {
       console.error("Error al obtener los datos del cliente", error);
     }
   };
-  
 
   const actualizarClient = async (values) => {
     try {
@@ -181,6 +236,11 @@ function Client() {
           )
         );
         setShowModal(false);
+        setFilteredClients((prevClients) => 
+          prevClients.map((client) => 
+            client.id === values.id ? response.data : client
+          )
+        );
       }
     } catch (error) {
       console.error("Error al actualizar el cliente", error);
@@ -217,6 +277,13 @@ function Client() {
     }
   };
 
+  const handleSortChange = (field) => {
+    const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
+    setSortField(field);
+    setSortOrder(newSortOrder);
+    handleFilter({ ...filters, name: searchTerm }); 
+  };
+  
   const postData = async (endpoint, data) => {
     try {
       const response = await axios.post(`${apiUrl}/${endpoint}`, data, {
@@ -261,11 +328,11 @@ function Client() {
       if (response.data) {
         console.log("Cliente creado con éxito:", response.data);
         setClients((prevClients) => [...prevClients, response.data]);
+        setFilteredClients((prevClients) => [...prevClients, response.data]);
         setShowModal(false); 
       }
   
     } catch (error) {
-      // Manejo de errores
       console.error("Error al crear el cliente:", error);
   
       if (error.response) {
@@ -281,11 +348,11 @@ function Client() {
     }
   };
   
-
+  
   return (
     <>
       <Header title="Clients" />
-      <Filtres />
+      <Filtres onSearch={handleFilter} />
 
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
@@ -562,7 +629,23 @@ function Client() {
           )}
         </Formik>
       </Modal>
-      
+      <nav aria-label="Page navigation example" className="d-block">
+        <ul className="pagination justify-content-center">
+          <li className="page-item">
+            <a className="page-link text-light-blue" href="#" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+          <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+          <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+          <li className="page-item">
+            <a className="page-link text-light-blue" href="#" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </>
   );
 }
