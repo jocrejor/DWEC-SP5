@@ -20,8 +20,9 @@ const carrierschema = Yup.object().shape({
   cp: Yup.string().matches(/^\d{5}$/, 'El codi postal ha de tenir 5 dígits').required('Valor requerit'),
 });
 
-function Transportista() {
+function Transportistes() {
   const [carriers, setCarriers] = useState([]);
+  const [carriersFiltrats, setCarriersFiltrats] = useState([]);
   const [pais, setPais] = useState([]);
   const [provincia, setProvince] = useState([]);
   const [ciutat, setCity] = useState([]);
@@ -43,6 +44,10 @@ function Transportista() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setCarriersFiltrats(carriers);
+  }, [carriers]);
 
   const fetchData = async () => {
     try {
@@ -120,17 +125,41 @@ function Transportista() {
     }
   };
 
+  const handleFilter = (filters) => {
+    const filtered = carriers.filter((carrier) => {
+      if (filters.name && !carrier.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
+      if (filters.nif && !carrier.nif.toLowerCase().includes(filters.nif.toLowerCase())) return false;
+      if (filters.state_id && carrier.state_id !== parseInt(filters.state_id, 10)) return false;
+      if (filters.province && !carrier.province.toLowerCase().includes(filters.province.toLowerCase())) return false;
+      if (filters.city && !carrier.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
+      return true;
+    });
+    setCarriersFiltrats(filtered);
+  };
+
+  const handleClearFilters = () => {
+    setCarriersFiltrats(carriers);
+  };
+
   return (
     <>
       <Header title="Llistat de transportistes" />
-      <Filtres />
+      <Filtres
+        carriers={carriers}
+        pais={pais}
+        provincia={provincia}
+        ciutat={ciutat}
+        onFilter={handleFilter}
+        onClear={handleClearFilters}
+      />
+
       <div className="container-fluid">
         <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
           <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
             <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
               <div className="form-floating bg-white">
                 <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
-                  <option selected>Tria una opció</option>
+                  <option defaultValue>Tria una opció</option>
                   <option value="1">Eliminar</option>
                 </select>
                 <label htmlFor="floatingSelect">Accions en lot</label>
@@ -181,12 +210,12 @@ function Transportista() {
             </tr>
           </thead>
           <tbody>
-            {carriers.length === 0 ? (
+            {carriersFiltrats.length === 0 ? (
               <tr>
                 <td colSpan="7">No hi han transportistes</td>
               </tr>
             ) : (
-              carriers.map((valors) => (
+              carriersFiltrats.map((valors) => (
                 <tr key={valors.id}>
                   <td data-cell="ID" className='text-center'>{valors.id}</td>
                   <td data-cell="Nom" className='text-center'>{valors.name}</td>
@@ -461,6 +490,7 @@ function Transportista() {
           >
             {({ values, errors, touched }) => (
               <Form>
+                {/* Formulario similar al anterior */}
                 <div className="form-group">
                   <label htmlFor="name">Nom</label>
                   <Field
@@ -612,6 +642,7 @@ function Transportista() {
           </Formik>
         </Modal.Body>
       </Modal>
+
       <nav aria-label="Page navigation example" className="d-block mt-4">
         <ul className="pagination justify-content-center">
           <li className="page-item">
@@ -633,4 +664,4 @@ function Transportista() {
   );
 }
 
-export default Transportista;
+export default Transportistes;
