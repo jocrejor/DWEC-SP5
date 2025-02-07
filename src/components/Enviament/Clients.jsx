@@ -58,8 +58,10 @@ function Client() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredClients, setFilteredClients] = useState([]);
   const [sortField, setSortField] = useState("name");
-  const [sortOrder, setSortOrder] = useState("asc"); 
-  
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [clientsPerPage] = useState(10);
+
   useEffect(() => {
     const fetchData = async () => {
       const clientsData = await getData("client");
@@ -87,19 +89,23 @@ function Client() {
 
   const handleFilter = (filters) => {
     console.log("Filtros aplicados:", filters);
-  
-    // Filtrado de los clientes por todos los campos
-    const filtered = clients.filter(client => {
+
+    const filtered = clients.filter((client) => {
       return (
-        (filters.name ? client.name.toLowerCase().includes(filters.name.toLowerCase()) : true) &&
-        (filters.email ? client.email.toLowerCase().includes(filters.email.toLowerCase()) : true) &&
+        (filters.name
+          ? client.name.toLowerCase().includes(filters.name.toLowerCase())
+          : true) &&
+        (filters.email
+          ? client.email.toLowerCase().includes(filters.email.toLowerCase())
+          : true) &&
         (filters.phone ? client.phone.includes(filters.phone) : true) &&
-        (filters.address ? client.address.toLowerCase().includes(filters.address.toLowerCase()) : true) &&
+        (filters.address
+          ? client.address.toLowerCase().includes(filters.address.toLowerCase())
+          : true) &&
         (filters.nif ? client.nif.includes(filters.nif) : true)
       );
     });
-  
-    // Ordenación
+
     const sorted = filtered.sort((a, b) => {
       if (sortField === "name") {
         return sortOrder === "asc"
@@ -128,12 +134,14 @@ function Client() {
       }
       return 0;
     });
-  
-    setFilteredClients(sorted); 
-  };
-  
-  
 
+    setFilteredClients(sorted);
+    setCurrentPage(1);
+  };
+
+  const paginateClients = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const getData = async (endpoint) => {
     try {
@@ -158,7 +166,7 @@ function Client() {
 
       const clientsData = await getData("client");
       setClients(clientsData);
-      setFilteredClients(clientsData); 
+      setFilteredClients(clientsData);
     } catch (error) {
       console.error("Error al eliminar el client", error);
     }
@@ -206,11 +214,11 @@ function Client() {
           "auth-token": localStorage.getItem("token"),
         },
       });
-  
+
       if (response.data) {
-        setClientToView(response.data); 
-        setTipoModal("Visualitzar");  
-        setShowModal(true); 
+        setClientToView(response.data);
+        setTipoModal("Visualitzar");
+        setShowModal(true);
       }
     } catch (error) {
       console.error("Error al obtener los datos del cliente", error);
@@ -236,8 +244,8 @@ function Client() {
           )
         );
         setShowModal(false);
-        setFilteredClients((prevClients) => 
-          prevClients.map((client) => 
+        setFilteredClients((prevClients) =>
+          prevClients.map((client) =>
             client.id === values.id ? response.data : client
           )
         );
@@ -254,24 +262,24 @@ function Client() {
 
     const provincesData = await getData("Province?state_id=" + selectedStateId);
     setProvinces(provincesData);
-    setSelectedProvince(""); 
-    setCities([]); 
+    setSelectedProvince("");
+    setCities([]);
   };
 
   const handleProvinceChange = async (e, setFieldValue) => {
     const selectedProvinceId = e.target.value;
-    setFieldValue("province_id", selectedProvinceId); 
-    setSelectedProvince(selectedProvinceId); 
+    setFieldValue("province_id", selectedProvinceId);
+    setSelectedProvince(selectedProvinceId);
 
     if (selectedProvinceId) {
-      const allCities = await getData("City"); 
+      const allCities = await getData("City");
 
       const filteredCities = allCities.filter(
         (city) => city.province_id === parseInt(selectedProvinceId)
       );
 
       setCities(filteredCities);
-      setFieldValue("city_id", ""); 
+      setFieldValue("city_id", "");
     } else {
       setCities([]);
     }
@@ -281,9 +289,9 @@ function Client() {
     const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
     setSortField(field);
     setSortOrder(newSortOrder);
-    handleFilter({ ...filters, name: searchTerm }); 
+    handleFilter({ ...filters, name: searchTerm });
   };
-  
+
   const postData = async (endpoint, data) => {
     try {
       const response = await axios.post(`${apiUrl}/${endpoint}`, data, {
@@ -300,7 +308,7 @@ function Client() {
   const crearClient = async (values) => {
     if (values.nif.length < 9) {
       alert("El NIF debe tener al menos 9 caracteres.");
-      return; 
+      return;
     }
 
     const clientData = {
@@ -310,34 +318,45 @@ function Client() {
       phone: values.phone,
       email: values.email,
       state_id: values.state_id,
-      province: provinces.find((province) => province.id === parseInt(values.province_id))?.name || "", 
-      city: cities.find((city) => city.id === parseInt(values.city_id))?.name || "", 
-      cp: values.cp
+      province:
+        provinces.find(
+          (province) => province.id === parseInt(values.province_id)
+        )?.name || "",
+      city:
+        cities.find((city) => city.id === parseInt(values.city_id))?.name || "",
+      cp: values.cp,
     };
-  
+
     console.log("Datos enviados para la creación del cliente:", clientData);
-  
+
     try {
-      const response = await axios.post("https://api.dwes.iesevalorpego.es/client", clientData, {
-        headers: {
-          "auth-token": localStorage.getItem("token"), 
-          "Content-Type": "application/json"
+      const response = await axios.post(
+        "https://api.dwes.iesevalorpego.es/client",
+        clientData,
+        {
+          headers: {
+            "auth-token": localStorage.getItem("token"),
+            "Content-Type": "application/json",
+          },
         }
-      });
-  
+      );
+
       if (response.data) {
         console.log("Cliente creado con éxito:", response.data);
         setClients((prevClients) => [...prevClients, response.data]);
         setFilteredClients((prevClients) => [...prevClients, response.data]);
-        setShowModal(false); 
+        setShowModal(false);
       }
-  
     } catch (error) {
       console.error("Error al crear el cliente:", error);
-  
+
       if (error.response) {
         console.error("Respuesta del servidor:", error.response.data);
-        alert(`Error al crear el cliente: ${error.response.data.message || error.response.statusText}`);
+        alert(
+          `Error al crear el cliente: ${
+            error.response.data.message || error.response.statusText
+          }`
+        );
       } else if (error.request) {
         console.error("Error en la solicitud:", error.request);
         alert("Error en la solicitud al servidor.");
@@ -347,13 +366,18 @@ function Client() {
       }
     }
   };
-  
-  
+
+  const indexOfLastClient = currentPage * clientsPerPage;
+  const indexOfFirstClient = indexOfLastClient - clientsPerPage;
+  const currentClients = filteredClients.slice(
+    indexOfFirstClient,
+    indexOfLastClient
+  );
+
   return (
     <>
       <Header title="Clients" />
       <Filtres onSearch={handleFilter} />
-
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -392,54 +416,78 @@ function Client() {
         <table className="table table-hover table-striped">
           <thead className="table">
             <tr>
-            <th scope="col" className="text-center">ID</th>
-              <th scope="col" className="text-center">Nom</th>
-              <th scope="col" className="text-center">Email</th>
-              <th scope="col" className="text-center">Telèfon</th>
-              <th scope="col" className="text-center">NIF</th> 
-              <th scope="col" className="text-center">Adreça</th>
-              <th scope="col" className="text-center">Accions</th>
+              <th scope="col" className="text-center">
+                ID
+              </th>
+              <th scope="col" className="text-center">
+                Nom
+              </th>
+              <th scope="col" className="text-center">
+                Email
+              </th>
+              <th scope="col" className="text-center">
+                Telèfon
+              </th>
+              <th scope="col" className="text-center">
+                NIF
+              </th>
+              <th scope="col" className="text-center">
+                Adreça
+              </th>
+              <th scope="col" className="text-center">
+                Accions
+              </th>
             </tr>
           </thead>
           <tbody>
-  {clients.map((client) => (
-    <tr key={client.id}>
-      <td data-cell="ID" className="text-center">{client.id}</td>
-      <td data-cell="Nom" className="text-center">{client.name}</td>
-      <td data-cell="Email" className="text-center">{client.email}</td>
-      <td data-cell="Telèfon" className="text-center">{client.phone}</td>
-      <td data-cell="NIF" className="text-center">{client.nif}</td>
-      <td data-cell="Adreça" className="text-center">{client.address}</td>
-      <td>
-        <div className="d-flex">
-          <span
-            onClick={() => visualizarClient(client.id)} // Visualizar
-            style={{ cursor: "pointer" }}
-          >
-            <i className="bi bi-eye"></i>
-          </span>
-          <span
-            onClick={() => modificarClient(client.id)} // Modificar
-            className="mx-2"
-            style={{ cursor: "pointer" }}
-          >
-            <i className="bi bi-pencil-square"></i>
-          </span>
-          <span
-            onClick={() => eliminarClient(client.id)} // Eliminar
-            style={{ cursor: "pointer" }}
-          >
-            <i className="bi bi-trash"></i>
-          </span>
-        </div>
-      </td>
-    </tr>
-  ))}
-</tbody>
-
+            {clients.map((client) => (
+              <tr key={client.id}>
+                <td data-cell="ID" className="text-center">
+                  {client.id}
+                </td>
+                <td data-cell="Nom" className="text-center">
+                  {client.name}
+                </td>
+                <td data-cell="Email" className="text-center">
+                  {client.email}
+                </td>
+                <td data-cell="Telèfon" className="text-center">
+                  {client.phone}
+                </td>
+                <td data-cell="NIF" className="text-center">
+                  {client.nif}
+                </td>
+                <td data-cell="Adreça" className="text-center">
+                  {client.address}
+                </td>
+                <td>
+                  <div className="d-flex">
+                    <span
+                      onClick={() => visualizarClient(client.id)} // Visualizar
+                      style={{ cursor: "pointer" }}
+                    >
+                      <i className="bi bi-eye"></i>
+                    </span>
+                    <span
+                      onClick={() => modificarClient(client.id)} // Modificar
+                      className="mx-2"
+                      style={{ cursor: "pointer" }}
+                    >
+                      <i className="bi bi-pencil-square"></i>
+                    </span>
+                    <span
+                      onClick={() => eliminarClient(client.id)} // Eliminar
+                      style={{ cursor: "pointer" }}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
-
       <Modal
         size="lg"
         show={showModal}
@@ -631,16 +679,52 @@ function Client() {
       </Modal>
       <nav aria-label="Page navigation example" className="d-block">
         <ul className="pagination justify-content-center">
-          <li className="page-item">
-            <a className="page-link text-light-blue" href="#" aria-label="Previous">
+          <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+            <a
+              className="page-link text-light-blue"
+              href="#"
+              aria-label="Previous"
+              onClick={() => paginateClients(currentPage - 1)}
+            >
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
-          <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-          <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-          <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
-          <li className="page-item">
-            <a className="page-link text-light-blue" href="#" aria-label="Next">
+
+          {Array.from(
+            { length: Math.ceil(filteredClients.length / clientsPerPage) },
+            (_, index) => (
+              <li
+                key={index}
+                className={`page-item ${
+                  index + 1 === currentPage ? "active" : ""
+                }`}
+              >
+                <a
+                  className={`page-link ${
+                    index + 1 === currentPage ? "activo-2" : "text-light-blue"
+                  }`}
+                  href="#"
+                  onClick={() => paginateClients(index + 1)}
+                >
+                  {index + 1}
+                </a>
+              </li>
+            )
+          )}
+
+          <li
+            className={`page-item ${
+              currentPage === Math.ceil(filteredClients.length / clientsPerPage)
+                ? "disabled"
+                : ""
+            }`}
+          >
+            <a
+              className="page-link text-light-blue"
+              href="#"
+              aria-label="Next"
+              onClick={() => paginateClients(currentPage + 1)}
+            >
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
