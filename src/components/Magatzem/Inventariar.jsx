@@ -12,6 +12,7 @@ function Inventariar() {
   const { id } = useParams();
   const navigate = useNavigate();
   const apiURL = import.meta.env.VITE_API_URL;
+  const user = JSON.parse(localStorage.getItem('user'));
 
   const [storages, setStorages] = useState([]);
   const [selectedInventory, setSelectedInventory] = useState(null);
@@ -21,7 +22,8 @@ function Inventariar() {
   const [updatedInventoryLines, setUpdatedInventoryLines] = useState([]);
   const [inventoryStatus, setInventoryStatus] = useState([]);
   const [inventoryReasons, setInventoryReasons] = useState([]);
-  const [inputLocked, setInputLocked] = useState(false)
+  const [inputLocked, setInputLocked] = useState(false);
+  
 
 
   useEffect(() => {
@@ -102,11 +104,11 @@ function Inventariar() {
     console.log(e)
     console.log(e.target.name)
     const { name, value, type } = e.target;
-    const lineId = name;
-    const newValue = value;
+    const lineId = parseInt(name);
+    const newValue = parseInt(value);
     const field = type === 'number' ? 'quantity_real' : 'inventory_reason_id';
 
-    console.log(field + ' - ' + value + ' - ' + type)
+    console.log(lineId + '-' + field + ' - ' + value + ' - ' + type)
     console.log(field)
 
     /*setUpdatedInventoryLines((prev) => ({
@@ -117,7 +119,7 @@ function Inventariar() {
       const index = prev.findIndex((line) => line.id === lineId);
       if (index != -1) {
         const updatedLines = [...prev];
-        updatedLines[index] = { ...updatedLines[index], [field]: type === 'number' ? parseInt(newValue) : newValue };
+        updatedLines[index] = { ...updatedLines[index], [field]: newValue };
         return updatedLines;
       }
 
@@ -132,33 +134,33 @@ function Inventariar() {
     if (updatedInventoryLines.length != selectedInventoryLines.length) {
       console.log(updatedInventoryLines.length + " - " + selectedInventory.length)
       alert("Introdueix totes les quantitats reals");
-    } else if (updatedInventoryLines === null) {
+    } else if (updatedInventoryLines.length === 0) {
       alert("No hi ha res a inventariar");
     } else {
-      const updatedLines = selectedInventoryLines.map(async (line) => {
+      const updatedLines = await Promise.all(selectedInventoryLines.map(async (line) => {
         const updatedLine = updatedInventoryLines.find((updated) => updated.id === line.id);
+        const defaultReason = inventoryReasons.find(reason => reason.name === "Recompte cíclic")?.id;
 
         if (updatedLine) {
-          line = { ...line, quantity_real: updatedLine?.quantity_real, inventory_reason_id: updatedLine?.inventory_reason_id };
+          line = { ...line, 
+            quantity_real: updatedLine?.quantity_real, 
+            operator_id: user.id, 
+            inventory_reason_id: updatedLine?.inventory_reason_id || defaultReason};
 
           await axios.put(`${apiURL}/inventoryline/${line.id}`, line, { headers: { "auth-token": localStorage.getItem('token') } })
-
-
-
-
+          
           return line;
         }
         return line;
-      })
+      }))
 
       const updatedSelectedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Fent-se').id }
-      console.log(updatedSelectedInventory)
+      //console.log("AQUI2: " + updatedSelectedInventory)
 
       await axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedSelectedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
       setSelectedInventoryLines(updatedLines);
       setSelectedInventory(updatedSelectedInventory);
-      setInputLocked(true);
       console.log(updatedSelectedInventory)
       alert("Linia actualitzada amb èxit");
       navigate('/inventaris');
@@ -206,7 +208,7 @@ function Inventariar() {
               <tbody className='text-light-blue'>
                 {
                   (selectedInventoryLines.length === 0) ?
-                    <tr><td colSpan={5} className='text-center'>No hay nada</td></tr> :
+                    <tr><td colSpan={6} className='text-center'>No hay nada</td></tr> :
                     selectedInventoryLines.map((value) => {
                       return (
                         <tr key={value.id}>
@@ -221,7 +223,6 @@ function Inventariar() {
                               step="1"
                               placeholder='0'
                               className='form-control'
-                              value={value.quantity_real}
                               onChange={handleInputChange}
                               disabled={inputLocked}
                             />
@@ -231,9 +232,9 @@ function Inventariar() {
                               name={value.id}
                               className='form-select'
                               onChange={handleInputChange}
-                              value={value?.inventory_reason_id}
+                              defaultValue={inventoryReasons.find(reason => reason.name === "Recompte cíclic")?.id}
                             >
-                              <option>Selecciona una opció</option>
+                              <option >Selecciona una opció</option>
                               {inventoryReasons.map((reason) => {
                                 return (
                                   <option value={reason.id} id={reason.id}>{reason.name}</option>

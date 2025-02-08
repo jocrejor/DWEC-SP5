@@ -34,6 +34,8 @@ function Inventaris() {
   const [inventoryStatus, setInventoryStatus] = useState([]);
   const [inputLocked, setInputLocked] = useState(false);
   const [users, setUsers] = useState([]);
+  const [inventoryReasons, setInventoryReasons] = useState([]);
+  
 
 
 
@@ -84,9 +86,15 @@ function Inventaris() {
       .then(response => {
         setUsers(response.data);
 
-        
+
       })
       .catch(e => { console.log(e) })
+    
+    axios.get(`${apiURL}/inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
+    .then(response => {
+      setInventoryReasons(response.data);
+    })
+    .catch(e => { console.log(e.response.data) })
 
     console.log("hola")
   }, []);
@@ -117,7 +125,7 @@ function Inventaris() {
         return 0;
 
       })
-      setSelectedInventoryLines(filteredInventoryLines);
+      setSelectedInventoryLines(orderedInventoryLines);
     } else {
       setSelectedInventoryLines([]);
     }
@@ -209,7 +217,7 @@ function Inventaris() {
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
-            {((users.find( u => u.id === user.id))?.userprofile_id === 1 || (users.find( u => u.id === user.id))?.userprofile_id === 2)  ?
+            {((users.find(u => u.id === user.id))?.userprofile_id === 1 || (users.find(u => u.id === user.id))?.userprofile_id === 2) ?
               <button type="button" className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0" onClick={handleShow} aria-label="Crear inventario"><i className="bi bi-plus-circle text-white pe-1"></i>Crear</button> : null}
           </div>
         </div>
@@ -322,7 +330,7 @@ function Inventaris() {
                           }
                         </td>
                         <td>
-                          <button className='btn' onClick={() => { setSelectedInventory(values); changeModalStatus() }}><i className="bi bi-eye text-light-blue fs-5"><span className="visually-hidden">Visaulitzar</span></i></button>
+                          <button className='btn' onClick={() => { setSelectedInventory(values); changeModalStatus() }}><i className="bi bi-eye text-light-blue fs-5"><span className="visually-hidden">Visualitzar</span></i></button>
                           <button className="btn" onClick={() => deleteInventory(values.id)}><i className="bi bi-trash text-light-blue fs-5"><span className="visually-hidden">Eliminar</span></i></button>
                         </td>
                       </tr>
@@ -371,6 +379,7 @@ function Inventaris() {
                         <th scope="col" className='text-light-blue'>Producte</th>
                         <th scope="col" className='text-light-blue'>Quantitat Estimada</th>
                         <th scope="col" className='text-light-blue'>Quantitat Real</th>
+                        <th scope="col" className='text-light-blue'>Justificació</th>
                       </tr>
                     </thead>
                     <tbody className='text-light-blue'>
@@ -378,17 +387,20 @@ function Inventaris() {
 
                       {
                         (selectedInventoryLines.length === 0) ?
-                          <tr><td colSpan={5} className='text-center'>No hay nada</td></tr> :
+                          <tr><td colSpan={6} className='text-center'>No existix informació per a ser mostrat.</td></tr> :
                           selectedInventoryLines.map((value) => {
+                            console.log(value)
                             return (
                               <tr key={value.id}>
                                 <td data-cell="Carrer: ">{value.street_id}</td>
-                                <td data-cell="Espacio: ">{value.selft_id}</td>
+                                <td data-cell="Espacio: ">{value.shelf_id}</td>
                                 <td data-cell="Estanteria: ">{value.space_id}</td>
                                 <td data-cell="Producte: ">{(products.find(product => product.id === value.product_id))?.name}</td>
                                 <td data-cell="Quantitat Estimada: ">{value.quantity_estimated}</td>
                                 <td data-cell="Quantitat Real: ">{value.quantity_real}</td>
-                              </tr>)
+                                <td data-cell="Justificació: ">{(inventoryReasons.find(reason => reason.id === value.inventory_reason_id))?.name}</td>
+                              </tr>
+                            )
                           })
                       }
                     </tbody>
