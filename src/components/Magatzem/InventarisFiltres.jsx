@@ -1,37 +1,80 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
+import { date } from 'yup';
 
 
-function InventarisFiltres() {
-    const [storages, setStorages] = useState([]);
-    const apiURL = import.meta.env.VITE_API_URL;
+function InventarisFiltres({ onFilter, onClearFilters, storages}) {
+    const [filters, setFilters] = useState({
+        dateFrom: '',
+        dateTo: '',
+        status: '',
+        storage: ''
+    });
 
-    useEffect(() => {
-        axios.get(`${apiURL}/storage`, { headers: { "auth-token": localStorage.getItem('token') } })
-            .then(response => {
-                setStorages(response.data);
-            })
-            .catch(e => { console.log(e.response.data) })
-    }, [])
+
+    const handleInputChange = (e) => {  
+        const {id, value} = e.target;
+        setFilters(prevFilters => ({
+            ...prevFilters,
+            [id]: value
+        }));
+        console.log("Filters desde handleInputChange:")
+        console.log( filters)
+        console.log(id + '- ' + value)
+    }
+
+    const handleFilter =  () => {
+        onFilter(filters)
+    }
+
+    const handleClearFilters = () => {
+        setFilters({
+            dateFrom: '',
+            dateTo: '',
+            status: '',
+            storage: ''
+        })  
+
+        onClearFilters();
+    }
+
+    
     return (
         <>
             <div className="row bg-grey pt-3 px-2 mx-0">
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
                         <label htmlFor="date-from" className="form-label">Data de</label>
-                        <input type="date" className="form-control" id="date-from" />
+                        <input 
+                            type="date" 
+                            className="form-control" 
+                            id="dateFrom" 
+                            value={filters.dateFrom}
+                            onChange={handleInputChange}
+                        />
                     </div>
                 </div>
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
                         <label htmlFor="date-to" className="form-label">Fins</label>
-                        <input type="date" className="form-control" id="date-to" />
+                        <input 
+                            type="date" 
+                            className="form-control" 
+                            id="dateTo" 
+                            value={filters.dateTo}
+                            onChange={handleInputChange}
+                        />
                     </div>
                 </div>
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
                         <label htmlFor="status" className="form-label">Estat</label>
-                        <select className='form-select' id='status'>
+                        <select 
+                            className='form-select' 
+                            id='status'
+                            value={filters.status}
+                            onChange={handleInputChange}
+                        >
                             <option>Selecciona una opció</option>
                             <option value="Pendent">Pendent</option>
                             <option value="Fent-se">Fent-se</option>
@@ -41,8 +84,13 @@ function InventarisFiltres() {
                 </div>
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
-                        <label htmlFor="magatzem" className="form-label">Magatzem</label>
-                        <select className='form-select' id='magatzem' defaultValue="def">
+                        <label htmlFor="storage" className="form-label">Magatzem</label>
+                        <select 
+                            className='form-select' 
+                            id='storage' 
+                            value={filters.storage}
+                            onChange={handleInputChange}
+                        >
                             <option value="def">Selecciona una opció</option>
                             {storages?.map(storage => {
                                 return (
@@ -59,8 +107,8 @@ function InventarisFiltres() {
                 <div className="col-xl-4"></div>
                 <div className="col-xl-4"></div>
                 <div className="col-12 col-xl-4 text-end">
-                    <button className="btn btn-secondary ps-2 me-2 text-white"><i className="bi bi-trash px-1 text-white"></i>Netejar</button>
-                    <button className="btn btn-primary me-2 ps-2 orange-button text-white"><i className="bi bi-funnel px-1 text-white"></i>Filtrar</button>
+                    <button className="btn btn-secondary ps-2 me-2 text-white" onClick={handleClearFilters}><i className="bi bi-trash px-1 text-white"></i>Netejar</button>
+                    <button className="btn btn-primary me-2 ps-2 orange-button text-white" onClick={handleFilter}><i className="bi bi-funnel px-1 text-white"></i>Filtrar</button>
                 </div>
             </div>
         </>

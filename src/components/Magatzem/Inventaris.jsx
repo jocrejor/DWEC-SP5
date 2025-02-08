@@ -6,7 +6,8 @@ import { Row, Col, Modal, Table, Button, Tab } from 'react-bootstrap/'
 import Header from '../Header'
 import InventarisFiltres from './InventarisFiltres'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { data, useNavigate } from 'react-router-dom'
+import { use } from 'react'
 
 
 const InventorySchema = Yup.object().shape({
@@ -35,6 +36,8 @@ function Inventaris() {
   const [inputLocked, setInputLocked] = useState(false);
   const [users, setUsers] = useState([]);
   const [inventoryReasons, setInventoryReasons] = useState([]);
+  const [filters, setFilters] = useState({});  
+  const [dataToDisplay, setDataToDisplay] = useState([]);
   
 
 
@@ -43,6 +46,7 @@ function Inventaris() {
     axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
         setInventory(response.data);
+        setDataToDisplay(response.data);
       })
       .catch(e => { console.log(e.response.data) })
 
@@ -130,6 +134,29 @@ function Inventaris() {
       setSelectedInventoryLines([]);
     }
   }, [selectedInventory])
+
+
+
+  const handleFilter = (f) => {
+    const filtered = dataToDisplay.filter(inv => {
+      const inventoryDate  = inv.created_at.split('T')[0];
+      const dateFrom = f.dateFrom ? inventoryDate >= f.dateFrom : true;
+      const dateTo = f.dateTo ? inventoryDate <= f.dateTo : true;
+      const findStatus = inventoryStatus.find(status => status.name === f.status);
+      const status = f.status ? inv.inventory_status === findStatus.id : true;
+      const findStorage = storages?.find(storage => storage.name === f.storage);
+      const storage = f.storage ? inv.storage_id === findStorage.id : true;
+
+      return dateFrom && dateTo && status && storage;
+    })
+    setInventory(filtered);
+    setFilters(f);
+  }
+
+  const handleClearFilters = () => { 
+    setInventory(dataToDisplay);
+    setFilters({});
+  }
   /**************** CREAR INVENTARIO ****************/
   const createInventory = async (values) => {
     let filteredSpaces;
@@ -200,7 +227,7 @@ function Inventaris() {
   return (
     <>
       <Header title='Inventaris'></Header>
-      <InventarisFiltres />
+      <InventarisFiltres onFilter={handleFilter} onClearFilters={handleClearFilters} storages={storages}/>
       <Row className="d-flex mx-3 bg-secondary rounded-top mt-3">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -308,8 +335,9 @@ function Inventaris() {
             <tbody className='text-light-blue'>
               {
                 (inventory.length === 0) ?
-                  <tr><td colSpan={6}>No hay nada</td></tr>
+                  <tr><td colSpan={7}>No hay nada</td></tr>
                   : inventory.map((values) => {
+                    
                     return (
                       <tr key={values.id}>
                         <td scope="row" data-cell="Seleccionar: ">
