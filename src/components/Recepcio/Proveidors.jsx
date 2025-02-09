@@ -6,6 +6,7 @@ import Header from '../Header';
 import Filtres from '../filtresProveidors';	
 import axios from 'axios';
 import '../../App.css';
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const supplierschema = Yup.object().shape({
@@ -22,6 +23,7 @@ const supplierschema = Yup.object().shape({
 
 function Proveidors() {
   const [suppliers, setSuppliers] = useState([]);
+  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const [pais, setPais] = useState([]);
   const [provincia, setProvince] = useState([]);
   const [ciutat, setCity] = useState([]);
@@ -43,6 +45,9 @@ function Proveidors() {
   useEffect(() => {
     fetchData();
   }, []);
+  useEffect(() => {
+    setFilteredSuppliers(suppliers);
+  }, [suppliers]);
 
   const fetchData = async () => {
     try {
@@ -114,18 +119,25 @@ function Proveidors() {
     }
   };
 
-  const actualitzaFiltres = () => {
-
+  const handleFilterChange = (filters) => {
+    const filtered = suppliers.filter((supplier) => {
+      if (filters.name && !supplier.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
+      if (filters.nif && !supplier.nif.toLowerCase().includes(filters.nif.toLowerCase())) return false;
+      if (filters.phone && !supplier.phone.includes(filters.phone)) return false;
+      if (filters.email && !supplier.email.toLowerCase().includes(filters.email.toLowerCase())) return false;
+      return true;
+    });
+    setFilteredSuppliers(filtered);
   };
 
-  const netejaFiltres = () => {
-
+  const handleFilterRestart = () => {
+    setFilteredSuppliers(suppliers);
   };
   
   return (
     <>
       <Header title="Llistat de proveidors" />
-      <Filtres onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres}/>
+      <Filtres onFilter={handleFilterChange} onClear={handleFilterRestart}/>
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -181,12 +193,12 @@ function Proveidors() {
             </tr>
           </thead>
           <tbody>
-            {suppliers.length === 0 ? (
+            {filteredSuppliers.length === 0 ? (
               <tr>
                 <td colSpan="13">No hi han proveidors</td>
               </tr>
             ) : (
-              suppliers.map((valors) => (
+              filteredSuppliers.map((valors) => (
                 <tr key={valors.id}>
                   <td data-cell="ID">{valors.id}</td>
                   <td data-cell="Nom">{valors.name}</td>
