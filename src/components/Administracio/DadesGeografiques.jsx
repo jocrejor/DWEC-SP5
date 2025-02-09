@@ -5,17 +5,14 @@ import City from './City';
 import Provincia from './Province';
 import State from './State';
 
-
 const DadesGeografiques = () => {
   return (
     <div>
       <Header title="Gestió de Dades Geografiques" />
       <Routes>
         <Route index element={<City />} />
-        <Route path="Province/:id" element={<Provincia />} />
-   
-        <Route path="state" element={<State />} />
-        <Route path="city" element={<City />} />
+        <Route path="Province/:provinceId?" element={<Provincia />} />
+        <Route path="State/:stateId" element={<State />} />
       </Routes>
     </div>
   );

@@ -3,8 +3,10 @@ import { Button, Modal, Table } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
+import Filtres from './FiltresProvince';
 
-const apiUrl = import.meta.env.VITE_API_URL; 
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const ProvinciaSchema = Yup.object().shape({
   name: Yup.string()
@@ -17,12 +19,21 @@ const ProvinciaSchema = Yup.object().shape({
 });
 
 function Provincia() {
-  const [showCreate, setShowCreate] = useState(false);
-  const [showView, setShowView] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
+  // Obtenemos el parámetro de la URL (por ejemplo, "/Province/1")
+  const { provinceId } = useParams();
+  const navigate = useNavigate();
+
+  // Estados para la lista y para los modales de CRUD
   const [provincias, setProvincias] = useState([]);
   const [currentProvince, setCurrentProvince] = useState(null);
+  const [showCreate, setShowCrear] = useState(false);
+  const [showView, setShowView] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState({ nombre: '', orden: 'none' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
+  // Función para cargar todas las provincias
   const cargarDatos = async () => {
     try {
       const response = await axios.get(`${apiUrl}/province`, {
@@ -34,12 +45,15 @@ function Provincia() {
     }
   };
 
+  // Al montar el componente se cargan todas las provincias
   useEffect(() => {
     cargarDatos();
   }, []);
 
+  // Funciones CRUD
   const crearProvincia = (values, { setSubmitting, resetForm }) => {
-    axios.post(`${apiUrl}/province`, values, {
+    axios
+      .post(`${apiUrl}/province`, values, {
         headers: { "auth-token": localStorage.getItem("token") },
       })
       .then(() => {
@@ -49,7 +63,7 @@ function Provincia() {
       .finally(() => {
         setSubmitting(false);
         resetForm();
-        setShowCreate(false);
+        setShowCrear(false);
       });
   };
 
@@ -92,14 +106,95 @@ function Provincia() {
       });
   };
 
+  // Filtramos la lista según el parámetro provinceId (si se pasa)
+  let filteredProvincias = provincias;
+  if (provinceId) {
+    filteredProvincias = filteredProvincias.filter(
+      (prov) => prov.id === Number(provinceId)
+    );
+  }
+
+  // Se aplican además otros filtros definidos en el componente de filtros
+  if (appliedFilters.nombre) {
+    filteredProvincias = filteredProvincias.filter((prov) =>
+      prov.name.toLowerCase().includes(appliedFilters.nombre.toLowerCase())
+    );
+  }
+  if (appliedFilters.orden === 'asc') {
+    filteredProvincias = [...filteredProvincias].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+  }
+
+  // Paginación
+  const totalpagines = Math.ceil(filteredProvincias.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = filteredProvincias.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleFilter = (filters) => {
+    setAppliedFilters(filters);
+    setCurrentPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setAppliedFilters({ nombre: '', orden: 'none' });
+    setCurrentPage(1);
+  };
+
+  const pagesToShow = 3;
+  const currentBlock = Math.floor((currentPage - 1) / pagesToShow);
+  const blocinici = currentBlock * pagesToShow + 1;
+  const blockfinal = Math.min(totalpagines, (currentBlock + 1) * pagesToShow);
+
+  const flegespaginacio = (e) => {
+    e.preventDefault();
+    if (currentBlock > 0) {
+      setCurrentPage((currentBlock - 1) * pagesToShow + 1);
+    }
+  };
+
+  const canvibloc = (e) => {
+    e.preventDefault();
+    if (blockfinal < totalpagines) {
+      setCurrentPage((currentBlock + 1) * pagesToShow + 1);
+    }
+  };
+
   return (
     <>
-  
-      <Button onClick={() => setShowCreate(true)} className="mb-3">
-        Nova Provincia
-      </Button>
+      <Filtres 
+        suggestions={[...new Set(provincias.map((prov) => prov.name))]}
+        onFilter={handleFilter}
+        onClear={handleClearFilters}
+      />
 
-      <Modal show={showCreate} onHide={() => setShowCreate(false)}>
+      <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+        <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+          <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+            <div className="form-floating bg-white">
+              <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
+                <option defaultValue>Tria una opció</option>
+                <option value="1">Eliminar</option>
+              </select>
+              <label htmlFor="floatingSelect">Accions en lot</label>
+            </div>
+            <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button">
+              <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+            </button>
+          </div>
+        </div>
+        <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+        <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+          <div className="d-flex h-100 justify-content-xl-end">
+            <button type="button" onClick={() => setShowCrear(true)} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal para crear */}
+      <Modal show={showCreate} onHide={() => setShowCrear(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Nova Provincia</Modal.Title>
         </Modal.Header>
@@ -113,24 +208,14 @@ function Provincia() {
               <Form>
                 <div className="mb-3">
                   <label htmlFor="name">Nom de la provincia</label>
-                  <Field
-                    id="name"
-                    name="name"
-                    type="text"
-                    className="form-control"
-                  />
+                  <Field id="name" name="name" type="text" className="form-control" />
                   {errors.name && touched.name && (
                     <div className="text-danger">{errors.name}</div>
                   )}
                 </div>
                 <div className="mb-3">
                   <label htmlFor="state_id">ID de l'estat</label>
-                  <Field
-                    id="state_id"
-                    name="state_id"
-                    type="number"
-                    className="form-control"
-                  />
+                  <Field id="state_id" name="state_id" type="number" className="form-control" />
                   {errors.state_id && touched.state_id && (
                     <div className="text-danger">{errors.state_id}</div>
                   )}
@@ -144,7 +229,7 @@ function Provincia() {
         </Modal.Body>
       </Modal>
 
-     
+      {/* Modal para visualizar */}
       <Modal show={showView} onHide={() => setShowView(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Visualitzar Provincia</Modal.Title>
@@ -152,14 +237,11 @@ function Provincia() {
         <Modal.Body>
           {currentProvince ? (
             <>
+              <p><strong>ID:</strong> {currentProvince.id}</p>
+              <p><strong>Nom:</strong> {currentProvince.name}</p>
               <p>
-                <strong>ID:</strong> {currentProvince.id}
-              </p>
-              <p>
-                <strong>Nom:</strong> {currentProvince.name}
-              </p>
-              <p>
-                <strong>ID de l'estat:</strong> {currentProvince.state_id}
+                <strong>ID de l'estat:</strong>{" "}
+                {currentProvince.state_id}
               </p>
             </>
           ) : (
@@ -173,6 +255,7 @@ function Provincia() {
         </Modal.Footer>
       </Modal>
 
+      {/* Modal para editar */}
       <Modal show={showEdit} onHide={() => setShowEdit(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Modificar Provincia</Modal.Title>
@@ -192,24 +275,14 @@ function Provincia() {
                 <Form>
                   <div className="mb-3">
                     <label htmlFor="name">Nom de la provincia</label>
-                    <Field
-                      id="name"
-                      name="name"
-                      type="text"
-                      className="form-control"
-                    />
+                    <Field id="name" name="name" type="text" className="form-control" />
                     {errors.name && touched.name && (
                       <div className="text-danger">{errors.name}</div>
                     )}
                   </div>
                   <div className="mb-3">
                     <label htmlFor="state_id">ID de l'estat</label>
-                    <Field
-                      id="state_id"
-                      name="state_id"
-                      type="number"
-                      className="form-control"
-                    />
+                    <Field id="state_id" name="state_id" type="number" className="form-control" />
                     {errors.state_id && touched.state_id && (
                       <div className="text-danger">{errors.state_id}</div>
                     )}
@@ -224,56 +297,105 @@ function Provincia() {
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>ID de l'estat</th>
-            <th>Accions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {provincias.map((prov) => (
-            <tr key={prov.id}>
-              <td>{prov.id}</td>
-              <td>{prov.name}</td>
-              <td>{prov.state_id}</td>
-              <td>
-                {/* Botón para visualizar */}
-                <Button
-                  variant="info"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => modalvisualitzar(prov)}
-                  title="Visualitzar"
+      {/* Tabla de Provincias */}
+      <div className="row">
+        <div className="col-12">
+          <table className="table table-striped text-center align-middle">
+            <thead className="table-active border-bottom border-dark-subtle">
+              <tr>
+                <th className="align-middle" scope="col">
+                  <input className="form-check-input" type="checkbox" />
+                </th>
+                <th scope="col">ID</th>
+                <th scope="col">Nom</th>
+                <th scope="col">ID de l'estat</th>
+                <th scope="col">Accions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentItems.map((prov) => (
+                <tr key={prov.id}>
+                  <td data-cell="Seleccionar">
+                    <input className="form-check-input" type="checkbox" />
+                  </td>
+                  <td data-cell="ID">{prov.id}</td>
+                  <td data-cell="Nom">{prov.name}</td>
+                  <td data-cell="ID de l'estat">
+                    {/* Botón que redirige al ID de l'estat */}
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        navigate(`/dadesGeografiques/State/${prov.state_id}`)
+                      }
+                    >
+                      Veure Estat
+                    </Button>
+                  </td>
+                  <td className="fs-5" data-no-colon="true">
+                    <i
+                      className="bi bi-eye me-2"
+                      title="Visualitzar"
+                      onClick={() => modalvisualitzar(prov)}
+                    ></i>
+                    <i
+                      className="bi bi-pencil me-2"
+                      title="Modificar"
+                      onClick={() => modaleditar(prov)}
+                    ></i>
+                    <i
+                      className="bi bi-trash"
+                      title="Eliminar"
+                      onClick={() => eliminarProvincia(prov.id)}
+                    ></i>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Paginación */}
+      {totalpagines > 1 && (
+        <nav aria-label="Page navigation example" className="d-block">
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentBlock === 0 ? 'disabled' : ''}`}>
+              <a
+                className="page-link text-light-blue"
+                href="#"
+                aria-label="Previous"
+                onClick={flegespaginacio}
+              >
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            {Array.from({ length: blockfinal - blocinici + 1 }, (_, i) => blocinici + i).map((page) => (
+              <li key={page} className="page-item">
+                <a
+                  className={`page-link ${currentPage === page ? 'activo-2' : 'text-light-blue'}`}
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(page);
+                  }}
                 >
-                  <i className="bi bi-eye"></i>
-                </Button>
-                {/* Botón para editar */}
-                <Button
-                  variant="warning"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => modaleditar(prov)}
-                  title="Modificar"
-                >
-                  <i className="bi bi-pencil"></i>
-                </Button>
-                {/* Botón para eliminar */}
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => eliminarProvincia(prov.id)}
-                  title="Eliminar"
-                >
-                  <i className="bi bi-trash"></i>
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+                  {page}
+                </a>
+              </li>
+            ))}
+            <li className={`page-item ${blockfinal === totalpagines ? 'disabled' : ''}`}>
+              <a
+                className="page-link text-light-blue"
+                href="#"
+                aria-label="Next"
+                onClick={canvibloc}
+              >
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      )}
     </>
   );
 }

@@ -72,7 +72,7 @@ function App() {
 
                 <Route path="/rols" element={<Rols />} />
 
-                <Route path="/dadesGeografiques" element={<DadesGeografiques />} />
+                <Route path="/dadesGeografiques/*" element={<DadesGeografiques />} />
 
                 <Route path="/transportistes" element={<Transportistes />} />
 
