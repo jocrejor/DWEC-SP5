@@ -114,27 +114,12 @@ function Proveidors() {
     }
   };
 
-  const actualitzaFiltres = async (clients,identificador) => {
-    let ordersFiltradas = orders;
-    ordersFiltradas = ordersFiltradas.filter((order) => {
-      const matchesClient = clients ? parseInt(order.client_id) === parseInt(clients) : true;
-      const matchesId = identificador ? parseInt(order.id) === parseInt(identificador) : true;
-  
-      // Ambas condiciones deben ser verdaderas para que la orden pase el filtro
-      return matchesClient && matchesId;
-    });
-    setOrder(ordersFiltradas);    
-  }
 
-  const netejaFiltres = () => {
-    actualitzaDades();
-  }
   
   return (
     <>
       <Header title="Llistat de proveidors" />
-      <Filtres onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres}/>
-      {/** <Filter onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres}/>*/}
+      <Filtres/>
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
