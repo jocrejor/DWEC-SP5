@@ -29,7 +29,7 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
       (or) => or.id === values.order_reception_id
     );
 
-    const supplierId = orderReception ? orderReception.supplier_id : undefined;
+    const supplierId = orderReception ? orderReception.supplier_id : "";
     const supplierRecord = suppliers.find((s) => s.id === supplierId);
 
 
@@ -38,11 +38,11 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
     const newRecord = {
       name: values.name, // se asume que "name" está definido en Formik
       product_id: values.product_id,
-      supplier_id: supplierRecord ? supplierRecord.id : undefined, // asignado automáticamente
+      supplier_id: supplierRecord ? supplierRecord.id : "", // asignado automáticamente
       quantity: lotOSerie === "Serie" ? 1 : values.quantity_received,
-      production_date: lotOSerie === "Lot" ? values.production_date : undefined,
-      expiration_date: lotOSerie === "Lot" ? values.expiration_date : undefined,
-      orderlinereception_id: orderReception ? orderReception.id : undefined, // asignado automáticamente
+      production_date: lotOSerie === "Lot" ? values.production_date : "",
+      expiration_date: lotOSerie === "Lot" ? values.expiration_date : "",
+      orderlinereception_id: orderReception ? orderReception.id : "", // asignado automáticamente
     };
 
     if (lotOSerie === "Lot") {
@@ -83,7 +83,7 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
 
       {/* Quantitat */}
       <div className="form-group">
-        <label htmlFor="quantity_received">Quantitat</label>
+        <label htmlFor="quantity_received">Quantitat de la ordre</label>
         <Field
           type="number"
           name="quantity_received"
@@ -105,7 +105,7 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
           <div className="input-group flex-nowrap">
             <Field
               type="number"
-              name={`${nombre}_quantity`}
+              name="quantity"
               className="form-control w-25"
               value={
                 lotOSerie === "Serie" ? (
@@ -120,7 +120,7 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
             )}
             <Field
               type="text"
-              name={`${nombre}_name`}
+              name="name"
               placeholder={nombre === "lot" ? `Nom del ${nombre}` : `Nom de la ${nombre}`}
               className="form-control w-100"
             />
