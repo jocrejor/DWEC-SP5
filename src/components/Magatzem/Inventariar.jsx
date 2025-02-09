@@ -111,10 +111,6 @@ function Inventariar() {
     console.log(lineId + '-' + field + ' - ' + value + ' - ' + type)
     console.log(field)
 
-    /*setUpdatedInventoryLines((prev) => ({
-      ...prev, [name]: { ...prev[name], [field]: value }
-    }))*/
-
     setUpdatedInventoryLines((prev) => {
       const index = prev.findIndex((line) => line.id === lineId);
       if (index != -1) {
@@ -155,7 +151,6 @@ function Inventariar() {
       }))
 
       const updatedSelectedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Fent-se').id }
-      //console.log("AQUI2: " + updatedSelectedInventory)
 
       await axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedSelectedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
@@ -208,7 +203,7 @@ function Inventariar() {
               <tbody className='text-light-blue'>
                 {
                   (selectedInventoryLines.length === 0) ?
-                    <tr><td colSpan={6} className='text-center'>No hay nada</td></tr> :
+                    <tr><td colSpan={7} className='text-center'>No existix informació per a ser mostrat.</td></tr> :
                     selectedInventoryLines.map((value) => {
                       return (
                         <tr key={value.id}>
@@ -237,7 +232,7 @@ function Inventariar() {
                               <option >Selecciona una opció</option>
                               {inventoryReasons.map((reason) => {
                                 return (
-                                  <option value={reason.id} id={reason.id}>{reason.name}</option>
+                                  <option value={reason.id} key={reason.id}>{reason.name}</option>
                                 )
                               })}
                             </select>

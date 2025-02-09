@@ -420,7 +420,7 @@ function Inventaris() {
 
                       {
                         (selectedInventoryLines.length === 0) ?
-                          <tr><td colSpan={6} className='text-center'>No existix informació per a ser mostrat.</td></tr> :
+                          <tr><td colSpan={7} className='text-center'>No existix informació per a ser mostrat.</td></tr> :
                           selectedInventoryLines.map((value) => {
                             console.log(value)
                             return (

@@ -141,7 +141,6 @@ function CompletarInventari() {
         line = { ...line, inventory_reason_id: updatedLine?.inventory_reason_id || defaultReason}
         console.log('AQUI 1:')
         console.log(line)
-        //await updateId(url, "InventoryLine", line.id, line);
         axios.put(`${apiURL}/inventoryline/${line.id}`, line, { headers: { "auth-token": localStorage.getItem('token') } })
         movMagatzem(line.product_id, user.id,line.quantity_real, "inventoryline", line.id, line.storage_id, line.street_id, line.shelf_id, line.space_id)
         return line;
@@ -157,21 +156,16 @@ function CompletarInventari() {
                   space.storage_id === line.storage_id &&
                   space.shelf_id === line.shelf_id &&
                   space.street_id === line.street_id);
-      // Cantidad real del espacio seteada por defecto (100) porque en la  bbdd son todas null
+
       const updatedQuantity = (space?.quantity === null) ? 100 - line.quantity_real : space?.quantity - line.quantity_real;
-      //console.log(space.id + ' : product-id: ' + line.product_id + ' - ' + space.quantity + ' - ' + line.quantity_real + ' = ' + updatedQuantity)
-      //console.log('AQUI Space:')
-      //console.log(space)
+    // No actualiza el spacio de foma 
       if (space) {
         const updatedSpace = { ...space, 
           product_id: (space?.product_id === null) ? line.product_id : space?.product_id, 
           quantity: updatedQuantity || space?.quantity }
         
           console.log(`${apiURL}/space/${space.id}`);
-        
-          //console.log('AQUI 2:')
-          //console.log(updatedSpace);
-        //await updateId(url, 'Space', space.id, updatedSpace)
+
         axios.put(`${apiURL}/space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
       };
 
@@ -181,7 +175,6 @@ function CompletarInventari() {
 
     const updatedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Completat').id }
 
-    //await updateId(url, 'Inventory', selectedInventory.id, updatedInvetory);
     axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
     alert('Inventari completat amb èxit');
@@ -226,7 +219,7 @@ function CompletarInventari() {
               <tbody>
                 {
                   (selectedInventoryLines.length === 0) ?
-                    <tr><td colSpan={4} className='text-center'>No hay nada</td></tr> :
+                    <tr><td colSpan={4} className='text-center'>No existix informació per a ser mostrat.</td></tr> :
                     selectedInventoryLines.map((value) => {
 
                       return (
@@ -239,12 +232,12 @@ function CompletarInventari() {
                               name={value.id}
                               className='form-select'
                               onChange={handleInputChange}
-                              defaultValue={value.inventory_reason_id}
+                              defaultValue={value.inventory_reason_id || inventoryReasons.find(reason => reason.name === "Recompte cíclic")?.id}
                             >
                               <option>Selecciona una opció</option>
                               {inventoryReasons.map((reason) => {
                                 return (
-                                  <option value={reason.id} id={reason.id}>{reason.name}</option>
+                                  <option value={reason.id} key={reason.id}>{reason.name}</option>
                                 )
                               })}
                             </select>
