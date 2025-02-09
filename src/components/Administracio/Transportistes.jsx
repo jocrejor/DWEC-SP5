@@ -41,12 +41,24 @@ function Transportistes() {
     cp: '',
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
+  const totalPages = Math.ceil(carriersFiltrats.length / pageSize);
+  const displayedCarriers = carriersFiltrats.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+  const canviPag = (page) => {
+    setCurrentPage(page);
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
 
   useEffect(() => {
     setCarriersFiltrats(carriers);
+    setCurrentPage(1);
   }, [carriers]);
 
   const fetchData = async () => {
@@ -125,7 +137,7 @@ function Transportistes() {
     }
   };
 
-  const handleFilter = (filters) => {
+  const botoFiltrar = (filters) => {
     const filtered = carriers.filter((carrier) => {
       if (filters.name && !carrier.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
       if (filters.nif && !carrier.nif.toLowerCase().includes(filters.nif.toLowerCase())) return false;
@@ -135,10 +147,12 @@ function Transportistes() {
       return true;
     });
     setCarriersFiltrats(filtered);
+    setCurrentPage(1);
   };
 
-  const handleClearFilters = () => {
+  const botoNetejaFiltres = () => {
     setCarriersFiltrats(carriers);
+    setCurrentPage(1);
   };
 
   return (
@@ -149,8 +163,8 @@ function Transportistes() {
         pais={pais}
         provincia={provincia}
         ciutat={ciutat}
-        onFilter={handleFilter}
-        onClear={handleClearFilters}
+        onFilter={botoFiltrar}
+        onClear={botoNetejaFiltres}
       />
 
       <div className="container-fluid">
@@ -199,31 +213,31 @@ function Transportistes() {
 
         <table className='table table-striped border'>
           <thead className="table-active border-bottom border-dark-subtle">
-            <tr>
-              <th scope="col" className='text-center'>ID</th>
-              <th scope="col" className='text-center'>Nom</th>
-              <th scope="col" className='text-center'>Adreça</th>
-              <th scope="col" className='text-center'>NIF</th>
-              <th scope="col" className='text-center'>Telèfon</th>
-              <th scope="col" className='text-center'>Email</th>
-              <th scope="col" className='text-center'>Accions</th>
+            <tr  className='text-center'>
+              <th scope="col">ID</th>
+              <th scope="col">Nom</th>
+              <th scope="col">Adreça</th>
+              <th scope="col">NIF</th>
+              <th scope="col">Telèfon</th>
+              <th scope="col">Email</th>
+              <th scope="col">Accions</th>
             </tr>
           </thead>
           <tbody>
             {carriersFiltrats.length === 0 ? (
               <tr>
-                <td colSpan="7">No hi han transportistes</td>
+                <td colSpan="7" className="text-center">No hi han transportistes</td>
               </tr>
             ) : (
-              carriersFiltrats.map((valors) => (
-                <tr key={valors.id}>
-                  <td data-cell="ID" className='text-center'>{valors.id}</td>
-                  <td data-cell="Nom" className='text-center'>{valors.name}</td>
-                  <td data-cell="Adreça" className='text-center'>{valors.address}</td>
-                  <td data-cell="NIF" className='text-center'>{valors.nif}</td>
-                  <td data-cell="Telèfon" className='text-center'>{valors.phone}</td>
-                  <td data-cell="Email" className='text-center'>{valors.email}</td>
-                  <td data-no-colon="true" className='text-center'>
+              displayedCarriers.map((valors) => (
+                <tr key={valors.id}  className='text-center'>
+                  <td data-cell="ID">{valors.id}</td>
+                  <td data-cell="Nom">{valors.name}</td>
+                  <td data-cell="Adreça">{valors.address}</td>
+                  <td data-cell="NIF">{valors.nif}</td>
+                  <td data-cell="Telèfon">{valors.phone}</td>
+                  <td data-cell="Email">{valors.email}</td>
+                  <td data-no-colon="true">
                     <div className="d-lg-flex justify-content-lg-center">
                       <span onClick={() => verCarrier(valors)} role='button' aria-label="Veure detalls del transportista">
                         <i className="bi bi-eye icono fs-5"></i>
@@ -243,7 +257,6 @@ function Transportistes() {
         </table>
       </div>
 
-      {/* Modal Visualitzar */}
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Visualitzar Transportista</Modal.Title>
@@ -271,7 +284,6 @@ function Transportistes() {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal Crear/Modificar */}
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} transportista</Modal.Title>
@@ -405,8 +417,6 @@ function Transportistes() {
                     </>
                   )}
                 </div>
-
-
                 {values.state_id === '194' && values.province ? (
                   <div className="form-group">
                     <label htmlFor="city">Ciutat</label>
@@ -461,7 +471,6 @@ function Transportistes() {
         </Modal.Body>
       </Modal>
 
-      {/* Modal per modificar*/}
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} transportista</Modal.Title>
@@ -588,7 +597,6 @@ function Transportistes() {
                     </>
                   )}
                 </div>
-
                 {values.state_id === '194' && values.province ? (
                   <div className="form-group">
                     <label htmlFor="city">Ciutat</label>
@@ -643,20 +651,38 @@ function Transportistes() {
         </Modal.Body>
       </Modal>
 
-      <nav aria-label="Page navigation example" className="d-block mt-4">
+      <nav aria-label="Page navigation" className="d-block mt-4">
         <ul className="pagination justify-content-center">
-          <li className="page-item">
-            <a className="page-link text-light-blue" href="#" aria-label="Previous">
+          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              onClick={() => canviPag(currentPage - 1)}
+              aria-label="Anterior"
+            >
               <span aria-hidden="true">&laquo;</span>
-            </a>
+            </button>
           </li>
-          <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-          <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-          <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
-          <li className="page-item">
-            <a className="page-link text-light-blue" href="#" aria-label="Next">
+          {[...Array(totalPages)].map((_, index) => {
+            const page = index + 1;
+            return (
+              <li
+                key={page}
+                className={`page-item ${currentPage === page ? 'active' : ''}`}
+              >
+                <button className="page-link" onClick={() => canviPag(page)}>
+                  {page}
+                </button>
+              </li>
+            );
+          })}
+          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              onClick={() => canviPag(currentPage + 1)}
+              aria-label="Següent"
+            >
               <span aria-hidden="true">&raquo;</span>
-            </a>
+            </button>
           </li>
         </ul>
       </nav>
