@@ -114,12 +114,18 @@ function Proveidors() {
     }
   };
 
+  const actualitzaFiltres = () => {
 
+  };
+
+  const netejaFiltres = () => {
+
+  };
   
   return (
     <>
       <Header title="Llistat de proveidors" />
-      <Filtres/>
+      <Filtres onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres}/>
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
