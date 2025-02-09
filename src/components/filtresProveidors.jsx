@@ -31,27 +31,27 @@ function Filtres({onFilterChange, onFilterRestart}) {
             <div className="row bg-grey pt-3 px-2 mx-0">
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
-                        <label for="id" className="form-label">Identificador</label>
-                        <input type="text" placeholder='Ex: 01' className="form-control" id="id" />
+                        <label for="name" className="form-label">Nom Proveidor</label>
+                        <input type="text" placeholder='Ex: 01' className="form-control" id="name" />
                     </div>
                 </div>
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
-                        <label for="date_min" className="form-label">Data minima</label>
+                        <label for="date_min" className="form-label">NIF</label>
                         <input type="date" className="form-control" id="date_min" />
                     </div>
                 </div>
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
-                        <label for="date_max" className="form-label">Data màxima</label>
+                        <label for="date_max" className="form-label">Telèfon</label>
                         <input type="date" placeholder='Ex: 03' className="form-control" id="date_max" />
                     </div>
                 </div>
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
-                        <label for="client" className="form-label">Client</label>
+                        <label for="client" className="form-label">Email</label>
                         <select className='form-control' name="client" id="client">
-                            <option value="">Selecciona un client:</option>
+                            <option value="">Selecciona un email del proveidor:</option>
                             {clients.map(client => {
                                 return <option key={client.id} value={client.id}>{client.name}</option>
                             })}
