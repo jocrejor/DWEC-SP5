@@ -533,14 +533,14 @@ function Transportistes() {
                   {touched.cp && errors.cp && <div className="invalid-feedback">{errors.cp}</div>}
                 </div>
                 <div className="form-group text-right">
-                  <Button type="submit" variant="success">
+                  <Button type="submit"  className="orange-button btn btn-secondary">
                     {tipoModal === 'Crear' ? 'Alta Transportista' : 'Modificar Transportista'}
                   </Button>
                 </div>
               </Form>
             )}
           </Formik>
-        </Modal.Body>
+        </Modal.Body> 
       </Modal>
 
       <Modal show={showModal} onHide={canviEstatModal}>
