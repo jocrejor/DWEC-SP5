@@ -63,12 +63,21 @@ function Transportistes() {
 
   const fetchData = async () => {
     try {
-      const [carriersResponse, paisResponse, provinciaResponse, ciutatResponse] = await Promise.all([
-        axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/state`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/province`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/city`, { headers: { "auth-token": localStorage.getItem("token") } }),
-      ]);
+      const [carriersResponse, paisResponse, provinciaResponse, ciutatResponse] =
+        await Promise.all([
+          axios.get(`${apiUrl}/carrier`, {
+            headers: { 'auth-token': localStorage.getItem('token') },
+          }),
+          axios.get(`${apiUrl}/state`, {
+            headers: { 'auth-token': localStorage.getItem('token') },
+          }),
+          axios.get(`${apiUrl}/province`, {
+            headers: { 'auth-token': localStorage.getItem('token') },
+          }),
+          axios.get(`${apiUrl}/city`, {
+            headers: { 'auth-token': localStorage.getItem('token') },
+          }),
+        ]);
 
       setCarriers(carriersResponse.data);
       setPais(paisResponse.data);
@@ -81,7 +90,9 @@ function Transportistes() {
 
   const delCarrier = async (id) => {
     try {
-      await axios.delete(`${apiUrl}/carrier/${id}`, { headers: { "auth-token": localStorage.getItem("token") } });
+      await axios.delete(`${apiUrl}/carrier/${id}`, {
+        headers: { 'auth-token': localStorage.getItem('token') },
+      });
       const newCarriers = carriers.filter((item) => item.id !== id);
       setCarriers(newCarriers);
     } catch (error) {
@@ -104,14 +115,37 @@ function Transportistes() {
     setShowModal(!showModal);
   };
 
+  const transformProvince = (values) => {
+    if (Number(values.state_id) === 194) {
+      const selectedProvince = provincia.find(
+        (p) => Number(p.id) === Number(values.province)
+      );
+      if (selectedProvince) {
+        values.province = selectedProvince.name;
+      }
+    }
+    return values;
+  };
+
   const gravar = async (values) => {
     try {
+      const valuesToSend = transformProvince({ ...values });
       if (tipoModal === 'Crear') {
-        await axios.post(`${apiUrl}/carrier`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+        await axios.post(
+          `${apiUrl}/carrier`,
+          valuesToSend,
+          { headers: { 'auth-token': localStorage.getItem('token') } }
+        );
       } else {
-        await axios.put(`${apiUrl}/carrier/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+        await axios.put(
+          `${apiUrl}/carrier/${values.id}`,
+          valuesToSend,
+          { headers: { 'auth-token': localStorage.getItem('token') } }
+        );
       }
-      const updatedCarriers = await axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } });
+      const updatedCarriers = await axios.get(`${apiUrl}/carrier`, {
+        headers: { 'auth-token': localStorage.getItem('token') },
+      });
       setCarriers(updatedCarriers.data);
       canviEstatModal();
     } catch (error) {
@@ -121,15 +155,26 @@ function Transportistes() {
 
   const gravar2 = async (values) => {
     try {
-      const { id, ...dataToSend } = values;
+      const valuesToSend = transformProvince({ ...values });
+      const { id, ...dataToSend } = valuesToSend;
 
       if (tipoModal === 'Crear') {
-        await axios.post(`${apiUrl}/carrier`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
+        await axios.post(
+          `${apiUrl}/carrier`,
+          dataToSend,
+          { headers: { 'auth-token': localStorage.getItem('token') } }
+        );
       } else {
-        await axios.put(`${apiUrl}/carrier/${id}`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
+        await axios.put(
+          `${apiUrl}/carrier/${id}`,
+          dataToSend,
+          { headers: { 'auth-token': localStorage.getItem('token') } }
+        );
       }
 
-      const updatedCarriers = await axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } });
+      const updatedCarriers = await axios.get(`${apiUrl}/carrier`, {
+        headers: { 'auth-token': localStorage.getItem('token') },
+      });
       setCarriers(updatedCarriers.data);
       canviEstatModal();
     } catch (error) {
@@ -139,11 +184,16 @@ function Transportistes() {
 
   const botoFiltrar = (filters) => {
     const filtered = carriers.filter((carrier) => {
-      if (filters.name && !carrier.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
-      if (filters.nif && !carrier.nif.toLowerCase().includes(filters.nif.toLowerCase())) return false;
-      if (filters.state_id && carrier.state_id !== parseInt(filters.state_id, 10)) return false;
-      if (filters.province && !carrier.province.toLowerCase().includes(filters.province.toLowerCase())) return false;
-      if (filters.city && !carrier.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
+      if (filters.name && !carrier.name.toLowerCase().includes(filters.name.toLowerCase()))
+        return false;
+      if (filters.nif && !carrier.nif.toLowerCase().includes(filters.nif.toLowerCase()))
+        return false;
+      if (filters.state_id && carrier.state_id !== parseInt(filters.state_id, 10))
+        return false;
+      if (filters.province && !carrier.province.toLowerCase().includes(filters.province.toLowerCase()))
+        return false;
+      if (filters.city && !carrier.city.toLowerCase().includes(filters.city.toLowerCase()))
+        return false;
       return true;
     });
     setCarriersFiltrats(filtered);
@@ -178,7 +228,11 @@ function Transportistes() {
                 </select>
                 <label htmlFor="floatingSelect">Accions en lot</label>
               </div>
-              <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button" aria-label="Aplicar accions en lot">
+              <button
+                className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0"
+                type="button"
+                aria-label="Aplicar accions en lot"
+              >
                 <i className="bi bi-check-circle text-white px-1"></i>Aplicar
               </button>
             </div>
@@ -211,9 +265,9 @@ function Transportistes() {
           </div>
         </div>
 
-        <table className='table table-striped border'>
+        <table className="table table-striped border">
           <thead className="table-active border-bottom border-dark-subtle">
-            <tr  className='text-center'>
+            <tr className="text-center">
               <th scope="col">ID</th>
               <th scope="col">Nom</th>
               <th scope="col">Adreça</th>
@@ -226,11 +280,13 @@ function Transportistes() {
           <tbody>
             {carriersFiltrats.length === 0 ? (
               <tr>
-                <td colSpan="7" className="text-center">No hi han transportistes</td>
+                <td colSpan="7" className="text-center">
+                  No hi han transportistes
+                </td>
               </tr>
             ) : (
               displayedCarriers.map((valors) => (
-                <tr key={valors.id}  className='text-center'>
+                <tr key={valors.id} className="text-center">
                   <td data-cell="ID">{valors.id}</td>
                   <td data-cell="Nom">{valors.name}</td>
                   <td data-cell="Adreça">{valors.address}</td>
@@ -239,13 +295,13 @@ function Transportistes() {
                   <td data-cell="Email">{valors.email}</td>
                   <td data-no-colon="true">
                     <div className="d-lg-flex justify-content-lg-center">
-                      <span onClick={() => verCarrier(valors)} role='button' aria-label="Veure detalls del transportista">
+                      <span onClick={() => verCarrier(valors)} role="button" aria-label="Veure detalls del transportista">
                         <i className="bi bi-eye icono fs-5"></i>
                       </span>
-                      <span onClick={() => modCarriers(valors)} className="mx-2" role='button' aria-label="Modificar transportista">
+                      <span onClick={() => modCarriers(valors)} className="mx-2" role="button" aria-label="Modificar transportista">
                         <i className="bi bi-pencil-square icono fs-5 mx-2"></i>
                       </span>
-                      <span onClick={() => delCarrier(valors.id)} role='button' aria-label="Eliminar transportista">
+                      <span onClick={() => delCarrier(valors.id)} role="button" aria-label="Eliminar transportista">
                         <i className="bi bi-trash icono fs-5"></i>
                       </span>
                     </div>
@@ -263,22 +319,38 @@ function Transportistes() {
         </Modal.Header>
         <Modal.Body>
           <div>
-            <p><b>Nom:</b> {valorsInicials.name}</p>
-            <p><b>Adreça:</b> {valorsInicials.address}</p>
-            <p><b>NIF:</b> {valorsInicials.nif}</p>
-            <p><b>Telèfon:</b> {valorsInicials.phone}</p>
-            <p><b>Email:</b> {valorsInicials.email}</p>
+            <p>
+              <b>Nom:</b> {valorsInicials.name}
+            </p>
+            <p>
+              <b>Adreça:</b> {valorsInicials.address}
+            </p>
+            <p>
+              <b>NIF:</b> {valorsInicials.nif}
+            </p>
+            <p>
+              <b>Telèfon:</b> {valorsInicials.phone}
+            </p>
+            <p>
+              <b>Email:</b> {valorsInicials.email}
+            </p>
             <p>
               <b>Estat:</b>{' '}
               {pais.find((state) => state.id === valorsInicials.state_id)?.name || 'No disponible'}
             </p>
-            <p><b>Província:</b> {valorsInicials.province}</p>
-            <p><b>Ciutat:</b> {valorsInicials.city}</p>
-            <p><b>Codi Postal:</b> {valorsInicials.cp}</p>
+            <p>
+              <b>Província:</b> {valorsInicials.province}
+            </p>
+            <p>
+              <b>Ciutat:</b> {valorsInicials.city}
+            </p>
+            <p>
+              <b>Codi Postal:</b> {valorsInicials.cp}
+            </p>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button className='orange-button' onClick={() => setShowViewModal(false)} aria-label="Tancar modal de visualització">
+          <Button className="orange-button" onClick={() => setShowViewModal(false)} aria-label="Tancar modal de visualització">
             Tancar
           </Button>
         </Modal.Footer>
@@ -294,16 +366,16 @@ function Transportistes() {
               tipoModal === 'Crear'
                 ? valorsInicials
                 : {
-                  name: '',
-                  address: '',
-                  nif: '',
-                  phone: '',
-                  email: '',
-                  state_id: 0,
-                  province: '',
-                  city: '',
-                  cp: '',
-                }
+                    name: '',
+                    address: '',
+                    nif: '',
+                    phone: '',
+                    email: '',
+                    state_id: 0,
+                    province: '',
+                    city: '',
+                    cp: '',
+                  }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
@@ -390,7 +462,7 @@ function Transportistes() {
                             .slice()
                             .sort((a, b) => a.name.localeCompare(b.name))
                             .map((prov) => (
-                              <option key={prov.name} value={prov.name}>
+                              <option key={prov.id} value={prov.id}>
                                 {prov.name}
                               </option>
                             ))
@@ -428,7 +500,7 @@ function Transportistes() {
                     >
                       <option value="">Selecciona una ciutat</option>
                       {ciutat
-                        .filter((item) => item.province_id === parseInt(values.province, 10))
+                        .filter((item) => item.province_id === Number(values.province))
                         .sort((a, b) => a.name.localeCompare(b.name))
                         .map((item) => (
                           <option key={item.id} value={item.name}>
@@ -481,16 +553,16 @@ function Transportistes() {
               tipoModal === 'Modificar'
                 ? valorsInicials
                 : {
-                  name: '',
-                  address: '',
-                  nif: '',
-                  phone: '',
-                  email: '',
-                  state_id: 0,
-                  province: '',
-                  city: '',
-                  cp: '',
-                }
+                    name: '',
+                    address: '',
+                    nif: '',
+                    phone: '',
+                    email: '',
+                    state_id: 0,
+                    province: '',
+                    city: '',
+                    cp: '',
+                  }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
@@ -574,7 +646,7 @@ function Transportistes() {
                         <option value="">Selecciona una província</option>
                         {provincia.length > 0 ? (
                           provincia.map((prov) => (
-                            <option key={prov.id} value={prov.name}>
+                            <option key={prov.id} value={prov.id}>
                               {prov.name}
                             </option>
                           ))
@@ -608,7 +680,7 @@ function Transportistes() {
                     >
                       <option value="">Selecciona una ciutat</option>
                       {ciutat
-                        .filter((item) => item.province_id === parseInt(values.province, 10))
+                        .filter((item) => item.province_id === Number(values.province))
                         .sort((a, b) => a.name.localeCompare(b.name))
                         .map((item) => (
                           <option key={item.id} value={item.name}>
@@ -641,7 +713,7 @@ function Transportistes() {
                   {touched.cp && errors.cp && <div className="invalid-feedback">{errors.cp}</div>}
                 </div>
                 <div className="form-group d-flex justify-content-end">
-                  <Button type="submit" className='orange-button mt-2'>
+                  <Button type="submit" className="orange-button mt-2">
                     {tipoModal === 'Modificar' ? 'Modificar Transportista' : 'Alta Transportista'}
                   </Button>
                 </div>
@@ -653,22 +725,15 @@ function Transportistes() {
 
       <nav aria-label="Page navigation" className="d-block mt-4">
         <ul className="pagination justify-content-center">
-          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-            <button
-              className="page-link"
-              onClick={() => canviPag(currentPage - 1)}
-              aria-label="Anterior"
-            >
-              <span aria-hidden="true">&laquo;</span>
+          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`} >
+            <button className="page-link" onClick={() => canviPag(currentPage - 1)} aria-label="Anterior">
+              <span aria-hidden="true" className='text-white'>&laquo;</span>
             </button>
           </li>
           {[...Array(totalPages)].map((_, index) => {
             const page = index + 1;
             return (
-              <li
-                key={page}
-                className={`page-item ${currentPage === page ? 'active' : ''}`}
-              >
+              <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
                 <button className="page-link" onClick={() => canviPag(page)}>
                   {page}
                 </button>
@@ -676,12 +741,8 @@ function Transportistes() {
             );
           })}
           <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-            <button
-              className="page-link"
-              onClick={() => canviPag(currentPage + 1)}
-              aria-label="Següent"
-            >
-              <span aria-hidden="true">&raquo;</span>
+            <button className="page-link" onClick={() => canviPag(currentPage + 1)} aria-label="Següent">
+              <span aria-hidden="true" className='text-white'>&raquo;</span>
             </button>
           </li>
         </ul>
