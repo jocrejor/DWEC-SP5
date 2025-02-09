@@ -21,7 +21,7 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
   }, []);
 
   const handleAddRecord = () => {
-    if(!values.name || !values.quantity) {
+    if (!values.name || !values.quantity) {
       setErrorAgregar("Debes llenar todos los campos");
       return;
     }
