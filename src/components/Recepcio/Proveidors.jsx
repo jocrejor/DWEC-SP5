@@ -337,7 +337,7 @@ function Proveidors() {
                       }`}
                   >
                     <option value="">Selecciona un estat</option>
-                    {pais.map((state) => (
+                    {pais.sort((a, b) => a.name.localeCompare(b.name)).map((state) => (
                       <option key={state.id} value={state.id}>
                         {state.name}
                       </option>
@@ -360,7 +360,7 @@ function Proveidors() {
                       >
                         <option value="">Selecciona una província</option>
                         {provincia.length > 0 ? (
-                          provincia.map((prov) => (
+                          provincia.sort((a, b) => a.name.localeCompare(b.name)).map((prov) => (
                             <option key={prov.id} value={prov.name}>
                               {prov.name}
                             </option>
@@ -401,11 +401,15 @@ function Proveidors() {
                       className={`text-light-blue form-control ${touched.city && errors.city ? 'is-invalid' : ''}`}
                     >
                       <option value="">Selecciona una ciutat</option>
-                      {ciutat.map((ciudad) => (
-                        <option key={ciudad.id} value={ciudad.name}>
-                          {ciudad.name}
-                        </option>
+                      {ciutat
+                        //.filter((item) => item.province_id === (Number(values.province) || 0))
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((ciudad) => (
+                          <option key={ciudad.id} value={ciudad.name}>
+                            {ciudad.name}
+                          </option>
                       ))}
+
                     </Field>
                     {touched.city && errors.city && (
                       <div className="invalid-feedback">{errors.city}</div>
