@@ -90,8 +90,13 @@ li:hover i{
 
 .activo-2{
     background-color: var(--lightBlue) !important;
-    border: 1px solid var(--lightBlue);
+    border: 1px solid var(--lightBlue) !important;
     color: white !important;
+}
+
+
+#pagination li {
+    cursor: pointer;
 }
 
 .outline-orange{

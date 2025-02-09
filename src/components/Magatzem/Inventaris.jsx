@@ -6,8 +6,9 @@ import { Row, Col, Modal, Table, Button, Tab } from 'react-bootstrap/'
 import Header from '../Header'
 import InventarisFiltres from './InventarisFiltres'
 import axios from 'axios'
-import { data, useNavigate } from 'react-router-dom'
-import { use } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Pagination from '../../Pagination'
+
 
 
 const InventorySchema = Yup.object().shape({
@@ -33,12 +34,16 @@ function Inventaris() {
   const [products, setProducts] = useState([]);
   const [selectedInventoryLines, setSelectedInventoryLines] = useState([]);
   const [inventoryStatus, setInventoryStatus] = useState([]);
-  const [inputLocked, setInputLocked] = useState(false);
   const [users, setUsers] = useState([]);
   const [inventoryReasons, setInventoryReasons] = useState([]);
   const [filters, setFilters] = useState({});  
   const [dataToDisplay, setDataToDisplay] = useState([]);
-  
+  const [inventoriesPerPage, setInventoriesPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const lastIndex = currentPage * inventoriesPerPage;
+  const firstIndex = lastIndex -inventoriesPerPage;
+  const totalInventories = inventory.length;
 
 
 
@@ -54,7 +59,7 @@ function Inventaris() {
       .then(response => {
         setInventoryStatus(response.data);
       })
-      .catch(e => { console.log(e.response.data) })
+      .catch(e => { console.log(response.data) })
 
     axios.get(`${apiURL}/storage`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
@@ -363,7 +368,7 @@ function Inventaris() {
                         </td>
                       </tr>
                     )
-                  })
+                  }).slice(firstIndex, lastIndex)
               }
 
             </tbody>
@@ -445,23 +450,7 @@ function Inventaris() {
 
             </Modal.Body>
           </Modal>
-          <nav aria-label="Page navigation example" className="d-block">
-            <ul className="pagination justify-content-center">
-              <li className="page-item">
-                <a className="page-link text-light-blue" href="#" aria-label="Página anterior">
-                  <span aria-hidden="true">&laquo;</span>
-                </a>
-              </li>
-              <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-              <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-              <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
-              <li className="page-item">
-                <a className="page-link text-light-blue" href="#" aria-label="Página siguiente">
-                  <span aria-hidden="true">&raquo;</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
+          <Pagination itemsPerPage={inventoriesPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalItems={totalInventories}/>
         </Col>
       </Row >
     </>
