@@ -26,6 +26,7 @@ function IncidenciesResoldre() {
     const [orderlineStatus, setOrderlineStatus]             = useState([])
     const [orderReceptionStatus, setOrderReceptionStatus]   = useState([])
     const [userProfile, setUserProfile]                     = useState ([])
+    const [suppliers, setSupplier]                           = useState ([])
     const [showModal, setShowModal]                         = useState(false)
     const [tipoModal, setTipoModal]                         = useState("Crear")
     const [visualitzar, setVisualitzar]                     = useState(false)
@@ -36,13 +37,15 @@ function IncidenciesResoldre() {
         supplier: '',
         operator: '',
         quantity_ordered: '',
-        created_at: ''
+        created_at: '',
+        orderlineStatus: ''
     });
 
     const getDataIncident = () => {
         const apiURL = import.meta.env.VITE_API_URL
         const token = localStorage.getItem("token")
         console.log(token)
+
         axios.get(`${apiURL}/incident`, {headers: {"auth-token" : token}})
             .then(response => setIncident(response.data))
             .catch(error => console.log(error))
@@ -53,10 +56,7 @@ function IncidenciesResoldre() {
         const token = localStorage.getItem("token")
         
         axios.get(`${apiURL}/product`, {headers: {"auth-token" : token}})
-            .then(response => {
-                setProducts(response.data),
-                console.log("Productos obtenidos:", response.data)
-            })
+            .then(response => setProducts(response.data))
             .catch(error => console.log(error))
     }
 
@@ -89,6 +89,17 @@ function IncidenciesResoldre() {
             .catch(error => console.log(error))
     }
 
+    const getSupplier = () => {
+        const apiURL = import.meta.env.VITE_API_URL
+        const token = localStorage.getItem("token")
+        
+        axios.get(`${apiURL}/supplier`, {headers: {"auth-token" : token}})
+            .then(response => {
+                setSupplier(response.data)
+            })
+            .catch(error => console.log(error))
+    }
+
     const postDataIncident = (newIncident) => {
         const apiURL    = import.meta.env.VITE_API_URL
         const token     = localStorage.getItem("token")
@@ -111,6 +122,7 @@ function IncidenciesResoldre() {
             .catch(error => console.log(error));
     }
 
+    /*Aso así no es gasta*/
     const deleteIncident = (id) => {
         const apiURL = import.meta.env.VITE_API_URL;
         const token = localStorage.getItem("token");
@@ -130,6 +142,7 @@ function IncidenciesResoldre() {
         getDataIncident();
         getDataOrderLineStatus();
         getDataUserProfile();
+        getSupplier();
     },  []);
 
     const visualitzarIncident = (valors) => {
@@ -139,11 +152,11 @@ function IncidenciesResoldre() {
         setShowModal(true);
     };
 
-    const modificarIncident = (valors) => {
-        setTipoModal("Modificar");
+    const resoldreIncident = (valors) => {
+        setTipoModal("Resol");
         setValorsInicials({
             ...valors,
-            status: valors.status || "Pendent" // Asegurar que siempre haya un estado inicial
+            
         });
         setShowModal(true);
     };
@@ -165,6 +178,11 @@ function IncidenciesResoldre() {
     const getUserProfileName = (operatorId) => {
         const operador = userProfile.find(o => o.id === operatorId);
         return operador ? operador.name : "Operari no trobat";
+    }
+
+    const getSupplierName = (supplierId) => {
+        const supplier = suppliers.find(sup => sup.id === supplierId);
+        return supplier ? supplier.name : "Proveïdor no trobat";
     }
 
     const getOrderReceptionStatusName = (statusId) => {
@@ -222,9 +240,11 @@ function IncidenciesResoldre() {
                 ) : (
                     incidents.map((valors) => (
                     <tr key={valors.id}>
-                        <td data-cell="Data de creació" className='text-center'>{valors.created_at}</td>
+                        <td data-cell="Data de creació" className='text-center'>
+                            {valors.created_at ? new Date(valors.created_at).toISOString().split('T')[0] : "Data no disponible"}
+                        </td>
                         <td data-cell="Descripció" className='text-center'>{valors.description}</td>
-                        <td data-cell="Producte" className='text-center'>{getProductName(valors.name)}</td>
+                        <td data-cell="Producte" className='text-center'>{getProductName(valors.product_id)}</td>
                         <td data-cell="Unitats demanades" className='text-center'>{valors.quantity_ordered}</td>
                         <td data-cell="Unitats rebudes" className='text-center'>{valors.quantity_received}</td>
                         <td data-cell="Estat" className='text-center'>{getStatusId(valors.id)}</td>
@@ -233,8 +253,8 @@ function IncidenciesResoldre() {
                             <span onClick={() => visualitzarIncident(valors)} role='button'>
                                 <i className="bi bi-eye icono fs-5"></i>
                             </span>
-                            <span onClick={() => modificarIncident(valors)} className="mx-2" role='button'>
-                                <i className="bi bi-pencil-square icono fs-5 mx-2"></i>
+                            <span onClick={() => resoldreIncident(valors)} className="mx-2" role='button'>
+                                <i className="bi bi-check icono fs-5 mx-2"></i>
                             </span>
                             <span onClick={() => console.log("Asi eliminarem")} role='button'>
                                 <i className="bi bi-trash icono fs-5"></i>
@@ -248,7 +268,10 @@ function IncidenciesResoldre() {
             </table>
         </div>
 
-        <Modal className='text-light-blue' show={showModal} onHide={canviEstatModal}>
+        <Modal  className='text-light-blue'
+                show={showModal} 
+                onHide={canviEstatModal}
+        >
             <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
                 <Modal.Title>{tipoModal} Incidència</Modal.Title>
             </Modal.Header>
@@ -257,8 +280,11 @@ function IncidenciesResoldre() {
                 <Formik
                     initialValues={valorsInicials}
                     validationSchema={IncidenciaSchema}
+                    enableReinitialize
                     onSubmit={values => {
-                        console.log(values);
+                        console.log("onSubmit se está ejecutando"); // Verifica si `onSubmit` se llama
+                        console.log("Valores enviados:", values); // Muestra los valores enviados
+                        console.log("Valors enviats: ", values);
                         updateDataIncident(values.id, values);
                         canviEstatModal();
                     }}
@@ -309,7 +335,7 @@ function IncidenciesResoldre() {
                             name="created_at"
                             disabled
                             className="text-light-blue form-control"
-                            value={values.created_at} />
+                            value={values.created_at ? values.created_at.split('T')[0] : ""} />
                         {errors.created_at && touched.created_at ? <div className="invalid-feedback">{errors.created_at}</div> : null}
                     </div>
                     
@@ -321,7 +347,7 @@ function IncidenciesResoldre() {
                             name="product"
                             disabled
                             className="text-light-blue form-control"
-                            value={getProductName(values.product)} />
+                            value={getProductName(values.product_id)} />
                         {errors.product && touched.product ? <div className="invalid-feedback">{errors.product}</div> : null}
                     </div>
 
@@ -333,7 +359,7 @@ function IncidenciesResoldre() {
                             name="supplier_id"
                             disabled
                             className="text-light-blue form-control"
-                            value={values.supplier_id} />
+                            value={getSupplierName(values.supplier_id)} />
                         {errors.supplier && touched.supplier ? <div className="invalid-feedback">{errors.supplier}</div> : null}
                     </div>
 
@@ -345,16 +371,16 @@ function IncidenciesResoldre() {
                             name="operator_id"
                             disabled
                             className="text-light-blue form-control"
-                            value={getUserProfileName(values.id)} />
+                            value={getUserProfileName(values.operator_id)} />
                         {errors.operator && touched.operator ? <div className="invalid-feedback">{errors.operator}</div> : null}
                     </div>
 
                     {/* Estat */}
                     <div className="form-group">
-                        <label className='fw-bolder' htmlFor='status'>Estat</label>
+                        <label className='fw-bolder' htmlFor='orderline_status_id'>Estat</label>
                         <Field 
                             as='select' 
-                            name="status"
+                            name="orderline_status_id"
                             className="text-light-blue form-control"
                             disabled = {tipoModal == "Visualitzar"}
                         >
@@ -393,7 +419,7 @@ function IncidenciesResoldre() {
                     {/* Botones */}
                     <Modal.Footer>
                         <Button variant="secondary" onClick={canviEstatModal}>Tancar</Button>
-                        <Button className='orange-button' type="submit" variant="success">Modificar</Button>
+                        <Button className='orange-button' type="submit" variant="success">Resoldre</Button>
                     </Modal.Footer>
                 </Form>
                 )}
