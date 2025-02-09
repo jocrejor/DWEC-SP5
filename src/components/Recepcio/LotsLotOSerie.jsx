@@ -1,7 +1,68 @@
-import { Field } from 'formik';
+import { Field, useFormikContext } from 'formik';
 import PropTypes from 'prop-types';
 
-function LotsLotOSerie({ products, errors, touched, nombre, lotOSerie }) {
+
+import { useState, useEffect } from "react";
+
+
+function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers }) {
+  const [lotes, setLotes] = useState([]);
+  const [series, setSeries] = useState([]);
+  const [errorAgregar, setErrorAgregar] = useState("");
+
+  const { values, errors, touched } = useFormikContext();
+  const records = lotOSerie === "Lot" ? lotes : series;
+
+  useEffect(() => {
+    const storedLotes = JSON.parse(localStorage.getItem("lotsTemporal")) || [];
+    const storedSeries = JSON.parse(localStorage.getItem("serieTemporal")) || [];
+    setLotes(storedLotes);
+    setSeries(storedSeries);
+  }, []);
+
+  const handleAddRecord = () => {
+    if(!values.name || !values.quantity) {
+      setErrorAgregar("Debes llenar todos los campos");
+      return;
+    }
+    const orderReception = orderreception.find(
+      (or) => or.id === values.order_reception_id
+    );
+
+    const supplierId = orderReception ? orderReception.supplier_id : undefined;
+    const supplierRecord = suppliers.find((s) => s.id === supplierId);
+
+
+
+
+    const newRecord = {
+      name: values.name, // se asume que "name" está definido en Formik
+      product_id: values.product_id,
+      supplier_id: supplierRecord ? supplierRecord.id : undefined, // asignado automáticamente
+      quantity: lotOSerie === "Serie" ? 1 : values.quantity_received,
+      production_date: lotOSerie === "Lot" ? values.production_date : undefined,
+      expiration_date: lotOSerie === "Lot" ? values.expiration_date : undefined,
+      orderlinereception_id: orderReception ? orderReception.id : undefined, // asignado automáticamente
+    };
+
+    if (lotOSerie === "Lot") {
+      const updatedLotes = [...lotes, newRecord];
+      localStorage.setItem("lotsTemporal", JSON.stringify(updatedLotes));
+      setLotes(updatedLotes);
+    } else if (lotOSerie === "Serie") {
+      const updatedSeries = [...series, newRecord];
+      localStorage.setItem("serieTemporal", JSON.stringify(updatedSeries));
+      setSeries(updatedSeries);
+    }
+  };
+
+
+
+
+
+
+
+
   return (
     <>
       {/* Producte */}
@@ -49,20 +110,26 @@ function LotsLotOSerie({ products, errors, touched, nombre, lotOSerie }) {
               value={
                 lotOSerie === "Serie" ? (
                   "1"
-                ) : null
+                ) : undefined
               }
               disabled={
                 lotOSerie === "Serie"}
             />
+            {errors.quantity && touched.quantity && (
+              <div className="text-danger mt-1">{errors.quantity}</div>
+            )}
             <Field
               type="text"
               name={`${nombre}_name`}
               placeholder={nombre === "lot" ? `Nom del ${nombre}` : `Nom de la ${nombre}`}
               className="form-control w-100"
             />
-            <button className="btn text-white orange-button" type="button">
+            {errors.name && touched.name && (
+              <div className="text-danger mt-1">{errors.name}</div>
+            )}
+            <button className="btn text-white orange-button" type="button" onClick={handleAddRecord}>
               <i
-              className='bi bi-plus-circle'
+                className='bi bi-plus-circle'
               >
               </i>
             </button>
@@ -72,33 +139,73 @@ function LotsLotOSerie({ products, errors, touched, nombre, lotOSerie }) {
 
       {/* Campos adicionales solo para "Lot" */}
       {lotOSerie === "Lot" && (
-        <div className="form-group d-flex gap-2 mt-3">
-          {/* Production Date */}
-          <div className="w-100">
-            <label htmlFor="production_date">Data de producció</label>
-            <Field
-              type="date"
-              name="production_date"
-              className="form-control"
-            />
-            {errors.production_date && touched.production_date && (
-              <div className="text-danger mt-1">{errors.production_date}</div>
-            )}
+        <>
+          <div className="form-group d-flex gap-2 mt-3">
+            {/* Production Date */}
+            <div className="w-100">
+              <label htmlFor="production_date">Data de producció</label>
+              <Field
+                type="date"
+                name="production_date"
+                className="form-control"
+              />
+              {errors.production_date && touched.production_date && (
+                <div className="text-danger mt-1">{errors.production_date}</div>
+              )}
+            </div>
+            {/* Expiration Date */}
+            <div className="w-100">
+              <label htmlFor="expiration_date">Data d&apos;expiració</label>
+              <Field
+                type="date"
+                name="expiration_date"
+                className="form-control"
+              />
+              {errors.expiration_date && touched.expiration_date && (
+                <div className="text-danger mt-1">{errors.expiration_date}</div>
+              )}
+            </div>
           </div>
-          {/* Expiration Date */}
-          <div className="w-100">
-            <label htmlFor="expiration_date">Data d&apos;expiració</label>
-            <Field
-              type="date"
-              name="expiration_date"
-              className="form-control"
-            />
-            {errors.expiration_date && touched.expiration_date && (
-              <div className="text-danger mt-1">{errors.expiration_date}</div>
-            )}
-          </div>
-        </div>
+          {errorAgregar && <div className="text-danger mt-2">{errorAgregar}</div>}
+        </>
       )}
+
+      <div className='mt-4'>
+        <table className="table table-striped text-center align-middle">
+          <thead className="table-active border-bottom border-dark-subtle">
+            <tr>
+              <th scope='col' className="align-middle">Quantitat</th>
+              <th scope='col' className="align-middle">Nom</th>
+              {lotOSerie === "Lot" && (
+                <>
+                  <th scope='col' className="align-middle">Fecha de producció</th>
+                  <th scope='col' className="align-middle">Fecha de expiració</th>
+                </>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {records.length === 0 ? (
+              <tr>
+                <td colSpan={lotOSerie === "Lot" ? 4 : 2}>No hi han registres</td>
+              </tr>
+            ) : (
+              records.map((record, index) => (
+                <tr key={index}>
+                  <td>{record.quantity}</td>
+                  <td>{record.name}</td>
+                  {lotOSerie === "Lot" && (
+                    <>
+                      <td>{record.production_date}</td>
+                      <td>{record.expiration_date}</td>
+                    </>
+                  )}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

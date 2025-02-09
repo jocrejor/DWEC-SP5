@@ -11,12 +11,19 @@ const apiUrl = import.meta.env.VITE_API_URL;
 // const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
 const token = localStorage.getItem('token');
 
-const LotSchema = Yup.object().shape({
-  order_reception_id: Yup.string().required('Valor requerit'),
-  orderlinereception_status_id: Yup.string().required('Valor requerit'),
-  product_id: Yup.string().min(1, 'El valor ha de ser una cadena no vacía').required('Valor requerit'),
-  quantity_ordered: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
-  quantity_received: Yup.number().min(0, 'El valor no pot ser negatiu').required('Valor requerit')
+const LotSchema = (lotOSerie) => Yup.object().shape({
+  name: Yup.string().required("El nom és requerit"),
+  product_id: Yup.string()
+    .min(1, "El valor ha de ser una cadena no buida")
+    .required("Valor requerit"),
+  quantity_received: Yup.number()
+    .min(0, "El valor no pot ser negatiu")
+    .required("Valor requerit"),
+  // Agregar condicionalmente las fechas si es un lot
+  ...(lotOSerie === "Lot" && {
+    production_date: Yup.date().required("La data de producció és requerida"),
+    expiration_date: Yup.date().required("La data d'expiració és requerida"),
+  }),
 });
 
 /* LOTS */
@@ -28,7 +35,7 @@ function Lots() {
   const [orderreception, setOrderReception] = useState([]);
   const [orderreception_status, setOrderReceptionStatus] = useState([]);
   const [orderline_status, setOrderLineStatus] = useState([]);
-  const [orderLineReceptions, setOrderLineReception] = useState([]);
+  const [orderlinereception, setOrderLineReception] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
   const [lotOSerie, setLotOSerie] = useState('Lot');
@@ -42,7 +49,6 @@ function Lots() {
 
   useEffect(() => {
     const fetchData = async () => {
-
       axios.get(`${apiUrl}Lot`, { headers: { "auth-token": token } })
         // axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
         .then(
@@ -219,17 +225,17 @@ function Lots() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orderLineReceptions.length === 0 ? (
+                  {orderlinereception.length === 0 ? (
                     <tr>
                       <td colSpan="12" className="text-center">
                         No hi han linies d&apos;ordre de recepció
                       </td>
                     </tr>
                   ) : (
-                    orderLineReceptions
+                    orderlinereception
                       .filter((valors) => valors.orderline_status_id === 2)
                       .map((valors) => (
-                        <tr key={`orderLineReceptions-${valors.id}`}>
+                        <tr key={`orderlinereception-${valors.id}`}>
                           <td scope='row' data-cell="Seleccionar">
                             <input className='form-check-input' type="checkbox" />
                           </td>
@@ -378,7 +384,7 @@ function Lots() {
                   quantity_received: 0
                 }
             }
-            validationSchema={LotSchema}
+            validationSchema={LotSchema(lotOSerie)}
             /** SE ACTUALIZA LA TABLA AL MODIFICAR O CREAR */
             onSubmit={(values) => {
               console.log(values);
@@ -456,53 +462,10 @@ function Lots() {
               /**FORMULARIO CON SELECTS Y DEMÁS (CORRECTO) */
               <Form>
                 {lotOSerie === "Lot" ? (
-                  <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="lot" lotOSerie={lotOSerie} />
+                  <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="lot" lotOSerie={lotOSerie} orderreception={orderreception} suppliers={suppliers} />
                 ) : lotOSerie === "Serie" ? (
-                  <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="serie" lotOSerie={lotOSerie} />
+                  <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="serie" lotOSerie={lotOSerie} orderreception={orderreception} suppliers={suppliers} />
                 ) : null}
-
-
-                {/* <div className="form-group d-flex mt-3">
-                  <div>
-                    <div className='text-center fs-4'>
-                      <label htmlFor="lot">Lot</label>
-                    </div>
-                    <div className="input-group flex-nowrap">
-                      <Field
-                        type="number"
-                        name="lot_quantity"
-                        className="form-control w-25"
-                      />
-
-                      <Field
-                        type="text"
-                        name="lot_name"
-                        placeholder="Nom del lot"
-                        className="form-control w-100"
-                      />
-                    </div>
-
-
-                    <div className='text-center fs-4'>
-                      <label htmlFor="serie">Serie</label>
-                    </div>
-                    <div className="input-group flex-nowrap">
-                      <Field
-                        type="number"
-                        name="serie_quantity"
-                        className="form-control w-25"
-                      />
-
-                      <Field
-                        type="text"
-                        name="serie_name"
-                        placeholder="Nom de la serie"
-                        className="form-control w-100"
-                      />
-                    </div>
-                  </div>
-                </div> */}
-
                 <div className="form-group d-flex justify-content-between mt-3">
                   <Button
                     variant="secondary"
