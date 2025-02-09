@@ -461,7 +461,7 @@ function Transportistes() {
         </Modal.Body>
       </Modal>
 
-      {/* Modal per modificar (còpia amb inicials diferents) */}
+      {/* Modal per modificar*/}
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} transportista</Modal.Title>
@@ -490,7 +490,6 @@ function Transportistes() {
           >
             {({ values, errors, touched }) => (
               <Form>
-                {/* Formulario similar al anterior */}
                 <div className="form-group">
                   <label htmlFor="name">Nom</label>
                   <Field
@@ -566,7 +565,7 @@ function Transportistes() {
                         <option value="">Selecciona una província</option>
                         {provincia.length > 0 ? (
                           provincia.map((prov) => (
-                            <option key={prov.id} value={prov.id}>
+                            <option key={prov.id} value={prov.name}>
                               {prov.name}
                             </option>
                           ))
@@ -589,6 +588,7 @@ function Transportistes() {
                     </>
                   )}
                 </div>
+
                 {values.state_id === '194' && values.province ? (
                   <div className="form-group">
                     <label htmlFor="city">Ciutat</label>
