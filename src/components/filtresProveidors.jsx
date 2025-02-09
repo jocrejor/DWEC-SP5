@@ -102,7 +102,7 @@ const FiltresProveidors = ({ onFilter, onClear }) => {
                 />
             </div>
 
-            <div className="col-12 col-md-6 col-xl-4 text-light-blue">
+            <div className="col-12 col-md-6 col-xl-4 text-light-blue pt-3">
                 <label htmlFor="email" className="form-label">Email</label>
                 <select
                     className="form-control"
