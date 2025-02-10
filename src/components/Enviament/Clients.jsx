@@ -37,17 +37,20 @@ function Client() {
   const [clients, setClients] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Crear");
+  const [countryId, setCountryId] = useState(null);
   const [valorsInicials, setValorsInicials] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    nif: "",
-    state_id: "",
-    province_id: "",
-    city_id: "",
-    cp: "",
-  });
+  name: "",
+  email: "",
+  phone: "",
+  address: "",
+  nif: "",
+  state_id: "",
+  province_id: "",
+  city_id: "",
+  cp: "",
+  province_name: "",
+  city_name: "",
+});
 
   const [clientToView, setClientToView] = useState(null);
   const [states, setStates] = useState([]);
@@ -58,8 +61,8 @@ function Client() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredClients, setFilteredClients] = useState([]);
   const [sortField, setSortField] = useState("name");
-  const [sortOrder, setSortOrder] = useState("asc"); 
-  
+  const [sortOrder, setSortOrder] = useState("asc");
+
   useEffect(() => {
     const fetchData = async () => {
       const clientsData = await getData("client");
@@ -86,38 +89,42 @@ function Client() {
   }, []);
 
   const handleFilter = (filters) => {
-    console.log("Filtros aplicados:", filters);  
-    
+    console.log("Filtros aplicados:", filters);
+
     // Filtrado de los clientes
-    const filtered = clients.filter(client => {
+    const filtered = clients.filter((client) => {
       return (
-        (filters.name ? client.name.toLowerCase().includes(filters.name.toLowerCase()) : true) &&
-        (filters.email ? client.email.toLowerCase().includes(filters.email.toLowerCase()) : true) &&
+        (filters.name
+          ? client.name.toLowerCase().includes(filters.name.toLowerCase())
+          : true) &&
+        (filters.email
+          ? client.email.toLowerCase().includes(filters.email.toLowerCase())
+          : true) &&
         (filters.phone ? client.phone.includes(filters.phone) : true) &&
-        (filters.address ? client.address.toLowerCase().includes(filters.address.toLowerCase()) : true) &&
+        (filters.address
+          ? client.address.toLowerCase().includes(filters.address.toLowerCase())
+          : true) &&
         (filters.nif ? client.nif.includes(filters.nif) : true)
       );
     });
-  
+
     // Ordenar los clientes filtrados
     const sorted = filtered.sort((a, b) => {
       if (sortField === "name") {
-        return sortOrder === "asc" 
-          ? a.name.localeCompare(b.name) 
+        return sortOrder === "asc"
+          ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name);
       }
       if (sortField === "email") {
-        return sortOrder === "asc" 
-          ? a.email.localeCompare(b.email) 
+        return sortOrder === "asc"
+          ? a.email.localeCompare(b.email)
           : b.email.localeCompare(a.email);
       }
       return 0;
     });
-  
-    setFilteredClients(sorted); 
-  };
-  
 
+    setFilteredClients(sorted);
+  };
 
   const getData = async (endpoint) => {
     try {
@@ -142,7 +149,7 @@ function Client() {
 
       const clientsData = await getData("client");
       setClients(clientsData);
-      setFilteredClients(clientsData); 
+      setFilteredClients(clientsData);
     } catch (error) {
       console.error("Error al eliminar el client", error);
     }
@@ -155,29 +162,47 @@ function Client() {
           "auth-token": localStorage.getItem("token"),
         },
       });
-
+  
       if (response.data) {
         setTipoModal("Modificar");
-        setValorsInicials(response.data);
-
-        const provincesData = await getData(
-          "Province?state_id=" + response.data.state_id
-        );
+        const provinceName = provinces.find(
+          (province) => province.id === response.data.province_id
+        )?.name;
+        const cityName = cities.find(
+          (city) => city.id === response.data.city_id
+        )?.name;
+  
+        setValorsInicials({
+          ...response.data,
+          state_id: response.data.state_id
+            ? response.data.state_id.toString()
+            : "",
+          province_id: response.data.province_id
+            ? response.data.province_id.toString()
+            : "",
+          city_id: response.data.city_id
+            ? response.data.city_id.toString()
+            : "",
+          province_name: provinceName || "",
+          city_name: cityName || "",
+        });
+  
+        const provincesData = await getData("Province?state_id=" + response.data.state_id);
         setProvinces(provincesData);
-
-        const citiesData = await getData(
-          "City?province_id=" + response.data.province_id
-        );
+  
+        const citiesData = await getData("City?province_id=" + response.data.province_id);
         setCities(citiesData);
-
+  
         setSelectedState(response.data.state_id);
         setSelectedProvince(response.data.province_id);
+  
         setShowModal(true);
       }
     } catch (error) {
       console.error("Error al obtener los datos del cliente", error);
     }
   };
+  
 
   const canviEstatModal = () => {
     setShowModal(!showModal);
@@ -192,13 +217,64 @@ function Client() {
       });
   
       if (response.data) {
-        setClientToView(response.data); 
-        setTipoModal("Visualitzar");  
-        setShowModal(true); 
+        const provinceName = provinces.find(
+          (province) => province.id === response.data.province_id
+        )?.name;
+        const cityName = cities.find(
+          (city) => city.id === response.data.city_id
+        )?.name;
+  
+        setValorsInicials({
+          ...response.data,
+          state_id: response.data.state_id
+            ? response.data.state_id.toString()
+            : "",
+          province_id: response.data.province_id
+            ? response.data.province_id.toString()
+            : "",
+          city_id: response.data.city_id
+            ? response.data.city_id.toString()
+            : "",
+          province_name: provinceName || "",
+          city_name: cityName || "",
+        });
+  
+        setTipoModal("Visualitzar");
+  
+        const provincesData = await getData(
+          "Province?state_id=" + response.data.state_id
+        );
+        setProvinces(provincesData);
+  
+        const citiesData = await getData(
+          "City?province_id=" + response.data.province_id
+        );
+        setCities(citiesData);
+  
+        setSelectedState(response.data.state_id);
+        setSelectedProvince(response.data.province_id);
+  
+        setShowModal(true);
       }
     } catch (error) {
       console.error("Error al obtener los datos del cliente", error);
     }
+  };
+
+  const openCrearModal = () => {
+    setTipoModal("Crear");
+    setValorsInicials({
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      nif: "",
+      state_id: "",
+      province_id: "",
+      city_id: "",
+      cp: "",
+    });
+    setShowModal(true);
   };
 
   const actualizarClient = async (values) => {
@@ -219,43 +295,40 @@ function Client() {
             client.id === values.id ? response.data : client
           )
         );
-        setShowModal(false);
-        setFilteredClients((prevClients) => 
-          prevClients.map((client) => 
+        setFilteredClients((prevClients) =>
+          prevClients.map((client) =>
             client.id === values.id ? response.data : client
           )
         );
+        setShowModal(false);
       }
     } catch (error) {
       console.error("Error al actualizar el cliente", error);
     }
   };
 
-  const handleStateChange = async (e, setFieldValue) => {
+  const handleStateChange = (e, setFieldValue) => {
     const selectedStateId = e.target.value;
-    setFieldValue("state_id", selectedStateId);
-    setSelectedState(selectedStateId);
-
-    const provincesData = await getData("Province?state_id=" + selectedStateId);
-    setProvinces(provincesData);
-    setSelectedProvince(""); 
-    setCities([]); 
+    const selectedCountryId = states.find(state => state.id.toString() === selectedStateId)?.country_id;
+    setCountryId(selectedCountryId);
+    setFieldValue("state_id", selectedStateId); 
   };
+
 
   const handleProvinceChange = async (e, setFieldValue) => {
     const selectedProvinceId = e.target.value;
-    setFieldValue("province_id", selectedProvinceId); 
-    setSelectedProvince(selectedProvinceId); 
+    setFieldValue("province_id", selectedProvinceId);
+    setSelectedProvince(selectedProvinceId);
 
     if (selectedProvinceId) {
-      const allCities = await getData("City"); 
+      const allCities = await getData("City");
 
       const filteredCities = allCities.filter(
         (city) => city.province_id === parseInt(selectedProvinceId)
       );
 
       setCities(filteredCities);
-      setFieldValue("city_id", ""); 
+      setFieldValue("city_id", "");
     } else {
       setCities([]);
     }
@@ -277,7 +350,7 @@ function Client() {
   const crearClient = async (values) => {
     if (values.nif.length < 9) {
       alert("El NIF debe tener al menos 9 caracteres.");
-      return; 
+      return;
     }
 
     const clientData = {
@@ -287,37 +360,43 @@ function Client() {
       phone: values.phone,
       email: values.email,
       state_id: values.state_id,
-      province: provinces.find((province) => province.id === parseInt(values.province_id))?.name || "", 
-      city: cities.find((city) => city.id === parseInt(values.city_id))?.name || "", 
-      cp: values.cp
+      province:
+        provinces.find(
+          (province) => province.id === parseInt(values.province_id)
+        )?.name || "",
+      city:
+        cities.find((city) => city.id === parseInt(values.city_id))?.name || "",
+      cp: values.cp,
     };
-  
+
     console.log("Datos enviados para la creación del cliente:", clientData);
-  
+
     try {
-      const response = await axios.post("https://api.dwes.iesevalorpego.es/client", clientData, {
-        headers: {
-          "auth-token": localStorage.getItem("token"), 
-          "Content-Type": "application/json"
+      const response = await axios.post(
+        "https://api.dwes.iesevalorpego.es/client",
+        clientData,
+        {
+          headers: {
+            "auth-token": localStorage.getItem("token"),
+            "Content-Type": "application/json",
+          },
         }
-      });
-  
+      );
+
       if (response.data) {
         console.log("Cliente creado con éxito:", response.data);
         setClients((prevClients) => [...prevClients, response.data]);
         setFilteredClients((prevClients) => [...prevClients, response.data]);
-        setShowModal(false); 
+        setShowModal(false);
       }
-  
     } catch (error) {
       console.error("Error al crear el cliente:", error);
-  
     }
   };
 
   const [currentPage, setCurrentPage] = useState(1);
   const clientsPerPage = 10;
-   const handlePageChange = (page) => {
+  const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
@@ -340,8 +419,9 @@ function Client() {
                 className="form-select"
                 id="floatingSelect"
                 aria-label="Seleccione una opción"
+                defaultValue=""
               >
-                <option selected>Tria una opció</option>
+                <option value="">Tria una opció</option>
                 <option value="1">Eliminar</option>
               </select>
               <label htmlFor="floatingSelect">Accions en lot</label>
@@ -359,7 +439,7 @@ function Client() {
           <div className="d-flex h-100 justify-content-xl-end">
             <button
               className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
-              onClick={canviEstatModal}
+              onClick={openCrearModal}
             >
               <i className="bi bi-plus-circle text-white pe-1"></i>Crear
             </button>
@@ -370,51 +450,76 @@ function Client() {
         <table className="table table-hover table-striped">
           <thead className="table">
             <tr>
-            <th scope="col" className="text-center">ID</th>
-              <th scope="col" className="text-center">Nom</th>
-              <th scope="col" className="text-center">Email</th>
-              <th scope="col" className="text-center">Telèfon</th>
-              <th scope="col" className="text-center">NIF</th> 
-              <th scope="col" className="text-center">Adreça</th>
-              <th scope="col" className="text-center">Accions</th>
+              <th scope="col" className="text-center">
+                ID
+              </th>
+              <th scope="col" className="text-center">
+                Nom
+              </th>
+              <th scope="col" className="text-center">
+                Email
+              </th>
+              <th scope="col" className="text-center">
+                Telèfon
+              </th>
+              <th scope="col" className="text-center">
+                NIF
+              </th>
+              <th scope="col" className="text-center">
+                Adreça
+              </th>
+              <th scope="col" className="text-center">
+                Accions
+              </th>
             </tr>
           </thead>
           <tbody>
-  {clients.map((client) => (
-    <tr key={client.id}>
-      <td data-cell="ID" className="text-center">{client.id}</td>
-      <td data-cell="Nom" className="text-center">{client.name}</td>
-      <td data-cell="Email" className="text-center">{client.email}</td>
-      <td data-cell="Telèfon" className="text-center">{client.phone}</td>
-      <td data-cell="NIF" className="text-center">{client.nif}</td>
-      <td data-cell="Adreça" className="text-center">{client.address}</td>
-      <td>
-        <div className="d-flex">
-          <span
-            onClick={() => visualizarClient(client.id)} // Visualizar
-            style={{ cursor: "pointer" }}
-          >
-            <i className="bi bi-eye"></i>
-          </span>
-          <span
-            onClick={() => modificarClient(client.id)} // Modificar
-            className="mx-2"
-            style={{ cursor: "pointer" }}
-          >
-            <i className="bi bi-pencil-square"></i>
-          </span>
-          <span
-            onClick={() => eliminarClient(client.id)} // Eliminar
-            style={{ cursor: "pointer" }}
-          >
-            <i className="bi bi-trash"></i>
-          </span>
-        </div>
-      </td>
-    </tr>
-  ))}
-</tbody>
-
+            {currentClients.map((client) => (
+              <tr key={client.id}>
+                <td data-cell="ID" className="text-center">
+                  {client.id}
+                </td>
+                <td data-cell="Nom" className="text-center">
+                  {client.name}
+                </td>
+                <td data-cell="Email" className="text-center">
+                  {client.email}
+                </td>
+                <td data-cell="Telèfon" className="text-center">
+                  {client.phone}
+                </td>
+                <td data-cell="NIF" className="text-center">
+                  {client.nif}
+                </td>
+                <td data-cell="Adreça" className="text-center">
+                  {client.address}
+                </td>
+                <td>
+                  <div className="d-flex">
+                    <span
+                      onClick={() => visualizarClient(client.id)} // Visualizar
+                      style={{ cursor: "pointer" }}
+                    >
+                      <i className="bi bi-eye"></i>
+                    </span>
+                    <span
+                      onClick={() => modificarClient(client.id)} // Modificar
+                      className="mx-2"
+                      style={{ cursor: "pointer" }}
+                    >
+                      <i className="bi bi-pencil-square"></i>
+                    </span>
+                    <span
+                      onClick={() => eliminarClient(client.id)} // Eliminar
+                      style={{ cursor: "pointer" }}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
 
@@ -429,183 +534,242 @@ function Client() {
           <Modal.Title>{tipoModal} Client</Modal.Title>
         </Modal.Header>
         <Formik
-          initialValues={valorsInicials}
-          validationSchema={ClientSchema}
-          enableReinitialize
-          onSubmit={tipoModal === "Crear" ? crearClient : actualizarClient}
-        >
-          {({
-            values,
-            handleChange,
-            handleSubmit,
-            setFieldValue,
-            errors,
-            touched,
-          }) => (
-            <Form onSubmit={handleSubmit}>
-              <Modal.Body>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="name">
-                    Nom del client
-                  </label>
-                  <Field
-                    className="form-control"
-                    type="text"
-                    id="name"
-                    name="name"
-                    disabled={tipoModal === "Visualitzar"}
-                  />
-                  {errors.name && touched.name && (
-                    <div className="text-danger">{errors.name}</div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="email">
-                    Correu electrònic
-                  </label>
-                  <Field
-                    className="form-control"
-                    type="email"
-                    id="email"
-                    name="email"
-                  />
-                  {errors.email && touched.email && (
-                    <div className="text-danger">{errors.email}</div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="phone">
-                    Telèfon
-                  </label>
-                  <Field
-                    className="form-control"
-                    type="text"
-                    id="phone"
-                    name="phone"
-                  />
-                  {errors.phone && touched.phone && (
-                    <div className="text-danger">{errors.phone}</div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="address">
-                    Adreça
-                  </label>
-                  <Field
-                    className="form-control"
-                    type="text"
-                    id="address"
-                    name="address"
-                  />
-                  {errors.address && touched.address && (
-                    <div className="text-danger">{errors.address}</div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="nif">
-                    NIF
-                  </label>
-                  <Field
-                    className="form-control"
-                    type="text"
-                    id="nif"
-                    name="nif"
-                  />
-                  {errors.nif && touched.nif && (
-                    <div className="text-danger">{errors.nif}</div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="state_id">
-                    Estat
-                  </label>
-                  <Field
-                    as="select"
-                    className="form-control"
-                    id="state_id"
-                    name="state_id"
-                    onChange={(e) => handleStateChange(e, setFieldValue)}
-                  >
-                    <option value="">Tria un estat</option>
-                    {states.map((state) => (
-                      <option key={state.id} value={state.id}>
-                        {state.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.state_id && touched.state_id && (
-                    <div className="text-danger">{errors.state_id}</div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="province_id">
-                    Província
-                  </label>
-                  <Field
-                    as="select"
-                    className="form-control"
-                    id="province_id"
-                    name="province_id"
-                    onChange={(e) => handleProvinceChange(e, setFieldValue)}
-                  >
-                    <option value="">Tria una província</option>
-                    {provinces.map((province) => (
-                      <option key={province.id} value={province.id}>
-                        {province.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.province_id && touched.province_id && (
-                    <div className="text-danger">{errors.province_id}</div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="city_id">
-                    Ciutat
-                  </label>
-                  <Field
-                    as="select"
-                    className="form-control"
-                    id="city_id"
-                    name="city_id"
-                  >
-                    <option value="">Tria una ciutat</option>
-                    {cities.map((city) => (
-                      <option key={city.id} value={city.id}>
-                        {city.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.city_id && touched.city_id && (
-                    <div className="text-danger">{errors.city_id}</div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="cp">
-                    Codi postal
-                  </label>
-                  <Field
-                    className="form-control"
-                    type="text"
-                    id="cp"
-                    name="cp"
-                  />
-                  {errors.cp && touched.cp && (
-                    <div className="text-danger">{errors.cp}</div>
-                  )}
-                </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={canviEstatModal}>
-                  Tancar
-                </Button>
-                <Button variant="primary" type="submit">
-                  {tipoModal === "Modificar" ? "Modificar" : "Crear"}
-                </Button>
-              </Modal.Footer>
-            </Form>
+  initialValues={valorsInicials}
+  validationSchema={ClientSchema}
+  enableReinitialize
+  onSubmit={tipoModal === "Crear" ? crearClient : actualizarClient}
+>
+  {({
+    values,
+    handleChange,
+    handleSubmit,
+    setFieldValue,
+    errors,
+    touched,
+  }) => {
+    // Si estamos en modo "Visualitzar", preseleccionamos provincia y ciudad
+    useEffect(() => {
+      if (tipoModal === "Visualitzar" && values.province && values.city) {
+        // Se asume que 'province' y 'city' son cadenas que deben coincidir con las opciones
+        const selectedProvince = provinces.find(
+          (province) => province.name === values.province
+        );
+        const selectedCity = cities.find((city) => city.name === values.city);
+
+        // Si encontramos la provincia y la ciudad, asignamos su id a los campos correspondientes
+        if (selectedProvince) {
+          setFieldValue("province_id", selectedProvince.id);
+        }
+
+        if (selectedCity) {
+          setFieldValue("city_id", selectedCity.id);
+        }
+      }
+    }, [values.province, values.city, tipoModal, provinces, cities, setFieldValue]);
+
+    return (
+      <Form onSubmit={handleSubmit}>
+        <Field type="hidden" name="id" />
+        <Modal.Body>
+          {/* Campo de nombre */}
+          <div className="mb-3">
+            <label className="form-label" htmlFor="name">
+              Nom del client
+            </label>
+            <Field
+              className="form-control"
+              type="text"
+              id="name"
+              name="name"
+              disabled={tipoModal === "Visualitzar"}
+            />
+            {errors.name && touched.name && (
+              <div className="text-danger">{errors.name}</div>
+            )}
+          </div>
+
+          {/* Campo de correo electrónico */}
+          <div className="mb-3">
+            <label className="form-label" htmlFor="email">
+              Correu electrònic
+            </label>
+            <Field
+              className="form-control"
+              type="email"
+              id="email"
+              name="email"
+              disabled={tipoModal === "Visualitzar"}
+            />
+            {errors.email && touched.email && (
+              <div className="text-danger">{errors.email}</div>
+            )}
+          </div>
+
+          {/* Campo de teléfono */}
+          <div className="mb-3">
+            <label className="form-label" htmlFor="phone">
+              Telèfon
+            </label>
+            <Field
+              className="form-control"
+              type="text"
+              id="phone"
+              name="phone"
+              disabled={tipoModal === "Visualitzar"}
+            />
+            {errors.phone && touched.phone && (
+              <div className="text-danger">{errors.phone}</div>
+            )}
+          </div>
+
+          {/* Campo de dirección */}
+          <div className="mb-3">
+            <label className="form-label" htmlFor="address">
+              Adreça
+            </label>
+            <Field
+              className="form-control"
+              type="text"
+              id="address"
+              name="address"
+              disabled={tipoModal === "Visualitzar"}
+            />
+            {errors.address && touched.address && (
+              <div className="text-danger">{errors.address}</div>
+            )}
+          </div>
+
+          {/* Campo de NIF */}
+          <div className="mb-3">
+            <label className="form-label" htmlFor="nif">
+              NIF
+            </label>
+            <Field
+              className="form-control"
+              type="text"
+              id="nif"
+              name="nif"
+              disabled={tipoModal === "Visualitzar"}
+            />
+            {errors.nif && touched.nif && (
+              <div className="text-danger">{errors.nif}</div>
+            )}
+          </div>
+
+          {/* Campo de estado */}
+          <div className="mb-3">
+            <label className="form-label" htmlFor="state_id">
+              Estat
+            </label>
+            <Field
+              as="select"
+              className="form-control"
+              id="state_id"
+              name="state_id"
+              onChange={(e) => handleStateChange(e, setFieldValue)}
+              disabled={tipoModal === "Visualitzar"}
+            >
+              <option value="">Tria un estat</option>
+              {states.map((state) => (
+                <option key={state.id} value={state.id.toString()}>
+                  {state.name}
+                </option>
+              ))}
+            </Field>
+            {errors.state_id && touched.state_id && (
+              <div className="text-danger">{errors.state_id}</div>
+            )}
+          </div>
+
+          {/* Campo de provincia */}
+          <div className="mb-3">
+            <label className="form-label" htmlFor="province_id">
+              Província
+            </label>
+            <Field
+              as="select"
+              className="form-control"
+              id="province_id"
+              name="province_id"
+              onChange={(e) => handleProvinceChange(e, setFieldValue)}
+              disabled={tipoModal === "Visualitzar"}
+            >
+              <option value="">Tria una província</option>
+              {provinces.map((province) => (
+                <option key={province.id} value={province.id.toString()}>
+                  {province.name}
+                </option>
+              ))}
+            </Field>
+            {errors.province_id && touched.province_id && (
+              <div className="text-danger">{errors.province_id}</div>
+            )}
+          </div>
+
+          {/* Campo de ciudad */}
+          <div className="mb-3">
+            <label className="form-label" htmlFor="city_id">
+              Ciutat
+            </label>
+            <Field
+              as="select"
+              className="form-control"
+              id="city_id"
+              name="city_id"
+              disabled={tipoModal === "Visualitzar"}
+            >
+              <option value="">Tria una ciutat</option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.id.toString()}>
+                  {city.name}
+                </option>
+              ))}
+            </Field>
+            {errors.city_id && touched.city_id && (
+              <div className="text-danger">{errors.city_id}</div>
+            )}
+          </div>
+
+          {/* Campo de código postal */}
+          <div className="mb-3">
+            <label className="form-label" htmlFor="cp">
+              Codi postal
+            </label>
+            <Field
+              className="form-control"
+              type="text"
+              id="cp"
+              name="cp"
+              disabled={tipoModal === "Visualitzar"}
+            />
+            {errors.cp && touched.cp && (
+              <div className="text-danger">{errors.cp}</div>
+            )}
+          </div>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={canviEstatModal}>
+            Tancar
+          </Button>
+
+          {tipoModal === "Crear" && (
+            <Button variant="primary" type="submit">
+              Crear
+            </Button>
           )}
-        </Formik>
+
+          {tipoModal === "Modificar" && (
+            <Button variant="primary" type="submit">
+              Modificar
+            </Button>
+          )}
+        </Modal.Footer>
+      </Form>
+    );
+  }}
+</Formik>
+
       </Modal>
       <nav aria-label="Page navigation example" className="d-block">
         <ul className="pagination justify-content-center">
@@ -625,7 +789,9 @@ function Client() {
           {[...Array(totalPages)].map((_, index) => (
             <li key={index} className="page-item">
               <a
-                className={`page-link ${currentPage === index + 1 ? "activo-2" : ""}`}
+                className={`page-link ${
+                  currentPage === index + 1 ? "activo-2" : ""
+                }`}
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
