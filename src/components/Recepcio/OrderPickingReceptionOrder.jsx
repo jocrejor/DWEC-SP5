@@ -164,10 +164,10 @@ function OrderPickingReception() {
 
     //funcions paginació
     useEffect (()=>{
-        const totalPages = Math.ceil(orderLineReception.length / elementsPaginacio);
+        const totalPages = Math.ceil(temporalPickings.length / elementsPaginacio);
         setTotalPages(totalPages);
         console.log(totalPages)
-    },[orderLineReception])
+    },[temporalPickings])
 
     const paginate = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -188,9 +188,9 @@ function OrderPickingReception() {
     useEffect(()=> {
         const indexOfLastItem = currentPage * elementsPaginacio;
         const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
-        const currentItems = orderLineReception.slice(indexOfFirstItem, indexOfLastItem);
+        const currentItems = temporalPickings.slice(indexOfFirstItem, indexOfLastItem);
         setOrderLinesPage(currentItems)
-    },[currentPage,orderLineReception])
+    },[currentPage,temporalPickings])
 
     return (
         <>
@@ -257,7 +257,7 @@ function OrderPickingReception() {
                                     </thead>
 
                                     <tbody>
-                                        {temporalPickings.map(temporalPicking => {
+                                        {orderLinesPage.map(temporalPicking => {
                                             const product = products.find(p => p.id === temporalPicking.product_id);
                                             return (
                                                 <tr key={temporalPicking.order_reception_id}>
