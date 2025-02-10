@@ -34,46 +34,43 @@ function OrdresEnviament() {
   const [productosEliminados, setArrayEliminados] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [orderPage,setOrderPage]= useState([]);
+  const [orderPage, setOrderPage] = useState([]);
 
   // Paginació
-const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
-  
- 
-// Obtindreels index. 
-useEffect (()=>{
-  const totalPages = Math.ceil(orders.length / elementsPaginacio);
-  setTotalPages(totalPages);
-  console.log(totalPages)
-},[orders])
-
-// Función para cambiar de página
-const paginate = (pageNumber) => {
-  setCurrentPage(pageNumber);
-};
-
-// Funciones para "anterior" y "siguiente"
-const goToPreviousPage = () => {
-  if (currentPage > 1) {
-    setCurrentPage(currentPage - 1);
-  }
-};
-
-const goToNextPage = () => {
-  if (currentPage < totalPages) {
-    setCurrentPage(currentPage + 1);
-  }
-};
-
-useEffect(()=> {
-  const indexOfLastItem = currentPage * elementsPaginacio;
-  const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
-  const currentItems = orders.slice(indexOfFirstItem, indexOfLastItem);
-  setOrderPage(currentItems)
-},[currentPage,orders])
+  const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
 
 
+  // Obtindreels index. 
+  useEffect(() => {
+    const totalPages = Math.ceil(orders.length / elementsPaginacio);
+    setTotalPages(totalPages);
+    console.log(totalPages)
+  }, [orders])
 
+  // Función para cambiar de página
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Funciones para "anterior" y "siguiente"
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    const indexOfLastItem = currentPage * elementsPaginacio;
+    const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
+    const currentItems = orders.slice(indexOfFirstItem, indexOfLastItem);
+    setOrderPage(currentItems)
+  }, [currentPage, orders])
 
   useEffect(() => {
     axios.get(`${apiUrl}ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
@@ -162,7 +159,6 @@ useEffect(()=> {
   }
 
   const eliminarProducte = (idProducto) => {
-    // Buscar el producto en `arrayProductos` y obtener su `id` de `orderlineshipping`
     const productoAEliminar = arrayProductos.find(producto => producto.product_id === idProducto);
     console.log(productoAEliminar);
 
@@ -299,14 +295,17 @@ useEffect(()=> {
     }
   };
 
-  const actualitzaFiltres = async (clients, identificador) => {
+  const actualitzaFiltres = async (clients, identificador, estats) => {
     let ordersFiltradas = orders;
     ordersFiltradas = ordersFiltradas.filter((order) => {
       const matchesClient = clients ? parseInt(order.client_id) === parseInt(clients) : true;
       const matchesId = identificador ? parseInt(order.id) === parseInt(identificador) : true;
-
+      const matchesStatus = estats ? parseInt(order.ordershipping_status_id) === parseInt(estats) : true;
+      console.log(estats);
+      console.log(matchesStatus);
+      setCurrentPage(1)
       // Ambas condiciones deben ser verdaderas para que la orden pase el filtro
-      return matchesClient && matchesId;
+      return matchesClient && matchesId && matchesStatus;
     });
     setOrder(ordersFiltradas);
   }
@@ -315,8 +314,7 @@ useEffect(()=> {
     actualitzaDades();
     document.getElementById("client").value = "";
     document.getElementById("id").value = "";
-    document.getElementById("date_max").value = "";
-    document.getElementById("date_min").value = "";
+    document.getElementById("status").value = "";
   }
 
   return (
@@ -394,7 +392,7 @@ useEffect(()=> {
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            
+
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
               <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
                 <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
@@ -403,7 +401,7 @@ useEffect(()=> {
               </li>
             ))}
             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {e.preventDefault(); goToNextPage(); }}>
+              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => { e.preventDefault(); goToNextPage(); }}>
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
@@ -421,7 +419,7 @@ useEffect(()=> {
             initialValues={(tipoModal === 'Modificar' ? valorsInicials : {
               client_id: '',
               shipping_date: '',
-              ordershipping_status_id: 1
+              ordershipping_status_id: 2
             })}
             validationSchema={OrderShippingSchema}
             onSubmit={values => {

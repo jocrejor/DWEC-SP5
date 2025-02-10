@@ -4,6 +4,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 function Filtres({onFilterChange, onFilterRestart}) {
     const [clients,setClients] = useState([])
+    const [status,SetStatus] = useState([])
 
     useEffect(() => {
         axios.get(`${apiUrl}client`, { headers: { "auth-token": localStorage.getItem("token") } })
@@ -15,12 +16,23 @@ function Filtres({onFilterChange, onFilterRestart}) {
           console.log(e)
         }
         )
+
+        axios.get(`${apiUrl}ordershipping_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+        .then(response => {
+          console.log(response)
+          SetStatus(response.data)
+        })
+        .catch(e => {
+          console.log(e)
+        }
+        )
     },[])
 
     const filtrar = () => {
         const clientValue = document.getElementById('client').value;
         const idValue = document.getElementById('id').value;
-        onFilterChange(clientValue,idValue);
+        const statusValue = document.getElementById('status').value;
+        onFilterChange(clientValue,idValue,statusValue);
     }
 
     const netejaFiltre = () => {
@@ -37,14 +49,13 @@ function Filtres({onFilterChange, onFilterRestart}) {
                 </div>
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
-                        <label for="date_min" className="form-label">Data minima</label>
-                        <input type="date" className="form-control" id="date_min" />
-                    </div>
-                </div>
-                <div className="col-12 col-md-6 col-xl-4">
-                    <div className="mb-3 text-light-blue">
-                        <label for="date_max" className="form-label">Data màxima</label>
-                        <input type="date" placeholder='Ex: 03' className="form-control" id="date_max" />
+                        <label for="status" className="form-label">Estat</label>
+                        <select className='form-control' name="status" id="status">
+                            <option value="">Selecciona un estat:</option>
+                            {status.map(estat => {
+                                return <option key={estat.id} value={estat.id}>{estat.name}</option>
+                            })}
+                        </select>
                     </div>
                 </div>
                 <div className="col-12 col-md-6 col-xl-4">
