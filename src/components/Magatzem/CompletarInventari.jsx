@@ -157,16 +157,17 @@ function CompletarInventari() {
                   space.shelf_id === line.shelf_id &&
                   space.street_id === line.street_id);
 
+                  console.log(line)
+
       const updatedQuantity = (space?.quantity === null) ? 100 - line.quantity_real : space?.quantity - line.quantity_real;
-    // No actualiza el spacio de foma 
+      // No actualiza el espacio
       if (space) {
         const updatedSpace = { ...space, 
           product_id: (space?.product_id === null) ? line.product_id : space?.product_id, 
           quantity: updatedQuantity || space?.quantity }
-        
-          console.log(`${apiURL}/space/${space.id}`);
 
-        axios.put(`${apiURL}/space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+          console.log()
+       // axios.put(`${apiURL}/space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
       };
 
       
@@ -175,10 +176,10 @@ function CompletarInventari() {
 
     const updatedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Completat').id }
 
-    axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+    //axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
     alert('Inventari completat amb èxit');
-    navigate('/inventaris');
+   // navigate('/inventaris');
 
   }
 

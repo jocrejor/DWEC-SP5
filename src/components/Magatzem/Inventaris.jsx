@@ -45,12 +45,18 @@ function Inventaris() {
   const totalInventories = inventory.length;
 
 
-
   useEffect(() => {
     axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
-        setInventory(response.data);
-        setDataToDisplay(response.data);
+        const orderedInventories = response.data.sort((a, b) => {
+          if(a.id > b.id) return 1;
+          if(a.id < b.id) return 1;
+          
+          return 0
+        })
+
+        setInventory(orderedInventories);
+        setDataToDisplay(orderedInventories);
       })
       .catch(e => { console.log(e.response.data) })
 
@@ -213,9 +219,14 @@ function Inventaris() {
 
     await axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
       .then(response => {
-        console.log(response)
-        console.log(response.data)
-        setInventory(response.data);
+        const orderedInventories = response.data.sort((a, b) => {
+          if(a.id > b.id) return 1;
+          if(a.id < b.id) return 1;
+          
+          return 0
+        })
+
+        setInventory(orderedInventories);
 
       })
       .catch(e => { console.log(e) })
@@ -228,8 +239,14 @@ function Inventaris() {
 
       axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
-          setInventory(response.data);
-
+          const orderedInventories = response.data.sort((a, b) => {
+            if(a.id > b.id) return 1;
+            if(a.id < b.id) return 1;
+            
+            return 0
+          })
+  
+          setInventory(orderedInventories);
         })
         .catch(e => { console.log(e) })
     }
@@ -247,6 +264,7 @@ function Inventaris() {
     setShowInventoryModal(!showInventoryModal);
   }
 
+
   return (
     <>
       <Header title='Inventaris'></Header>
@@ -261,7 +279,7 @@ function Inventaris() {
               </select>
               <label htmlFor="floatingSelect">Accions en lot</label>
             </div>
-            <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button" aria-label='Aplicar acciones en lote'><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+            <button onClick={fecha} className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button" aria-label='Aplicar acciones en lote'><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
           </div>
         </div>
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>

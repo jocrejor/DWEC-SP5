@@ -7,7 +7,7 @@ function InventarisFiltres({ onFilter, onClearFilters, storages}) {
     const [filters, setFilters] = useState({
         dateFrom: '',
         dateTo: '',
-        status: '',
+        status: 'Pendent',
         storage: ''
     });
 

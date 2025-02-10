@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
 
+
 function Lateral() {
     const [showModal, setShowModal] = useState(false);
     const [activeOption, setActiveOption] = useState();
@@ -30,18 +31,18 @@ function Lateral() {
                 <div className="">
                     <div className="d-flex justify-content-between">
                         <img id="logo" className="m-4 py-xl-4 m-xl-auto" src={logo} alt="Logo Stockflow" />
-                        <nav class="navbar navbar-dark  d-xl-none d-flex">
-                            <div class="container-fluid">
-                                <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse"
+                        <nav className="navbar navbar-dark  d-xl-none d-flex">
+                            <div className="container-fluid">
+                                <button className="navbar-toggler text-white" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#navbarToggleExternalContent"
                                     aria-controls="navbarToggleExternalContent" aria-expanded="false"
                                     aria-label="Toggle navigation">
-                                    <span class="navbar-toggler-icon text"></span>
+                                    <span className="navbar-toggler-icon text"></span>
                                 </button>
                             </div>
                         </nav>
                     </div>
-                    <nav class="collapse d-xl-block" id="navbarToggleExternalContent">
+                    <nav className="collapse d-xl-block" id="navbarToggleExternalContent">
                         <ul className="list-group list-group-flush border-top border-bottom ">
                             <li className="list-group-item py-3 px-1 text-white fondo-azul no-hover"><i className="bi bi-house-fill px-1 text-white"></i>Administració</li>
                             <li className={activeOption == 'Usuaris' ? liActive : liInactive}><Link className={activeOption == 'Usuaris' ? linkActive : linkInactive} onClick={() => { setActiveOption('Usuaris') }} to="/usuaris">{activeOption == 'Usuaris' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Usuaris</Link></li>
