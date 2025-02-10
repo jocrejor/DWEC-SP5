@@ -45,12 +45,17 @@ function Proveidors() {
     city: '',
     cp: '',
   });
+  const displayedSuppliers = filteredSuppliers.slice(
+    (currentPage - 1) * elementsPaginacio,
+    currentPage * elementsPaginacio
+  );
 
   useEffect(() => {
     fetchData();
   }, []);
   useEffect(() => {
     setFilteredSuppliers(suppliers);
+    setCurrentPage(1);
   }, [suppliers]);
 
     // Obtindreels index. 
@@ -103,7 +108,6 @@ function Proveidors() {
     }
   };
   
-
   const deleteSuppliers = async (id) => {
     const confirmDelete = window.confirm("Segur que vols eliminar aquest proveidor?");
     
@@ -120,7 +124,6 @@ function Proveidors() {
     }
   };
   
-
   const modSuppliers = (valors) => {
     setTipoModal('Modificar');
     setValorsInicials(valors);
@@ -204,10 +207,12 @@ function Proveidors() {
       return true;
     });
     setFilteredSuppliers(filtered);
+    setCurrentPage(1);
   };
 
   const handleFilterRestart = () => {
     setFilteredSuppliers(suppliers);
+    setCurrentPage(1);
   };
   
   return (
@@ -274,7 +279,7 @@ function Proveidors() {
                 <td colSpan="13">No hi han proveidors</td>
               </tr>
             ) : (
-              filteredSuppliers.map((valors) => (
+              displayedSuppliers.map((valors) => (
                 <tr key={valors.id}>
                   <td data-cell="ID">{valors.id}</td>
                   <td data-cell="Nom">{valors.name}</td>
