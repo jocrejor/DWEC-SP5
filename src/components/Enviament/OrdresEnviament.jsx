@@ -273,6 +273,10 @@ function OrdresEnviament() {
 
   const netejaFiltres = () => {
     actualitzaDades();
+    document.getElementById("client").value = "";
+    document.getElementById("id").value = "";
+    document.getElementById("date_max").value = "";
+    document.getElementById("date_min").value = "";
   }
 
   return (
