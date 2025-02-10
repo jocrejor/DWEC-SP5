@@ -3,7 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
-import Filtres from "../FiltresLiniaRecepcio";
+import Filtres from "./EstatsRecepcioFiltres";
 import axios from 'axios';
 import '../../App.css';
 
@@ -64,23 +64,19 @@ function OrderReception_Status() {
     setShowModal(!showModal);
   };
 
-
- 
-
-
   const actualitzaFiltres = (id, nomEstat) => {
     let filteredOrders = ordersReceptionStatus;
-  
+
     if (id) {
       filteredOrders = filteredOrders.filter(order => order.id.toString().includes(id));
     }
     if (nomEstat) {
       filteredOrders = filteredOrders.filter(order => order.name.toLowerCase().includes(nomEstat.toLowerCase()));
     }
-  
+
     setOrdersReceptionStatus(filteredOrders);
   };
-  
+
   const netejaFiltres = () => {
     axios.get(`${apiUrl}/orderreception_status`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
@@ -91,7 +87,6 @@ function OrderReception_Status() {
       });
   };
 
-  
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
@@ -183,7 +178,6 @@ function OrderReception_Status() {
           </tbody>
         </Table>
       </div>
-
 
       <nav aria-label="Paginació" class="d-block">
         <ul class="pagination justify-content-center">

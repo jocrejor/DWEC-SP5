@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
-import Filtres from "../FiltresLiniaRecepcio";
+import Filtres from "./EstatsRecepcioFiltres";
 import '../../App.css';
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -62,17 +62,17 @@ function OrderLineReception_Status() {
 
   const actualitzaFiltres = (id, nomEstat) => {
     let filteredOrders = ordersLineReception;
-  
+
     if (id) {
       filteredOrders = filteredOrders.filter(order => order.id.toString().includes(id));
     }
     if (nomEstat) {
       filteredOrders = filteredOrders.filter(order => order.name.toLowerCase().includes(nomEstat.toLowerCase()));
     }
-  
+
     setOrdersLineReception(filteredOrders);
   };
-  
+
   const netejaFiltres = () => {
     axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
@@ -82,7 +82,6 @@ function OrderLineReception_Status() {
         setError("Error carregant les dades.");
       });
   };
-  
 
   const handleSubmit = async (values) => {
     try {
@@ -194,7 +193,7 @@ function OrderLineReception_Status() {
         </nav>
       </div>
 
-{/* Modal */}
+      {/* Modal */}
       <Modal className="text-light-blue" show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Estat de Línia</Modal.Title>
@@ -206,12 +205,12 @@ function OrderLineReception_Status() {
                 <div className="form-group">
                   <label htmlFor="name">Nom</label>
                   <Field id="name"
-                  type="text"
-                  name="name"
-                  placeholder="Nom del estat"
-                  autoComplete="off"
-                  className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''}`}
-                  aria-describedby="nameHelp"
+                    type="text"
+                    name="name"
+                    placeholder="Nom del estat"
+                    autoComplete="off"
+                    className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''}`}
+                    aria-describedby="nameHelp"
                   />
                   {errors.name && touched.name && (
                     <div className="invalid-feedback">{errors.name}</div>

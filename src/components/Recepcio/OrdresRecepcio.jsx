@@ -37,7 +37,7 @@ function OrderReception() {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [ordersRes, suppliersRes, productsRes, statusesRes,statusLineRes] = await Promise.all([
+      const [ordersRes, suppliersRes, productsRes, statusesRes, statusLineRes] = await Promise.all([
         axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } }),
@@ -74,9 +74,9 @@ function OrderReception() {
         const response = await axios.get(`${apiUrl}/orderlinereception`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
-  
+
         const responseData = response.data;
-  
+
         if (responseData.length > 0) {
           const deletePromises = responseData
             .filter(orderLine => orderLine.order_reception_id === id)
@@ -85,53 +85,60 @@ function OrderReception() {
                 headers: { "auth-token": localStorage.getItem("token") }
               })
             );
-  
+
           await Promise.all(deletePromises);
         }
-  
+
         await axios.delete(`${apiUrl}/orderreception/${id}`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
-  
+
         setOrderReceptions(prev => prev.filter((item) => item.id !== id));
-  
+
       } catch (err) {
         console.error("Error eliminant ordre:", err);
         setError("Error eliminant l'ordre.");
       }
     }
   };
-  
+
   const [loadingModal, setLoadingModal] = useState(false);
 
   const modificarOrdre = async (ordre) => {
     setTipoModal('Modificar');
-    setLoadingModal(true);
-  
+    canviEstatModal();
+
     try {
       const res = await axios.get(`${apiUrl}/orderreception/${ordre.id}`, {
         headers: { "auth-token": localStorage.getItem("token") },
       });
-  
-      const productesAssociats = res.data.map((linea) => ({
+
+      const orderLinesRes = await axios.get(`${apiUrl}/orderlinereception/`, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+
+      const orderLinesResFilter = orderLinesRes.data.filter(line => line.order_reception_id === ordre.id);
+      setOrderLines(orderLinesResFilter);
+
+      const productesAssociats = orderLinesResFilter.map((linea) => ({
         product_id: linea.product_id,
         name: products.find((p) => p.id === linea.product_id)?.name || 'Producte desconegut',
         quantity: linea.quantity_ordered,
       }));
-  
+
       setSelectedProducts(productesAssociats);
-  
+
       setValorsInicials({
         id: ordre.id,
         supplier_id: ordre.supplier_id,
-        estimated_reception_date: formateaFecha(ordre.estimated_reception_date),
+        estimated_reception_date: ordre.estimated_reception_date,
       });
-      
+
     } catch (err) {
-      console.error("Error carregant línies d'ordre:", err);
+      console.error("Error carregant les dades per modificar l'ordre:", err);
       setSelectedProducts([]);
     }
-  
+
     setLoadingModal(false);
     setShowModal(true);
   };
@@ -185,18 +192,18 @@ function OrderReception() {
       await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderreception_status_id: 2 }, {
         headers: { "auth-token": localStorage.getItem("token") },
       });
-  
+
       setOrderReceptions(prev => prev.map(order =>
         order.id === ordreId ? { ...order, orderreception_status_id: 2 } : order
       ));
-  
+
       setShowReviewModal(false);
     } catch (err) {
       console.error("Error canviant l'estat de l'ordre:", err);
       setError("Error actualitzant l'estat de l'ordre.");
     }
   };
-  
+
 
   const eliminarProducte = (index) => {
     setSelectedProducts((prev) => prev.filter((_, i) => i !== index));
@@ -207,7 +214,7 @@ function OrderReception() {
     if (status) {
       return status.name;
     } else {
-      return 'Desconegut'; 
+      return 'Desconegut';
     }
   };
 
@@ -237,12 +244,11 @@ function OrderReception() {
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
-        // Crear una nova ordre de recepció
-        const ordreIdValue = await crearOrdreDeRecepcio({ 
-          ...values, 
-          orderreception_status_id: 1 
+        const ordreIdValue = await crearOrdreDeRecepcio({
+          ...values,
+          orderreception_status_id: 1
         });
-  
+
         for (let product of selectedProducts) {
           await crearLiniaOrdreDeRecepcio({
             order_reception_id: ordreIdValue,
@@ -252,16 +258,16 @@ function OrderReception() {
             quantity_received: 0,
           });
         }
-  
+
       } else if (tipoModal === 'Modificar') {
         await axios.put(`${apiUrl}/orderreception/${valorsInicials.id}`, values, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
-  
+
         await axios.delete(`${apiUrl}/orderlinereception/order/${valorsInicials.id}`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
-  
+
         for (let product of selectedProducts) {
           await crearLiniaOrdreDeRecepcio({
             order_reception_id: valorsInicials.id,
@@ -272,7 +278,7 @@ function OrderReception() {
           });
         }
       }
-  
+
       await fetchInitialData();
       canviEstatModal();
       setError(null);
@@ -281,7 +287,6 @@ function OrderReception() {
       setError("No s'ha pogut processar la sol·licitud.");
     }
   };
-  
 
   return (
     <>
@@ -357,6 +362,15 @@ function OrderReception() {
             <Formik
               enableReinitialize
               initialValues={valorsInicials}
+
+              /*
+              initialValues={(tipoModal === 'Modificar' ? valorsInicials : {
+                id: valorsInicials.id,
+                supplier_id: valorsInicials.supplier_id,
+                estimated_reception_date: valorsInicials.estimated_reception_date,
+                selectedProducts: selectedProducts,
+              })}
+                */
               validationSchema={OrderReceptionSchema}
               onSubmit={handleSubmit}
             >
@@ -383,6 +397,13 @@ function OrderReception() {
                       id="estimated_reception_date"
                       type="date"
                       name="estimated_reception_date"
+                      value={valorsInicials.estimated_reception_date}
+                      onChange={(e) => {
+                        setValorsInicials({
+                          ...valorsInicials,
+                          estimated_reception_date: e.target.value,
+                        });
+                      }}
                     />
                     {errors.estimated_reception_date &&
                       touched.estimated_reception_date && (
@@ -507,7 +528,6 @@ function OrderReception() {
           </Button>
         </Modal.Footer>
       </Modal>
-
     </>
   );
 }
