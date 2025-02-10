@@ -35,6 +35,7 @@ function Proveidors() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [suppliersPage,setSuppliersPage]= useState([]);
+  const [file, setFile] = useState([]);
   const [valorsInicials, setValorsInicials] = useState({
     name: '',
     address: '',
@@ -201,8 +202,6 @@ function Proveidors() {
     }
   };
   
-  
-  
   const handleFilterChange = (filters) => {
     const filtered = suppliers.filter((supplier) => {
       if (filters.name && !supplier.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
@@ -218,6 +217,14 @@ function Proveidors() {
   const handleFilterRestart = () => {
     setFilteredSuppliers(suppliers);
     setCurrentPage(1);
+  };
+
+  const importaProveidor = () => {
+
+    const handleFileChange = (e) => {
+      setFile(e.target.files[0]);
+    };
+
   };
   
   return (
@@ -326,7 +333,15 @@ function Proveidors() {
       </Modal.Header>
       <Modal.Body>
         <div>
-            <p>hola</p>
+          {/* Input para importar CSV */}
+          <div className="mt-3 mb-3">
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFilterChange}
+              className="form-control"
+            />
+          </div>
         </div>
       </Modal.Body>
       <Modal.Footer>
