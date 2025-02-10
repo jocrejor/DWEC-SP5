@@ -29,7 +29,7 @@ function Rols() {
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
 
-  const calcularTotalPagines = (array) => Math.max(3, Math.ceil(array.length / rolesPerPage));
+  const calcularTotalPagines = (array) => Math.max(1, Math.ceil(array.length / rolesPerPage));
 
   useEffect(() => {
     axios.get(`${apiUrl}/userProfile`, { headers: { "auth-token": token } })
@@ -175,6 +175,9 @@ function Rols() {
         <Table className="table table-striped text-center">
           <thead className="table-active border-bottom border-dark-subtle">
             <tr>
+              <th scope="col">
+                <input className="form-check-input" type="checkbox" name="" id="" />
+              </th>
               <th>Id</th>
               <th>Nom</th>
               <th>Accions</th>
@@ -188,6 +191,9 @@ function Rols() {
             ) : (
               getCurrentPageRoles().map((role) => (
                 <tr key={role.id}>
+                 <th scope="col">
+                <input className="form-check-input" type="checkbox" name="" id="" />
+              </th>
                   <td>{role.id}</td>
                   <td>{role.name}</td>
 
@@ -211,13 +217,27 @@ function Rols() {
 
       {/* Paginació */}
       <nav>
-        <ul className="pagination justify-content-center">
+        <ul className="pagination justify-content-center" style={{ backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
           <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
             <button className="page-link" onClick={() => paginate(currentPage - 1)}>&laquo;</button>
           </li>
           {Array.from({ length: totalPages }, (_, i) => (
-            <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-              <button className="page-link" onClick={() => paginate(i + 1)}>{i + 1}</button>
+            <li 
+              key={i} 
+              className={`page-item ${currentPage === i + 1 ? 'active' : ''}`} 
+              style={{ backgroundColor: currentPage === i + 1 ? '#30475E' : 'white', borderRadius: '5px' }}
+            >
+              <button 
+                className="page-link" 
+                onClick={() => paginate(i + 1)}
+                style={{ 
+                  color: currentPage === i + 1 ? 'white' : '#30475E', 
+                  backgroundColor: currentPage === i + 1 ? '#30475E' : 'transparent',
+                  border: 'none' 
+                }}
+              >
+                {i + 1}
+              </button>
             </li>
           ))}
           <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>

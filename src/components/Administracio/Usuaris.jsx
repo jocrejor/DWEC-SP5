@@ -42,11 +42,12 @@ function Usuaris() {
   const [filterName, setFilterName] = useState('');
   const [filterEmail, setFilterEmail] = useState('');
   const [filterRole, setFilterRole] = useState('');
-
+  const [showSecondModal, setShowSecondModal] = useState(false);
+  const [showTercerModal, setShowTercerModal] = useState(false);
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
 
-  const calcularTotalPagines = (array) => Math.max(3, Math.ceil(array.length / userPerPage));
+  const calcularTotalPagines = (array) => Math.max(1, Math.ceil(array.length / userPerPage));
 
   useEffect(() => {
     axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } })
@@ -76,7 +77,7 @@ function Usuaris() {
   const modificarUsuari = (valors) => {
     setTipoModal("Modificar");
     setValorsInicials(valors);
-    setShowModal(true);
+    setShowSecondModal(true);
   };
 
   const obrirModal = () => {
@@ -86,7 +87,6 @@ function Usuaris() {
       email: '',
       password: '',
       role: '',
-      image: ''
     });
     setShowModal(true);
   };
@@ -113,7 +113,7 @@ function Usuaris() {
     });
     setFilteredUsers(filtered);
     setTotalPages(calcularTotalPagines(filtered));
-  setCurrentPage(1);
+    setCurrentPage(1);
   };
 
 
@@ -123,7 +123,7 @@ function Usuaris() {
     setFilterRole('');
     setFilteredUsers(user);
     setTotalPages(calcularTotalPagines(user));
-  setCurrentPage(1);
+    setCurrentPage(1);
   };
 
 
@@ -139,15 +139,29 @@ function Usuaris() {
       setCurrentPage(pageNumber);
     }
   };
- 
+  //Segon modal de modificacio
+  const obrirSegonModal = () => {
+    setShowSecondModal(true);
+  };
 
+  const tancarSegonModal = () => {
+    setShowSecondModal(false);
+  };
+  //Tercer Modal de contrasenyes
+  const obrirTercernModal = () => {
+    setShowSecondModal(true);
+  };
+
+  const tancarTercerModal = () => {
+    setShowSecondModal(false);
+  };
   return (
     <div>
       <Header title="Usuaris" />
       <div className="row bg-grey pt-3 px-2 mx-0">
         <div className="col-12 col-md-4">
           <div className="mb-3 text-light-blue">
-            <label htmlFor="nombre" className="form-label">Nom</label>
+            <label htmlFor="name" className="form-label">Nom</label>
             <input
               type="text"
               className="form-control"
@@ -160,11 +174,11 @@ function Usuaris() {
         </div>
         <div className="col-12 col-md-4">
           <div className="mb-3 text-light-blue">
-            <label htmlFor="dni-nif" className="form-label">Email</label>
+            <label htmlFor="email" className="form-label">Email</label>
             <input
               type="text"
               className="form-control"
-              id="dni-nif"
+              id="email"
               value={filterEmail}
               onChange={(e) => setFilterEmail(e.target.value)}
               onKeyUp={handleFilterChange}
@@ -226,12 +240,15 @@ function Usuaris() {
         <Table className="table table-striped text-light-blue" borderless>
           <thead className="table-active border-bottom border-dark-subtle">
             <tr>
+              <th scope="col">
+                <input className="form-check-input" type="checkbox" name="" id="" />
+              </th>
+
               <th>Id</th>
               <th>Nom</th>
               <th>Email</th>
               <th>Password</th>
               <th>Rol</th>
-              <th>Image</th>
               <th>Accions</th>
             </tr>
           </thead>
@@ -244,13 +261,19 @@ function Usuaris() {
             ) : (
               getCurrentPageUser().map((user) => (
                 <tr key={user.id}>
+                  <th scope="col">
+                <input className="form-check-input" type="checkbox" name="" id="" />
+              </th>
                   <td>{user.id}</td>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
                   <td>{user.password}</td>
                   <td>{user.role}</td>
-                  <td>{user.image}</td>
                   <td>
+                  <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => passwordUsuari(user)} className="btn-sm">
+                      <i style={{ color: 'gray' }} className="bi bi-key-fill"></i>
+                    </Button>
+
                     <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => modificarUsuari(user)} className="btn-sm">
                       <i style={{ color: 'gray' }} className="bi bi-pencil-square"></i>
                     </Button>
@@ -260,6 +283,7 @@ function Usuaris() {
                     <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => visualitzarUsuari(user)} className="btn-sm">
                       <i className="bi bi-eye px-3" style={{ color: 'gray' }}></i>
                     </Button>
+                    
                   </td>
                 </tr>
               ))
@@ -269,13 +293,27 @@ function Usuaris() {
       </div>
       {/* Paginació*/}
       <nav>
-        <ul className="pagination justify-content-center">
+        <ul className="pagination justify-content-center" style={{ backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
           <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
             <button className="page-link" onClick={() => paginate(currentPage - 1)}>&laquo;</button>
           </li>
           {Array.from({ length: totalPages }, (_, i) => (
-            <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-              <button className="page-link" onClick={() => paginate(i + 1)}>{i + 1}</button>
+            <li 
+              key={i} 
+              className={`page-item ${currentPage === i + 1 ? 'active' : ''}`} 
+              style={{ backgroundColor: currentPage === i + 1 ? '#30475E' : 'white', borderRadius: '5px' }}
+            >
+              <button 
+                className="page-link" 
+                onClick={() => paginate(i + 1)}
+                style={{ 
+                  color: currentPage === i + 1 ? 'white' : '#30475E', 
+                  backgroundColor: currentPage === i + 1 ? '#30475E' : 'transparent',
+                  border: 'none' 
+                }}
+              >
+                {i + 1}
+              </button>
             </li>
           ))}
           <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
@@ -293,12 +331,10 @@ function Usuaris() {
               <h5>Nom: {selectedUser?.name}</h5>
               <p>Email: {selectedUser?.email}</p>
               <p>Password: {selectedUser?.password}</p>
-              <p>Rol: {selectedUser?.role}</p>
-              <p>Imatge: {selectedUser?.image}</p>
             </div>
           ) : (
             <Formik
-              initialValues={tipoModal === 'Modificar' ? valorsInicials : { name: '', email: '', password: '', role: '', image: '' }}
+              initialValues={tipoModal === 'Crear' ? valorsInicials : { name: '', email: '', password: '', role: '' }}
               validationSchema={UserSchema}
               onSubmit={async (values) => {
                 console.log("Enviar valors:", values);
@@ -340,16 +376,11 @@ function Usuaris() {
                     <Field name="role" type="text" className="form-control" placeholder="Rol de l'usuari" />
                     {errors.role && touched.role && <div className="text-danger">{errors.role}</div>}
                   </div>
-                  <div className="mb-3">
-                    <label htmlFor="image" className="form-label">Imatge</label>
-                    <Field name="image" type="text" className="form-control" placeholder="URL de la imatge" />
-                    {errors.image && touched.image && <div className="text-danger">{errors.image}</div>}
-                  </div>
                   <div className="d-flex justify-content-between">
                     <Button variant="secondary" onClick={tancarModal}>
                       Tancar
                     </Button>
-                    <Button className="primary orange-button" type="button"   onClick={() => alert("S'està enviant el formulari!")}>
+                    <Button className="primary orange-button" type="button" onClick={() => alert("S'està enviant el formulari!")}>
                       Gravar
                     </Button>
                   </div>
@@ -357,6 +388,127 @@ function Usuaris() {
               )}
             </Formik>
           )}
+        </Modal.Body>
+      </Modal>
+
+      {/*Segon modal de modificar*/}
+      <Modal show={showSecondModal} onHide={tancarSegonModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{tipoModal} Usuari</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Formik
+            initialValues={tipoModal === 'Modificar' ? valorsInicials : { name: '', email: '', role: '' }}
+            validationSchema={UserSchema}
+            onSubmit={async (values, { setSubmitting }) => {
+              console.log("Enviar valors:", values);
+              try {
+                await axios.put(`${apiUrl}/users/${values.id}`, values);
+                tancarSegonModal();
+                const response = await axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } });
+                setUser(response.data);
+              } catch (error) {
+                console.error("Error submitting form:", error);
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+          >
+            {({ errors, touched, isSubmitting }) => (
+              <Form>
+                <div className="mb-3">
+                  <label htmlFor="name" className="form-label">Nom</label>
+                  <Field name="name" type="text" className="form-control" placeholder="Nom de l'usuari" />
+                  {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="email" className="form-label">Correu Electrònic</label>
+                  <Field name="email" type="email" className="form-control" placeholder="Correu Electrònic" />
+                  {errors.email && touched.email && <div className="text-danger">{errors.email}</div>}
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="role" className="form-label">Rol</label>
+                  <Field as="select" name="role" className="form-control">
+                    <option value="" disabled>Selecciona un rol</option>
+                    <option value="admin">Administrador</option>
+                    <option value="user">Operari</option>
+                    <option value="moderator">Encarregat</option>
+                  </Field>
+                  {errors.role && touched.role && <div className="text-danger">{errors.role}</div>}
+                </div>
+
+                <div className="d-flex justify-content-between">
+                  <Button variant="secondary" onClick={tancarSegonModal} disabled={isSubmitting}>
+                    Tancar
+                  </Button>
+                  <Button className="primary orange-button" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Guardant..." : "Gravar"}
+                  </Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </Modal.Body>
+      </Modal>
+              {/*Tercer modal de contrasenyes*/}
+      <Modal show={showTercerModal} onHide={tancarTercerModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{tipoModal} Usuari</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Formik
+            initialValues={tipoModal === 'Modificar' ? valorsInicials : { name: '', email: '', role: '' }}
+            validationSchema={UserSchema}
+            onSubmit={async (values, { setSubmitting }) => {
+              console.log("Enviar valors:", values);
+              try {
+                await axios.put(`${apiUrl}/users/${values.id}`, values);
+                tancarSegonModal();
+                const response = await axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } });
+                setUser(response.data);
+              } catch (error) {
+                console.error("Error submitting form:", error);
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+          >
+            {({ errors, touched, isSubmitting }) => (
+              <Form>
+                <div className="mb-3">
+                  <label htmlFor="name" className="form-label">Nom</label>
+                  <Field name="name" type="text" className="form-control" placeholder="Nom de l'usuari" />
+                  {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="email" className="form-label">Correu Electrònic</label>
+                  <Field name="email" type="email" className="form-control" placeholder="Correu Electrònic" />
+                  {errors.email && touched.email && <div className="text-danger">{errors.email}</div>}
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="role" className="form-label">Rol</label>
+                  <Field as="select" name="role" className="form-control">
+                    <option value="" disabled>Selecciona un rol</option>
+                    <option value="admin">Administrador</option>
+                    <option value="user">Operari</option>
+                    <option value="moderator">Encarregat</option>
+                  </Field>
+                  {errors.role && touched.role && <div className="text-danger">{errors.role}</div>}
+                </div>
+
+                <div className="d-flex justify-content-between">
+                  <Button variant="secondary" onClick={tancarSegonModal} disabled={isSubmitting}>
+                    Tancar
+                  </Button>
+                  <Button className="primary orange-button" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Guardant..." : "Gravar"}
+                  </Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
         </Modal.Body>
       </Modal>
     </div>
