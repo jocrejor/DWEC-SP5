@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Formik, Form, Field } from 'formik'
+import { Link }   from 'react-router-dom'
 import * as Yup from 'yup'
 import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header'
@@ -255,7 +256,14 @@ function IncidenciesResoldre() {
                 <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 order-xl-2">
                     <div className="d-flex h-100 justify-content-xl-end">
                         <button type="button" onClick={() => console.log("Prova Crear incident")} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
-                            <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+                            <Link to="/incidencies/incidenciesGenerar" className="text-reset text-decoration-none">
+                                Generar Incidències
+                            </Link>
+                        </button>
+                        <button type="button" onClick={() => console.log("Prova Crear incident")} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+                            <Link to="/incidencies/incidenciesResoldre" className="text-reset text-decoration-none">
+                                Resoldre Incidències
+                            </Link>
                         </button>
                     </div>
                 </div>
@@ -296,10 +304,7 @@ function IncidenciesResoldre() {
                                                 <i className="bi bi-eye icono fs-5"></i>
                                             </span>
                                             <span onClick={() => resoldreIncident(valors)} className="mx-2" role='button'>
-                                                <i className="bi bi-check icono fs-5 mx-2"></i>
-                                            </span>
-                                            <span onClick={() => console.log("Asi eliminarem")} role='button'>
-                                                <i className="bi bi-trash icono fs-5"></i>
+                                                <i title="Resoldre incidència" className="bi bi-check icono fs-5 mx-2"></i>
                                             </span>
                                         </div>
                                     </td>
@@ -375,7 +380,7 @@ function IncidenciesResoldre() {
                                     <Field
                                         type="text"
                                         name="description"
-                                        disabled
+                                        disabled = {tipoModal == "Visualitzar"}
                                         className="text-light-blue form-control"
                                         value={values.description} />
                                     {errors.description && touched.description ? <div className="invalid-feedback">{errors.description}</div> : null}
@@ -429,6 +434,30 @@ function IncidenciesResoldre() {
                                     {errors.operator && touched.operator ? <div className="invalid-feedback">{errors.operator}</div> : null}
                                 </div>
 
+                                {/* Cantidad pedida */}
+                                <div className="form-group">
+                                    <label className='fw-bolder' htmlFor='quantity_ordered'>Cantitat demanada</label>
+                                    <Field
+                                        type="number"
+                                        name="quantity_ordered"
+                                        disabled
+                                        className="text-light-blue form-control"
+                                        value={values.quantity_ordered} />
+                                    {errors.quantity_ordered && touched.quantity_ordered ? <div className="invalid-feedback">{errors.quantity_ordered}</div> : null}
+                                </div>
+
+                                {/* Cantidad recibida */}
+                                <div className="form-group">
+                                    <label className='fw-bolder' htmlFor='quantity_received'>Cantitat recibida</label>
+                                    <Field
+                                        type="number"
+                                        name="quantity_received"
+                                        disabled = {tipoModal == "Visualitzar"}
+                                        className="text-light-blue form-control"
+                                        value={values.quantity_received} />
+                                    {errors.quantity_received && touched.quantity_received ? <div className="invalid-feedback">{errors.quantity_received}</div> : null}
+                                </div>
+
                                 {/* Estat */}
                                 <div className="form-group">
                                     <label className="fw-bolder" htmlFor="orderline_status_id">Estat</label>
@@ -456,30 +485,6 @@ function IncidenciesResoldre() {
                                     {errors.status && touched.status ? (
                                         <div className="invalid-feedback">{errors.status}</div>
                                     ) : null}
-                                </div>
-
-                                {/* Cantidad pedida */}
-                                <div className="form-group">
-                                    <label className='fw-bolder' htmlFor='quantity_ordered'>Cantitat demanada</label>
-                                    <Field
-                                        type="number"
-                                        name="quantity_ordered"
-                                        disabled
-                                        className="text-light-blue form-control"
-                                        value={values.quantity_ordered} />
-                                    {errors.quantity_ordered && touched.quantity_ordered ? <div className="invalid-feedback">{errors.quantity_ordered}</div> : null}
-                                </div>
-
-                                {/* Cantidad recibida */}
-                                <div className="form-group">
-                                    <label className='fw-bolder' htmlFor='quantity_received'>Cantitat recibida</label>
-                                    <Field
-                                        type="number"
-                                        name="quantity_received"
-                                        disabled
-                                        className="text-light-blue form-control"
-                                        value={values.quantity_received} />
-                                    {errors.quantity_received && touched.quantity_received ? <div className="invalid-feedback">{errors.quantity_received}</div> : null}
                                 </div>
 
                                 {/* Botones */}
