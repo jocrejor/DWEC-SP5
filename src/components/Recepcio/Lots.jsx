@@ -37,19 +37,19 @@ function Lots() {
   const [orderline_status, setOrderLineStatus] = useState([]);
   const [orderlinereception, setOrderLineReception] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [tipoModal, setTipoModal] = useState('Crear');
   const [lotOSerie, setLotOSerie] = useState('Lot');
-  const [valorsInicials, setValorsInicials] = useState({
-    name: '',
-    product_id: '',
-    supplier_id: '',
-    quantity: lotOSerie === "Serie" ? "1" : "",
-    production_date: '',
-    expiration_date: '',
-    orderlinereception: '',
-    // product_id: '',
-    // quantity: lotOSerie === "Serie" ? "1" : "",
-  });
+  // const [valorsInicials, setValorsInicials] = useState({
+  //   name: '',
+  //   product_id: '',
+  //   supplier_id: '',
+  //   quantity: lotOSerie === "Serie" ? 1 : 0,
+  //   // quantity: 0,
+  //   production_date: '',
+  //   expiration_date: '',
+  //   orderlinereception: '',
+  //   // product_id: '',
+  //   // quantity: lotOSerie === "Serie" ? "1" : "",
+  // });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -136,40 +136,6 @@ function Lots() {
     fetchData();
   }, []);
 
-  const eliminarLot = (id) => {
-    try {
-      axios.delete(`${apiUrl}lot/${id}`, {
-        headers: { "auth-token": token }
-      })
-        .then(() => {
-          setLot((prevLot) => prevLot.filter((item) => item.id !== id));
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    }
-    catch (error) {
-      console.log("Error al eliminar:", error);
-    }
-  }
-  // const eliminarLot = (id) => {
-  //   deleteData(url, 'Lot', id);
-  //   const newLot = lot.filter((item) => item.id !== id);
-  //   setLot(newLot);
-  // };
-
-  const modificarLot = (valors) => {
-    console.log(valors.id);
-
-    setTipoModal('Modificar');
-    setValorsInicials(valors);
-  };
-
-  const visualitzarLot = (valors) => {
-    setTipoModal('Visualitzar');
-    setValorsInicials(valors);
-  };
-
   const canviEstatModal = () => {
     setShowModal(!showModal);
   };
@@ -194,19 +160,7 @@ function Lots() {
             </div>
           </div>
           <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
-          <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
-            {/* <div className="d-flex h-100 justify-content-xl-end">
-              <Button
-                type="button"
-                className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
-                onClick={() => {
-                  canviEstatModal();
-                  setTipoModal('Crear');
-                }}>
-                <i className="bi bi-plus-circle text-white pe-1"></i>Crear
-              </Button>
-            </div> */}
-          </div>
+          <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2"></div>
         </div>
 
         <div className="row">
@@ -224,8 +178,9 @@ function Lots() {
                     <th scope='col' className="align-middle">Estat ordre de recepció</th>
                     <th scope='col' className="align-middle">Producte</th>
                     <th scope='col' className="align-middle">Quantitat</th>
-                    <th scope='col' className="align-middle">Lot</th>
-                    <th scope='col' className="align-middle">Serie</th>
+                    {/* <th scope='col' className="align-middle">Lot</th>
+                    <th scope='col' className="align-middle">Serie</th> */}
+                    <th scope='col' className="align-middle">Lot/Serie</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -269,24 +224,13 @@ function Lots() {
                           </td>
 
                           <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
-                          {console.log(valors)}
-                          <td data-no-colon="true">
-                            {/* <Button
-                              type="button"
-                              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
-                              onClick={() => {
-                                canviEstatModal();
-                                setTipoModal('Crear');
-                              }}>
-                              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
-                            </Button> */}
 
+                          {/* <td data-no-colon="true">
                             <i
                               className="bi bi-plus-circle icono"
                               role='button'
                               onClick={() => {
                                 canviEstatModal();
-                                setTipoModal('Crear');
                                 setLotOSerie('Lot')
                                 setValorsInicials(valors);
                               }}>
@@ -297,44 +241,22 @@ function Lots() {
                               role='button'
                               onClick={() => {
                                 canviEstatModal();
-                                setTipoModal('Crear');
                                 setLotOSerie('Serie')
                                 setValorsInicials(valors);
                               }}
                             >
                             </i>
-                          </td>
-
-                          {/* accions visualitzar, modificar, eliminar */}
-                          {/* <td data-no-colon="true" className='fs-5'>
-                            <div className="d-xl-flex flex-xl-column flex-xl-row">
-                              <i
-                                onClick={() => {
-                                  visualitzarLot(valors);
-                                  canviEstatModal();
-                                }}
-                                className="bi bi-eye icono"
-                                role='button'>
-                              </i>
-                              <i
-                                onClick={() => {
-                                  modificarLot(valors);
-                                  canviEstatModal();
-                                }}
-                                className="bi bi-pencil-square px-3 icono"
-                                role='button'>
-                              </i>
-                              <i
-                                onClick={() => {
-                                  eliminarLot(valors.id);
-                                }}
-                                className="bi bi-trash icono"
-                                role='button'>
-                              </i>
-                            </div>
                           </td> */}
+                          <td data-no-colon="true">
+                            <i className="bi bi-plus-circle icono"
+                              role='button'
+                              onClick={() => {
+                                canviEstatModal();
+                              }}
+                            >
+                            </i>
+                          </td>
                         </tr>
-
                       ))
                   )}
                 </tbody>
@@ -362,137 +284,11 @@ function Lots() {
         </div>
       </div>
 
-      <Modal show={showModal} onHide={canviEstatModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            Crear
-            {lotOSerie === "Lot"
-              ? ("Lot")
-              : lotOSerie === "Serie"
-                ? ("Serie")
-                : null
-            }
-          </Modal.Title>
-        </Modal.Header>
 
-        <Modal.Body>
-          <Formik
-            initialValues={
-              tipoModal === 'Crear'
-                ? valorsInicials
-                : {
-                  name: '',
-                  product_id: '',
-                  supplier_id: '',
-                  quantity: lotOSerie === "Serie" ? "1" : "",
-                  production_date: '',
-                  expiration_date: '',
-                  orderlinereception: '',
-                  // product_id: '',
-                  // quantity_received: 0
-                }
-            }
-            validationSchema={LotSchema(lotOSerie)}
-            /** SE ACTUALIZA LA TABLA AL MODIFICAR O CREAR */
-            onSubmit={(values) => {
-              console.log(values);
-              console.log(tipoModal);
-              try {
-                if (tipoModal === 'Crear') {
-                  axios.post(`${apiUrl}lot`, values, {
-                    headers: { "auth-token": token }
-                  })
-                    .then((response) => {
-                      console.log("Response data", response.data);
-                      console.log("Response data results", response.data.results);
+      {/* MODAL CON FORMIK */}
+      <LotsLotOSerie products={products} lotOSerie={lotOSerie} orderreception={orderreception} suppliers={suppliers} canviEstatModal={canviEstatModal} showModal={showModal} LotSchema={LotSchema} />
 
-                      // Usamos los 'values' (datos del formulario) para agregar el lote
-                      const newLot = {
-                        ...values,
-                        id: response.data.results.insertId, // Asigna el ID generado por la base de datos
 
-                        product_id: products.find((product) => product.id === values.product_id)?.name,
-                        supplier_id: suppliers.find((supplier) => supplier.id === values.supplier_id)?.name
-                      };
-
-                      console.log("Valor producte", values.product_id)
-                      console.log("Valor supplier", values.supplier_id)
-
-                      console.log("Producte nom", products.find((product) => product.id === values.product_id)?.name);
-                      console.log("Supplier nom", suppliers.find((supplier) => supplier.id === values.supplier_id)?.name);
-
-                      setLot((prevLot) => {
-                        const updatedLot = [...prevLot, newLot];
-                        console.log("Updated Lot list:", updatedLot);
-                        return updatedLot;
-                      });
-
-                      setShowModal(false);
-                    })
-                    .catch(error => {
-                      console.error("Error al crear:", error);
-                    });
-                }
-
-                else if (tipoModal === 'Modificar') {
-                  axios.put(`${apiUrl}lot/${values.id}`, values, {
-                    headers: { "auth-token": token }
-                  })
-                    .then((response) => {
-                      // Actualizar el lote en el estado después de la modificación
-                      // setLot((prevLot) =>
-                      //   prevLot.map((lot) => (lot.id === values.id ? response.data : lot))
-                      // );
-                      console.log(response.data);
-
-                      setLot((prevLot) =>
-                        prevLot.map((lot) =>
-                          lot.id === values.id ? { ...lot, ...response.data } : lot
-                        )
-                      );
-
-                      console.log(lot);
-                    })
-                    .catch(error => {
-                      console.error("Error al modificar:", error);
-                    });
-
-                  // Cerrar el modal
-                  setShowModal(false);
-                }
-              }
-              catch (error) {
-                console.log("Error al crear o eliminar:", error);
-              }
-            }}
-          >
-            {({ errors, touched }) => (
-              /**FORMULARIO CON SELECTS Y DEMÁS (CORRECTO) */
-              <Form>
-                {lotOSerie === "Lot" ? (
-                  <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="lot" lotOSerie={lotOSerie} orderreception={orderreception} suppliers={suppliers} />
-                ) : lotOSerie === "Serie" ? (
-                  <LotsLotOSerie products={products} errors={errors} touched={touched} nombre="serie" lotOSerie={lotOSerie} orderreception={orderreception} suppliers={suppliers} />
-                ) : null}
-                <div className="form-group d-flex justify-content-between mt-3">
-                  <Button
-                    variant="secondary"
-                    onClick={canviEstatModal}
-                    className="btn btn-secondary"
-                  >
-                    Tancar
-                  </Button>
-                  {tipoModal !== 'Visualitzar' && (
-                    <Button className="btn text-white orange-button text-white" type="button">
-                      Gravar
-                    </Button>
-                  )}
-                </div>
-              </Form>
-            )}
-          </Formik>
-        </Modal.Body>
-      </Modal>
     </>
   );
 }
