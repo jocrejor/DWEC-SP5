@@ -64,6 +64,34 @@ function OrderReception_Status() {
     setShowModal(!showModal);
   };
 
+
+ 
+
+
+  const actualitzaFiltres = (id, nomEstat) => {
+    let filteredOrders = ordersReceptionStatus;
+  
+    if (id) {
+      filteredOrders = filteredOrders.filter(order => order.id.toString().includes(id));
+    }
+    if (nomEstat) {
+      filteredOrders = filteredOrders.filter(order => order.name.toLowerCase().includes(nomEstat.toLowerCase()));
+    }
+  
+    setOrdersReceptionStatus(filteredOrders);
+  };
+  
+  const netejaFiltres = () => {
+    axios.get(`${apiUrl}/orderreception_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setOrdersReceptionStatus(response.data);
+      })
+      .catch(() => {
+        setError("Error carregant les dades.");
+      });
+  };
+
+  
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
@@ -89,7 +117,7 @@ function OrderReception_Status() {
   return (
     <>
       <Header title="Llistat Estats de Ordre" />
-      <Filtres />
+      <Filtres onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres} />
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">

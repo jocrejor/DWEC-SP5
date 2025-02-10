@@ -60,6 +60,30 @@ function OrderLineReception_Status() {
     setShowModal(!showModal);
   };
 
+  const actualitzaFiltres = (id, nomEstat) => {
+    let filteredOrders = ordersLineReception;
+  
+    if (id) {
+      filteredOrders = filteredOrders.filter(order => order.id.toString().includes(id));
+    }
+    if (nomEstat) {
+      filteredOrders = filteredOrders.filter(order => order.name.toLowerCase().includes(nomEstat.toLowerCase()));
+    }
+  
+    setOrdersLineReception(filteredOrders);
+  };
+  
+  const netejaFiltres = () => {
+    axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setOrdersLineReception(response.data);
+      })
+      .catch(() => {
+        setError("Error carregant les dades.");
+      });
+  };
+  
+
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
@@ -79,7 +103,7 @@ function OrderLineReception_Status() {
   return (
     <>
       <Header title="Llistat Estats de Línia" />
-      <Filtres />
+      <Filtres onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres} />
 
       <section className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
