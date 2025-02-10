@@ -51,6 +51,10 @@ td, th{
     border-color: var(--lightBlue);
 }
 
+.orange-button-login:hover {
+    background-color: #FF7F50;
+    border-color: #FF7F50;
+}
 li:hover{
     background-color: white;
 }
@@ -121,6 +125,9 @@ li:hover i{
     #logo {
         width: 5em;
     }
+    .m-customized{
+        margin-top: 5.8em;
+    }
 
     /*Taula responsive*/
 
@@ -156,4 +163,12 @@ li:hover i{
     }
 
 
+}
+
+@media only screen and (max-width: 600px){
+    .m-customized{
+        margin-top: 1.5em;
+        left: 35%;
+        
+    }
 }

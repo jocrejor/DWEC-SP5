@@ -1,9 +1,25 @@
-import React from 'react'
+import {useState}from 'react'
 import logo from '../assets/logo_footer2.png';
 import '../App'
 import Nav from 'react-bootstrap/Nav';
+import { Modal,Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+
 
 function Lateral() {
+    const [showModal, setShowModal] = useState(false);
+  
+    const navigate = useNavigate();
+
+    const canviEstatModal = () =>{
+        setShowModal(!showModal)
+      }
+      
+      const borrarToken = ()=>{
+        localStorage.clear();
+        canviEstatModal()
+        navigate("/login")
+    }
     return (
         <>
         <div className="col-12 col-xl-2 p-0 fondo-azul">
@@ -37,12 +53,32 @@ function Lateral() {
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/inventaris">Inventaris</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/incidencies">Incidències</a></li>
                         <li className="list-group-item fondo-azul-claro"><a className="text-decoration-none text-white d-block" href="/moviments">Moviments</a></li>
-                        <li className="list-group-item text-white logout"><a className="text-decoration-none text-white d-block" href="/logout"><i className="bi bi-box-arrow-right pe-1 text-white"></i>Tancar</a></li>
+                        <li className="list-group-item text-white logout"><a className="text-decoration-none text-white d-block" href="#" onClick={canviEstatModal}><i className="bi bi-box-arrow-right pe-1 text-white"></i>Tancar</a></li>
                     </ul>
                 </nav>
                 <button id="dropdown" className="d-xl-none d-block me-4 fondo-azul border border-0"><i className="bi bi-list text-white fs-1"></i></button>
             </div>
         </div>
+
+        
+      <Modal show={showModal} onHide={canviEstatModal}>
+      <Modal.Header closeButton >
+        <Modal.Title>Tancar sessió</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+      <h4 >Vols eixir del teu perfil d'usuari?</h4>
+    
+    <Button type="submit"
+            id="enviar"
+            className="mt-2"
+            onClick={()=> borrarToken()}
+            >
+        Eixir
+    </Button>
+      </Modal.Body>
+      </Modal> 
+
         </>
     )
 }
