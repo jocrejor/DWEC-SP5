@@ -136,17 +136,33 @@ function Proveidors() {
     setShowModal(!showModal);
   };
 
+  const transformProvince = (values) => {
+    if (Number(values.state_id) === 194) {
+      const selectedProvince = provincia.find(
+        (p) => Number(p.id) === Number(values.province)
+      );
+      if (selectedProvince) {
+        values.province = selectedProvince.name;
+      }
+    }
+    return values;
+  };
+
+  
   const gravar = async (values) => {
     try {
-      const dataToSend = tipoModal === 'Modificar' ? { ...values, id: undefined } : values;
+      // Llamamos a transformProvince antes de hacer cualquier envío a la API
+      const transformedValues = transformProvince(values);
   
+      const dataToSend = tipoModal === 'Modificar' ? { ...transformedValues, id: undefined } : transformedValues;
+    
       if (tipoModal === 'Crear') {
         await axios.post(`${apiUrl}/supplier`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
       } else {
-        const { id, ...valuesWithoutId } = values;
+        const { id, ...valuesWithoutId } = dataToSend;
         await axios.put(`${apiUrl}/supplier/${id}`, valuesWithoutId, { headers: { "auth-token": localStorage.getItem("token") } });
       }
-  
+    
       const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } });
       setSuppliers(updatedSuppliers.data);
       canviEstatModal();
@@ -154,7 +170,7 @@ function Proveidors() {
       console.error('Error guardant proveidors:', error);
     }
   };
-
+  
   const handleFilterChange = (filters) => {
     const filtered = suppliers.filter((supplier) => {
       if (filters.name && !supplier.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
@@ -416,7 +432,7 @@ function Proveidors() {
                         <option value="">Selecciona una província</option>
                         {provincia.length > 0 ? (
                           provincia.sort((a, b) => a.name.localeCompare(b.name)).map((prov) => (
-                            <option key={prov.id} value={prov.name}>
+                            <option key={prov.id} value={prov.id}>
                               {prov.name}
                             </option>
                           ))
@@ -457,7 +473,7 @@ function Proveidors() {
                     >
                       <option value="">Selecciona una ciutat</option>
                       {ciutat
-                        //.filter((item) => item.province_id === (Number(values.province) || 0))
+                        .filter((ciudad) => ciudad.province_id === Number(values.province))
                         .sort((a, b) => a.name.localeCompare(b.name))
                         .map((ciudad) => (
                           <option key={ciudad.id} value={ciudad.name}>
