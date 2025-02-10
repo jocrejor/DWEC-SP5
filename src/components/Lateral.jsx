@@ -68,14 +68,15 @@ function Lateral() {
 
       <Modal.Body>
       <h4 >Vols eixir del teu perfil d'usuari?</h4>
-    
+    <div class="d-flex justify-content-end">
     <Button type="submit"
             id="enviar"
-            className="mt-2"
+            className="mt-2 orange-button"
             onClick={()=> borrarToken()}
             >
         Eixir
     </Button>
+    </div>
       </Modal.Body>
       </Modal> 
 
