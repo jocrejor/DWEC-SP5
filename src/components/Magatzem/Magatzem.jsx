@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Filtres from '../Filtres';
+import FiltresMagatzem from './FiltresMagatzem';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -16,9 +16,12 @@ const StorageSchema = Yup.object().shape({
 
 function Storage() {
   const [storages, setStorages] = useState([]);
+  const [filteredStorages, setFilteredStorages] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Crear");
   const [valorsInicials, setValorsInicials] = useState({ name: '', type: '', address: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // Puedes ajustar cuántos ítems por página deseas
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,11 +30,31 @@ function Storage() {
     })
       .then(response => {
         setStorages(response.data);
+        setFilteredStorages(response.data); // Por defecto, mostrar todos los almacenes
       })
       .catch(error => {
         console.log('Error fetching data:', error);
       });
   }, []);
+
+  // Función para aplicar los filtros
+  const handleFilter = (filters) => {
+    const { name, type, address } = filters;
+    const filteredData = storages.filter(storage => {
+      return (
+        (name ? storage.name.toLowerCase().includes(name.toLowerCase()) : true) &&
+        (type ? storage.type.toLowerCase().includes(type.toLowerCase()) : true) &&
+        (address ? storage.address.toLowerCase().includes(address.toLowerCase()) : true)
+      );
+    });
+    setFilteredStorages(filteredData);  // Actualizar los almacenes filtrados
+    setCurrentPage(1); // Resetear la página al aplicar filtro
+  };
+
+  const handleClear = () => {
+    setFilteredStorages(storages);  // Limpiar los filtros y mostrar todos los almacenes
+    setCurrentPage(1); // Resetear la página
+  };
 
   const eliminarStorage = async (id) => {
     try {
@@ -39,6 +62,7 @@ function Storage() {
         headers: { "auth-token": localStorage.getItem("token") }
       });
       setStorages(storages.filter(item => item.id !== id));
+      setFilteredStorages(filteredStorages.filter(item => item.id !== id)); // Actualizar los filtros después de eliminar
     } catch (e) {
       console.log('Error deleting storage:', e);
     }
@@ -51,16 +75,14 @@ function Storage() {
   };
 
   const modSuppliers = (valors) => {
-    modificarStorage(valors); // Reuse modificarStorage logic
+    modificarStorage(valors); 
   };
 
   const viewSupplier = (valors) => {
-    // Implement viewSupplier functionality (for example, open a details page)
     console.log("Viewing supplier", valors);
   };
 
   const deleteSuppliers = async (id) => {
-    // Implement deleteSuppliers functionality
     if (window.confirm("Are you sure you want to delete this storage?")) {
       await eliminarStorage(id);
     }
@@ -75,9 +97,17 @@ function Storage() {
     setTipoModal("Crear");
   };
 
+  // Paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredStorages.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <>
-      <Filtres />
+      <FiltresMagatzem onFilter={handleFilter} onClear={handleClear} />
+
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -117,7 +147,7 @@ function Storage() {
             </tr>
           </thead>
           <tbody>
-            {storages.map((valors) => (
+            {currentItems.map((valors) => (  // Mostrar solo los elementos de la página actual
               <tr key={valors.id}>
                 <td scope="row" data-cell="Seleccionar">
                   <input className="form-check-input" type="checkbox" name="" id="" />
@@ -144,18 +174,24 @@ function Storage() {
             ))}
           </tbody>
         </table>
+
+        {/* Paginación */}
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className="page-item">
-              <a className="page-link text-light-blue" href="#" aria-label="Previous">
+              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={() => paginate(currentPage - 1)}>
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-            <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-            <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+            {[...Array(Math.ceil(filteredStorages.length / itemsPerPage))].map((_, index) => (
+              <li key={index} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
+                <a className="page-link text-light-blue" href="#" onClick={() => paginate(index + 1)}>
+                  {index + 1}
+                </a>
+              </li>
+            ))}
             <li className="page-item">
-              <a className="page-link text-light-blue" href="#" aria-label="Next">
+              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={() => paginate(currentPage + 1)}>
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>

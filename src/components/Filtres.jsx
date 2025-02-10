@@ -67,4 +67,4 @@ function Filtres() {
     )
 }
 
-export default Filtres
+export default Filtres;
