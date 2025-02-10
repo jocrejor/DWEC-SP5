@@ -6,15 +6,15 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const SignupSchema = Yup.object().shape({
-  email: Yup.string().email('Correo electrónico inválido').required('Campo obligatorio'),
-  password: Yup.string().min(6, 'Demasiado corta').max(20, 'Demasiado larga').required('Campo obligatorio'),
+  email: Yup.string().email('Correo electrònic invàlid').required('Camp obligatori'),
+  password: Yup.string().min(6, 'Molt curta').max(20, 'Massa llarga').required('Camp obligatori'),
 });
 
 function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const apiUrl = importta.env.VITE_API_URL;
 
   const formik = useFormik({
     initialValues: { email: '', password: '' },
