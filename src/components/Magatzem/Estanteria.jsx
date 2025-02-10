@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import Filtres from '../Filtres';
+import FilterEstanteria from './FilterEstanteria';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -76,7 +76,7 @@ function Shelf() {
 
   return (
     <>
-      <Filtres />
+      <FilterEstanteria />
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
