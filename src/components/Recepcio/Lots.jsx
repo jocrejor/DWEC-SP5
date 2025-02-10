@@ -40,11 +40,15 @@ function Lots() {
   const [tipoModal, setTipoModal] = useState('Crear');
   const [lotOSerie, setLotOSerie] = useState('Lot');
   const [valorsInicials, setValorsInicials] = useState({
-    // order_reception_id: '',
-    // orderlinereception_status_id: '',
+    name: '',
     product_id: '',
-    // quantity_ordered: 0,
-    quantity_received: 0
+    supplier_id: '',
+    quantity: lotOSerie === "Serie" ? "1" : "",
+    production_date: '',
+    expiration_date: '',
+    orderlinereception: '',
+    // product_id: '',
+    // quantity: lotOSerie === "Serie" ? "1" : "",
   });
 
   useEffect(() => {
@@ -265,7 +269,7 @@ function Lots() {
                           </td>
 
                           <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
-
+                          {console.log(valors)}
                           <td data-no-colon="true">
                             {/* <Button
                               type="button"
@@ -377,11 +381,15 @@ function Lots() {
               tipoModal === 'Crear'
                 ? valorsInicials
                 : {
-                  // order_reception_id: '',
-                  // orderlinereception_status_id: '',
+                  name: '',
                   product_id: '',
-                  // quantity_ordered: 0,
-                  quantity_received: 0
+                  supplier_id: '',
+                  quantity: lotOSerie === "Serie" ? "1" : "",
+                  production_date: '',
+                  expiration_date: '',
+                  orderlinereception: '',
+                  // product_id: '',
+                  // quantity_received: 0
                 }
             }
             validationSchema={LotSchema(lotOSerie)}

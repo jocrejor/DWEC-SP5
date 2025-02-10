@@ -21,7 +21,11 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
   }, []);
 
   const handleAddRecord = () => {
-    if (!values.name || !values.quantity) {
+    if (!values.name ||
+      !values.quantity ||
+      lotOSerie === "Lot" && (
+        !values.production_date ||
+        !values.expiration_date)) {
       setErrorAgregar("Debes llenar todos los campos");
       return;
     }
@@ -29,20 +33,18 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
       (or) => or.id === values.order_reception_id
     );
 
+
     const supplierId = orderReception ? orderReception.supplier_id : "";
     const supplierRecord = suppliers.find((s) => s.id === supplierId);
 
-
-
-
     const newRecord = {
-      name: values.name, // se asume que "name" está definido en Formik
+      name: values.name,
       product_id: values.product_id,
       supplier_id: supplierRecord ? supplierRecord.id : "", // asignado automáticamente
       quantity: lotOSerie === "Serie" ? 1 : values.quantity_received,
       production_date: lotOSerie === "Lot" ? values.production_date : "",
       expiration_date: lotOSerie === "Lot" ? values.expiration_date : "",
-      orderlinereception_id: orderReception ? orderReception.id : "", // asignado automáticamente
+      orderlinereception_id: values.id, // asignado automáticamente
     };
 
     if (lotOSerie === "Lot") {
@@ -55,13 +57,6 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
       setSeries(updatedSeries);
     }
   };
-
-
-
-
-
-
-
 
   return (
     <>
@@ -76,9 +71,9 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
             </option>
           ))}
         </Field>
-        {errors.product_id && touched.product_id && (
+        {/* {errors.product_id && touched.product_id && (
           <div className="text-danger mt-1">{errors.product_id}</div>
-        )}
+        )} */}
       </div>
 
       {/* Quantitat */}
@@ -91,9 +86,9 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
           className="form-control"
           disabled
         />
-        {errors.quantity_received && touched.quantity_received && (
+        {/* {errors.quantity_received && touched.quantity_received && (
           <div className="text-danger mt-1">{errors.quantity_received}</div>
-        )}
+        )} */}
       </div>
 
       {/* Inputs para lot o serie */}
@@ -107,13 +102,7 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
               type="number"
               name="quantity"
               className="form-control w-25"
-              value={
-                lotOSerie === "Serie" ? (
-                  "1"
-                ) : undefined
-              }
-              disabled={
-                lotOSerie === "Serie"}
+              disabled={lotOSerie === "Serie"}
             />
             {errors.quantity && touched.quantity && (
               <div className="text-danger mt-1">{errors.quantity}</div>
@@ -133,6 +122,7 @@ function LotsLotOSerie({ products, nombre, lotOSerie, orderreception, suppliers 
               >
               </i>
             </button>
+            {console.log(values)}
           </div>
         </div>
       </div>
