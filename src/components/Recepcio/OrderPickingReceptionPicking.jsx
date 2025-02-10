@@ -12,12 +12,14 @@ function OrderPickingReception() {
     const [usuariFiltrar, setUsuariFiltrar] = useState(""); //usuari a filtrar en la taula order picking 
 
     // Estats paginació
-    const [pagActual, setpagActual] = useState(1);
-    const filesPerPag = 10; 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [orderPickingPage,setOrderPickingPage]= useState([]); 
 
-    //url api, token
+    //url api, token, paginacio
     const apiUrl = import.meta.env.VITE_API_URL; 
     const token = localStorage.getItem("token");
+    const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
 
     //navegate
     const navigate =useNavigate();
@@ -103,6 +105,38 @@ function OrderPickingReception() {
         alert("Order picking completada");
     };
 
+    //funcions paginació
+    useEffect (()=>{
+        const totalPages = Math.ceil(orderPickingReception.length / elementsPaginacio);
+        setTotalPages(totalPages);
+        console.log(totalPages)
+    },[orderPickingReception])
+
+    const paginate = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+          setCurrentPage(currentPage + 1);
+        }
+    };
+
+    useEffect(()=> {
+        const indexOfLastItem = currentPage * elementsPaginacio;
+        const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
+        const currentItems = orderPickingReception.slice(indexOfFirstItem, indexOfLastItem);
+        setOrderPickingPage(currentItems)
+    },[currentPage,orderPickingReception])
+
+
+
     return (
         <>
             <div className="container-fluid">
@@ -152,7 +186,7 @@ function OrderPickingReception() {
                                 </thead>
 
                                 <tbody>
-                                    {orderPickingReception
+                                    {orderPickingPage
                                         .filter(order => order.operator_id === parseInt(usuariFiltrar))
                                         .map(order => {
                                             const user = users.find(u => u.id === order.operator_id);
@@ -175,18 +209,23 @@ function OrderPickingReception() {
                             
                             <nav aria-label="Page navigation example" className="d-block">
                                 <ul className="pagination justify-content-center">
-                                    <li className="page-item">
-                                        <a className="page-link text-light-blue" href="#" aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
+                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                    <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                    </li>
+                                    
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+                                    <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                                        <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
+                                        {number}
                                         </a>
                                     </li>
-                                    <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-                                    <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-                                    <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
-                                    <li className="page-item">
-                                        <a className="page-link text-light-blue" href="#" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
+                                    ))}
+                                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                    <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {e.preventDefault(); goToNextPage(); }}>
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
                                     </li>
                                 </ul>
                             </nav>
