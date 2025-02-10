@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Button, Modal, Table } from 'react-bootstrap';
+import { Button, Modal } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import Filtres from './FiltresProvince';
+import Filtres from './ProvinceFiltres';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -19,11 +19,10 @@ const ProvinciaSchema = Yup.object().shape({
 });
 
 function Provincia() {
-  // Obtenemos el parámetro de la URL (por ejemplo, "/Province/1")
+
   const { provinceId } = useParams();
   const navigate = useNavigate();
 
-  // Estados para la lista y para los modales de CRUD
   const [provincias, setProvincias] = useState([]);
   const [currentProvince, setCurrentProvince] = useState(null);
   const [showCreate, setShowCrear] = useState(false);
@@ -31,9 +30,8 @@ function Provincia() {
   const [showEdit, setShowEdit] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({ nombre: '', orden: 'none' });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 10;
 
-  // Función para cargar todas las provincias
   const cargarDatos = async () => {
     try {
       const response = await axios.get(`${apiUrl}/province`, {
@@ -45,12 +43,11 @@ function Provincia() {
     }
   };
 
-  // Al montar el componente se cargan todas las provincias
   useEffect(() => {
     cargarDatos();
   }, []);
 
-  // Funciones CRUD
+
   const crearProvincia = (values, { setSubmitting, resetForm }) => {
     axios
       .post(`${apiUrl}/province`, values, {
@@ -106,7 +103,6 @@ function Provincia() {
       });
   };
 
-  // Filtramos la lista según el parámetro provinceId (si se pasa)
   let filteredProvincias = provincias;
   if (provinceId) {
     filteredProvincias = filteredProvincias.filter(
@@ -114,7 +110,6 @@ function Provincia() {
     );
   }
 
-  // Se aplican además otros filtros definidos en el componente de filtros
   if (appliedFilters.nombre) {
     filteredProvincias = filteredProvincias.filter((prov) =>
       prov.name.toLowerCase().includes(appliedFilters.nombre.toLowerCase())
@@ -126,7 +121,7 @@ function Provincia() {
     );
   }
 
-  // Paginación
+
   const totalpagines = Math.ceil(filteredProvincias.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = filteredProvincias.slice(startIndex, startIndex + itemsPerPage);
@@ -193,7 +188,7 @@ function Provincia() {
         </div>
       </div>
 
-      {/* Modal para crear */}
+      {/* Modal per crear */}
       <Modal show={showCreate} onHide={() => setShowCrear(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Nova Provincia</Modal.Title>
@@ -229,7 +224,7 @@ function Provincia() {
         </Modal.Body>
       </Modal>
 
-      {/* Modal para visualizar */}
+      {/* Modal per visualizar */}
       <Modal show={showView} onHide={() => setShowView(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Visualitzar Provincia</Modal.Title>
@@ -321,7 +316,6 @@ function Provincia() {
                   <td data-cell="ID">{prov.id}</td>
                   <td data-cell="Nom">{prov.name}</td>
                   <td data-cell="ID de l'estat">
-                    {/* Botón que redirige al ID de l'estat */}
                     <Button
                       size="sm"
                       onClick={() =>

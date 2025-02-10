@@ -1,7 +1,7 @@
 // Moviments.js
 import { useState, useEffect, useMemo } from 'react';
 import Header from "../Header";
-import FiltresMoviments from "./FiltresMoviments";
+import FiltresMoviments from "./MovimentsFiltres";
 import { Button, Modal } from 'react-bootstrap';
 import axios from "axios";
 
@@ -19,7 +19,6 @@ function Moviments() {
   const [Orderlinereception, setOrdrelinerecepcio] = useState([]);
   const [incidencies, setIncidencies] = useState([]);
   
-  // Estados para modales de origen
 
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [selectedInventory, setSelectedInventory] = useState(null);
@@ -33,13 +32,11 @@ function Moviments() {
   const [showIncidentModal, setShowIncidentModal] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState(null);
 
-  // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 1;
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  // Modal de moviments
   const handleClose = () => setShow(false);
   const handleShow = (product) => {
     setSelectedMoviment(product);
@@ -207,7 +204,6 @@ function Moviments() {
     return {
       magatzem: Array.from(new Set(moviments.map(m => m.storage_id.toString()))).sort(),
       carrer: Array.from(new Set(moviments.map(m => m.street_id.toString()))).sort(),
-      estanteria: Array.from(new Set(moviments.map(m => m.shelf_id.toString()))).sort(),
       espai: Array.from(new Set(moviments.map(m => m.space_id.toString()))).sort(),
       producte: producte.length > 0
         ? Array.from(new Set(producte.map(p => p.name))).sort()
@@ -220,7 +216,7 @@ function Moviments() {
     };
   }, [moviments, producte, users]);
 
-  // Paginación: calcula los elementos a mostrar en la página actual
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredMoviments.slice(indexOfFirstItem, indexOfLastItem);
@@ -231,7 +227,7 @@ function Moviments() {
     setCurrentPage(pageNumber);
   };
 
-  // Funciones para "anterior" y "siguiente"
+  // Funcion para "anterior" y "siguiente"
   const goToPreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -382,7 +378,7 @@ function Moviments() {
           </ul>
         </nav>
 
-      {/* Modal de Detalles del Movimiento */}
+      {/* Modal de  Moviments */}
 <Modal show={show} onHide={handleClose} centered>
   <Modal.Header closeButton className="bg-primary text-white">
     <Modal.Title>Detalls del Moviment</Modal.Title>
@@ -462,7 +458,7 @@ function Moviments() {
   </Modal.Footer>
 </Modal>
 
-{/* Modal Línea de Orden de Recepción */}
+{/* Modal Línea de Orde de Recepció */}
 <Modal show={showOrderLineModal} onHide={() => setShowOrderLineModal(false)} centered>
   <Modal.Header closeButton>
     <Modal.Title>Detalles de Línea de Orden de Recepción</Modal.Title>

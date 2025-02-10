@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Button, Modal, Table } from 'react-bootstrap';
+import { Button, Modal } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import FiltresCity from './FiltresCity'; 
+import FiltresCity from './CityFiltres'; 
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -29,7 +29,7 @@ function City() {
   const [appliedFilters, setAppliedFilters] = useState({ name: '', orden: 'none', provinceId: '' });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 10;
 
   const cargarDatos = async () => {
     try {
@@ -317,18 +317,16 @@ function City() {
         </div>
       </div>
 
-      {/* Paginación en bloques de 3 páginas */}
       {totalPages > 1 && (
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
-            {/* Flecha Izquierda para el bloque anterior */}
+            
             <li className={`page-item ${currentBlock === 0 ? 'disabled' : ''}`}>
               <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={handlePreviousBlock}>
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
 
-            {/* Números de página correspondientes al bloque actual */}
             {Array.from({ length: blockEnd - blockStart + 1 }, (_, i) => blockStart + i).map((page) => (
               <li key={page} className="page-item">
                 <a

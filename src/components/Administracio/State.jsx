@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import FiltresState from './FiltresState'; // Asegúrate de que la ruta sea correcta
+import FiltresState from './StateProvince'; // Asegúrate de que la ruta sea correcta
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -71,14 +71,13 @@ function State() {
     filteredStates = [...filteredStates].sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  // Paginación
-  const itemsPerPage = 15;
+  // Paginació
+  const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(filteredStates.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = filteredStates.slice(startIndex, startIndex + itemsPerPage);
 
-  // Paginación en bloques de 3 páginas
   const pagesToShow = 3;
   const currentBlock = Math.floor((currentPage - 1) / pagesToShow);
   const blockStart = currentBlock * pagesToShow + 1;
@@ -98,7 +97,6 @@ function State() {
     }
   };
 
-  // Callbacks recibidos del componente de filtros
   const handleFilter = (filters) => {
     setAppliedFilters(filters);
     setCurrentPage(1);
