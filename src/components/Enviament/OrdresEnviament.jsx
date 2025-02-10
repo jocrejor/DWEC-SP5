@@ -418,13 +418,13 @@ function OrdresEnviament() {
             }) => (
               <Form>
                 <div>
-                  <Button variant={tipoModal === "Crear" ? "success" : "info"} type='submit'>{tipoModal}</Button>
+                  <Button className='mb-4' variant={tipoModal === "Crear" ? "success" : "info"} type='submit'>{tipoModal}</Button>
 
                 </div>
 
-                <div className='pb-3'>
-                  <label htmlFor='client_id' className='block text-sm font-medium text-gray-700 pe-2'>Client</label>
-                  <Field as="select" name="client_id" values={values.client_id} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                <div className='form-group pb-3'>
+                  <label htmlFor='client_id'>Client</label>
+                  <Field as="select" name="client_id" values={values.client_id} className="form-control">
                     <option value="">Selecciona un client:</option>
                     {clientes.map(cliente => {
                       return <option key={cliente.id} value={cliente.id}>{cliente.name}</option>
@@ -433,10 +433,10 @@ function OrdresEnviament() {
                   {errors.client_id && touched.client_id ? <div className="text-red-500 text-sm">{errors.client_id}</div> : null}
                 </div>
 
-                <div className='pb-3'>
-                  <label htmlFor='shipping_date' className='block text-sm font-medium text-gray-700 pe-2'>Data estimada</label>
-                  <Field type="date" name="shipping_date" values={values.shipping_date} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" />
-                  {errors.shipping_date && touched.shipping_date ? <div className="text-red-500 text-sm">{errors.shipping_date}</div> : null}
+                <div className='form-group'>
+                  <label htmlFor='shipping_date'>Data estimada</label>
+                  <Field type="date" name="shipping_date" values={values.shipping_date} className="form-control" />
+                  {errors.shipping_date && touched.shipping_date ? <div>{errors.shipping_date}</div> : null}
                 </div>
               </Form>
             )}
@@ -469,31 +469,31 @@ function OrdresEnviament() {
               <Form>
 
                 <h4>Afegeix productes a la ordre:</h4>
-                <div className='pb-3'>
-                  <label htmlFor='product_id' className='block text-sm font-medium text-gray-700 pe-2'>Producte</label>
-                  <Field as="select" name="product_id" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                <div className='form-group'>
+                  <label htmlFor='product_id'>Producte</label>
+                  <Field as="select" name="product_id" className="form-control">
                     <option value="">Selecciona un producte</option>
                     {products.map(product => {
                       return <option key={product.id} value={product.id}>{product.name}</option>
                     })}
                   </Field>
-                  {errors.product_id && touched.product_id ? <div className="text-red-500 text-sm">{errors.product_id}</div> : null}
+                  {errors.product_id && touched.product_id ? <div>{errors.product_id}</div> : null}
                 </div>
 
-                <div className='pb-3'>
-                  <label htmlFor='quantity' className='block text-sm font-medium text-gray-700 pe-2'>Quantitat</label>
+                <div className='form-group'>
+                  <label htmlFor='quantity'>Quantitat</label>
                   <Field
                     type="text"
                     name="quantity"
                     placeholder="Quantitat del producte"
                     value={values.quantity}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                    className="form-control"
                   >
                   </Field>
-                  {errors.quantity && touched.quantity ? <div className="text-red-500 text-sm">{errors.quantity}</div> : null}
+                  {errors.quantity && touched.quantity ? <div>{errors.quantity}</div> : null}
                 </div>
 
-                <div>
+                <div className='mt-3'>
                   <table class="table table-striped text-center">
                     <thead className="table-active border-bottom border-dark-subtle">
                       <tr>
@@ -521,8 +521,6 @@ function OrdresEnviament() {
 
                       ))}
                     </tbody>
-
-
                   </table>
                 </div>
 
@@ -562,33 +560,31 @@ function OrdresEnviament() {
             }) => (
               <Form>
                 <div>
-                  <Button variant={tipoModal === "Crear" ? "success" : "info"} type='submit'>{tipoModal}</Button>
-
+                  <Button className='mb-4' variant={"info"} type='submit'>{tipoModal}</Button>
                 </div>
-                <div className='pb-3'>
-                  <label htmlFor='client_id' className='block text-sm font-medium text-gray-700 pe-2'>Client</label>
-                  <Field as="select" name="client_id" values={values.client_id} className="w-full border border-0 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" disabled>
+                <div className='form-group'>
+                  <label htmlFor='client_id'>Client</label>
+                  <Field as="select" name="client_id" values={values.client_id} className="form-control" disabled>
                     <option value="">Selecciona un client:</option>
                     {clientes.map(cliente => {
                       return <option key={cliente.id} value={cliente.id}>{cliente.name}</option>
                     })}
                   </Field>
-                  {errors.client_id && touched.client_id ? <div className="text-red-500 text-sm">{errors.client_id}</div> : null}
+                  {errors.client_id && touched.client_id ? <div>{errors.client_id}</div> : null}
                 </div>
 
-                <div className='pb-3'>
-                  <label htmlFor='shipping_date' className='block text-sm font-medium text-gray-700 pe-2'>Data estimada</label>
-                  <Field type="date" name="shipping_date" values={values.shipping_date} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" disabled />
-                  {errors.shipping_date && touched.shipping_date ? <div className="text-red-500 text-sm">{errors.shipping_date}</div> : null}
+                <div className='form-group'>
+                  <label htmlFor='shipping_date'>Data estimada</label>
+                  <Field type="date" name="shipping_date" values={values.shipping_date} className="form-control" disabled />
+                  {errors.shipping_date && touched.shipping_date ? <div>{errors.shipping_date}</div> : null}
                 </div>
 
-                <div>
+                <div className='mt-3'>
                   <table class="table table-striped text-center">
                     <thead className="table-active border-bottom border-dark-subtle">
                       <tr>
                         <th>Producte</th>
                         <th>Quantitat</th>
-                        <th>Accions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -596,16 +592,6 @@ function OrdresEnviament() {
                         <tr key={producto.product_id}>
                           <td>{producteExistent(producto.product_id)}</td>
                           <td>{producto.quantity}</td>
-                          <td>
-                            <Button
-                              variant="outline-secondary"
-                              onClick={() => {
-                                eliminarProducte(producto.product_id);
-                              }}
-                            >
-                              <i className="bi bi-trash p-2"></i>
-                            </Button>
-                          </td>
                         </tr>
 
                       ))}
@@ -613,7 +599,6 @@ function OrdresEnviament() {
                   </table>
                 </div>
               </Form>
-
             )}
           </Formik>
         </Modal.Body>
