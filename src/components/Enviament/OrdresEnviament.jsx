@@ -180,9 +180,9 @@ function OrdresEnviament() {
     const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
     const datos = await obtindreOrderLine();
-    if(datos.shipping_order_id === valors.id ){
+    if (datos.shipping_order_id === valors.id) {
       setValorsLineInicials(datos)
-      
+
     }
     canviEstatModalVisualitza();
   }
@@ -259,16 +259,16 @@ function OrdresEnviament() {
     }
   };
 
-  const actualitzaFiltres = async (clients,identificador) => {
+  const actualitzaFiltres = async (clients, identificador) => {
     let ordersFiltradas = orders;
     ordersFiltradas = ordersFiltradas.filter((order) => {
       const matchesClient = clients ? parseInt(order.client_id) === parseInt(clients) : true;
       const matchesId = identificador ? parseInt(order.id) === parseInt(identificador) : true;
-  
+
       // Ambas condiciones deben ser verdaderas para que la orden pase el filtro
       return matchesClient && matchesId;
     });
-    setOrder(ordersFiltradas);    
+    setOrder(ordersFiltradas);
   }
 
   const netejaFiltres = () => {
@@ -282,7 +282,7 @@ function OrdresEnviament() {
   return (
     <>
       <Header title="Ordres d'Enviament" />
-      <Filter onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres}/>
+      <Filter onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres} />
       <div class="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div class="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div class="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -416,13 +416,12 @@ function OrdresEnviament() {
           </Formik>
 
           <Formik
-            enableReinitialize={true} 
-            initialValues={(tipoModal === 'Modificar' ? valorsLineInicials : {
-              shipping_order_id: '',
-              product_id: '',
-              quantity: '',
-              orderline_status_id: '',
-            })}
+            enableReinitialize={true}
+            initialValues={{
+              product_id: valorsLineInicials?.product_id || '',
+              quantity: valorsLineInicials?.quantity || '',
+              orderline_status_id: valorsLineInicials?.orderline_status_id || 1
+            }}
             validationSchema={OrderLineSchema}
             onSubmit={(values, { resetForm }) => {
               afegirProducte({
@@ -433,6 +432,7 @@ function OrdresEnviament() {
               resetForm();
             }}
           >
+
             {({
               values,
               errors,
@@ -586,7 +586,7 @@ function OrdresEnviament() {
                   </table>
                 </div>
               </Form>
-              
+
             )}
           </Formik>
         </Modal.Body>
