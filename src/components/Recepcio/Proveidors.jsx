@@ -148,28 +148,52 @@ function Proveidors() {
     return values;
   };
 
-  
   const gravar = async (values) => {
     try {
       // Llamamos a transformProvince antes de hacer cualquier envío a la API
       const transformedValues = transformProvince(values);
   
-      const dataToSend = tipoModal === 'Modificar' ? { ...transformedValues, id: undefined } : transformedValues;
-    
-      if (tipoModal === 'Crear') {
-        await axios.post(`${apiUrl}/supplier`, dataToSend, { headers: { "auth-token": localStorage.getItem("token") } });
-      } else {
-        const { id, ...valuesWithoutId } = dataToSend;
-        await axios.put(`${apiUrl}/supplier/${id}`, valuesWithoutId, { headers: { "auth-token": localStorage.getItem("token") } });
+      // Preparamos los datos a enviar, si es 'Modificar' eliminamos el id del objeto
+      let dataToSend = tipoModal === 'Modificar' ? { ...transformedValues } : transformedValues;
+  
+      // Si estamos modificando, eliminamos el id de los datos enviados en el cuerpo de la solicitud
+      if (tipoModal === 'Modificar' && dataToSend.id) {
+        delete dataToSend.id; // Eliminar el id antes de enviarlo
       }
-    
-      const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } });
+  
+      if (tipoModal === 'Crear') {
+        // Para creación, enviamos los valores tal cual
+        await axios.post(`${apiUrl}/supplier`, dataToSend, { 
+          headers: { "auth-token": localStorage.getItem("token") } 
+        });
+      } else {
+        // Para modificación, aseguramos que el id esté presente en la URL
+        if (!values.id) {
+          console.error('Error: El id del proveedor es necesario para la modificación');
+          return;
+        }
+        await axios.put(`${apiUrl}/supplier/${values.id}`, dataToSend, {
+          headers: { "auth-token": localStorage.getItem("token") }
+        });
+      }
+      
+      // Si todo sale bien, obtenemos la lista actualizada de proveedores
+      const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      });
       setSuppliers(updatedSuppliers.data);
       canviEstatModal();
+  
     } catch (error) {
-      console.error('Error guardant proveidors:', error);
+      // Mostramos el error si ocurre un fallo en la operación
+      console.error('Error guardando proveedores:', error);
+      if (error.response && error.response.data) {
+        console.error('Respuesta de la API:', error.response.data);
+      }
     }
   };
+  
+  
   
   const handleFilterChange = (filters) => {
     const filtered = suppliers.filter((supplier) => {
@@ -426,8 +450,7 @@ function Proveidors() {
                         as="select"
                         id="province"
                         name="province"
-                        className={`text-light-blue form-control ${touched.province && errors.province ? 'is-invalid' : ''
-                          }`}
+                        className={`text-light-blue form-control ${touched.province && errors.province ? 'is-invalid' : ''}`}
                       >
                         <option value="">Selecciona una província</option>
                         {provincia.length > 0 ? (
