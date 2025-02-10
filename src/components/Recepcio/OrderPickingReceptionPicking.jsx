@@ -159,8 +159,8 @@ function OrderPickingReception() {
                                             const product = products.find(p => p.id === order.product_id);
                                             return (
                                                 <tr key={order.id}>
-                                                    <td class="d-flex justify-content-center align-items-center">
-                                                        <i class="bi bi-arrow-down" onClick={() => completarOrderPicking(order.order_line_reception_id, order.id)}></i>
+                                                    <td className="d-flex justify-content-center align-items-center">
+                                                        <i className="bi bi-arrow-down" onClick={() => completarOrderPicking(order.order_line_reception_id, order.id)}></i>
                                                     </td>
                                                     <td data-cell="Ordre ID">{order.id}</td>
                                                     <td data-cell="Producte">{product.name}</td>
@@ -173,18 +173,18 @@ function OrderPickingReception() {
                                 </tbody>
                             </table>
                             
-                            <nav aria-label="Page navigation example" class="d-block">
-                                <ul class="pagination justify-content-center">
-                                    <li class="page-item">
-                                        <a class="page-link text-light-blue" href="#" aria-label="Previous">
+                            <nav aria-label="Page navigation example" className="d-block">
+                                <ul className="pagination justify-content-center">
+                                    <li className="page-item">
+                                        <a className="page-link text-light-blue" href="#" aria-label="Previous">
                                             <span aria-hidden="true">&laquo;</span>
                                         </a>
                                     </li>
-                                    <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
-                                    <li class="page-item">
-                                        <a class="page-link text-light-blue" href="#" aria-label="Next">
+                                    <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+                                    <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+                                    <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+                                    <li className="page-item">
+                                        <a className="page-link text-light-blue" href="#" aria-label="Next">
                                             <span aria-hidden="true">&raquo;</span>
                                         </a>
                                     </li>
