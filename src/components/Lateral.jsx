@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import logo from '../assets/logo_footer2.png';
-import '../App'
-import Nav from 'react-bootstrap/Nav';
 import { Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -28,12 +26,22 @@ function Lateral() {
     }
     return (
         <>
-            <div className="col-12 col-xl-2 p-0 fondo-azul">
-                <div className="d-flex justify-content-between align-items-center overflow-visible d-xl-block">
-                    <div className="d-flex">
+            <div className="col-12 col-xl-2 p-0 fondo-azul z-3">
+                <div className="">
+                    <div className="d-flex justify-content-between">
                         <img id="logo" className="m-4 py-xl-4 m-xl-auto" src={logo} alt="Logo Stockflow" />
+                        <nav class="navbar navbar-dark  d-xl-none d-flex">
+                            <div class="container-fluid">
+                                <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#navbarToggleExternalContent"
+                                    aria-controls="navbarToggleExternalContent" aria-expanded="false"
+                                    aria-label="Toggle navigation">
+                                    <span class="navbar-toggler-icon text"></span>
+                                </button>
+                            </div>
+                        </nav>
                     </div>
-                    <nav id="menu" className="d-xl-block">
+                    <nav class="collapse d-xl-block" id="navbarToggleExternalContent">
                         <ul className="list-group list-group-flush border-top border-bottom ">
                             <li className="list-group-item py-3 px-1 text-white fondo-azul no-hover"><i className="bi bi-house-fill px-1 text-white"></i>Administració</li>
                             <li className={activeOption == 'Usuaris' ? liActive : liInactive}><Link className={activeOption == 'Usuaris' ? linkActive : linkInactive} onClick={() => { setActiveOption('Usuaris') }} to="/usuaris">{activeOption == 'Usuaris' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Usuaris</Link></li>
@@ -58,7 +66,7 @@ function Lateral() {
                             <li className="list-group-item text-white logout"><a className="text-decoration-none text-white d-block" href="#" onClick={canviEstatModal}><i className="bi bi-box-arrow-right pe-1 text-white"></i>Tancar</a></li>
                         </ul>
                     </nav>
-                    <button id="dropdown" className="d-xl-none d-block me-4 fondo-azul border border-0"><i className="bi bi-list text-white fs-1"><span className="visually-hidden">Menú desplegable</span></i></button>
+                   {/*} <button id="dropdown" className="d-xl-none d-block me-4 fondo-azul border border-0"><i className="bi bi-list text-white fs-1"><span className="visually-hidden">Menú desplegable</span></i></button>*/}
                 </div>
             </div>
 

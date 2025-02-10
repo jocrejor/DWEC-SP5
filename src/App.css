@@ -13,6 +13,7 @@
     color: var(--lightBlue);
 }
 
+
 td, th{
     color: var(--lightBlue) !important;
 }
@@ -128,21 +129,6 @@ li:hover i{
 @media only screen and (max-width: 1199px)
 {
 
-    nav{
-        display: none;
-        top: 5.7em;
-    }
-
-    .show{
-        border-top: 1px solid white;
-        position: absolute;
-        display: block;
-        width: 100%;
-        max-height: calc(100vh - 5.7em);
-        animation: slideDown 0.4s ease-in-out;
-        z-index: 5;
-    }
-
     #logo {
         width: 5em;
     }
@@ -176,19 +162,5 @@ li:hover i{
     td[data-no-colon="true"]::before {
         content: ""; 
     }
-
-    /*********** DESPLAZAMIENTO DEL MENÚ ***********/
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
 
 }
