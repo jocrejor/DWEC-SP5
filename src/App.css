@@ -17,7 +17,7 @@ td, th{
 }
 
 .fondo-azul{
-    background-color: var(--darkBlue);
+    background-color: var(--darkBlue) !important;
 }
 
 .fondo-azul-claro{
@@ -85,7 +85,7 @@ li:hover i{
 
 .activo-2{
     background-color: var(--lightBlue) !important;
-    border: 1px solid var(--lightBlue);
+    border: 1px solid var(--lightBlue) !important;
     color: white !important;
 }
 

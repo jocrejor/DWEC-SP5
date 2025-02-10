@@ -3,11 +3,12 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header';
-import Filtres from '../filtresProveidors';	
+import Filtres from './proveidorsFiltres';	
 import axios from 'axios';
 import '../../App.css';
 
 const apiUrl = import.meta.env.VITE_API_URL;
+const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
 
 const supplierschema = Yup.object().shape({
   name: Yup.string().min(3, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
@@ -30,6 +31,9 @@ function Proveidors() {
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [suppliersPage,setSuppliersPage]= useState([]);
   const [valorsInicials, setValorsInicials] = useState({
     name: '',
     address: '',
@@ -48,6 +52,38 @@ function Proveidors() {
   useEffect(() => {
     setFilteredSuppliers(suppliers);
   }, [suppliers]);
+
+    // Obtindreels index. 
+    useEffect (()=>{
+      const totalPages = Math.ceil(suppliers.length / elementsPaginacio);
+      setTotalPages(totalPages);
+      console.log(totalPages)
+    },[suppliers])
+  
+    // Función para cambiar de página
+    const paginate = (pageNumber) => {
+      setCurrentPage(pageNumber);
+    };
+  
+    // Funciones para "anterior" y "siguiente"
+    const goToPreviousPage = () => {
+      if (currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    };
+  
+    const goToNextPage = () => {
+      if (currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+      }
+    };
+  
+    useEffect(()=> {
+      const indexOfLastItem = currentPage * elementsPaginacio;
+      const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
+      const currentItems = suppliers.slice(indexOfFirstItem, indexOfLastItem);
+      setSuppliersPage(currentItems)
+    },[currentPage,suppliers])
 
   const fetchData = async () => {
     try {
@@ -146,7 +182,7 @@ function Proveidors() {
                 <option selected>Tria una opció</option>
                 <option value="1">Eliminar</option>
               </select>
-              <label for="floatingSelect">Accions en lot</label>
+              <label htmlFor="floatingSelect">Accions en lot</label>
             </div>
             <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button"><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
           </div>
@@ -181,7 +217,7 @@ function Proveidors() {
       <div className='container-fluid pt-3'>
 
         <table className='table table-striped border m-2 text-center'>
-          <thead class="table-active border-bottom border-dark-subtle">
+          <thead className="table-active border-bottom border-dark-subtle">
             <tr>
               <th scope="col">ID</th>
               <th scope="col">Nom</th>
@@ -193,7 +229,7 @@ function Proveidors() {
             </tr>
           </thead>
           <tbody>
-            {filteredSuppliers.length === 0 ? (
+            {filteredSuppliers.length === 0 && suppliersPage.length === 0 ? (
               <tr>
                 <td colSpan="13">No hi han proveidors</td>
               </tr>
@@ -473,20 +509,26 @@ function Proveidors() {
           </Formik>
         </Modal.Body>
       </Modal>
-      <nav aria-label="Page navigation example" class="d-block">
-        <ul class="pagination justify-content-center">
-          <li class="page-item">
-                <a class="page-link text-light-blue" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
+
+      <nav aria-label="Page navigation example" className="d-block">
+        <ul className="pagination justify-content-center">
+          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+            <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
+              <span aria-hidden="true">&laquo;</span>
+            </a>
           </li>
-          <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
-          <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
-          <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
-          <li class="page-item">
-                <a class="page-link text-light-blue" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+            <li key={number} className={`page-item ${currentPage === number ? 'activo-2' : ''}`}>
+              <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
+                {number}
+              </a>
+            </li>
+          ))}
+          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+            <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {e.preventDefault(); goToNextPage(); }}>
+              <span aria-hidden="true">&raquo;</span>
+            </a>
           </li>
         </ul>
       </nav>
