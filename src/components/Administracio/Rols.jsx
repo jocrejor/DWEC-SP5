@@ -12,6 +12,7 @@ const RoleSchema = Yup.object().shape({
     .required('Valor requerit'),
 });
 
+const rolesPerPage = 5;
 function Rols() {
   const [roles, setRoles] = useState([]);
   const [filteredRoles, setFilteredRoles] = useState([]);
@@ -20,20 +21,22 @@ function Rols() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [valorsInicials, setValorsInicials] = useState({ name: '' });
   const [filterName, setFilterName] = useState('');
-  const [filterEmail, setFilterEmail] = useState('');
-  const [filterRole, setFilterRole] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+
+
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
+
+  const calcularTotalPagines = (array) => Math.max(3, Math.ceil(array.length / rolesPerPage));
 
   useEffect(() => {
     axios.get(`${apiUrl}/userProfile`, { headers: { "auth-token": token } })
       .then((response) => {
         setRoles(response.data);
         setFilteredRoles(response.data);
-        setTotalPages(Math.ceil(response.data.length / 10));  
+        setTotalPages(calcularTotalPagines(response.data));
       })
       .catch((error) => {
         console.error(error.response.data);
@@ -41,21 +44,20 @@ function Rols() {
   }, [apiUrl, token]);
 
   const handleFilterChange = () => {
-    const filtered = roles.filter((role) => {
-      return (
-        role.name.toLowerCase().includes(filterName.toLowerCase()) &&
-        role.email.toLowerCase().includes(filterEmail.toLowerCase()) &&
-        role.role.toLowerCase().includes(filterRole.toLowerCase())
-      );
-    });
+    const filtered = roles.filter(role =>
+      role.name.toLowerCase().includes(filterName.toLowerCase()),
+      setTotalPages(calcularTotalPagines(filtered)),
+      setCurrentPage(1)
+    );
     setFilteredRoles(filtered);
+
   };
 
   const handleClearFilter = () => {
     setFilterName('');
-    setFilterEmail('');
-    setFilterRole('');
     setFilteredRoles(roles);
+    setTotalPages(calcularTotalPagines(roles));
+
   };
 
   const eliminarRole = async (id) => {
@@ -65,6 +67,8 @@ function Rols() {
         await axios.delete(`${apiUrl}/Role/${id}`, { headers: { "auth-token": token } });
         setRoles((prevRoles) => prevRoles.filter((item) => item.id !== id));
         setFilteredRoles((prevRoles) => prevRoles.filter((item) => item.id !== id));
+        setTotalPages(calcularTotalPagines(updatedRoles));
+
       } catch (error) {
         console.error('Error en suprimir el rol:', error);
       }
@@ -98,9 +102,16 @@ function Rols() {
   };
 
   const getCurrentPageRoles = () => {
-    const startIndex = (currentPage - 1) * 10;  
-    const endIndex = startIndex + 10;
+    const startIndex = (currentPage - 1) * rolesPerPage;
+    const endIndex = startIndex + rolesPerPage;
     return filteredRoles.slice(startIndex, endIndex);
+  };
+
+  // Canviar de pàgina
+  const paginate = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
   };
 
   return (
@@ -125,11 +136,15 @@ function Rols() {
         <div className="col-xl-4"></div>
         <div className="col-xl-4"></div>
         <div className="col-12 col-xl-4 text-end">
-          <button className="btn btn-secondary ps-2 me-2 text-white"><i className="bi bi-trash px-1 text-white"></i>Netejar</button>
-          <button className="btn btn-primary me-2 ps-2 orange-button text-white"><i className="bi bi-funnel px-1 text-white"></i>Filtrar</button>
+          <button className="btn btn-secondary ps-2 me-2 text-white" onClick={handleClearFilter}>
+            <i className="bi bi-trash px-1 text-white"></i>Netejar
+          </button>
+          <button className="btn btn-primary me-2 ps-2 orange-button text-white" onClick={handleFilterChange}>
+            <i className="bi bi-funnel px-1 text-white"></i>Filtrar
+          </button>
         </div>
       </div>
-     
+
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -146,13 +161,13 @@ function Rols() {
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
-          <button 
-  type="button" 
-  className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0" 
-  onClick={obrirModal}
->
-  <i className="bi bi-plus-circle text-white pe-1"></i>Crear
-</button>
+            <button
+              type="button"
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+              onClick={obrirModal}
+            >
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+            </button>
           </div>
         </div>
       </div>
@@ -175,16 +190,16 @@ function Rols() {
                 <tr key={role.id}>
                   <td>{role.id}</td>
                   <td>{role.name}</td>
-               
+
                   <td>
-                    <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => modificarRole(role)}className="btn-sm">
-                    <i style={{ color: 'gray' }} className="bi bi-pencil-square"></i>
+                    <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => modificarRole(role)} className="btn-sm">
+                      <i style={{ color: 'gray' }} className="bi bi-pencil-square"></i>
                     </Button>
                     <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => eliminarRole(role.id)} className="btn-sm">
-                    <i className="bi bi-trash" style={{ color: 'gray' }}></i>
+                      <i className="bi bi-trash" style={{ color: 'gray' }}></i>
                     </Button>
                     <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => visualitzarRole(role)} className="btn-sm">
-                    <i className="bi bi-eye px-3" style={{ color: 'gray' }}></i> 
+                      <i className="bi bi-eye px-3" style={{ color: 'gray' }}></i>
                     </Button>
                   </td>
                 </tr>
@@ -195,20 +210,18 @@ function Rols() {
       </div>
 
       {/* Paginació */}
-      <nav aria-label="Page navigation example" className="d-block">
+      <nav>
         <ul className="pagination justify-content-center">
-          <li className="page-item">
-            <a className="page-link text-light-blue" href="#" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
+          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+            <button className="page-link" onClick={() => paginate(currentPage - 1)}>&laquo;</button>
           </li>
-          <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-          <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-          <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
-          <li className="page-item">
-            <a className="page-link text-light-blue" href="#" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
+              <button className="page-link" onClick={() => paginate(i + 1)}>{i + 1}</button>
+            </li>
+          ))}
+          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+            <button className="page-link" onClick={() => paginate(currentPage + 1)}>&raquo;</button>
           </li>
         </ul>
       </nav>
@@ -257,7 +270,7 @@ function Rols() {
                     {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
                   </div>
                   <div className="d-flex justify-content-between">
-                  <Button variant="secondary" onClick={tancarModal}>
+                    <Button variant="secondary" onClick={tancarModal}>
                       Tancar
                     </Button>
                     <Button variant="primary orange-button" type="submit" disabled={Object.keys(errors).length > 0}>

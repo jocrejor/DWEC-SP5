@@ -22,11 +22,15 @@ const UserSchema = Yup.object().shape({
   image: Yup.string().required('Valor requerit')
 });
 
+const userPerPage = 5;
+
 function Usuaris() {
   const [user, setUser] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Crear");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [valorsInicials, setValorsInicials] = useState({
     name: '',
     email: '',
@@ -42,11 +46,14 @@ function Usuaris() {
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
 
+  const calcularTotalPagines = (array) => Math.max(3, Math.ceil(array.length / userPerPage));
+
   useEffect(() => {
     axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } })
       .then((response) => {
         setUser(response.data);
         setFilteredUsers(response.data);
+        setTotalPages(calcularTotalPagines(response.data));
       })
       .catch((error) => {
         console.error(error.response.data);
@@ -93,22 +100,46 @@ function Usuaris() {
   };
 
   const handleFilterChange = () => {
-    const filtered = user.filter((user) => {
+    if (!user || user.length === 0) {
+      console.warn("No hi ha usuaris carregats per filtrar.");
+      return;
+    }
+    const filtered = user.filter((u) => {
       return (
-        user.name.toLowerCase().includes(filterName.toLowerCase()) &&
-        user.email.toLowerCase().includes(filterEmail.toLowerCase()) &&
-        user.role.toLowerCase().includes(filterRole.toLowerCase())
+        (filterName === "" || u.name.toLowerCase().includes(filterName.toLowerCase())) &&
+        (filterEmail === "" || u.email.toLowerCase().includes(filterEmail.toLowerCase())) &&
+        (filterRole === "" || u.role.toLowerCase().includes(filterRole.toLowerCase()))
       );
     });
     setFilteredUsers(filtered);
+    setTotalPages(calcularTotalPagines(filtered));
+  setCurrentPage(1);
   };
+
 
   const handleClearFilter = () => {
     setFilterName('');
     setFilterEmail('');
     setFilterRole('');
     setFilteredUsers(user);
+    setTotalPages(calcularTotalPagines(user));
+  setCurrentPage(1);
   };
+
+
+  const getCurrentPageUser = () => {
+    const startIndex = (currentPage - 1) * userPerPage;
+    const endIndex = startIndex + userPerPage;
+    return filteredUsers.slice(startIndex, endIndex);
+  };
+
+  // Canviar de pàgina
+  const paginate = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+ 
 
   return (
     <div>
@@ -205,12 +236,13 @@ function Usuaris() {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.length === 0 ? (
+
+            {getCurrentPageUser().length === 0 ? (
               <tr>
-                <td colSpan="9" className="text-center text-light-blue">No hi ha perfils d'usuaris</td>
+                <td colSpan="7" className="text-center text-light-blue">No hi ha perfils d'usuaris</td>
               </tr>
             ) : (
-              filteredUsers.map((user) => (
+              getCurrentPageUser().map((user) => (
                 <tr key={user.id}>
                   <td>{user.id}</td>
                   <td>{user.name}</td>
@@ -235,21 +267,19 @@ function Usuaris() {
           </tbody>
         </Table>
       </div>
-      {/* Paginació */}
-      <nav aria-label="Page navigation example" className="d-block">
+      {/* Paginació*/}
+      <nav>
         <ul className="pagination justify-content-center">
-          <li className="page-item">
-            <a className="page-link text-light-blue" href="#" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
+          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+            <button className="page-link" onClick={() => paginate(currentPage - 1)}>&laquo;</button>
           </li>
-          <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-          <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-          <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
-          <li className="page-item">
-            <a className="page-link text-light-blue" href="#" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
+              <button className="page-link" onClick={() => paginate(i + 1)}>{i + 1}</button>
+            </li>
+          ))}
+          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+            <button className="page-link" onClick={() => paginate(currentPage + 1)}>&raquo;</button>
           </li>
         </ul>
       </nav>
@@ -316,11 +346,11 @@ function Usuaris() {
                     {errors.image && touched.image && <div className="text-danger">{errors.image}</div>}
                   </div>
                   <div className="d-flex justify-content-between">
-                  <Button variant="secondary" onClick={tancarModal}>
+                    <Button variant="secondary" onClick={tancarModal}>
                       Tancar
                     </Button>
-                    <Button variant="primary orange-button" type="submit">
-                      {tipoModal}
+                    <Button className="primary orange-button" type="button"   onClick={() => alert("S'està enviant el formulari!")}>
+                      Gravar
                     </Button>
                   </div>
                 </Form>
