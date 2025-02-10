@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const FiltresTransportistes = ({ carriers, pais, provincia, ciutat, onFilter, onClear }) => {
+const TransportistesFiltres = ({ carriers, pais, provincia, ciutat, onFilter, onClear }) => {
     const [filters, setFilters] = useState({
         name: '',
         nif: '',
@@ -180,4 +180,4 @@ const FiltresTransportistes = ({ carriers, pais, provincia, ciutat, onFilter, on
     );
 };
 
-export default FiltresTransportistes;
+export default TransportistesFiltres;

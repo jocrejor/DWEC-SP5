@@ -3,7 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header';
-import Filtres from './FiltresTransportistes';
+import Filtres from './TransportistesFiltres';
 import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -319,38 +319,22 @@ function Transportistes() {
         </Modal.Header>
         <Modal.Body>
           <div>
-            <p>
-              <b>Nom:</b> {valorsInicials.name}
-            </p>
-            <p>
-              <b>Adreça:</b> {valorsInicials.address}
-            </p>
-            <p>
-              <b>NIF:</b> {valorsInicials.nif}
-            </p>
-            <p>
-              <b>Telèfon:</b> {valorsInicials.phone}
-            </p>
-            <p>
-              <b>Email:</b> {valorsInicials.email}
-            </p>
+            <p><b>Nom:</b> {valorsInicials.name}</p>
+            <p><b>Adreça:</b> {valorsInicials.address}</p>
+            <p><b>NIF:</b> {valorsInicials.nif}</p>
+            <p><b>Telèfon:</b> {valorsInicials.phone}</p>
+            <p><b>Email:</b> {valorsInicials.email}</p>
             <p>
               <b>Estat:</b>{' '}
               {pais.find((state) => state.id === valorsInicials.state_id)?.name || 'No disponible'}
             </p>
-            <p>
-              <b>Província:</b> {valorsInicials.province}
-            </p>
-            <p>
-              <b>Ciutat:</b> {valorsInicials.city}
-            </p>
-            <p>
-              <b>Codi Postal:</b> {valorsInicials.cp}
-            </p>
+            <p><b>Província:</b> {valorsInicials.province}</p>
+            <p><b>Ciutat:</b> {valorsInicials.city}</p>
+            <p><b>Codi Postal:</b> {valorsInicials.cp}</p>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button className="orange-button" onClick={() => setShowViewModal(false)} aria-label="Tancar modal de visualització">
+          <Button className="btn btn-secondary orange-button" onClick={() => setShowViewModal(false)} aria-label="Tancar modal de visualització">
             Tancar
           </Button>
         </Modal.Footer>
