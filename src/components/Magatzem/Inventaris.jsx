@@ -7,7 +7,6 @@ import Header from '../Header'
 import InventarisFiltres from './InventarisFiltres'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-import Pagination from '../../Pagination'
 
 
 
@@ -18,6 +17,7 @@ const InventorySchema = Yup.object().shape({
 
 function Inventaris() {
   const apiURL = import.meta.env.VITE_API_URL;
+  const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
   const navigate = useNavigate();
   var user = JSON.parse(localStorage.getItem('user'));
 
@@ -36,13 +36,12 @@ function Inventaris() {
   const [inventoryStatus, setInventoryStatus] = useState([]);
   const [users, setUsers] = useState([]);
   const [inventoryReasons, setInventoryReasons] = useState([]);
-  const [filters, setFilters] = useState({});  
+  const [filters, setFilters] = useState({});
   const [dataToDisplay, setDataToDisplay] = useState([]);
-  const [inventoriesPerPage, setInventoriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const lastIndex = currentPage * inventoriesPerPage;
-  const firstIndex = lastIndex -inventoriesPerPage;
+  const lastIndex = currentPage * elementsPaginacio;
+  const firstIndex = lastIndex - elementsPaginacio;
   const totalInventories = inventory.length;
 
 
@@ -98,12 +97,12 @@ function Inventaris() {
 
       })
       .catch(e => { console.log(e) })
-    
+
     axios.get(`${apiURL}/inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
-    .then(response => {
-      setInventoryReasons(response.data);
-    })
-    .catch(e => { console.log(e.response.data) })
+      .then(response => {
+        setInventoryReasons(response.data);
+      })
+      .catch(e => { console.log(e.response.data) })
 
     console.log("hola")
   }, []);
@@ -140,11 +139,10 @@ function Inventaris() {
     }
   }, [selectedInventory])
 
-
-
+  /**************** FILTROS ****************/
   const handleFilter = (f) => {
     const filtered = dataToDisplay.filter(inv => {
-      const inventoryDate  = inv.created_at.split('T')[0];
+      const inventoryDate = inv.created_at.split('T')[0];
       const dateFrom = f.dateFrom ? inventoryDate >= f.dateFrom : true;
       const dateTo = f.dateTo ? inventoryDate <= f.dateTo : true;
       const findStatus = inventoryStatus.find(status => status.name === f.status);
@@ -158,9 +156,29 @@ function Inventaris() {
     setFilters(f);
   }
 
-  const handleClearFilters = () => { 
+  const handleClearFilters = () => {
     setInventory(dataToDisplay);
     setFilters({});
+  }
+
+  /**************** PAGINACIÓN ****************/
+  const pageNumbers = [];
+  const rounded = Math.ceil(totalInventories/elementsPaginacio);
+
+  for (let i = 1; i <= rounded; i++){
+    pageNumbers.push(i); 
+  }
+
+  const previuosPage = () => {
+    setCurrentPage(currentPage - 1);
+  }
+
+  const nextPage = () => {
+    setCurrentPage(currentPage + 1);
+  }
+
+  const specificPage = (page) => {
+    setCurrentPage(page);
   }
   /**************** CREAR INVENTARIO ****************/
   const createInventory = async (values) => {
@@ -232,13 +250,13 @@ function Inventaris() {
   return (
     <>
       <Header title='Inventaris'></Header>
-      <InventarisFiltres onFilter={handleFilter} onClearFilters={handleClearFilters} storages={storages}/>
+      <InventarisFiltres onFilter={handleFilter} onClearFilters={handleClearFilters} storages={storages} />
       <Row className="d-flex mx-3 bg-secondary rounded-top mt-3">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
             <div className="form-floating bg-white">
-              <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
-                <option selected>Tria una opció</option>
+              <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción" defaultValue="">
+                <option value="">Tria una opció</option>
                 <option value="Eliminar">Eliminar</option>
               </select>
               <label htmlFor="floatingSelect">Accions en lot</label>
@@ -342,7 +360,7 @@ function Inventaris() {
                 (inventory.length === 0) ?
                   <tr><td colSpan={7}>No hay nada</td></tr>
                   : inventory.map((values) => {
-                    
+
                     return (
                       <tr key={values.id}>
                         <td scope="row" data-cell="Seleccionar: ">
@@ -450,7 +468,26 @@ function Inventaris() {
 
             </Modal.Body>
           </Modal>
-          <Pagination itemsPerPage={inventoriesPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalItems={totalInventories}/>
+          
+          <nav aria-label="Page navigation example" className="d-block" id='pagination'>
+            <ul className="pagination justify-content-center">
+              <li className="page-item">
+                <a className={`page-link text-light-blue ${currentPage === 1 ? 'disabled' : ''}`} onClick={previuosPage} aria-label="Página anterior">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+              {pageNumbers.map(page => (
+                <li className="page-item" key={page}>
+                  <a className={`page-link text-light-blue ${page === currentPage ? 'activo-2' : ''}`} onClick={() => specificPage(page)}>{page}</a>
+                </li>
+              ))}
+              <li className="page-item">
+                <a className={`page-link text-light-blue ${currentPage >= pageNumbers.length ? 'disabled' : ''}`} onClick={nextPage} aria-label="Página siguiente">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
         </Col>
       </Row >
     </>
