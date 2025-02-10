@@ -17,7 +17,6 @@ function OrderReception() {
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [orderStatuses, setOrderStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
@@ -30,24 +29,26 @@ function OrderReception() {
   const [quantity, setQuantity] = useState('');
   const [showReviewModal, setShowReviewModal] = useState(false); // Nou modal per revisar
   const [orderToReview, setOrderToReview] = useState(null);
-  const [orderReceptionStatuses, setOrderReceptionStatuses] = useState([]);
+  const [orderReceptionStatus, setorderReceptionStatus] = useState([]);
+  const [orderLineStatus, setOrderLineStatus] = useState([]);
   const [orderLines, setOrderLines] = useState([]);
 
 
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [ordersRes, suppliersRes, productsRes, statusesRes] = await Promise.all([
+      const [ordersRes, suppliersRes, productsRes, statusesRes,statusLineRes] = await Promise.all([
         axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/orderreception_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+        axios.get(`${apiUrl}/orderreception_status`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } })
       ]);
       setOrderReceptions(ordersRes.data);
       setSuppliers(suppliersRes.data);
       setProducts(productsRes.data);
-      setOrderReceptionStatuses(statusesRes.data);
+      setorderReceptionStatus(statusesRes.data);
+      setOrderLineStatus(statusLineRes.data);
       setError(null);
     } catch (err) {
       console.error("Error al carregar dades:", err);
@@ -163,10 +164,13 @@ function OrderReception() {
   const revisarOrdre = async (ordre) => {
     setOrderToReview(ordre);
     try {
-      const orderLinesRes = await axios.get(`${apiUrl}/orderreception/${ordre.id}`, {
+
+      const orderLinesRes = await axios.get(`${apiUrl}/orderlinereception/`, {
         headers: { "auth-token": localStorage.getItem("token") },
       });
-      setOrderLines(orderLinesRes.data);
+      const orderLinesResFilter = orderLinesRes.data.filter(line => line.order_reception_id === ordre.id)
+      console.log(orderLinesResFilter)
+      setOrderLines(orderLinesResFilter);
 
     } catch (err) {
       console.error("Error al carregar les línies de l'ordre:", err);
@@ -199,7 +203,7 @@ function OrderReception() {
   };
 
   const getStatusName = (statusId) => {
-    const status = orderReceptionStatuses.find((status) => status.id === statusId);
+    const status = orderReceptionStatus.find((status) => status.id === statusId);
     if (status) {
       return status.name;
     } else {
