@@ -128,7 +128,6 @@ function OrdresEnviament() {
   const modificarOrdre = async (valors) => {
     setTipoModal('Modificar');
     canviEstatModal();
-    console.log(valors);
     const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
     const orderLinesData = await obtindreOrderLine();
@@ -136,9 +135,19 @@ function OrdresEnviament() {
     setOrderLine(filteredOrders);
     setValorsLineInicials(filteredOrders);
     setArray(filteredOrders);
-    console.log(filteredOrders);
-    console.log(orderLine)
   };
+
+  const visualitzarOrdre = async (valors) => {
+    setTipoModal("Visualitzar");
+    const fechaFormateada = formateaFecha(valors.shipping_date);
+    setValorsInicials({ ...valors, shipping_date: fechaFormateada });
+    const orderLinesData = await obtindreOrderLine();
+    const filteredOrders = orderLinesData.filter(order => order.shipping_order_id === valors.id);
+    setOrderLine(filteredOrders);
+    setValorsLineInicials(filteredOrders);
+    setArray(filteredOrders);
+    canviEstatModalVisualitza();
+  }
 
   const eliminarOrder = (id) => {
     axios.get(`${apiUrl}orderlineshipping`, { headers: { "auth-token": localStorage.getItem("token") } })
@@ -160,8 +169,6 @@ function OrdresEnviament() {
 
   const eliminarProducte = (idProducto) => {
     const productoAEliminar = arrayProductos.find(producto => producto.product_id === idProducto);
-    console.log(productoAEliminar);
-
     if (productoAEliminar) {
       setArrayEliminados(prevEliminados => [...prevEliminados, productoAEliminar.id]);
       setArray(prevProductos => prevProductos.filter(producto => producto.product_id !== idProducto));
@@ -170,10 +177,8 @@ function OrdresEnviament() {
 
 
   const afegirProducte = (producte) => {
-    console.log("Producte a agregar: ", producte)
     setArray(prevProductos => {
       const newArray = [...prevProductos, producte];
-      console.log("Nuevo array de productos:", newArray);
       return newArray;
     });
   }
@@ -186,8 +191,6 @@ function OrdresEnviament() {
   }
 
   const estatExistent = (id) => {
-    console.log(status)
-    console.log(id)
     const existe = status.find(estat => estat.id === id)
     if (existe) {
       return existe.name
@@ -211,18 +214,6 @@ function OrdresEnviament() {
     setArray([])
   }
 
-  const visualitzarOrdre = async (valors) => {
-    setTipoModal("Visualitzar");
-    const fechaFormateada = formateaFecha(valors.shipping_date);
-    setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-    const datos = await obtindreOrderLine();
-    if (datos.shipping_order_id === valors.id) {
-      setValorsLineInicials(datos)
-
-    }
-    canviEstatModalVisualitza();
-  }
-
   const canviEstatModalVisualitza = () => {
     setShowModalVisualitza(!showModalVisualitza)
   }
@@ -234,12 +225,8 @@ function OrdresEnviament() {
           .then(response => {
             const resultat = response.data;
             arrayProductos.map(line => {
-              console.log(arrayProductos)
               const novaId = resultat.results.insertId
               line.shipping_order_id = novaId
-
-              console.log(novaId)
-              console.log(line)
               axios.post(`${apiUrl}orderlineshipping`, line, { headers: { "auth-token": localStorage.getItem("token") } })
             })
           })
@@ -252,7 +239,6 @@ function OrdresEnviament() {
     }
     else {
       for (const idOrderLine of productosEliminados) {
-        console.log(idOrderLine);
         axios.delete(`${apiUrl}orderlineshipping/${idOrderLine}`, { headers: { "auth-token": localStorage.getItem("token") } });
       }
       axios.put(`${apiUrl}ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
@@ -301,8 +287,6 @@ function OrdresEnviament() {
       const matchesClient = clients ? parseInt(order.client_id) === parseInt(clients) : true;
       const matchesId = identificador ? parseInt(order.id) === parseInt(identificador) : true;
       const matchesStatus = estats ? parseInt(order.ordershipping_status_id) === parseInt(estats) : true;
-      console.log(estats);
-      console.log(matchesStatus);
       setCurrentPage(1)
       // Ambas condiciones deben ser verdaderas para que la orden pase el filtro
       return matchesClient && matchesId && matchesStatus;
