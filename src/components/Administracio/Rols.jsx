@@ -257,7 +257,10 @@ function Rols() {
                     {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
                   </div>
                   <div className="d-flex justify-content-between">
-                    <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>
+                  <Button variant="secondary" onClick={tancarModal}>
+                      Tancar
+                    </Button>
+                    <Button variant="primary orange-button" type="submit" disabled={Object.keys(errors).length > 0}>
                       {modalType === 'Crear' ? 'Crear' : 'Modificar'}
                     </Button>
                   </div>

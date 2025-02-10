@@ -316,7 +316,10 @@ function Usuaris() {
                     {errors.image && touched.image && <div className="text-danger">{errors.image}</div>}
                   </div>
                   <div className="d-flex justify-content-between">
-                    <Button variant="primary" type="submit">
+                  <Button variant="secondary" onClick={tancarModal}>
+                      Tancar
+                    </Button>
+                    <Button variant="primary orange-button" type="submit">
                       {tipoModal}
                     </Button>
                   </div>
