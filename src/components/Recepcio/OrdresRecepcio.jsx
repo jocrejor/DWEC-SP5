@@ -121,9 +121,11 @@ function OrderReception() {
       setSelectedProducts(productesAssociats);
   
       setValorsInicials({
+        id: ordre.id,
         supplier_id: ordre.supplier_id,
         estimated_reception_date: formateaFecha(ordre.estimated_reception_date),
       });
+      
     } catch (err) {
       console.error("Error carregant línies d'ordre:", err);
       setSelectedProducts([]);
@@ -229,30 +231,53 @@ function OrderReception() {
   };
 
   const handleSubmit = async (values) => {
-    //try {
-    const ordreDeRecepcio = {
-      ...values,
-      orderreception_status_id: 1,
-    };
-
-    const resultat = await crearOrdreDeRecepcio(ordreDeRecepcio);
-    const ordreIdValue = resultat
-
-    for (let product of selectedProducts) {
-      const liniaOrdre = {
-        order_reception_id: ordreIdValue,
-        product_id: product.product_id,
-        quantity_ordered: product.quantity,
-        orderline_status_id: 1,
-        quantity_received: 0,
-      };
-      await crearLiniaOrdreDeRecepcio(liniaOrdre);
+    try {
+      if (tipoModal === 'Crear') {
+        // Crear una nova ordre de recepció
+        const ordreIdValue = await crearOrdreDeRecepcio({ 
+          ...values, 
+          orderreception_status_id: 1 
+        });
+  
+        for (let product of selectedProducts) {
+          await crearLiniaOrdreDeRecepcio({
+            order_reception_id: ordreIdValue,
+            product_id: product.product_id,
+            quantity_ordered: product.quantity,
+            orderline_status_id: 1,
+            quantity_received: 0,
+          });
+        }
+  
+      } else if (tipoModal === 'Modificar') {
+        await axios.put(`${apiUrl}/orderreception/${valorsInicials.id}`, values, {
+          headers: { "auth-token": localStorage.getItem("token") }
+        });
+  
+        await axios.delete(`${apiUrl}/orderlinereception/order/${valorsInicials.id}`, {
+          headers: { "auth-token": localStorage.getItem("token") }
+        });
+  
+        for (let product of selectedProducts) {
+          await crearLiniaOrdreDeRecepcio({
+            order_reception_id: valorsInicials.id,
+            product_id: product.product_id,
+            quantity_ordered: product.quantity,
+            orderline_status_id: 1,
+            quantity_received: 0,
+          });
+        }
+      }
+  
+      await fetchInitialData();
+      canviEstatModal();
+      setError(null);
+    } catch (err) {
+      console.error("Error en el procés:", err);
+      setError("No s'ha pogut processar la sol·licitud.");
     }
-
-    await fetchInitialData();
-    canviEstatModal();
-    setError(null);
   };
+  
 
   return (
     <>
