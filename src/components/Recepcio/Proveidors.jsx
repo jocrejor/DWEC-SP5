@@ -30,6 +30,7 @@ function Proveidors() {
   const [ciutat, setCity] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [tipoModal, setTipoModal] = useState('Crear');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -135,6 +136,10 @@ function Proveidors() {
     setShowViewModal(true);
   };
 
+  const importSuppliers = () => {
+    setShowImportModal(true);
+  };
+
   const canviEstatModal = () => {
     setShowModal(!showModal);
   };
@@ -235,6 +240,12 @@ function Proveidors() {
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
+            <Button 
+            className='btn btn-success border-white text-white mt-2 my-md-2 me-3 flex-grow-1 flex-xl-grow-0'
+            onClick={() => importSuppliers()} style={{ cursor: "pointer" }}
+            >
+            <i className="bi bi-box-arrow-down text-white pe-1"></i>Importar
+            </Button>
             <Button
               className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
               onClick={() => {
@@ -307,6 +318,23 @@ function Proveidors() {
           </tbody>
         </table>
       </div>
+
+      {/* Modal Importar */}
+      <Modal className='text-light-blue' show={showImportModal} onHide={() => setShowImportModal(false)}>
+      <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
+        <Modal.Title>Importa Proveidors</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div>
+            <p>hola</p>
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button className='orange-button' type="submit" variant="success" onClick={() => setShowImportModal(false)}>
+          Importar
+        </Button>
+      </Modal.Footer>
+    </Modal>
 
       {/* Modal Visualitzar */}
       <Modal className='text-light-blue' show={showViewModal} onHide={() => setShowViewModal(false)}>
