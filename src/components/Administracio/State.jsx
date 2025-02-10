@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import FiltresState from './StateProvince'; // Asegúrate de que la ruta sea correcta
+import FiltresState from './StateProvince'; 
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -16,14 +16,12 @@ const StateSchema = Yup.object().shape({
 });
 
 function State() {
-  // Estados de datos y modales
   const [states, setStates] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Crear");
   const [valorsInicials, setValorsInicials] = useState({ name: '' });
   const navigate = useNavigate();
 
-  // Cargar datos
   useEffect(() => {
     axios.get(`${apiUrl}/state`, {
       headers: { "auth-token": localStorage.getItem("token") }
@@ -54,13 +52,10 @@ function State() {
     setTipoModal("Crear");
   };
 
-  // Filtros: estado en el componente padre
   const [appliedFilters, setAppliedFilters] = useState({ name: '', orden: 'none' });
 
-  // Extraer sugerencias para el autocompletado a partir de los nombres de los estados
   const suggestions = [...new Set(states.map(item => item.name))];
 
-  // Filtrar y ordenar la lista de estados
   let filteredStates = states;
   if (appliedFilters.name) {
     filteredStates = filteredStates.filter(item =>
@@ -110,9 +105,6 @@ function State() {
   return (
     <>
   
-
-
-      {/* Componente de filtros */}
       <FiltresState 
         suggestions={suggestions} 
         onFilter={handleFilter} 
@@ -142,7 +134,6 @@ function State() {
           </div>
         </div>
       </div>
-
   
       <div className="row">
   <div className="col-12">
@@ -176,19 +167,16 @@ function State() {
   </div>
 </div>
 
-
-      {/* Paginación en bloques de 3 páginas */}
       {totalPages > 1 && (
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
-            {/* Flecha izquierda para bloque anterior */}
+  
             <li className={`page-item ${currentBlock === 0 ? 'disabled' : ''}`}>
               <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={handlePreviousBlock}>
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-
-            {/* Números de página del bloque actual */}
+        
             {Array.from({ length: blockEnd - blockStart + 1 }, (_, i) => blockStart + i).map(page => (
               <li key={page} className="page-item">
                 <a
@@ -214,7 +202,7 @@ function State() {
         </nav>
       )}
 
-      {/* Modal para Crear/Modificar Estado */}
+      {/* Modal per Crear/Modificar Estat */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Estado</Modal.Title>

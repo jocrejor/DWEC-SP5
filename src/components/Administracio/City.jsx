@@ -186,7 +186,7 @@ function City() {
         </div>
       </div>
 
-      {/* Componente de filtros */}
+      {/* Component de filtres */}
       <FiltresCity
         suggestions={suggestions}
         onFilter={handleFilter}

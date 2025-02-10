@@ -47,11 +47,8 @@ function Provincia() {
     cargarDatos();
   }, []);
 
-
   const crearProvincia = (values, { setSubmitting, resetForm }) => {
-    axios
-      .post(`${apiUrl}/province`, values, {
-        headers: { "auth-token": localStorage.getItem("token") },
+    axios.post(`${apiUrl}/province`, values, {headers: { "auth-token": localStorage.getItem("token") },
       })
       .then(() => {
         cargarDatos();
@@ -292,7 +289,7 @@ function Provincia() {
         </Modal.Body>
       </Modal>
 
-      {/* Tabla de Provincias */}
+      {/* Tabla de Provincies */}
       <div className="row">
         <div className="col-12">
           <table className="table table-striped text-center align-middle">
@@ -332,7 +329,7 @@ function Provincia() {
                       onClick={() => modalvisualitzar(prov)}
                     ></i>
                     <i
-                      className="bi bi-pencil me-2"
+                      className="bi bi-pencil-square me-2"
                       title="Modificar"
                       onClick={() => modaleditar(prov)}
                     ></i>
@@ -349,7 +346,7 @@ function Provincia() {
         </div>
       </div>
 
-      {/* Paginación */}
+      {/* Paginació */}
       {totalpagines > 1 && (
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">

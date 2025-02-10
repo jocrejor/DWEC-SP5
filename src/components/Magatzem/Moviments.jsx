@@ -1,4 +1,3 @@
-// Moviments.js
 import { useState, useEffect, useMemo } from 'react';
 import Header from "../Header";
 import FiltresMoviments from "./MovimentsFiltres";
@@ -21,19 +20,19 @@ function Moviments() {
   
 
   const [showInventoryModal, setShowInventoryModal] = useState(false);
-  const [selectedInventory, setSelectedInventory] = useState(null);
+  const [inventariseleccionat, setSelectedInventory] = useState(null);
   
   const [showOrderReceptionModal, setShowOrderReceptionModal] = useState(false);
-  const [selectedOrderReception, setSelectedOrderReception] = useState(null);
+  const [ordreRecepcioseleccionada, setSelectedOrderReception] = useState(null);
   
   const [showOrderLineModal, setShowOrderLineModal] = useState(false);
-  const [selectedOrderLine, setSelectedOrderLine] = useState(null);
+  const [ordrelineaseleccionada, setSelectedOrderLine] = useState(null);
   
   const [showIncidentModal, setShowIncidentModal] = useState(false);
-  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [incidencia_seleccionada, setSelectedIncident] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 1;
+  const pagina = 10;
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -156,7 +155,7 @@ function Moviments() {
       setFilteredMoviments(moviments);
       return;
     }
-    const newFiltered = moviments.filter(mov => {
+    const noufiltre = moviments.filter(mov => {
       let cumple = true;
       if (activeFilters.magatzem) {
         if (!mov.storage_id.toString().toLowerCase().includes(activeFilters.magatzem.toLowerCase()))
@@ -196,7 +195,7 @@ function Moviments() {
       }
       return cumple;
     });
-    setFilteredMoviments(newFiltered);
+    setFilteredMoviments(noufiltre);
   };
 
   // Autocomplete
@@ -217,17 +216,16 @@ function Moviments() {
   }, [moviments, producte, users]);
 
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredMoviments.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredMoviments.length / itemsPerPage);
+  const indexOfLastItem = currentPage * pagina;
+  const indexprimerItem = indexOfLastItem - pagina;
+  const currentItems = filteredMoviments.slice(indexprimerItem, indexOfLastItem);
+  const paginestotal = Math.ceil(filteredMoviments.length / pagina);
 
-  // Función para cambiar de página
+  // Funció per cambiar de página
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  // Funcion para "anterior" y "siguiente"
   const goToPreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -235,7 +233,7 @@ function Moviments() {
   };
 
   const goToNextPage = () => {
-    if (currentPage < totalPages) {
+    if (currentPage < paginestotal) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -279,7 +277,7 @@ function Moviments() {
    <th className='align-middle' scope='col'>
             <input className='form-check-input' type="checkbox" />
                   </th>
-                  <th scope='col' className="align-middle">ID</th>
+                <th scope='col' className="align-middle">ID</th>
                 <th scope='col' className="align-middle">Id Producte</th>
                 <th scope='col' className="align-middle">Magatzem</th>
                 <th scope='col' className="align-middle">Carrer</th>
@@ -354,7 +352,6 @@ function Moviments() {
 </div>
       </div>
       </div>
-         
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -363,14 +360,14 @@ function Moviments() {
               </a>
             </li>
             
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+            {Array.from({ length: paginestotal }, (_, i) => i + 1).map((number) => (
               <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
                 <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
                   {number}
                 </a>
               </li>
             ))}
-            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+            <li className={`page-item ${currentPage === paginestotal ? 'disabled' : ''}`}>
               <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => { e.preventDefault(); goToNextPage(); }}>
                 <span aria-hidden="true">&raquo;</span>
               </a>
@@ -378,7 +375,7 @@ function Moviments() {
           </ul>
         </nav>
 
-      {/* Modal de  Moviments */}
+ {/* Modal de  Moviments */}
 <Modal show={show} onHide={handleClose} centered>
   <Modal.Header closeButton className="bg-primary text-white">
     <Modal.Title>Detalls del Moviment</Modal.Title>
@@ -414,13 +411,13 @@ function Moviments() {
     <Modal.Title>Detalles de Inventario</Modal.Title>
   </Modal.Header>
   <Modal.Body>
-    {selectedInventory ? (
+    {inventariseleccionat ? (
       <div>
-        <p className='fw-bold'>ID: {selectedInventory.id}</p>
-        <p className='fw-bold'>Date:{selectedInventory.created_at}</p>
-        <p className='fw-bold'>Created By: {selectedInventory.created_by}</p>
-        <p className='fw-bold'>Inventory Status:{selectedInventory.inventory_status}</p>
-        <p className='fw-bold'>Storage ID: {selectedInventory.storage_id}</p>
+        <p className='fw-bold'>ID: {inventariseleccionat.id}</p>
+        <p className='fw-bold'>Date:{inventariseleccionat.created_at}</p>
+        <p className='fw-bold'>Created By: {inventariseleccionat.created_by}</p>
+        <p className='fw-bold'>Inventory Status:{inventariseleccionat.inventory_status}</p>
+        <p className='fw-bold'>Storage ID: {inventariseleccionat.storage_id}</p>
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -433,19 +430,19 @@ function Moviments() {
   </Modal.Footer>
 </Modal>
 
-{/* Modal Orden de Recepción */}
+{/* Modal de Orde de Recepció */}
 <Modal show={showOrderReceptionModal} onHide={() => setShowOrderReceptionModal(false)} centered>
   <Modal.Header closeButton>
     <Modal.Title>Detalles de Orden de Recepción</Modal.Title>
   </Modal.Header>
   <Modal.Body>
-    {selectedOrderReception ? (
+    {ordreRecepcioseleccionada ? (
       <div>
-        <p className='fw-bold'>ID:{selectedOrderReception.id}</p>
-        <p className='fw-bold'>Supplier ID:{selectedOrderReception.supplier_id}</p>
-        <p className='fw-bold'>Estimated Reception Date: {selectedOrderReception.estimated_reception_date}</p>
-        <p className='fw-bold'>Created By: {selectedOrderReception.created_by}</p>
-        <p className='fw-bold'>Order Reception Status ID: {selectedOrderReception.orderreception_status_id}</p>
+        <p className='fw-bold'>ID:{ordreRecepcioseleccionada.id}</p>
+        <p className='fw-bold'>Supplier ID:{ordreRecepcioseleccionada.supplier_id}</p>
+        <p className='fw-bold'>Estimated Reception Date: {ordreRecepcioseleccionada.estimated_reception_date}</p>
+        <p className='fw-bold'>Created By: {ordreRecepcioseleccionada.created_by}</p>
+        <p className='fw-bold'>Order Reception Status ID: {ordreRecepcioseleccionada.orderreception_status_id}</p>
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -458,19 +455,19 @@ function Moviments() {
   </Modal.Footer>
 </Modal>
 
-{/* Modal Línea de Orde de Recepció */}
+{/* Modal de Línea de Orde de Recepció */}
 <Modal show={showOrderLineModal} onHide={() => setShowOrderLineModal(false)} centered>
   <Modal.Header closeButton>
     <Modal.Title>Detalles de Línea de Orden de Recepción</Modal.Title>
   </Modal.Header>
   <Modal.Body>
-    {selectedOrderLine ? (
+    {ordrelineaseleccionada ? (
       <div>
-        <p className='fw-bold'>ID: {selectedOrderLine.id}</p>
-        <p className='fw-bold' >Order Reception ID:{selectedOrderLine.order_reception_id}</p>
-        <p className='fw-bold'>Product ID: {selectedOrderLine.product_id}</p>
-        <p className='fw-bold'>Quantity Ordered: {selectedOrderLine.quantity_ordered}</p>
-        <p className='fw-bold'>Quantity Received: {selectedOrderLine.quantity_received}</p>
+        <p className='fw-bold'>ID: {ordrelineaseleccionada.id}</p>
+        <p className='fw-bold' >Order Reception ID:{ordrelineaseleccionada.order_reception_id}</p>
+        <p className='fw-bold'>Product ID: {ordrelineaseleccionada.product_id}</p>
+        <p className='fw-bold'>Quantity Ordered: {ordrelineaseleccionada.quantity_ordered}</p>
+        <p className='fw-bold'>Quantity Received: {ordrelineaseleccionada.quantity_received}</p>
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -489,10 +486,10 @@ function Moviments() {
     <Modal.Title>Detalles de Incidencia</Modal.Title>
   </Modal.Header>
   <Modal.Body>
-    {selectedIncident ? (
+    {incidencia_seleccionada ? (
       <div>
-        <p><strong>ID:</strong> {selectedIncident.id}</p>
-        <p>{JSON.stringify(selectedIncident)}</p>
+        <p><strong>ID:</strong> {incidencia_seleccionada.id}</p>
+        <p>{JSON.stringify(incidencia_seleccionada)}</p>
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
