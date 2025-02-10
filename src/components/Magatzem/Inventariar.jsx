@@ -2,10 +2,18 @@ import React from 'react'
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { Row, Col, Table, Button, Tab } from 'react-bootstrap/'
+import { Row, Col, Table, Button, Modal } from 'react-bootstrap/'
 import Header from '../Header'
 import axios from 'axios';
+import { Formik, Form, Field } from 'formik'
+import * as Yup from 'yup'
 
+const InventoryLineSchema = Yup.object().shape({
+  street_id: Yup.string().required('Required'),
+  shelf_id: Yup.string().required('Required'),
+  space_id: Yup.string().required('Required'),
+  quantity_real: Yup.number().required('Required'),
+});
 
 
 function Inventariar() {
@@ -163,6 +171,13 @@ function Inventariar() {
 
   }
 
+  //********* MODAL *********
+    const [show, setShow] = useState(false);
+    const handleClose = () => {
+      setShow(false)
+    };
+  
+    const handleShow = () => setShow(true);
 
   return (
     <>
@@ -194,7 +209,7 @@ function Inventariar() {
                 <tr>
                   <th scope="col" className='text-light-blue'>Carrer</th>
                   <th scope="col" className='text-light-blue'>Estanteria</th>
-                  <th scope="col" className='text-light-blue'>Espacio</th>
+                  <th scope="col" className='text-light-blue'>Espai</th>
                   <th scope="col" className='text-light-blue'>Producte</th>
                   <th scope="col" className='text-light-blue'>Quantitat Real</th>
                   <th scope="col" className='text-light-blue'>Justificació</th>
@@ -209,7 +224,7 @@ function Inventariar() {
                         <tr key={value.id}>
                           <td data-cell="Carrer: ">{value.street_id}</td>
                           <td data-cell="Estanteria: ">{value.shelf_id}</td>
-                          <td data-cell="Espacio: ">{value.space_id}</td>
+                          <td data-cell="Espai: ">{value.space_id}</td>
                           <td data-cell="Producte: ">{(products.find(product => product.id === value.product_id))?.name}</td>
                           <td data-cell="Quantitat Real: ">
                             <input
@@ -240,6 +255,11 @@ function Inventariar() {
                         </tr>)
                     })
                 }
+                <tr>
+                  <td colSpan={7} className='text-center'>
+                    <Button variant='success' onClick={handleShow}>+</Button>
+                  </td>
+                </tr>
               </tbody>
 
             </Table>
@@ -249,6 +269,73 @@ function Inventariar() {
             </div>
 
           </div>
+
+          <Modal show={show} onHide={handleClose} animation={true} >
+            <Modal.Header closeButton>
+              <Modal.Title className='text-light-blue'>Alta de Inventari</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Formik
+                initialValues={{ storage_id: '', street_id: '' }}
+                validationSchema={InventoryLineSchema}
+                onSubmit={values => {
+                  createInventory(values);
+                  handleClose();
+                }}
+              >
+                {({ errors, touched, setFieldValue }) => (
+                  <Form>
+                    <div>
+                      <label htmlFor="storage_" className='py-3 text-light-blue'>Magatzem:</label>
+                      <Field
+                        as='select'
+                        name='storage_id'
+                        className='form-control'
+                        onChange={(e) => {
+                          setSelectedStorageId(e.target.value);
+                          setFieldValue('storage_id', e.target.value);
+                        }}
+                      >
+                        <option value=''>Selecciona un magatzem</option>
+                        {
+                          storages.map((storage) => {
+                            return (
+                              <option key={storage.id} value={storage.id}>{storage.name}</option>
+                            );
+                          })
+                        }
+                      </Field>
+                      {errors.storage_id && touched.storage_id ? <div>{errors.storage_id}</div> : null}
+                    </div>
+                    <div>
+                      <label htmlFor="street_" className='py-3 text-light-blue'>Carrer:</label>
+                      <Field
+                        as='select'
+                        name='street_id'
+                        className='form-control'
+
+                      >
+                        <option value=''>Selecciona un carrer</option>
+                        {/*
+                          availableStreets.map((street) => {
+                            return (
+                              <option key={street.id} value={street.id} >{street.name}</option>
+                            );
+                          })
+                        */}
+                      </Field>
+                      {errors.street_id && touched.street_id ? <div>{errors.street_id}</div> : null}
+                    </div>
+
+                    <div className='py-3 text-end'>
+                      <Button variant='secondary' onClick={handleClose}>Cerrar</Button>
+                      <Button type='submit' className='ms-2 orange-button'>Generar Inventari</Button>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
+            </Modal.Body>
+          </Modal>
         </Col>
       </Row >
     </>

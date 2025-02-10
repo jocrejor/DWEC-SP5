@@ -7,6 +7,8 @@ import Header from '../Header'
 import InventarisFiltres from './InventarisFiltres'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import jsPDF from 'jspdf'
+import 'jspdf-autotable';
 
 
 
@@ -264,6 +266,19 @@ function Inventaris() {
     setShowInventoryModal(!showInventoryModal);
   }
 
+  const changeDate = (date) => {
+    console.log(date)
+    const newDate = new Date(date);
+    console.log(newDate)
+    console.log(newDate.toLocaleDateString())
+    return newDate.toLocaleDateString();
+  }
+
+  const generarPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Inventaris', 10, 10);
+    doc.save('inventaris.pdf');
+  }
 
   return (
     <>
@@ -279,7 +294,7 @@ function Inventaris() {
               </select>
               <label htmlFor="floatingSelect">Accions en lot</label>
             </div>
-            <button onClick={fecha} className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button" aria-label='Aplicar acciones en lote'><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+            <button onClick={generarPDF} className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button" aria-label='Aplicar acciones en lote'><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
           </div>
         </div>
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
@@ -385,7 +400,7 @@ function Inventaris() {
                           <input type="checkbox" className='form-check-input' name="" id="" aria-label={`Selecione la fila del inventario ${values.id}`} />
                         </td>
                         <td data-cell="ID: ">{values.id}</td>
-                        <td data-cell="Data: ">{values.created_at}</td>
+                        <td data-cell="Data: ">{changeDate(new Date(values.created_at))}</td>
                         <td data-cell="Estat: ">{(inventoryStatus.find(inventory => inventory.id === values.inventory_status))?.name}</td>
                         <td data-cell="Magatzem: ">{(storages.find(storage => storage.id === values.storage_id))?.name}</td>
                         <td>
@@ -444,7 +459,7 @@ function Inventaris() {
                       <tr>
                         <th scope="col" className='text-light-blue'>Carrer</th>
                         <th scope="col" className='text-light-blue'>Estanteria</th>
-                        <th scope="col" className='text-light-blue'>Espacio</th>
+                        <th scope="col" className='text-light-blue'>Espai</th>
                         <th scope="col" className='text-light-blue'>Producte</th>
                         <th scope="col" className='text-light-blue'>Quantitat Estimada</th>
                         <th scope="col" className='text-light-blue'>Quantitat Real</th>
@@ -462,7 +477,7 @@ function Inventaris() {
                             return (
                               <tr key={value.id}>
                                 <td data-cell="Carrer: ">{value.street_id}</td>
-                                <td data-cell="Espacio: ">{value.shelf_id}</td>
+                                <td data-cell="Espai: ">{value.shelf_id}</td>
                                 <td data-cell="Estanteria: ">{value.space_id}</td>
                                 <td data-cell="Producte: ">{(products.find(product => product.id === value.product_id))?.name}</td>
                                 <td data-cell="Quantitat Estimada: ">{value.quantity_estimated}</td>
