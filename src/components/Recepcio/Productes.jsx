@@ -132,14 +132,8 @@ const grabar = (values)=>{
        }) 
     .catch((error) => {setMessageError(error.response.data)})
   
-    }
- 
- 
-    
-
-  
+    }  
 }
-
 
 const handleImageChange = (e) => {
   setImage({

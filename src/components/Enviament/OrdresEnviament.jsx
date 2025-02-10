@@ -7,7 +7,6 @@ import Filter from '../OrdreEnviamentFIltres'
 import axios from 'axios'
 const apiUrl = import.meta.env.VITE_API_URL;
 
-
 const OrderShippingSchema = yup.object().shape({
   client_id: yup.string().required('Valor requerit'),
   shipping_date: yup.date().required('Data obligatoria'),
@@ -33,6 +32,47 @@ function OrdresEnviament() {
   const [products, setProducts] = useState([])
   const [arrayProductos, setArray] = useState([])
   const [productosEliminados, setArrayEliminados] = useState([])
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [orderPage,setOrderPage]= useState([]);
+
+  // Paginació
+const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
+  
+ 
+// Obtindreels index. 
+useEffect (()=>{
+  const totalPages = Math.ceil(orders.length / elementsPaginacio);
+  setTotalPages(totalPages);
+  console.log(totalPages)
+},[orders])
+
+// Función para cambiar de página
+const paginate = (pageNumber) => {
+  setCurrentPage(pageNumber);
+};
+
+// Funciones para "anterior" y "siguiente"
+const goToPreviousPage = () => {
+  if (currentPage > 1) {
+    setCurrentPage(currentPage - 1);
+  }
+};
+
+const goToNextPage = () => {
+  if (currentPage < totalPages) {
+    setCurrentPage(currentPage + 1);
+  }
+};
+
+useEffect(()=> {
+  const indexOfLastItem = currentPage * elementsPaginacio;
+  const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
+  const currentItems = orders.slice(indexOfFirstItem, indexOfLastItem);
+  setOrderPage(currentItems)
+},[currentPage,orders])
+
+
 
 
   useEffect(() => {
@@ -316,7 +356,7 @@ function OrdresEnviament() {
             </tr>
           </thead>
           <tbody>
-            {orders.map((valors) => (
+            {orderPage.map((valors) => (
               <tr key={valors.id}>
                 <td scope="row" data-cell="Seleccionar" className='text-center'>
                   <input class="form-check-input" type="checkbox" name="" id="" />
@@ -342,23 +382,28 @@ function OrdresEnviament() {
                 </td>
               </tr>
             ))}
-            {orders.length <= 0 && (
+            {orderPage.length <= 0 && (
               <tr>No se encontraron órdenes.</tr>
             )}
           </tbody>
         </table>
-        <nav aria-label="Page navigation example" class="d-block">
-          <ul class="pagination justify-content-center">
-            <li class="page-item">
-              <a class="page-link text-light-blue" href="#" aria-label="Previous">
+        <nav aria-label="Page navigation example" className="d-block">
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
-            <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
-            <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
-            <li class="page-item">
-              <a class="page-link text-light-blue" href="#" aria-label="Next">
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
+                  {number}
+                </a>
+              </li>
+            ))}
+            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {e.preventDefault(); goToNextPage(); }}>
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
