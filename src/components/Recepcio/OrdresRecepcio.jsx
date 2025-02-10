@@ -127,7 +127,6 @@ function OrderReception() {
       }));
 
       setSelectedProducts(productesAssociats);
-
       setValorsInicials({
         id: ordre.id,
         supplier_id: ordre.supplier_id,
