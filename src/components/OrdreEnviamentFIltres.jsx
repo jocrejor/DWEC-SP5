@@ -70,9 +70,21 @@ function Filtres({onFilterChange, onFilterRestart}) {
                     </div>
                 </div>
               
-                <div className="col-xl-4"></div>
-                <div className="col-xl-4"></div>
+                <div className="col-12 col-md-6 col-xl-4">
+                    <div className="mb-3 text-light-blue">
+                        <label for="date" className="form-label">Data mínima</label>
+                        <input type="date" className="form-control" id="date" />
+                    </div>
+                </div>
+
+                <div className="col-12 col-md-6 col-xl-4">
+                    <div className="mb-3 text-light-blue">
+                        <label for="date" className="form-label">Data màxima</label>
+                        <input type="date" className="form-control" id="date" />
+                    </div>
+                </div>                 
             </div>
+
             <div className="row bg-grey pb-3 mx-0">
                 <div className="col-xl-4"></div>
                 <div className="col-xl-4"></div>
