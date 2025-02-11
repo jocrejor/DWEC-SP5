@@ -24,10 +24,12 @@ function OrdresEnviament() {
   const [orderLine, setOrderLine] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [showModalVisualitza, setShowModalVisualitza] = useState(false)
+  const [showModalEnviament,setShowModalEnviament] = useState(false)
   const [tipoModal, setTipoModal] = useState('Crear')
   const [valorsInicials, setValorsInicials] = useState({ client_id: '', shipping_date: '', ordershipping_status_id: '' })
   const [valorsLineInicials, setValorsLineInicials] = useState({ shipping_order_id: '', product_id: '', quantity: '', orderline_status_id: '' })
   const [clientes, setClientes] = useState([])
+  const [carriers,setCarriers] = useState([])
   const [users, setUsers] = useState([])
   const [products, setProducts] = useState([])
   const [arrayProductos, setArray] = useState([])
@@ -118,6 +120,15 @@ function OrdresEnviament() {
         console.log(e)
       }
       )
+
+      axios.get(`${apiUrl}carrier`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setCarriers(response.data)
+      })
+      .catch(e => {
+        console.log(e)
+      }
+      )
   }, [valorsLineInicials])
 
   const crearOrdre = () => {
@@ -147,6 +158,18 @@ function OrdresEnviament() {
     setValorsLineInicials(filteredOrders);
     setArray(filteredOrders);
     canviEstatModalVisualitza();
+  }
+
+  const enviarOrdre = async (valors) => {
+    setTipoModal("Enviar");
+    const fechaFormateada = formateaFecha(valors.shipping_date);
+    setValorsInicials({ ...valors, shipping_date: fechaFormateada });
+    const orderLinesData = await obtindreOrderLine();
+    const filteredOrders = orderLinesData.filter(order => order.shipping_order_id === valors.id);
+    setOrderLine(filteredOrders);
+    setValorsLineInicials(filteredOrders);
+    setArray(filteredOrders);
+    canviEstatModalEnviament();
   }
 
   const eliminarOrder = (id) => {
@@ -218,6 +241,10 @@ function OrdresEnviament() {
     setShowModalVisualitza(!showModalVisualitza)
   }
 
+  const canviEstatModalEnviament = () =>{
+    setShowModalEnviament(!showModalEnviament)
+  }
+
   const grabar = (values) => {
     if (tipoModal === "Crear") {
       if (arrayProductos.length > 0) {
@@ -230,6 +257,7 @@ function OrdresEnviament() {
               axios.post(`${apiUrl}orderlineshipping`, line, { headers: { "auth-token": localStorage.getItem("token") } })
             })
           })
+          canviEstatModal();
         actualitzaDades();
       }
       else {
@@ -237,14 +265,13 @@ function OrdresEnviament() {
         return
       }
     }
-    else {
+    else if(tipoModal === "Modificar"){
       for (const idOrderLine of productosEliminados) {
         axios.delete(`${apiUrl}orderlineshipping/${idOrderLine}`, { headers: { "auth-token": localStorage.getItem("token") } });
       }
       axios.put(`${apiUrl}ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
         .then(response => {
           arrayProductos.map(line => {
-
             if (line.id) {
               axios.put(`${apiUrl}orderlineshipping/${line.id}`, line, { headers: { "auth-token": localStorage.getItem("token") } })
             }
@@ -254,10 +281,17 @@ function OrdresEnviament() {
             }
           })
         })
+      canviEstatModal();
+      actualitzaDades();
+    }
+    else if(tipoModal === "Enviar"){
+      values.ordershipping_status_id = 4;
+      console.log(values)
+      axios.put(`${apiUrl}ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
+      canviEstatModalEnviament(); 
       actualitzaDades();
     }
     actualitzaDades();
-    canviEstatModal();
     setArray([]);
   }
 
@@ -276,7 +310,6 @@ function OrdresEnviament() {
       const datos = response.data;
       return datos;
     } catch (error) {
-      console.error("Error al obtener las líneas de orden:", error);
       return [];
     }
   };
@@ -352,14 +385,26 @@ function OrdresEnviament() {
                     <span onClick={() => visualitzarOrdre(valors)} style={{ cursor: "pointer" }}>
                       <i className="bi bi-eye icono fs-5"></i>
                     </span>
+                    {estatExistent(valors.ordershipping_status_id) === "Pendent" && (
+                      <>
+                        <span onClick={() => modificarOrdre(valors)} className="mx-2" style={{ cursor: "pointer" }}>
+                          <i className="bi bi-pencil-square icono fs-5"></i>
+                        </span>
 
-                    <span onClick={() => modificarOrdre(valors)} className="mx-2" style={{ cursor: "pointer" }}>
-                      <i className="bi bi-pencil-square icono fs-5"></i>
-                    </span>
+                        <span onClick={() => eliminarOrder(valors.id)} style={{ cursor: "pointer" }}>
+                          <i className="bi bi-trash icono fs-5"></i>
+                        </span>
+                      </>
+                    )}
+                    {estatExistent(valors.ordershipping_status_id) === "Preparada" && (
+                      <>
+                        <span onClick={() => enviarOrdre(valors)} className="mx-2" style={{ cursor: "pointer" }}>
+                          <i class="bi bi-send icono fs-5"></i>
+                        </span>
+                      </>
+                    )}
 
-                    <span onClick={() => eliminarOrder(valors.id)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-trash icono fs-5"></i>
-                    </span>
+
                   </div>
                 </td>
               </tr>
@@ -403,7 +448,7 @@ function OrdresEnviament() {
             initialValues={(tipoModal === 'Modificar' ? valorsInicials : {
               client_id: '',
               shipping_date: '',
-              ordershipping_status_id: 2
+              ordershipping_status_id: 3
             })}
             validationSchema={OrderShippingSchema}
             onSubmit={values => {
@@ -459,7 +504,6 @@ function OrdresEnviament() {
               resetForm();
             }}
           >
-
             {({
               values,
               errors,
@@ -467,7 +511,6 @@ function OrdresEnviament() {
               handleSubmit
             }) => (
               <Form>
-
                 <h4>Afegeix productes a la ordre:</h4>
                 <div className='form-group'>
                   <label htmlFor='product_id'>Producte</label>
@@ -594,6 +637,84 @@ function OrdresEnviament() {
                           <td>{producto.quantity}</td>
                         </tr>
 
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </Modal.Body>
+      </Modal>
+
+      <Modal show={showModalEnviament}>
+        <Modal.Header closeButton onHide={canviEstatModalEnviament} className='bg-gray-200 border-b'>
+          <Modal.Title className='text-lg font-semibold text-gray-800'>{tipoModal} Ordre Enviament</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Formik
+            initialValues={(tipoModal === 'Enviar' ? valorsInicials : {
+              client_id: '',
+              shipping_date: '',
+              ordershipping_status_id: 1
+            })}
+            validationSchema={OrderShippingSchema}
+            onSubmit={values => {
+              grabar(values)
+            }}
+          >
+            {({
+              values,
+              errors,
+              touched,
+              handleSubmit
+            }) => (
+              <Form>
+                <div>
+                  <Button className='mb-4' variant={"info"} type='submit'>{tipoModal}</Button>
+                </div>
+                <div className='form-group'>
+                  <label htmlFor='client_id'>Client</label>
+                  <Field as="select" name="client_id" values={values.client_id} className="form-control" disabled>
+                    <option value="">Selecciona un client:</option>
+                    {clientes.map(cliente => {
+                      return <option key={cliente.id} value={cliente.id}>{cliente.name}</option>
+                    })}
+                  </Field>
+                  {errors.client_id && touched.client_id ? <div>{errors.client_id}</div> : null}
+                </div>
+
+                <div className='form-group'>
+                  <label htmlFor='shipping_date'>Data estimada</label>
+                  <Field type="date" name="shipping_date" values={values.shipping_date} className="form-control" disabled />
+                  {errors.shipping_date && touched.shipping_date ? <div>{errors.shipping_date}</div> : null}
+                </div>
+
+                <div className='form-group'>
+                  <label htmlFor='carrier_id'>Transportista</label>
+                  <Field as="select" name="carrier_id" values={values.client_id} className="form-control">
+                    <option value="">Selecciona un transportista:</option>
+                    {carriers.map(carrier => {
+                      return <option key={carrier.id} value={carrier.id}>{carrier.name}</option>
+                    })}
+                  </Field>
+                  {errors.carrier_id && touched.carrier_id ? <div>{errors.carrier_id}</div> : null}
+                </div>
+
+                <div className='mt-3'>
+                  <table class="table table-striped text-center">
+                    <thead className="table-active border-bottom border-dark-subtle">
+                      <tr>
+                        <th>Producte</th>
+                        <th>Quantitat</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {arrayProductos.map((producto) => (
+                        <tr key={producto.product_id}>
+                          <td>{producteExistent(producto.product_id)}</td>
+                          <td>{producto.quantity}</td>
+                        </tr>
                       ))}
                     </tbody>
                   </table>
