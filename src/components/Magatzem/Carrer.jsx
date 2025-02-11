@@ -26,7 +26,7 @@ function Street() {
   });
 
   useEffect(() => {
-    axios.get(`${apiUrl}/street?storage_id=${magatzem}`, {
+    axios.get(`${apiUrl}/street/${magatzem}`, {
       headers: { "auth-token": localStorage.getItem("token") }
     })
       .then(response => {
