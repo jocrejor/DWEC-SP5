@@ -81,7 +81,7 @@ function OrderPickingReception() {
                 console.log("Linea actualitzada correctament", response.data);
             })
             .catch((error) => {
-                console.error("Error en actualitzar",error.response.data);
+                console.error("Error en actualitzar estat linea",error.response.data);
             });
         
         // eliminar la order picking
@@ -96,6 +96,20 @@ function OrderPickingReception() {
         //crear moviments
         const space = spaces.find(space => space.product_id === lineActualitzar.product_id);
         if (space) {
+            // Actualitzar quantitat space
+            const updatedSpace = {
+                ...space,
+                quantity: space.quantity + lineActualitzar.quantity_received,
+            };
+
+            axios.put(`${apiUrl}space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`, updatedSpace, {headers: { "auth-token": token }})
+                .then((response) => {
+                    console.log("Quantitat space actialitzada", response.data);
+                })
+                .catch((error) => {
+                    console.error("Error en actualitzar quantitat space", error.response.data);
+                });
+
             movMagatzem(lineActualitzar.product_id, lineActualitzar.operator_id, lineActualitzar.quantity_received, "Recepcio", space.storage_id, space.storage_id, space.street_id, space.shelf_id, space.id);
             console.log("Moviment eixida realitzat");
 
@@ -134,8 +148,6 @@ function OrderPickingReception() {
         const currentItems = orderPickingReception.slice(indexOfFirstItem, indexOfLastItem);
         setOrderPickingPage(currentItems)
     },[currentPage,orderPickingReception])
-
-
 
     return (
         <>
