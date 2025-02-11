@@ -130,7 +130,7 @@ function OrderReception() {
       setValorsInicials({
         id: ordre.id,
         supplier_id: ordre.supplier_id,
-        estimated_reception_date: ordre.estimated_reception_date,
+        estimated_reception_date: formateaFecha(ordre.estimated_reception_date),
       });
 
     } catch (err) {
