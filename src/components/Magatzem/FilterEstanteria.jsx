@@ -74,23 +74,17 @@ const FilterEstanteria = ({ onFilter, onClear }) => {
                 />
             </div>
 
-            <div className="col-12 col-md-6 col-xl-4 text-light-blue">
+            <div className="col-12 col-md-6 col-xl-4">
                 <label htmlFor="filterIdStorage" className="form-label">Magatzem</label>
-                <select
+                <input
+                    type="text"
                     className="form-control"
                     id="filterIdStorage"
-                    name="id_storage"
-                    value={filters.id_storage}
+                    name="id_magatzem"
+                    value={filters.id_street}
                     onChange={handleFilterChange}
-                    placeholder="Filtra per magatzem"
-                >
-                    <option value="">Seleccionar Magatzem</option>
-                    {magatzems.map(magatzem => (
-                        <option key={magatzem.id} value={magatzem.id}>
-                            {magatzem.name}
-                        </option>
-                    ))}
-                </select>
+                    placeholder="Filtra per ID del magatzem"
+                />
             </div>
 
             {/* Contenedor para los botones con alineación a la derecha */}
