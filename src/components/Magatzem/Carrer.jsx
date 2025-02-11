@@ -15,14 +15,14 @@ const StreetSchema = Yup.object().shape({
 
 function Street() {
   const [streets, setStreets] = useState([]);
-  const [filteredStreets, setFilteredStreets] = useState([]); // Estado para almacenar calles filtradas
+  const [filteredStreets, setFilteredStreets] = useState([]); 
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Crear");
   const [valorsInicials, setValorsInicials] = useState({ name: '', storage_id: '' });
   const navigate = useNavigate();
   const { magatzem } = useParams();
   const [filters, setFilters] = useState({
-    storage_id: magatzem, // Por defecto, el filtro se aplica al ID del magatzem
+    storage_id: magatzem, 
   });
 
   useEffect(() => {
@@ -31,7 +31,7 @@ function Street() {
     })
       .then(response => {
         setStreets(response.data);
-        setFilteredStreets(response.data); // Inicialmente mostramos todas las calles
+        setFilteredStreets(response.data); 
       })
       .catch(error => {
         console.log('Error fetching data:', error);
@@ -39,12 +39,12 @@ function Street() {
   }, [magatzem]);
 
   useEffect(() => {
-    // Aplicar filtro por storage_id
+    
     const filtered = streets.filter(street => {
-      return street.storage_id === filters.storage_id; // Filtrar solo por el storage_id
+      return street.storage_id === filters.storage_id; 
     });
-    setFilteredStreets(filtered); // Actualizamos las calles filtradas
-  }, [filters, streets]); // Re-aplicar el filtro cuando cambian los filtros o las calles
+    setFilteredStreets(filtered); 
+  }, [filters, streets]); 
 
   const eliminarStreet = async (id) => {
     try {
@@ -72,25 +72,25 @@ function Street() {
     setTipoModal("Crear");
   };
 
-  // Recibir los filtros desde FiltresCarrer
+  
   const handleFilter = (filters) => {
-    setFilters(filters); // Solo necesitamos actualizar el storage_id
+    setFilters(filters); 
   };
 
-  // Define the missing functions
+
   const viewSupplier = (valors) => {
     console.log("Viewing supplier:", valors);
-    // Implement the viewing logic (e.g., navigate to a detailed view)
+    
   };
 
   const modSuppliers = (valors) => {
     console.log("Modifying supplier:", valors);
-    modificarStreet(valors); // Reusing the existing modificarStreet logic
+    modificarStreet(valors); 
   };
 
   const deleteSuppliers = (id) => {
     console.log("Deleting supplier:", id);
-    eliminarStreet(id); // Reusing the existing eliminarStreet logic
+    eliminarStreet(id); 
   };
 
   return (
@@ -179,7 +179,7 @@ function Street() {
         </nav>
       </div>
 
-      {/* Modal for Create/Modify Street */}
+      {}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Carrer</Modal.Title>

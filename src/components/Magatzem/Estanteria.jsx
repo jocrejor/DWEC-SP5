@@ -53,20 +53,20 @@ function Shelf() {
     setShowModal(true);
   };
 
-  // Define the missing functions
+ 
   const viewSupplier = (valors) => {
     console.log("Viewing supplier:", valors);
-    // Implement the viewing logic (e.g., navigate to a detailed view)
+    
   };
 
   const modSuppliers = (valors) => {
     console.log("Modifying supplier:", valors);
-    editShelf(valors); // Reusing the existing modificarStreet logic
+    editShelf(valors); 
   };
 
   const deleteSuppliers = (id) => {
     console.log("Deleting supplier:", id);
-    deleteShelf(id); // Reusing the existing eliminarStreet logic
+    deleteShelf(id); 
   };
 
   const canviEstatModal = () => {
@@ -152,7 +152,7 @@ function Shelf() {
         </table>
       </div>
 
-      {/* Modal for Create/Modify Shelf */}
+      {}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{modalType} Estanteria</Modal.Title>
