@@ -2,35 +2,57 @@ import { Formik, Form, Field } from 'formik';
 import PropTypes from 'prop-types';
 import { Button, Modal } from 'react-bootstrap';
 import { useState, useEffect } from "react";
+import * as Yup from 'yup';
 
-function LotsLotOSerie({ products, lotOSerie, orderreception, suppliers, canviEstatModal, showModal, LotSchema }) {
+
+const LotSchema = (lotOrSerial) => Yup.object().shape({
+  name: Yup.string().required("El nom és requerit"),
+  product_id: Yup.string()
+    .min(1, "El valor ha de ser una cadena no buida")
+    .required("Valor requerit"),
+  quantity: Yup.number()
+    .min(0, "El valor no pot ser negatiu")
+    .required("Valor requerit"),
+  // Agregar condicionalmente las fechas si es un lot
+  ...(lotOrSerial === "lot" && {
+    production_date: Yup.date().required("La data de producció és requerida"),
+    expiration_date: Yup.date().required("La data d'expiració és requerida"),
+  }),
+});
+
+
+
+function LotsLotOSerie({ products, orderreception, suppliers, canviEstatModal, showModal, valorsInicials, lotOrSerial }) {
   const [lotes, setLotes] = useState([]);
   const [series, setSeries] = useState([]);
   const [errorAgregar, setErrorAgregar] = useState("");
-
-  const records = lotOSerie === "Lot" ? lotes : series;
-
-
-
-  const [valorsInicials, setValorsInicials] = useState({
-    name: '',
-    product_id: '',
-    supplier_id: '',
-    quantity: lotOSerie === "Serie" ? 1 : 0,
-    // quantity: 0,
-    production_date: '',
-    expiration_date: '',
-    orderlinereception: '',
-    // product_id: '',
-    // quantity: lotOSerie === "Serie" ? "1" : "",
-  });
+  // const [lotOSerie, setLotOSerie] = useState('Lot');
 
 
 
-
-
+  // const [valorsInicials, setValorsInicials] = useState({
+  //   name: '',
+  //   product_id: '',
+  //   supplier_id: '',
+  //   quantity: 0,
+  //   production_date: '',
+  //   expiration_date: '',
+  //   orderlinereception: '',
+  // });
 
   useEffect(() => {
+    // if (showModal) {
+      // setValorsInicials({
+        // name: "",
+        // product_id: '',
+        // supplier_id: '',
+        // quantity: 0,
+        // production_date: '',
+        // expiration_date: '',
+        // orderlinereception: '',
+      // });
+    // }
+
     const storedLotes = JSON.parse(localStorage.getItem("lotsTemporal")) || [];
     const storedSeries = JSON.parse(localStorage.getItem("serieTemporal")) || [];
     setLotes(storedLotes);
@@ -43,9 +65,10 @@ function LotsLotOSerie({ products, lotOSerie, orderreception, suppliers, canviEs
         <Modal.Header closeButton>
           <Formik
             initialValues={valorsInicials}
-            validationSchema={LotSchema(lotOSerie)}
+            validationSchema={LotSchema(lotOrSerial)}
           >
             {({ values }) => {
+              console.log(values)
               const selectedProduct = products.find(p => p.id === values.product_id);
               const lotOrSerial = selectedProduct ? selectedProduct.lotorserial : null;
               return (
@@ -60,7 +83,7 @@ function LotsLotOSerie({ products, lotOSerie, orderreception, suppliers, canviEs
         <Modal.Body>
           <Formik
             initialValues={valorsInicials}
-            validationSchema={LotSchema(lotOSerie)}
+            validationSchema={LotSchema(lotOrSerial)}
           >
             {({ values, errors, touched }) => {
               const selectedProduct = products.find(p => p.id === values.product_id);
@@ -91,7 +114,7 @@ function LotsLotOSerie({ products, lotOSerie, orderreception, suppliers, canviEs
                   const updatedLotes = [...lotes, newRecord];
                   localStorage.setItem("lotsTemporal", JSON.stringify(updatedLotes));
                   setLotes(updatedLotes);
-                } else if (lotOSerie === "Serial") {
+                } else if (lotOrSerial === "Serial") {
                   const updatedSeries = [...series, newRecord];
                   localStorage.setItem("serieTemporal", JSON.stringify(updatedSeries));
                   setSeries(updatedSeries);
@@ -180,24 +203,24 @@ function LotsLotOSerie({ products, lotOSerie, orderreception, suppliers, canviEs
                         </tr>
                       </thead>
                       <tbody>
-                        {records.length === 0 ? (
+                        {/* {records.length === 0 ? (
                           <tr>
                             <td colSpan={lotOrSerial === "Lot" ? 4 : 2}>No hi han registres</td>
                           </tr>
                         ) : (
-                          records.map((record, index) => (
-                            <tr key={index}>
-                              <td>{record.quantity}</td>
-                              <td>{record.name}</td>
+                          records.map((record, index) => ( */}
+                            <tr>
+                              <td>{}</td>
+                              <td>{}</td>
                               {lotOrSerial === "Lot" && (
                                 <>
-                                  <td>{record.production_date}</td>
-                                  <td>{record.expiration_date}</td>
+                                  <td>{}</td>
+                                  <td>{}</td>
                                 </>
                               )}
                             </tr>
-                          ))
-                        )}
+                          {/* ))
+                        )} */}
                       </tbody>
                     </table>
                   </div>
@@ -219,13 +242,13 @@ function LotsLotOSerie({ products, lotOSerie, orderreception, suppliers, canviEs
 
 LotsLotOSerie.propTypes = {
   products: PropTypes.array.isRequired,
-  lotOSerie: PropTypes.string.isRequired,
+  lotOrSerial: PropTypes.string.isRequired,
   orderreception: PropTypes.array.isRequired,
   suppliers: PropTypes.array.isRequired,
   canviEstatModal: PropTypes.func.isRequired,
   showModal: PropTypes.bool.isRequired,
-  // valorsInicials: PropTypes.object.isRequired,
-  LotSchema: PropTypes.func.isRequired,
+  valorsInicials: PropTypes.object.isRequired,
+  // LotSchema: PropTypes.func.isRequired,
 };
 
 export default LotsLotOSerie;

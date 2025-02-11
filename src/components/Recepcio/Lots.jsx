@@ -11,21 +11,6 @@ const apiUrl = import.meta.env.VITE_API_URL;
 // const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
 const token = localStorage.getItem('token');
 
-const LotSchema = (lotOSerie) => Yup.object().shape({
-  name: Yup.string().required("El nom és requerit"),
-  product_id: Yup.string()
-    .min(1, "El valor ha de ser una cadena no buida")
-    .required("Valor requerit"),
-  quantity_received: Yup.number()
-    .min(0, "El valor no pot ser negatiu")
-    .required("Valor requerit"),
-  // Agregar condicionalmente las fechas si es un lot
-  ...(lotOSerie === "Lot" && {
-    production_date: Yup.date().required("La data de producció és requerida"),
-    expiration_date: Yup.date().required("La data d'expiració és requerida"),
-  }),
-});
-
 /* LOTS */
 function Lots() {
   const [lot, setLot] = useState([]);
@@ -37,19 +22,18 @@ function Lots() {
   const [orderline_status, setOrderLineStatus] = useState([]);
   const [orderlinereception, setOrderLineReception] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [lotOSerie, setLotOSerie] = useState('Lot');
-  // const [valorsInicials, setValorsInicials] = useState({
-  //   name: '',
-  //   product_id: '',
-  //   supplier_id: '',
-  //   quantity: lotOSerie === "Serie" ? 1 : 0,
-  //   // quantity: 0,
-  //   production_date: '',
-  //   expiration_date: '',
-  //   orderlinereception: '',
-  //   // product_id: '',
-  //   // quantity: lotOSerie === "Serie" ? "1" : "",
-  // });
+  const [valorsInicials, setValorsInicials] = useState({
+    name: '',
+    product_id: '',
+    supplier_id: '',
+    quantity: 0,
+    production_date: '',
+    expiration_date: '',
+    orderlinereception: '',
+    quantity_received: 0,
+  });
+
+  const [lotOrSerial, setLotOrSerial] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -252,6 +236,32 @@ function Lots() {
                               role='button'
                               onClick={() => {
                                 canviEstatModal();
+
+                                const selectedProduct = products.find(p => p.id === valors.product_id);
+                                const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
+
+                                if(lotOSerie === "Lot"){
+                                  setLotOrSerial("lot");
+                                }
+                                else if(lotOSerie === "Serial"){
+                                  setLotOrSerial("serie");
+                                }
+
+                                const orderReceptions = orderreception.find(
+                                  (or) => or.id === valors.order_reception_id
+                                );
+                                const supplier = suppliers.find((s) => s.id === orderReceptions?.supplier_id);
+
+                                setValorsInicials({
+                                  name: "",
+                                  product_id: valors.product_id,
+                                  supplier_id: supplier ? supplier.id : "",
+                                  quantity: lotOSerie === "Serial" ? 1 : "",
+                                  production_date: "",
+                                  expiration_date: "",
+                                  orderlinereception: valors.id,
+                                  quantity_received: valors.quantity_received,
+                                });
                               }}
                             >
                             </i>
@@ -286,9 +296,7 @@ function Lots() {
 
 
       {/* MODAL CON FORMIK */}
-      <LotsLotOSerie products={products} lotOSerie={lotOSerie} orderreception={orderreception} suppliers={suppliers} canviEstatModal={canviEstatModal} showModal={showModal} LotSchema={LotSchema} />
-
-
+      <LotsLotOSerie products={products} orderreception={orderreception} suppliers={suppliers} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} lotOrSerial={lotOrSerial} />
     </>
   );
 }
