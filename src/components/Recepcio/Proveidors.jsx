@@ -127,11 +127,21 @@ function Proveidors() {
   };
   
   const modSuppliers = (valors) => {
+
+    const provinceId = provincia.find((prov) => prov.name === valors.province)?.id || '';
+    //const cityId = ciutat.find((ciudad) => ciudad.name === valors.city)?.id || '';
+    
+    // Establecer los valores iniciales con los IDs de provincia y ciudad
     setTipoModal('Modificar');
-    setValorsInicials(valors);
+    setValorsInicials({
+      ...valors,
+      province: provinceId, 
+      //city: cityId, 
+    });
+    console.log('Valors Modificar:', valors);  // Puedes revisar que los valores se pasen correctamente
     setShowModal(true);
   };
-
+  
   const viewSupplier = (valors) => {
     setValorsInicials(valors);
     setShowViewModal(true);
@@ -150,33 +160,30 @@ function Proveidors() {
       const selectedProvince = provincia.find(
         (p) => Number(p.id) === Number(values.province)
       );
+  
       if (selectedProvince) {
-        values.province = selectedProvince.name;
+        values.province = values.isModal ? selectedProvince.id : selectedProvince.name;
       }
     }
     return values;
   };
+  
 
   const gravar = async (values) => {
     try {
-      // Llamamos a transformProvince antes de hacer cualquier envío a la API
       const transformedValues = transformProvince(values);
-  
-      // Preparamos los datos a enviar, si es 'Modificar' eliminamos el id del objeto
+
       let dataToSend = tipoModal === 'Modificar' ? { ...transformedValues } : transformedValues;
   
-      // Si estamos modificando, eliminamos el id de los datos enviados en el cuerpo de la solicitud
       if (tipoModal === 'Modificar' && dataToSend.id) {
-        delete dataToSend.id; // Eliminar el id antes de enviarlo
+        delete dataToSend.id; 
       }
   
       if (tipoModal === 'Crear') {
-        // Para creación, enviamos los valores tal cual
         await axios.post(`${apiUrl}/supplier`, dataToSend, { 
           headers: { "auth-token": localStorage.getItem("token") } 
         });
       } else {
-        // Para modificación, aseguramos que el id esté presente en la URL
         if (!values.id) {
           console.error('Error: El id del proveedor es necesario para la modificación');
           return;
@@ -186,7 +193,6 @@ function Proveidors() {
         });
       }
       
-      // Si todo sale bien, obtenemos la lista actualizada de proveedores
       const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, {
         headers: { "auth-token": localStorage.getItem("token") }
       });
@@ -194,7 +200,6 @@ function Proveidors() {
       canviEstatModal();
   
     } catch (error) {
-      // Mostramos el error si ocurre un fallo en la operación
       console.error('Error guardando proveedores:', error);
       if (error.response && error.response.data) {
         console.error('Respuesta de la API:', error.response.data);
