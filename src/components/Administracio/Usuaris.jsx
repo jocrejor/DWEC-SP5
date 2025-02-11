@@ -44,6 +44,8 @@ function Usuaris() {
   const [filterRole, setFilterRole] = useState('');
   const [showSecondModal, setShowSecondModal] = useState(false);
   const [showTercerModal, setShowTercerModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
 
@@ -139,21 +141,29 @@ function Usuaris() {
       setCurrentPage(pageNumber);
     }
   };
-  //Segon modal de modificacio
-  const obrirSegonModal = () => {
-    setShowSecondModal(true);
-  };
 
+  //Tanca segon modal
   const tancarSegonModal = () => {
     setShowSecondModal(false);
   };
-  //Tercer Modal de contrasenyes
-  const obrirTercernModal = () => {
-    setShowSecondModal(true);
+  //Tercer modal
+  const passwordUsuari = (user) => {
+    setSelectedUser(user);
+    obtenirContrasenyaActual(user.id);
+    setShowTercerModal(true);
+  };
+  const obtenirContrasenyaActual = async (userId) => {
+    try {
+      const resposta = await axios.get(`${apiUrl}/users/${userId}/password`);
+      setCurrentPassword(resposta.data.password); // Ajusta segons el format del backend
+    } catch (error) {
+      console.error("Error obtenint la contrasenya:", error);
+    }
   };
 
+  // Tercer modal per tancar 
   const tancarTercerModal = () => {
-    setShowSecondModal(false);
+    setShowTercerModal(false);
   };
   return (
     <div>
@@ -262,15 +272,17 @@ function Usuaris() {
               getCurrentPageUser().map((user) => (
                 <tr key={user.id}>
                   <th scope="col">
-                <input className="form-check-input" type="checkbox" name="" id="" />
-              </th>
+                    <input className="form-check-input" type="checkbox" name="" id="" />
+                  </th>
                   <td>{user.id}</td>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
                   <td>{user.password}</td>
                   <td>{user.role}</td>
                   <td>
-                  <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => passwordUsuari(user)} className="btn-sm">
+                    <Button
+                      style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => passwordUsuari(user)}
+                      className="btn-sm">
                       <i style={{ color: 'gray' }} className="bi bi-key-fill"></i>
                     </Button>
 
@@ -283,7 +295,7 @@ function Usuaris() {
                     <Button style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => visualitzarUsuari(user)} className="btn-sm">
                       <i className="bi bi-eye px-3" style={{ color: 'gray' }}></i>
                     </Button>
-                    
+
                   </td>
                 </tr>
               ))
@@ -293,34 +305,66 @@ function Usuaris() {
       </div>
       {/* Paginació*/}
       <nav>
-        <ul className="pagination justify-content-center" style={{ backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
-          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-            <button className="page-link" onClick={() => paginate(currentPage - 1)}>&laquo;</button>
-          </li>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <li 
-              key={i} 
-              className={`page-item ${currentPage === i + 1 ? 'active' : ''}`} 
-              style={{ backgroundColor: currentPage === i + 1 ? '#30475E' : 'white', borderRadius: '5px' }}
-            >
-              <button 
-                className="page-link" 
-                onClick={() => paginate(i + 1)}
-                style={{ 
-                  color: currentPage === i + 1 ? 'white' : '#30475E', 
-                  backgroundColor: currentPage === i + 1 ? '#30475E' : 'transparent',
-                  border: 'none' 
-                }}
-              >
-                {i + 1}
-              </button>
-            </li>
-          ))}
-          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-            <button className="page-link" onClick={() => paginate(currentPage + 1)}>&raquo;</button>
-          </li>
-        </ul>
-      </nav>
+  <ul className="pagination justify-content-center" style={{ backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
+    {/* Flecha Izquierda */}
+    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+      <button
+        className="page-link"
+        onClick={() => paginate(currentPage - 1)}
+        style={{
+          color: currentPage === 1 ? '#A0A0A0' : '#30475E', // Color más claro si está deshabilitado
+          backgroundColor: 'transparent',
+          border: 'none',
+          fontSize: '18px' // Asegurar que el tamaño del símbolo sea el mismo
+        }}
+        disabled={currentPage === 1}
+      >
+        &laquo;
+      </button>
+    </li>
+
+    {/* Números de página */}
+    {Array.from({ length: totalPages }, (_, i) => (
+      <li
+        key={i}
+        className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}
+        style={{ borderRadius: '5px' }}
+      >
+        <button
+          className="page-link"
+          onClick={() => paginate(i + 1)}
+          style={{
+            color: currentPage === i + 1 ? 'white' : '#30475E',
+            backgroundColor: currentPage === i + 1 ? '#30475E' : 'white',
+            border: 'none',
+            borderRadius: '5px',
+            width: '100%'
+          }}
+        >
+          {i + 1}
+        </button>
+      </li>
+    ))}
+
+    {/* Flecha Derecha */}
+    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+      <button
+        className="page-link"
+        onClick={() => paginate(currentPage + 1)}
+        style={{
+          color: currentPage === totalPages ? '#A0A0A0' : '#30475E',
+          backgroundColor: 'transparent',
+          border: 'none',
+          fontSize: '18px'
+        }}
+        disabled={currentPage === totalPages}
+      >
+        &raquo;
+      </button>
+    </li>
+  </ul>
+</nav>
+
       <Modal show={showModal} onHide={tancarModal}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Usuari</Modal.Title>
@@ -373,7 +417,12 @@ function Usuaris() {
                   </div>
                   <div className="mb-3">
                     <label htmlFor="role" className="form-label">Rol</label>
-                    <Field name="role" type="text" className="form-control" placeholder="Rol de l'usuari" />
+                    <Field as="select" name="role" className="form-control">
+                      <option value="" disabled>Selecciona un rol</option>
+                      <option value="admin">Administrador</option>
+                      <option value="user">Operari</option>
+                      <option value="moderator">Encarregat</option>
+                    </Field>
                     {errors.role && touched.role && <div className="text-danger">{errors.role}</div>}
                   </div>
                   <div className="d-flex justify-content-between">
@@ -451,24 +500,29 @@ function Usuaris() {
           </Formik>
         </Modal.Body>
       </Modal>
-              {/*Tercer modal de contrasenyes*/}
+      {/*Tercer modal de contrasenyes*/}
       <Modal show={showTercerModal} onHide={tancarTercerModal}>
         <Modal.Header closeButton>
-          <Modal.Title>{tipoModal} Usuari</Modal.Title>
+          <Modal.Title>Canvi de Contrasenya</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Formik
-            initialValues={tipoModal === 'Modificar' ? valorsInicials : { name: '', email: '', role: '' }}
-            validationSchema={UserSchema}
+            initialValues={{ password: '', confirmPassword: '' }}
+            validationSchema={Yup.object({
+              password: Yup.string()
+                .min(8, 'Valor mínim de 8 caràcters.')
+                .max(20, 'El valor màxim és de 20 caràcters')
+                .required('Valor requerit'),
+              confirmPassword: Yup.string()
+                .oneOf([Yup.ref('password'), null], 'Les contrasenyes han de coincidir')
+                .required('Valor requerit'),
+            })}
             onSubmit={async (values, { setSubmitting }) => {
-              console.log("Enviar valors:", values);
               try {
-                await axios.put(`${apiUrl}/users/${values.id}`, values);
-                tancarSegonModal();
-                const response = await axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } });
-                setUser(response.data);
+                await axios.put(`${apiUrl}/users/${selectedUser?.id}/password`, { password: values.password });
+                tancarTercerModal();
               } catch (error) {
-                console.error("Error submitting form:", error);
+                console.error("Error canviant la contrasenya:", error);
               } finally {
                 setSubmitting(false);
               }
@@ -477,33 +531,31 @@ function Usuaris() {
             {({ errors, touched, isSubmitting }) => (
               <Form>
                 <div className="mb-3">
-                  <label htmlFor="name" className="form-label">Nom</label>
-                  <Field name="name" type="text" className="form-control" placeholder="Nom de l'usuari" />
-                  {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
+                  <label htmlFor="currentPassword" className="form-label">Contrasenya Actual</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={currentPassword}
+                    disabled
+                  />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">Correu Electrònic</label>
-                  <Field name="email" type="email" className="form-control" placeholder="Correu Electrònic" />
-                  {errors.email && touched.email && <div className="text-danger">{errors.email}</div>}
+                  <label htmlFor="password" className="form-label">Nova Contrasenya</label>
+                  <Field name="password" type="password" className="form-control" placeholder="Nova Contrasenya" />
+                  {errors.password && touched.password && <div className="text-danger">{errors.password}</div>}
                 </div>
-
                 <div className="mb-3">
-                  <label htmlFor="role" className="form-label">Rol</label>
-                  <Field as="select" name="role" className="form-control">
-                    <option value="" disabled>Selecciona un rol</option>
-                    <option value="admin">Administrador</option>
-                    <option value="user">Operari</option>
-                    <option value="moderator">Encarregat</option>
-                  </Field>
-                  {errors.role && touched.role && <div className="text-danger">{errors.role}</div>}
+                  <label htmlFor="confirmPassword" className="form-label">Confirmar Contrasenya</label>
+                  <Field name="confirmPassword" type="password" className="form-control" placeholder="Confirmar Contrasenya" />
+                  {errors.confirmPassword && touched.confirmPassword && <div className="text-danger">{errors.confirmPassword}</div>}
                 </div>
 
                 <div className="d-flex justify-content-between">
-                  <Button variant="secondary" onClick={tancarSegonModal} disabled={isSubmitting}>
-                    Tancar
+                  <Button variant="secondary" onClick={tancarTercerModal}>
+                    Cancel·lar
                   </Button>
                   <Button className="primary orange-button" type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Guardant..." : "Gravar"}
+                    {isSubmitting ? "Guardant..." : "Canviar Contrasenya"}
                   </Button>
                 </div>
               </Form>
