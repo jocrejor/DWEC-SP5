@@ -259,7 +259,7 @@ function Lots() {
                                   quantity: lotOSerie === "Serial" ? 1 : "",
                                   production_date: "",
                                   expiration_date: "",
-                                  orderlinereception: valors.id,
+                                  orderlinereception_id: valors.id,
                                   quantity_received: valors.quantity_received,
                                 });
                               }}
@@ -296,7 +296,7 @@ function Lots() {
 
 
       {/* MODAL CON FORMIK */}
-      <LotsLotOSerie products={products} orderreception={orderreception} suppliers={suppliers} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} lotOrSerial={lotOrSerial} />
+      <LotsLotOSerie products={products} orderreception={orderreception} suppliers={suppliers} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} />
     </>
   );
 }

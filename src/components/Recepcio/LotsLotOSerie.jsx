@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import { Button, Modal } from 'react-bootstrap';
 import { useState, useEffect } from "react";
 import * as Yup from 'yup';
+import axios from 'axios';
+
+const apiUrl = import.meta.env.VITE_API_URL;
+const token = localStorage.getItem('token');
 
 
 const LotSchema = (lotOrSerial) => Yup.object().shape({
@@ -22,37 +26,14 @@ const LotSchema = (lotOrSerial) => Yup.object().shape({
 
 
 
-function LotsLotOSerie({ products, orderreception, suppliers, canviEstatModal, showModal, valorsInicials, lotOrSerial }) {
+function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, setValorsInicials, lotOrSerial }) {
   const [lotes, setLotes] = useState([]);
   const [series, setSeries] = useState([]);
   const [errorAgregar, setErrorAgregar] = useState("");
-  // const [lotOSerie, setLotOSerie] = useState('Lot');
 
-
-
-  // const [valorsInicials, setValorsInicials] = useState({
-  //   name: '',
-  //   product_id: '',
-  //   supplier_id: '',
-  //   quantity: 0,
-  //   production_date: '',
-  //   expiration_date: '',
-  //   orderlinereception: '',
-  // });
+  const [guardado, setGuardado] = useState([]);
 
   useEffect(() => {
-    // if (showModal) {
-      // setValorsInicials({
-        // name: "",
-        // product_id: '',
-        // supplier_id: '',
-        // quantity: 0,
-        // production_date: '',
-        // expiration_date: '',
-        // orderlinereception: '',
-      // });
-    // }
-
     const storedLotes = JSON.parse(localStorage.getItem("lotsTemporal")) || [];
     const storedSeries = JSON.parse(localStorage.getItem("serieTemporal")) || [];
     setLotes(storedLotes);
@@ -95,31 +76,41 @@ function LotsLotOSerie({ products, orderreception, suppliers, canviEstatModal, s
                   setErrorAgregar("Debes llenar todos los campos");
                   return;
                 }
-
-                const orderReception = orderreception.find(or => or.id === values.order_reception_id);
-                const supplierId = orderReception ? orderReception.supplier_id : "";
-                const supplierRecord = suppliers.find(s => s.id === supplierId);
-
-                const newRecord = {
+                const newGuardado = {
                   name: values.name,
                   product_id: values.product_id,
-                  supplier_id: supplierRecord ? supplierRecord.id : "",
-                  quantity: lotOrSerial === "Serial" ? 1 : values.quantity_received,
+                  supplier_id: values.supplier_id,
+                  quantity: values.quantity,
                   production_date: lotOrSerial === "Lot" ? values.production_date : "",
                   expiration_date: lotOrSerial === "Lot" ? values.expiration_date : "",
-                  orderlinereception_id: values.id,
+                  orderlinereception_id: values.orderlinereception_id,
                 };
 
+                setGuardado(prevGuardado => [...prevGuardado, newGuardado]);
+
+                setValorsInicials(prevValues => ({
+                  ...prevValues,
+                  name: "",
+                  quantity: lotOrSerial === "Serial" ? 1 : "",
+                  production_date: "",
+                  expiration_date: "",
+                }));
+
+
                 if (lotOrSerial === "Lot") {
-                  const updatedLotes = [...lotes, newRecord];
+                  const updatedLotes = [...lotes, newGuardado];
                   localStorage.setItem("lotsTemporal", JSON.stringify(updatedLotes));
                   setLotes(updatedLotes);
                 } else if (lotOrSerial === "Serial") {
-                  const updatedSeries = [...series, newRecord];
+                  const updatedSeries = [...series, newGuardado];
                   localStorage.setItem("serieTemporal", JSON.stringify(updatedSeries));
                   setSeries(updatedSeries);
                 }
               };
+              
+              const handleDeleteRecord = (index) => {
+                setGuardado(prevGuardado => prevGuardado.filter((_, i) => i !== index));
+              };             
 
               return (
                 <Form>
@@ -200,27 +191,31 @@ function LotsLotOSerie({ products, orderreception, suppliers, canviEstatModal, s
                               <th>Fecha de expiració</th>
                             </>
                           )}
+                          <th>Accions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {/* {records.length === 0 ? (
+                        {guardado.length === 0 ? (
                           <tr>
-                            <td colSpan={lotOrSerial === "Lot" ? 4 : 2}>No hi han registres</td>
+                            <td colSpan={lotOrSerial === "lot" ? 5 : 3}>No hi han registres</td>
                           </tr>
                         ) : (
-                          records.map((record, index) => ( */}
-                            <tr>
-                              <td>{}</td>
-                              <td>{}</td>
+                          guardado.map((guardar, index) => (
+                            <tr key={index}>
+                              <td>{guardar.quantity}</td>
+                              <td>{guardar.name}</td>
                               {lotOrSerial === "Lot" && (
                                 <>
-                                  <td>{}</td>
-                                  <td>{}</td>
+                                  <td>{guardar.production_date}</td>
+                                  <td>{guardar.expiration_date}</td>
                                 </>
                               )}
+                              <td>
+                                  <i className="bi bi-trash icono" onClick={() => handleDeleteRecord(index)} role='button'></i>
+                              </td>
                             </tr>
-                          {/* ))
-                        )} */}
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -243,11 +238,12 @@ function LotsLotOSerie({ products, orderreception, suppliers, canviEstatModal, s
 LotsLotOSerie.propTypes = {
   products: PropTypes.array.isRequired,
   lotOrSerial: PropTypes.string.isRequired,
-  orderreception: PropTypes.array.isRequired,
-  suppliers: PropTypes.array.isRequired,
+  // orderreception: PropTypes.array.isRequired,
+  // suppliers: PropTypes.array.isRequired,
   canviEstatModal: PropTypes.func.isRequired,
   showModal: PropTypes.bool.isRequired,
   valorsInicials: PropTypes.object.isRequired,
+  setValorsInicials: PropTypes.func.isRequired,
   // LotSchema: PropTypes.func.isRequired,
 };
 
