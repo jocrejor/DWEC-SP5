@@ -69,7 +69,7 @@ function OrderPickingReception() {
     }
 
     useEffect(()=>{
-        const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 1);
+        const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 3);
         const tempPickings = [];
         
         //recorrer orden reception pendent (desempaquetada)
