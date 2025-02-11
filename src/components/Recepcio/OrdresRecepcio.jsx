@@ -203,6 +203,19 @@ function OrderReception() {
     }
   };
 
+  const desempaquetarOrdre = async (ordreId) => {
+    try {
+      await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderreception_status_id: 3 }, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+      setOrderReceptions(prev => prev.map(order =>
+        order.id === ordreId ? { ...order, orderreception_status_id: 3 } : order
+      ));
+      setShowReviewModal(false);
+    } catch (err) {
+      console.error("Error canviant l'estat de l'ordre:", err);
+    }
+  };
 
   const eliminarProducte = (index) => {
     setSelectedProducts((prev) => prev.filter((_, i) => i !== index));
@@ -317,9 +330,8 @@ function OrderReception() {
               <th>Proveïdor</th>
               <th>Data Estimada</th>
               <th>Estat</th>
-              <th>Revisar</th>
-              <th>Modificar</th>
-              <th>Eliminar</th>
+              <th>Accions</th>
+
             </tr>
           </thead>
           <tbody>
@@ -333,16 +345,17 @@ function OrderReception() {
                   <Button variant="info" onClick={() => revisarOrdre(valors)}>
                     Revisar
                   </Button>
-                </td>
-                <td>
-                  <Button variant="warning" onClick={() => modificarOrdre(valors)}>
-                    Modificar
-                  </Button>
-                </td>
-                <td>
-                  <Button variant="primary" onClick={() => eliminarOrdre(valors.id)}>
-                    Eliminar
-                  </Button>
+
+                  {valors.orderreception_status_id === 1 && (
+                    <>
+                      <Button variant="warning" onClick={() => modificarOrdre(valors)}>
+                        Modificar
+                      </Button>
+                      <Button variant="primary" onClick={() => eliminarOrdre(valors.id)}>
+                        Eliminar
+                      </Button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}
@@ -361,15 +374,6 @@ function OrderReception() {
             <Formik
               enableReinitialize
               initialValues={valorsInicials}
-
-              /*
-              initialValues={(tipoModal === 'Modificar' ? valorsInicials : {
-                id: valorsInicials.id,
-                supplier_id: valorsInicials.supplier_id,
-                estimated_reception_date: valorsInicials.estimated_reception_date,
-                selectedProducts: selectedProducts,
-              })}
-                */
               validationSchema={OrderReceptionSchema}
               onSubmit={handleSubmit}
             >
@@ -519,16 +523,28 @@ function OrderReception() {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowReviewModal(false)}>
-            Tancar
-          </Button>
-          <Button variant="success" onClick={() => descarregarOrdre(orderToReview.id)}>
-            Descarregada
-          </Button>
+          {orderToReview?.orderreception_status_id === 1 ? (
+            <>
+              <Button variant="secondary" onClick={() => setShowReviewModal(false)}>
+                Tancar
+              </Button>
+              <Button variant="success" onClick={() => descarregarOrdre(orderToReview.id)}>
+                Descarregada
+              </Button>
+            </>
+          ) : null}
+          {orderToReview?.orderreception_status_id === 2 ? (
+            <>
+              <Button variant="warning" href="#">Incidència</Button>
+              <Button variant="primary" href="#">Lot</Button>
+              <Button variant="success" onClick={() => desempaquetarOrdre(orderToReview.id)}>
+                Desempaquetada
+              </Button>
+            </>
+          ) : null}
         </Modal.Footer>
       </Modal>
     </>
   );
 }
-
 export default OrderReception;
