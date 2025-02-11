@@ -5,6 +5,7 @@ import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header';
 import Filtres from './proveidorsFiltres';	
 import axios from 'axios';
+import Papa from 'papaparse';
 import '../../App.css';
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -35,7 +36,7 @@ function Proveidors() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [suppliersPage,setSuppliersPage]= useState([]);
-  const [file, setFile] = useState([]);
+  const [csvData, setCsvData] = useState([]);
   const [valorsInicials, setValorsInicials] = useState({
     name: '',
     address: '',
@@ -224,12 +225,38 @@ function Proveidors() {
     setCurrentPage(1);
   };
 
-  const importaProveidor = () => {
+  // Maneja el cambio del archivo CSV
+  const handleImportChange = (event) => {
+    const file = event.target.files[0];
 
-    const handleFileChange = (e) => {
-      setFile(e.target.files[0]);
-    };
+    if (file) {
+      Papa.parse(file, {
+        complete: (result) => {
+          console.log('CSV Parsed: ', result);
+          setCsvData(result.data); // Guardar los datos del CSV
+        },
+        header: true, // Asumiendo que el CSV tiene una fila de encabezado
+      });
+    }
+  };
 
+  const handleImport = async () => {
+    if (csvData) {
+      try {
+        const response = await axios.post(`${apiUrl}/supplier`, {
+          supplier: csvData, // Enviar los datos procesados
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        console.log('Importación exitosa:', response.data);
+        setShowImportModal(false); // Cerrar el modal después de la importación
+      } catch (error) {
+        console.error('Error al importar:', error);
+      }
+    }
   };
   
   return (
@@ -343,14 +370,14 @@ function Proveidors() {
             <input
               type="file"
               accept=".csv"
-              onChange={handleFilterChange}
+              onChange={handleImportChange}
               className="form-control"
             />
           </div>
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button className='orange-button' type="submit" variant="success" onClick={() => setShowImportModal(false)}>
+        <Button className='orange-button' type="submit" variant="success" onClick={handleImport}>
           Importar
         </Button>
       </Modal.Footer>
