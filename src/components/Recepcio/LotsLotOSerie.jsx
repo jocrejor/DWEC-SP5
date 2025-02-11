@@ -10,70 +10,84 @@ const token = localStorage.getItem('token');
 
 
 const LotSchema = (lotOrSerial) => Yup.object().shape({
-  name: Yup.string().required("El nom és requerit"),
+  name: Yup.string()
+    .required("El nom és requerit")
+    .min(3, "El nom ha de tindre mínim 3 caracters"),
   product_id: Yup.string()
-    .min(1, "El valor ha de ser una cadena no buida")
-    .required("Valor requerit"),
+    .required("Quantitat requerida"),
   quantity: Yup.number()
-    .min(0, "El valor no pot ser negatiu")
+    .min(0, "La quantitat no pot ser negativa")
     .required("Valor requerit"),
   // Agregar condicionalmente las fechas si es un lot
   ...(lotOrSerial === "lot" && {
     production_date: Yup.date().required("La data de producció és requerida"),
-    expiration_date: Yup.date().required("La data d'expiració és requerida"),
+    expiration_date: Yup.date()
+      .required("La data d'expiració és requerida")
+      .test(
+        "is-expiration-after-production",
+        "La data d'expiració ha de ser posterior a la data de producció",
+        function (value) {
+          const { production_date } = this.parent; // Obtén la fecha de producción
+          if (!production_date || !value) return true; // Si cualquiera de las fechas está vacía, no validamos
+          return new Date(value) > new Date(production_date); // Compara las fechas
+        })
   }),
 });
 
 
 
 function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, setValorsInicials, lotOrSerial }) {
-  const [lotes, setLotes] = useState([]);
-  const [series, setSeries] = useState([]);
   const [errorAgregar, setErrorAgregar] = useState("");
-
   const [guardado, setGuardado] = useState([]);
-
-  useEffect(() => {
-    const storedLotes = JSON.parse(localStorage.getItem("lotsTemporal")) || [];
-    const storedSeries = JSON.parse(localStorage.getItem("serieTemporal")) || [];
-    setLotes(storedLotes);
-    setSeries(storedSeries);
-  }, []);
 
   return (
     <>
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
-          <Formik
-            initialValues={valorsInicials}
-            validationSchema={LotSchema(lotOrSerial)}
-          >
-            {({ values }) => {
-              console.log(values)
-              const selectedProduct = products.find(p => p.id === values.product_id);
-              const lotOrSerial = selectedProduct ? selectedProduct.lotorserial : null;
-              return (
-                <Modal.Title>
-                  Crear {lotOrSerial === "Lot" ? "lot" : lotOrSerial === "Serial" ? "serie" : "No definit"}
-                </Modal.Title>
-              );
-            }}
-          </Formik>
+          <Modal.Title>
+            Crear {lotOrSerial === "lot" ? "lot" : lotOrSerial === "serie" ? "serie" : "No definit"}
+          </Modal.Title>
         </Modal.Header>
-
         <Modal.Body>
           <Formik
             initialValues={valorsInicials}
             validationSchema={LotSchema(lotOrSerial)}
           >
             {({ values, errors, touched }) => {
-              const selectedProduct = products.find(p => p.id === values.product_id);
-              const lotOrSerial = selectedProduct ? selectedProduct.lotorserial : null;
-              const nombreTipo = lotOrSerial === "Lot" ? "lot" : lotOrSerial === "Serial" ? "serie" : "No definit";
+              const handleSave = async () => {
+                if (guardado.length === 0) {
+                  setErrorAgregar("No hi ha registres per gravar");
+                  return;
+                }
+
+                try {
+                  for (const lote of guardado) {
+                    const saveResponse = await axios.post(`${apiUrl}lot`, lote, {
+                      headers: { "auth-token": token }
+                    });
+
+                    console.log("Registres guardats correctament", saveResponse.data);
+                  }
+
+                  setGuardado([]);      // Vaciar la lista después de guardar
+                  setValorsInicials({
+                    name: "",
+                    quantity: lotOrSerial === "serie" ? 1 : "",
+                    production_date: "",
+                    expiration_date: "",
+                  });
+                  canviEstatModal();    // Cerrar el modal
+
+                  setErrorAgregar("");
+                }
+                catch (error) {
+                  console.error("Error al guardar:", error);
+                }
+              };
 
               const handleAddRecord = () => {
-                if (!values.name || !values.quantity || (lotOrSerial === "Lot" && (!values.production_date || !values.expiration_date))) {
-                  setErrorAgregar("Debes llenar todos los campos");
+                if (!values.name || !values.quantity || (lotOrSerial === "lot" && (!values.production_date || !values.expiration_date))) {
+                  setErrorAgregar("No pots deixar camps buits");
                   return;
                 }
                 const newGuardado = {
@@ -81,8 +95,8 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
                   product_id: values.product_id,
                   supplier_id: values.supplier_id,
                   quantity: values.quantity,
-                  production_date: lotOrSerial === "Lot" ? values.production_date : "",
-                  expiration_date: lotOrSerial === "Lot" ? values.expiration_date : "",
+                  production_date: lotOrSerial === "lot" ? values.production_date : "",
+                  expiration_date: lotOrSerial === "lot" ? values.expiration_date : "",
                   orderlinereception_id: values.orderlinereception_id,
                 };
 
@@ -91,26 +105,17 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
                 setValorsInicials(prevValues => ({
                   ...prevValues,
                   name: "",
-                  quantity: lotOrSerial === "Serial" ? 1 : "",
+                  quantity: lotOrSerial === "serie" ? 1 : "",
                   production_date: "",
                   expiration_date: "",
                 }));
 
-
-                if (lotOrSerial === "Lot") {
-                  const updatedLotes = [...lotes, newGuardado];
-                  localStorage.setItem("lotsTemporal", JSON.stringify(updatedLotes));
-                  setLotes(updatedLotes);
-                } else if (lotOrSerial === "Serial") {
-                  const updatedSeries = [...series, newGuardado];
-                  localStorage.setItem("serieTemporal", JSON.stringify(updatedSeries));
-                  setSeries(updatedSeries);
-                }
+                setErrorAgregar("");
               };
-              
+
               const handleDeleteRecord = (index) => {
                 setGuardado(prevGuardado => prevGuardado.filter((_, i) => i !== index));
-              };             
+              };
 
               return (
                 <Form>
@@ -137,17 +142,17 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
                   <div className="form-group d-flex mt-3">
                     <div>
                       <div className="text-center fs-4">
-                        <span className="text-capitalize">{nombreTipo}</span>
+                        <span className="text-capitalize">{lotOrSerial}</span>
                       </div>
                       <div className="input-group flex-nowrap mt-3">
                         <Field
                           type="number" name="quantity"
                           className="form-control w-25"
-                          disabled={lotOrSerial === "Serial"}
+                          disabled={lotOrSerial === "serie"}
                         />
                         <Field
                           type="text" name="name"
-                          placeholder={`Nom ${lotOrSerial === "Lot" ? "del" : "de la"} ${nombreTipo}`}
+                          placeholder={`Nom ${lotOrSerial === "lot" ? "del" : "de la"} ${lotOrSerial}`}
                           className="form-control w-100"
                         />
                         <button className="btn text-white orange-button" type="button" onClick={handleAddRecord}>
@@ -160,7 +165,7 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
                   </div>
 
                   {/* Campos adicionales solo para "Lot" */}
-                  {lotOrSerial === "Lot" && (
+                  {lotOrSerial === "lot" && (
                     <>
                       <div className="form-group d-flex gap-2 mt-3">
                         <div className="w-100">
@@ -185,7 +190,7 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
                         <tr>
                           <th>Quantitat</th>
                           <th>Nom</th>
-                          {lotOrSerial === "Lot" && (
+                          {lotOrSerial === "lot" && (
                             <>
                               <th>Fecha de producció</th>
                               <th>Fecha de expiració</th>
@@ -204,14 +209,14 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
                             <tr key={index}>
                               <td>{guardar.quantity}</td>
                               <td>{guardar.name}</td>
-                              {lotOrSerial === "Lot" && (
+                              {lotOrSerial === "lot" && (
                                 <>
                                   <td>{guardar.production_date}</td>
                                   <td>{guardar.expiration_date}</td>
                                 </>
                               )}
                               <td>
-                                  <i className="bi bi-trash icono" onClick={() => handleDeleteRecord(index)} role='button'></i>
+                                <i className="bi bi-trash icono" onClick={() => handleDeleteRecord(index)} role='button'></i>
                               </td>
                             </tr>
                           ))
@@ -222,14 +227,13 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
 
                   <div className="form-group d-flex justify-content-between mt-3">
                     <Button variant="secondary" onClick={canviEstatModal}>Tancar</Button>
-                    <Button className="btn text-white orange-button">Gravar</Button>
+                    <Button className="btn text-white orange-button" onClick={handleSave}>Gravar</Button>
                   </div>
                 </Form>
               );
             }}
           </Formik>
         </Modal.Body>
-
       </Modal>
     </>
   );
@@ -238,13 +242,10 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
 LotsLotOSerie.propTypes = {
   products: PropTypes.array.isRequired,
   lotOrSerial: PropTypes.string.isRequired,
-  // orderreception: PropTypes.array.isRequired,
-  // suppliers: PropTypes.array.isRequired,
   canviEstatModal: PropTypes.func.isRequired,
   showModal: PropTypes.bool.isRequired,
   valorsInicials: PropTypes.object.isRequired,
   setValorsInicials: PropTypes.func.isRequired,
-  // LotSchema: PropTypes.func.isRequired,
 };
 
 export default LotsLotOSerie;

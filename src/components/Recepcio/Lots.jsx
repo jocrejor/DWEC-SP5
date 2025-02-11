@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
-import { Button, Modal } from 'react-bootstrap';
+// import { Formik, Form, Field } from 'formik';
+// import * as Yup from 'yup';
+// import { Button, Modal } from 'react-bootstrap';
 import axios from "axios";
 
 import Header from '../Header';
@@ -13,7 +13,7 @@ const token = localStorage.getItem('token');
 
 /* LOTS */
 function Lots() {
-  const [lot, setLot] = useState([]);
+  // const [lot, setLot] = useState([]);
   const [products, setProduct] = useState([]);
   const [suppliers, setSupplier] = useState([]);
   // de momento no hay orderReception
@@ -37,17 +37,17 @@ function Lots() {
 
   useEffect(() => {
     const fetchData = async () => {
-      axios.get(`${apiUrl}Lot`, { headers: { "auth-token": token } })
-        // axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
-        .then(
-          response => {
-            setLot(response.data)
-          })
-        .catch(
-          error => {
-            console.log(error)
-          }
-        )
+      // axios.get(`${apiUrl}Lot`, { headers: { "auth-token": token } })
+      //   // axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
+      //   .then(
+      //     response => {
+      //       setLot(response.data)
+      //     })
+      //   .catch(
+      //     error => {
+      //       console.log(error)
+      //     }
+      //   )
 
       axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
         // axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
