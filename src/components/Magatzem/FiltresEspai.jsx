@@ -5,8 +5,8 @@ import PropTypes from 'prop-types';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-const FilterEstanteria = ({ onFilter, onClear }) => {
-    const [carrers, setCarrers] = useState([]); // Aquí se almacenan los magatzems para los filtros
+const FiltresEspai = ({ onFilter, onClear }) => {
+    const [shelfs, setEstanteries] = useState([]); // Aquí se almacenan los magatzems para los filtros
     const [filters, setFilters] = useState({
         nom: '',          // Filtro por nombre de la calle
         id_storage: '',   // Filtro por id_storage (almacen)
@@ -17,7 +17,7 @@ const FilterEstanteria = ({ onFilter, onClear }) => {
     useEffect(() => {
         axios.get(`${apiUrl}/magatzem`, { headers: { "auth-token": localStorage.getItem("token") } })
             .then(response => {
-                setCarrers(response.data);
+                setEstanteries(response.data);
             })
             .catch(e => {
                 console.log(e);
@@ -49,7 +49,7 @@ const FilterEstanteria = ({ onFilter, onClear }) => {
     return (
         <form className="row bg-grey pt-3 px-2 mx-0 text-light-blue" onSubmit={handleFilterSubmit}>
             <div className="col-12 col-md-6 col-xl-4">
-                <label htmlFor="filterNom" className="form-label">Nom Estanteria</label>
+                <label htmlFor="filterNom" className="form-label">Nom Espai</label>
                 <input
                     type="text"
                     className="form-control"
@@ -81,9 +81,22 @@ const FilterEstanteria = ({ onFilter, onClear }) => {
                     className="form-control"
                     id="filterIdStorage"
                     name="id_magatzem"
-                    value={filters.id_street}
+                    value={filters.id_storage}
                     onChange={handleFilterChange}
                     placeholder="Filtra per ID del magatzem"
+                />
+            </div>
+
+            <div className="col-12 col-md-6 col-xl-4">
+                <label htmlFor="filterIdShelf" className="form-label">Estanteria</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    id="filterIdShelf"
+                    name="id_shelf"
+                    value={filters.id_shelf}
+                    onChange={handleFilterChange}
+                    placeholder="Filtra per ID de la estanteria"
                 />
             </div>
 
@@ -103,9 +116,9 @@ const FilterEstanteria = ({ onFilter, onClear }) => {
     );
 };
 
-FilterEstanteria.propTypes = {
+FiltresEspai.propTypes = {
     onFilter: PropTypes.func.isRequired, 
     onClear: PropTypes.func.isRequired, 
 };
 
-export default FilterEstanteria;
+export default FiltresEspai;

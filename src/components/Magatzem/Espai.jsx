@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import Filtres from '../Filtres';
+import FiltresEspai from './FiltresEspai';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -87,7 +87,7 @@ function Space() {
 
     return (
         <>
-            <Filtres />
+            <FiltresEspai />
 
             <h2>Magatzem: {magatzem}</h2>
             <h2>Carrer: {carrer}</h2>
