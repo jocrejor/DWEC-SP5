@@ -183,6 +183,11 @@ function CompletarInventari() {
 
   }
 
+  const changeDate = (date) => {
+    const newDate = new Date(date);
+    return newDate.toLocaleDateString();
+  }
+
   return (
     <>
       <Header title="Completar Inventari" />
@@ -201,7 +206,7 @@ function CompletarInventari() {
               <tbody className='text-light-blue'>
                 <tr>
                   <td data-cell="ID Inventari: ">{selectedInventory?.id}</td>
-                  <td data-cell="Data: ">{selectedInventory?.created_at}</td>
+                  <td data-cell="Data: ">{changeDate(selectedInventory?.created_at)}</td>
                   <td data-cell="Estat: ">{selectedInventory?.inventory_status}</td>
                   <td data-cell="Magatzem: ">{(storages.find(storage => storage.id === selectedInventory?.storage_id))?.name}</td>
                 </tr>

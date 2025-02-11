@@ -112,7 +112,6 @@ function Inventaris() {
       })
       .catch(e => { console.log(e.response.data) })
 
-    console.log("hola")
   }, []);
 
   useEffect(() => {
@@ -267,16 +266,20 @@ function Inventaris() {
   }
 
   const changeDate = (date) => {
-    console.log(date)
     const newDate = new Date(date);
-    console.log(newDate)
-    console.log(newDate.toLocaleDateString())
     return newDate.toLocaleDateString();
   }
 
-  const generarPDF = () => {
+  const generarPDF = (inventory) => {
     const doc = new jsPDF();
-    doc.text('Inventaris', 10, 10);
+    doc.text('Inventaris', 14, 14);
+    doc.autotable({
+      head:[['ID', 'Data', 'Estat', 'Magatzem']],
+      body:[
+        [(inventory.id).toString(), changeDate(inventory.created_at), inventoryStatus.find(inv => inv.id === inventory.status_id)?.name, storages.find(st => st.id === inventory.storage_id)?.name]
+      ]
+    })
+   doc.autoTable({html: '#report'})
     doc.save('inventaris.pdf');
   }
 
@@ -291,6 +294,7 @@ function Inventaris() {
               <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción" defaultValue="">
                 <option value="">Tria una opció</option>
                 <option value="Eliminar">Eliminar</option>
+                <option value="Informe">Generar informe</option>
               </select>
               <label htmlFor="floatingSelect">Accions en lot</label>
             </div>
@@ -327,7 +331,7 @@ function Inventaris() {
                       <Field
                         as='select'
                         name='storage_id'
-                        className='form-control'
+                        className='form-select'
                         onChange={(e) => {
                           setSelectedStorageId(e.target.value);
                           setFieldValue('storage_id', e.target.value);
@@ -349,7 +353,7 @@ function Inventaris() {
                       <Field
                         as='select'
                         name='street_id'
-                        className='form-control'
+                        className='form-select'
 
                       >
                         <option value=''>Selecciona un carrer</option>
@@ -416,6 +420,10 @@ function Inventaris() {
                         <td>
                           <button className='btn' onClick={() => { setSelectedInventory(values); changeModalStatus() }}><i className="bi bi-eye text-light-blue fs-5"><span className="visually-hidden">Visualitzar</span></i></button>
                           <button className="btn" onClick={() => deleteInventory(values.id)}><i className="bi bi-trash text-light-blue fs-5"><span className="visually-hidden">Eliminar</span></i></button>
+                          {
+                            (values.inventory_status === inventoryStatus.find(status => status.name === 'Completat')?.id) ?
+                            <button onClick={()=>{setSelectedInventory(values); generarPDF(values)}} className="btn "><i className="bi bi-filetype-pdf text-light-blue fs-5"></i><span className="visually-hidden">Generar informe</span></button> : ''
+                          }
                         </td>
                       </tr>
                     )

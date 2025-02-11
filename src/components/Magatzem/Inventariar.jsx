@@ -9,10 +9,12 @@ import { Formik, Form, Field } from 'formik'
 import * as Yup from 'yup'
 
 const InventoryLineSchema = Yup.object().shape({
-  street_id: Yup.string().required('Required'),
-  shelf_id: Yup.string().required('Required'),
-  space_id: Yup.string().required('Required'),
-  quantity_real: Yup.number().required('Required'),
+  street_id: Yup.string().required('Valor requerit'),
+  shelf_id: Yup.string().required('Valor requerit'),
+  space_id: Yup.string().required('Valor requerit'),
+  product_id: Yup.string().required('Valor requerit'),
+  quantity_real: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
+  inventory_reason_id: Yup.string()
 });
 
 
@@ -31,7 +33,12 @@ function Inventariar() {
   const [inventoryStatus, setInventoryStatus] = useState([]);
   const [inventoryReasons, setInventoryReasons] = useState([]);
   const [inputLocked, setInputLocked] = useState(false);
-  
+  const [streets, setStreets] = useState([]);
+  const [shelfs, setShelfs] = useState([]);
+  const [spaces, setSpaces] = useState([]);
+  const [selectedStreets, setSelectedStreets] = useState([]);
+  const [selectedShelfs, setSelectedShelfs] = useState([]);
+  const [selectedSpaces, setSelectedSpaces] = useState([]);
 
 
   useEffect(() => {
@@ -71,6 +78,24 @@ function Inventariar() {
         setInventoryReasons(response.data);
       })
       .catch(e => { console.log(e.response.data) })
+
+    axios.get(`${apiURL}/street`, { headers: { "auth-token": localStorage.getItem('token') } })
+      .then(response => {
+        setStreets(response.data);
+      })
+      .catch(e => { console.log(e.response.data) })
+    axios.get(`${apiURL}/shelf`, { headers: { "auth-token": localStorage.getItem('token') } })
+      .then(response => {
+        setShelfs(response.data);
+      })
+      .catch(e => { console.log(e.response.data) })
+
+    axios.get(`${apiURL}/space`, { headers: { "auth-token": localStorage.getItem('token') } })
+      .then(response => {
+        setSpaces(response.data);
+      })
+      .catch(e => { console.log(e.response.data) })
+
   }, []);
 
 
@@ -95,6 +120,21 @@ function Inventariar() {
 
       })
 
+      const filteredStreets = streets.filter((street) => {
+        street.storage_id === selectedInventory.storage_id;
+      });
+
+      const filteredShelfs = shelfs.filter((shelf) => {
+        shelf.storage_id === selectedInventory.storage_id
+      })
+
+      const filteredSpaces = spaces.filter((space) => {
+        space.storage_id === selectedInventory.storage_id;
+      })
+
+      setSelectedStreets(filteredStreets);
+      setSelectedShelfs(filteredShelfs);
+      setSelectedSpaces(filteredSpaces);
       setSelectedInventoryLines(orderedInventoryLines);
 
     } else {
@@ -102,22 +142,31 @@ function Inventariar() {
     }
   }, [selectedInventory])
 
+
+  const displayData = () => {
+    console.log(selectedStreets)
+    console.log(selectedShelfs)
+    console.log(selectedSpaces)
+  }
+
+
+
   useEffect(() => {
-    console.log(updatedInventoryLines)
+    //console.log(updatedInventoryLines)
     console.log(selectedInventoryLines)
 
   }, [updatedInventoryLines, selectedInventoryLines])
 
   const handleInputChange = (e) => {
-    console.log(e)
-    console.log(e.target.name)
+    //console.log(e)
+    //console.log(e.target.name)
     const { name, value, type } = e.target;
     const lineId = parseInt(name);
     const newValue = parseInt(value);
     const field = type === 'number' ? 'quantity_real' : 'inventory_reason_id';
 
-    console.log(lineId + '-' + field + ' - ' + value + ' - ' + type)
-    console.log(field)
+    //console.log(lineId + '-' + field + ' - ' + value + ' - ' + type)
+    //console.log(field)
 
     setUpdatedInventoryLines((prev) => {
       const index = prev.findIndex((line) => line.id === lineId);
@@ -136,7 +185,7 @@ function Inventariar() {
 
   const handleSubmit = async () => {
     if (updatedInventoryLines.length != selectedInventoryLines.length) {
-      console.log(updatedInventoryLines.length + " - " + selectedInventory.length)
+      //console.log(updatedInventoryLines.length + " - " + selectedInventory.length)
       alert("Introdueix totes les quantitats reals");
     } else if (updatedInventoryLines.length === 0) {
       alert("No hi ha res a inventariar");
@@ -146,13 +195,15 @@ function Inventariar() {
         const defaultReason = inventoryReasons.find(reason => reason.name === "Recompte cíclic")?.id;
 
         if (updatedLine) {
-          line = { ...line, 
-            quantity_real: updatedLine?.quantity_real, 
-            operator_id: user.id, 
-            inventory_reason_id: updatedLine?.inventory_reason_id || defaultReason};
+          line = {
+            ...line,
+            quantity_real: updatedLine?.quantity_real,
+            operator_id: user.id,
+            inventory_reason_id: updatedLine?.inventory_reason_id || defaultReason
+          };
 
           await axios.put(`${apiURL}/inventoryline/${line.id}`, line, { headers: { "auth-token": localStorage.getItem('token') } })
-          
+
           return line;
         }
         return line;
@@ -164,20 +215,25 @@ function Inventariar() {
 
       setSelectedInventoryLines(updatedLines);
       setSelectedInventory(updatedSelectedInventory);
-      console.log(updatedSelectedInventory)
+      //console.log(updatedSelectedInventory)
       alert("Linia actualitzada amb èxit");
       navigate('/inventaris');
     }
 
   }
 
+  const changeDate = (date) => {
+    const newDate = new Date(date);
+    return newDate.toLocaleDateString();
+  }
+
   //********* MODAL *********
-    const [show, setShow] = useState(false);
-    const handleClose = () => {
-      setShow(false)
-    };
-  
-    const handleShow = () => setShow(true);
+  const [show, setShow] = useState(false);
+  const handleClose = () => {
+    setShow(false)
+  };
+
+  const handleShow = () => setShow(true);
 
   return (
     <>
@@ -197,7 +253,7 @@ function Inventariar() {
               <tbody className='text-light-blue'>
                 <tr>
                   <td data-cell="ID Inventari: ">{selectedInventory?.id}</td>
-                  <td data-cell="Data: ">{selectedInventory?.created_at}</td>
+                  <td data-cell="Data: ">{changeDate(selectedInventory?.created_at)}</td>
                   <td data-cell="Estat: ">{(inventoryStatus.find(inventory => inventory.id === selectedInventory?.inventory_status))?.name}</td>
                   <td data-cell="Magatzem">{(storages.find(storage => storage.id === selectedInventory?.storage_id))?.name}</td>
                 </tr>
@@ -257,7 +313,7 @@ function Inventariar() {
                 }
                 <tr>
                   <td colSpan={7} className='text-center'>
-                    <Button variant='success' onClick={handleShow}>+</Button>
+                    <Button className="btn outline-blue fw-bold" onClick={handleShow}>+</Button>
                   </td>
                 </tr>
               </tbody>
@@ -272,7 +328,7 @@ function Inventariar() {
 
           <Modal show={show} onHide={handleClose} animation={true} >
             <Modal.Header closeButton>
-              <Modal.Title className='text-light-blue'>Alta de Inventari</Modal.Title>
+              <Modal.Title className='text-light-blue'>Afegir línia d'inventari</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Formik
@@ -286,50 +342,122 @@ function Inventariar() {
                 {({ errors, touched, setFieldValue }) => (
                   <Form>
                     <div>
-                      <label htmlFor="storage_" className='py-3 text-light-blue'>Magatzem:</label>
+                      <label htmlFor="street_id" className='py-3 text-light-blue'>Carrer:</label>
                       <Field
                         as='select'
-                        name='storage_id'
-                        className='form-control'
+                        name='street_id'
+                        className='form-select'
                         onChange={(e) => {
                           setSelectedStorageId(e.target.value);
                           setFieldValue('storage_id', e.target.value);
                         }}
                       >
-                        <option value=''>Selecciona un magatzem</option>
+                        <option value=''>Selecciona un carrer</option>
                         {
-                          storages.map((storage) => {
+                          streets.map((street) => {
                             return (
-                              <option key={storage.id} value={storage.id}>{storage.name}</option>
+                              <option key={street.id} value={street.id}>{street.name}</option>
                             );
                           })
                         }
                       </Field>
-                      {errors.storage_id && touched.storage_id ? <div>{errors.storage_id}</div> : null}
+                      {errors.street_id && touched.street_id ? <div className='text-danger'>{errors.street_id}</div> : null}
                     </div>
+
                     <div>
-                      <label htmlFor="street_" className='py-3 text-light-blue'>Carrer:</label>
+                      <label htmlFor="shelf_id" className='py-3 text-light-blue'>Estanteria:</label>
                       <Field
                         as='select'
-                        name='street_id'
-                        className='form-control'
+                        name='shelf_id'
+                        className='form-select'
 
                       >
-                        <option value=''>Selecciona un carrer</option>
-                        {/*
-                          availableStreets.map((street) => {
+                        <option value=''>Selecciona una estanteria</option>
+                        {
+                          shelfs.map((shelf) => {
                             return (
-                              <option key={street.id} value={street.id} >{street.name}</option>
+                              <option key={shelf.id} value={shelf.id} >{shelf.name}</option>
                             );
                           })
-                        */}
+                        }
                       </Field>
-                      {errors.street_id && touched.street_id ? <div>{errors.street_id}</div> : null}
+                      {errors.shelf_id && touched.shelf_id ? <div className='text-danger'>{errors.shelf_id}</div> : null}
                     </div>
+
+                    <div>
+                      <label htmlFor="space_id" className='py-3 text-light-blue'>Espai:</label>
+                      <Field
+                        as='select'
+                        name='space_id'
+                        className='form-select'
+
+                      >
+                        <option value=''>Selecciona un espai</option>
+                        {
+                          spaces.map((space) => {
+                            return (
+                              <option key={space.id} value={space.id} >{space.name}</option>
+                            );
+                          })
+                        }
+                      </Field>
+                      {errors.space_id && touched.space_id ? <div className='text-danger'>{errors.space_id}</div> : null}
+                    </div>
+
+                    <div>
+                      <label htmlFor="product_id" className='py-3 text-light-blue'>Producte:</label>
+                      <Field
+                        as='select'
+                        name='product_id'
+                        className='form-select'
+
+                      >
+                        <option value=''>Selecciona un producte</option>
+                        {
+                          products.map((product) => {
+                            return (
+                              <option key={product.id} value={product.id} >{product.name}</option>
+                            );
+                          })
+                        }
+                      </Field>
+                      {errors.product_id && touched.product_id ? <div className='text-danger'>{errors.product_id}</div> : null}
+                    </div>
+
+                    <div>
+                      <label htmlFor="quantity_real" className='py-3 text-light-blue'>Quantitat real:</label>
+                      <Field
+                        type="number"
+                        name='quantity_real'
+                        className='form-control'
+                        placeholder="0"
+                      >
+                      </Field>
+                      {errors.quantity_real && touched.quantity_real ? <div className='text-danger'>{errors.quantity_real}</div> : null}
+                    </div>
+
+                    <div>
+                      <label htmlFor="inventory_reason_id" className='py-3 text-light-blue'>Producte:</label>
+                      <Field
+                        as='select'
+                        name='inventory_reason_id'
+                        className='form-select'
+
+                      >
+                        <option >Selecciona una opció</option>
+                        {inventoryReasons.map((reason) => {
+                          return (
+                            <option value={reason.id} key={reason.id}>{reason.name}</option>
+                          )
+                        })}
+                      </Field>
+                      {errors.inventory_reason_id && touched.inventory_reason_id ? <div>{errors.inventory_reason_id}</div> : null}
+                    </div>
+
 
                     <div className='py-3 text-end'>
                       <Button variant='secondary' onClick={handleClose}>Cerrar</Button>
-                      <Button type='submit' className='ms-2 orange-button'>Generar Inventari</Button>
+                      <Button type='submit' className='ms-2 orange-button'>Afegir línia</Button>
                     </div>
                   </Form>
                 )}
