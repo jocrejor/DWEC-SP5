@@ -163,7 +163,6 @@ const grabar = async (values)=>{
                 name="weight"
                 step="1"
                 placeholder="0"
-               
                 value={values.weight}
               />
               {errors.weight && touched.weight ? <div>{errors.weight}</div> : null}

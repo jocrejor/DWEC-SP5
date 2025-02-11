@@ -8,16 +8,8 @@ import Filtres from '../Filtres'
 import axios from 'axios'
 
 const IncidenciaSchema = Yup.object().shape({
-    //Aso es té que llevar quan estiga ben fet, es soles un formulari de alta de prova perque Crespo no m'ha explicat on és fa l'alta i quins camps tinc que posar
-    product: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 60 caracters').required('Valor requerit'),
-    supplier: Yup.string().min(1, 'Valor mínim de 1 caracter.').max(50, 'El valor màxim és de 60 caracters').required('Valor requerit'),
-    operator: Yup.string().min(1, 'Valor mínim de 1 caracter.').max(50, 'El valor màxim és de 60 caracters').required('Valor requerit'),
-    quantity_ordered: Yup.number().positive().integer().required('Tens que introduïr una cantitat vàlida'),
-    created_at: Yup.date().min('2024/01/22', 'No pot ser abans del 22 de gener del 2024').max('2025/01/23').required("Introdueïx una data vàlida", 'No pot ser després del 23 de gener del 2025'),
-
-    //Estos dos camos eb teoria están be per a quan modifiquem la incidència
     quantity_received: Yup.number().positive().integer().required('Tens que introduïr una cantitat vàlida'),
-    description: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(200, 'El valor màxim és de 60 caracters')
+    description: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(200, 'El valor màxim és de 200 caracters')
 })
 
 function IncidenciesResoldre() {
@@ -25,12 +17,11 @@ function IncidenciesResoldre() {
     const [incidents, setIncident] = useState([])
     const [products, setProducts] = useState([])
     const [orderlineStatus, setOrderlineStatus] = useState([])
-    const [orderReceptionStatus, setOrderReceptionStatus] = useState([])
+  
     const [userProfile, setUserProfile] = useState([])
     const [suppliers, setSupplier] = useState([])
     const [showModal, setShowModal] = useState(false)
     const [tipoModal, setTipoModal] = useState("Crear")
-    const [visualitzar, setVisualitzar] = useState(false)
     //Paginació
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
@@ -156,7 +147,6 @@ function IncidenciesResoldre() {
     const updateDataIncident = (id, updatedData) => {
         const apiURL = import.meta.env.VITE_API_URL
         const token = localStorage.getItem("token")
-
         axios.put(`${apiURL}/incident/${id}`, updatedData, { headers: { "auth-token": token } })
             .then(response => setIncident(prevIncidents =>
                 prevIncidents.map(incidents => incidents.id === id ? response.data : incidents)
@@ -191,7 +181,6 @@ function IncidenciesResoldre() {
         setTipoModal("Visualitzar");
         console.log(valors)
         setValorsInicials(valors);
-        setVisualitzar(true);
         setShowModal(true);
     };
 
@@ -348,10 +337,10 @@ function IncidenciesResoldre() {
                 </Modal.Header>
 
                 <Modal.Body>
+                    
                     <Formik
                         initialValues={valorsInicials}
                         validationSchema={IncidenciaSchema}
-                        enableReinitialize
                         onSubmit={values => {
                             console.log("onSubmit se está ejecutando"); // Verifica si `onSubmit` se llama
                             console.log("Valores enviados:", values); // Muestra los valores enviados
@@ -371,8 +360,7 @@ function IncidenciesResoldre() {
                                         disabled
                                         className="text-light-blue form-control"
                                         value={values.id} />
-                                    {errors.id && touched.id ? <div className="invalid-feedback">{errors.id}</div> : null}
-                                </div>
+                                 </div>
 
                                 {/* Descripció */}
                                 <div className="form-group">
@@ -395,7 +383,6 @@ function IncidenciesResoldre() {
                                         disabled
                                         className="text-light-blue form-control"
                                         value={values.created_at ? values.created_at.split('T')[0] : ""} />
-                                    {errors.created_at && touched.created_at ? <div className="invalid-feedback">{errors.created_at}</div> : null}
                                 </div>
 
                                 {/* Producte */}
@@ -407,7 +394,6 @@ function IncidenciesResoldre() {
                                         disabled
                                         className="text-light-blue form-control"
                                         value={getProductName(values.product_id)} />
-                                    {errors.product && touched.product ? <div className="invalid-feedback">{errors.product}</div> : null}
                                 </div>
 
                                 {/* Proveedor */}
@@ -419,7 +405,6 @@ function IncidenciesResoldre() {
                                         disabled
                                         className="text-light-blue form-control"
                                         value={getSupplierName(values.supplier_id)} />
-                                    {errors.supplier && touched.supplier ? <div className="invalid-feedback">{errors.supplier}</div> : null}
                                 </div>
 
                                 {/* Operador */}
@@ -431,7 +416,6 @@ function IncidenciesResoldre() {
                                         disabled
                                         className="text-light-blue form-control"
                                         value={getUserProfileName(values.operator_id)} />
-                                    {errors.operator && touched.operator ? <div className="invalid-feedback">{errors.operator}</div> : null}
                                 </div>
 
                                 {/* Cantidad pedida */}
@@ -443,7 +427,6 @@ function IncidenciesResoldre() {
                                         disabled
                                         className="text-light-blue form-control"
                                         value={values.quantity_ordered} />
-                                    {errors.quantity_ordered && touched.quantity_ordered ? <div className="invalid-feedback">{errors.quantity_ordered}</div> : null}
                                 </div>
 
                                 {/* Cantidad recibida */}

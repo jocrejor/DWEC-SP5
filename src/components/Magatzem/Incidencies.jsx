@@ -11,17 +11,14 @@ export default function Incidencies() {
     <>
         <Header title="Incidencies" />
 
-        <Button variant='success' className="text-reset">
-            <Link to="/incidencies/incidenciesGenerar">Generar Incidències</Link>
-        </Button>
-        <Button variant='danger'>
-            <Link to="/incidencies/incidenciesResoldre">Resoldre Incidències</Link>
-        </Button>      
+          
         
         <Outlet/>
         <Routes>
+          
           <Route path="incidenciesGenerar" element={<IncidenciesGenerar />}/>
           <Route path="incidenciesResoldre" element={<IncidenciesResoldre />}/>
+          <Route path="/" element={<IncidenciesResoldre />}/>
         </Routes>
     </>
   )
