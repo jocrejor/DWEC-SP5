@@ -17,7 +17,7 @@ function IncidenciesResoldre() {
     const [incidents, setIncident] = useState([])
     const [products, setProducts] = useState([])
     const [orderlineStatus, setOrderlineStatus] = useState([])
-  
+    const [statuses, setStatus] = useState([])
     const [userProfile, setUserProfile] = useState([])
     const [suppliers, setSupplier] = useState([])
     const [showModal, setShowModal] = useState(false)
@@ -74,10 +74,18 @@ function IncidenciesResoldre() {
         setIncidentsPage(currentItems)
     }, [currentPage, incidents])
 
+    const getStatusNames = () => {
+        const apiURL = import.meta.env.VITE_API_URL
+        const token = localStorage.getItem("token")
+
+        axios.get(`${apiURL}/orderreception_status`, { headers: { "auth-token": token } })
+            .then(response => setStatus(response.data))
+            .catch(error => console.log(error))
+    }
+
     const getDataIncident = () => {
         const apiURL = import.meta.env.VITE_API_URL
         const token = localStorage.getItem("token")
-        console.log(token)
 
         axios.get(`${apiURL}/incident`, { headers: { "auth-token": token } })
             .then(response => setIncident(response.data))
@@ -144,14 +152,20 @@ function IncidenciesResoldre() {
             .catch(error => console.log(error));
     }
 
-    const updateDataIncident = (id, updatedData) => {
+    const updateDataIncident = (updatedData) => {
         const apiURL = import.meta.env.VITE_API_URL
         const token = localStorage.getItem("token")
-        axios.put(`${apiURL}/incident/${id}`, updatedData, { headers: { "auth-token": token } })
+        console.log(updatedData)
+        alert(updatedData)
+
+        updatedData.orderline_status_id = Number(updatedData.orderline_status_id)        
+
+        axios.put(`${apiURL}incident/${updatedData.id}`, updatedData, { headers: { "auth-token": token } })
             .then(response => setIncident(prevIncidents =>
-                prevIncidents.map(incidents => incidents.id === id ? response.data : incidents)
+                prevIncidents.map(incidents => incidents.id === updatedData.id ? response.data : incidents)
             ))
-            .catch(error => console.log(error));
+            .catch(error => console.log(error)
+        );
     }
 
     /*Aso así no es gasta*/
@@ -159,14 +173,13 @@ function IncidenciesResoldre() {
         const apiURL = import.meta.env.VITE_API_URL;
         const token = localStorage.getItem("token");
 
-        axios.delete(`${apiURL}/incident/${id}`, {
-            headers: { "auth-token": token }
-        })
+        axios.delete(`${apiURL}/incident/${id}`, { headers: { "auth-token": token } })
             .then(() => {
                 // Filtrar incidencia eliminada y actualitzar l'estat
                 setIncident(prevIncidents => prevIncidents.filter(item => item.id !== id));
             })
-            .catch(error => console.error("Error al eliminar la incidencia:", error));
+            .catch(error => console.error("Error al eliminar la incidencia:", error)
+        );
     };
 
     useEffect(() => {
@@ -175,6 +188,7 @@ function IncidenciesResoldre() {
         getDataOrderLineStatus();
         getDataUserProfile();
         getSupplier();
+        getStatusNames();
     }, []);
 
     const visualitzarIncident = (valors) => {
@@ -342,10 +356,8 @@ function IncidenciesResoldre() {
                         initialValues={valorsInicials}
                         validationSchema={IncidenciaSchema}
                         onSubmit={values => {
-                            console.log("onSubmit se está ejecutando"); // Verifica si `onSubmit` se llama
-                            console.log("Valores enviados:", values); // Muestra los valores enviados
-                            console.log("Valors enviats: ", values);
-                            updateDataIncident(values.id, values);
+                            console.log("Valores enviados a updateDataIncident:", values);
+                            updateDataIncident(values);
                             canviEstatModal();
                         }}
                     >
@@ -457,12 +469,12 @@ function IncidenciesResoldre() {
                                             as="select"
                                             name="orderline_status_id"
                                             className="text-light-blue form-control"
-                                        >
-                                            <option value="Pendent">Pendent</option>
-                                            {/*<option value="Pendent">{getStatusId(values.orderline_status_id)}</option>*/}
-                                            <option value="Rebutjada">Rebutjada</option>
-                                            <option value="Completada">Completada</option>
-                                            <option value="Forçada">Forçada</option>
+                                        >                                           
+                                            {orderlineStatus.map(status => 
+                                                <option key={status.id} value={status.id}>
+                                                    {status.name}
+                                                </option>
+                                            )}
                                         </Field>
                                     )}
                                     {errors.status && touched.status ? (
