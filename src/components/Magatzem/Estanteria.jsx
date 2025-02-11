@@ -53,7 +53,23 @@ function Shelf() {
     setShowModal(true);
   };
 
-  const openModal = () => {
+  // Define the missing functions
+  const viewSupplier = (valors) => {
+    console.log("Viewing supplier:", valors);
+    // Implement the viewing logic (e.g., navigate to a detailed view)
+  };
+
+  const modSuppliers = (valors) => {
+    console.log("Modifying supplier:", valors);
+    editShelf(valors); // Reusing the existing modificarStreet logic
+  };
+
+  const deleteSuppliers = (id) => {
+    console.log("Deleting supplier:", id);
+    deleteShelf(id); // Reusing the existing eliminarStreet logic
+  };
+
+  const canviEstatModal = () => {
     setShowModal(true);
     setModalType("Crear");
   };
@@ -66,24 +82,27 @@ function Shelf() {
     <>
       <FilterEstanteria />
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
-        <div className="col-12 col-md-6 col-xl-4 d-flex">
-          <div className="d-flex rounded border mt-2 flex-grow-1">
+        <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+          <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
             <div className="form-floating bg-white">
-              <select className="form-select">
+              <select className="form-select" id="floatingSelect" aria-label="Seleccione una opció">
                 <option selected>Tria una opció</option>
                 <option value="1">Eliminar</option>
               </select>
-              <label>Accions en lot</label>
+              <label htmlFor="floatingSelect">Accions en lot</label>
             </div>
-            <button className="btn rounded-0 orange-button text-white px-2">
+            <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button">
               <i className="bi bi-check-circle text-white px-1"></i>Aplicar
             </button>
           </div>
         </div>
-        <div className="col-12 col-md-6 col-xl-4 text-end">
-          <button type="button" onClick={openModal} className="btn btn-dark mt-2">
-            <i className="bi bi-plus-circle text-white pe-1"></i>Crear Estanteria
-          </button>
+        <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+        <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+          <div className="d-flex h-100 justify-content-xl-end">
+            <button type="button" onClick={canviEstatModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear Estanteria
+            </button>
+          </div>
         </div>
       </div>
 
@@ -114,14 +133,19 @@ function Shelf() {
                   <td>{values.storage_id}</td>
                   <td>{values.street_id}</td>
                   <td><Button onClick={() => handleShelfClick(values.id)}>Espai</Button></td>
-                  <td>
-                    <span onClick={() => editShelf(values)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-pencil-square"></i>
-                    </span>
-                    <span onClick={() => deleteShelf(values.id)} className="mx-2" style={{ cursor: "pointer" }}>
-                      <i className="bi bi-trash"></i>
-                    </span>
-                  </td>
+                  <td data-no-colon="true">
+                  <span onClick={() => viewSupplier(values)} style={{ cursor: "pointer" }}>
+                    <i className="bi bi-eye"></i>
+                  </span>
+
+                  <span onClick={() => modSuppliers(values)} className="mx-2" style={{ cursor: "pointer" }}>
+                    <i className="bi bi-pencil-square"></i>
+                  </span>
+
+                  <span onClick={() => deleteSuppliers(values.id)} style={{ cursor: "pointer" }}>
+                    <i className="bi bi-trash"></i>
+                  </span>
+                </td>
                 </tr>
               ))}
           </tbody>
