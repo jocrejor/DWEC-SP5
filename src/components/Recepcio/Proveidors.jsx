@@ -128,20 +128,18 @@ function Proveidors() {
   };
   
   const modSuppliers = (valors) => {
-
     const provinceId = provincia.find((prov) => prov.name === valors.province)?.id || '';
-    //const cityId = ciutat.find((ciudad) => ciudad.name === valors.city)?.id || '';
-    
-    // Establecer los valores iniciales con los IDs de provincia y ciudad
+
     setTipoModal('Modificar');
     setValorsInicials({
-      ...valors,
-      province: provinceId, 
-      //city: cityId, 
+        ...valors,
+        province: valors.state_id === 194 ? provinceId : valors.province, 
     });
-    console.log('Valors Modificar:', valors);  // Puedes revisar que los valores se pasen correctamente
+
+    console.log('Valors Modificar:', valors);  
     setShowModal(true);
-  };
+};
+
   
   const viewSupplier = (valors) => {
     setValorsInicials(valors);
