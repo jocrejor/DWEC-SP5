@@ -257,7 +257,7 @@ function OrderPickingShipping() {
               </button>
               <button
                 onClick={() => {
-                  navigate("/orderpickingshipping/picking");
+                  navigate(`/orderpickingshipping/picking`);
                 }}
                 type="button"
                 className="btn btn-dark ms-2 border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
