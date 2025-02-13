@@ -4,7 +4,7 @@ import { Link }   from 'react-router-dom'
 import * as Yup from 'yup'
 import { Button, Modal } from 'react-bootstrap';
 import Header from '../Header'
-import Filtres from '../Filtres'
+import Filtres from './IncidenciesResoldreFiltres'
 import axios from 'axios'
 
 const IncidenciaSchema = Yup.object().shape({
