@@ -217,6 +217,20 @@ function OrderReception() {
     }
   };
 
+  const emmagatzemarOrdre = async (ordreId) => {
+    try {
+      await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderreception_status_id: 4 }, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+      setOrderReceptions(prev => prev.map(order =>
+        order.id === ordreId ? { ...order, orderreception_status_id: 4 } : order
+      ));
+      setShowReviewModal(false);
+    } catch (err) {
+      console.error("Error canviant l'estat de l'ordre:", err);
+    }
+  };
+
   const eliminarProducte = (index) => {
     setSelectedProducts((prev) => prev.filter((_, i) => i !== index));
   };
@@ -335,25 +349,37 @@ function OrderReception() {
             </tr>
           </thead>
           <tbody>
-            {orderReceptions.map((valors) => (
+          {orderReceptions
+  .filter((ordre) => ordre.orderreception_status_id !== 4)
+  .map((valors) => (
               <tr key={valors.id}>
                 <td>{valors.id}</td>
                 <td>{suppliers.find((sup) => sup.id === valors.supplier_id)?.name}</td>
                 <td>{formateaFecha(valors.estimated_reception_date)}</td>
                 <td>{getStatusName(valors.orderreception_status_id)}</td>
                 <td>
-                  <Button variant="info" onClick={() => revisarOrdre(valors)}>
-                    Revisar
-                  </Button>
+                  {valors.orderreception_status_id === 3 && (
+                    <Button variant="info" onClick={() => emmagatzemarOrdre(valors)}>
+                      Emmagatzemada
+                    </Button>
+                  )}
 
-                  {valors.orderreception_status_id === 1 && (
+                  {(valors.orderreception_status_id === 1 || valors.orderreception_status_id === 2) && (
                     <>
-                      <Button variant="warning" onClick={() => modificarOrdre(valors)}>
-                        Modificar
+                      <Button variant="info" onClick={() => revisarOrdre(valors)}>
+                        Revisar
                       </Button>
-                      <Button variant="primary" onClick={() => eliminarOrdre(valors.id)}>
-                        Eliminar
-                      </Button>
+
+                      {valors.orderreception_status_id === 1 && (
+                        <>
+                          <Button variant="warning" onClick={() => modificarOrdre(valors)}>
+                            Modificar
+                          </Button>
+                          <Button variant="primary" onClick={() => eliminarOrdre(valors.id)}>
+                            Eliminar
+                          </Button>
+                        </>
+                      )}
                     </>
                   )}
                 </td>
