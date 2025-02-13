@@ -32,7 +32,9 @@ function Filtres({onFilterChange, onFilterRestart}) {
         const clientValue = document.getElementById('client').value;
         const idValue = document.getElementById('id').value;
         const statusValue = document.getElementById('status').value;
-        onFilterChange(clientValue,idValue,statusValue);
+        const dataMinValue = document.getElementById('date_min').value;
+        const dateMaxValue = document.getElementById('date_max').value;
+        onFilterChange(clientValue,idValue,statusValue,dataMinValue,dateMaxValue);
     }
 
     const netejaFiltre = () => {
@@ -72,15 +74,15 @@ function Filtres({onFilterChange, onFilterRestart}) {
               
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
-                        <label for="date" className="form-label">Data mínima</label>
-                        <input type="date" className="form-control" id="date" />
+                        <label for="date_min" className="form-label">Data mínima</label>
+                        <input type="date" className="form-control" id="date_min" />
                     </div>
                 </div>
 
                 <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
-                        <label for="date" className="form-label">Data màxima</label>
-                        <input type="date" className="form-control" id="date" />
+                        <label for="date_max" className="form-label">Data màxima</label>
+                        <input type="date" className="form-control" id="date_max" />
                     </div>
                 </div>                 
             </div>

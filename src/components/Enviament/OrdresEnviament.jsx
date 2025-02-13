@@ -314,15 +314,21 @@ function OrdresEnviament() {
     }
   };
 
-  const actualitzaFiltres = async (clients, identificador, estats) => {
+  const actualitzaFiltres = async (clients, identificador, estats, dataMinima, dataMaxima) => {
     let ordersFiltradas = orders;
     ordersFiltradas = ordersFiltradas.filter((order) => {
       const matchesClient = clients ? parseInt(order.client_id) === parseInt(clients) : true;
       const matchesId = identificador ? parseInt(order.id) === parseInt(identificador) : true;
       const matchesStatus = estats ? parseInt(order.ordershipping_status_id) === parseInt(estats) : true;
+      console.log(dataMinima)
+      console.log(order)
+      const orderDate = new Date(order.shipping_date);
+      console.log(orderDate) 
+      const matchesDateMin = dataMinima ? new Date(dataMinima) <= orderDate : true;
+      const matchesDateMax = dataMaxima ? new Date(dataMaxima) >= orderDate : true;
       setCurrentPage(1)
-      // Ambas condiciones deben ser verdaderas para que la orden pase el filtro
-      return matchesClient && matchesId && matchesStatus;
+
+      return matchesClient && matchesId && matchesStatus && matchesDateMin && matchesDateMax;
     });
     setOrder(ordersFiltradas);
   }
@@ -332,6 +338,8 @@ function OrdresEnviament() {
     document.getElementById("client").value = "";
     document.getElementById("id").value = "";
     document.getElementById("status").value = "";
+    document.getElementById("date_min").value = "";
+    document.getElementById("date_max").value = "";
   }
 
   return (
@@ -362,7 +370,7 @@ function OrdresEnviament() {
         <table className='table table-striped border m-2'>
           <thead class="table-active border-bottom border-dark-subtle">
             <tr>
-              <th scope='col'><input class="form-check-input" type="checkbox" name="" id="" /></th>
+              <th scope='col' class="text-center"><input class="form-check-input" type="checkbox" name="" id="" /></th>
               <th scope='col' className='text-center'>ID</th>
               <th scope='col' className='text-center'>Client</th>
               <th scope='col' className='text-center'>Data Estimada</th>
@@ -576,7 +584,6 @@ function OrdresEnviament() {
               </Form>
             )}
           </Formik>
-
         </Modal.Body>
       </Modal>
       <Modal show={showModalVisualitza}>
