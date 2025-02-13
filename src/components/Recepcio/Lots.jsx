@@ -1,22 +1,16 @@
 import { useState, useEffect } from 'react';
-// import { Formik, Form, Field } from 'formik';
-// import * as Yup from 'yup';
-// import { Button, Modal } from 'react-bootstrap';
 import axios from "axios";
 
 import Header from '../Header';
 import Filtres from '../Filtres';
 import LotsLotOSerie from './LotsLotOSerie';
 const apiUrl = import.meta.env.VITE_API_URL;
-// const apiUrl = "http://node.daw.iesevalorpego.es:3001/";
 const token = localStorage.getItem('token');
 
 /* LOTS */
 function Lots() {
-  // const [lot, setLot] = useState([]);
   const [products, setProduct] = useState([]);
   const [suppliers, setSupplier] = useState([]);
-  // de momento no hay orderReception
   const [orderreception, setOrderReception] = useState([]);
   const [orderreception_status, setOrderReceptionStatus] = useState([]);
   const [orderline_status, setOrderLineStatus] = useState([]);
@@ -30,27 +24,16 @@ function Lots() {
     production_date: '',
     expiration_date: '',
     orderlinereception: '',
+    /* sirve para pasar la cantidad total de la orden al modal,
+    * esta informacion no se añadirá a la base de datos */
     quantity_received: 0,
   });
-
+  //estado que determina si un producto será serie o lote
   const [lotOrSerial, setLotOrSerial] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
-      // axios.get(`${apiUrl}Lot`, { headers: { "auth-token": token } })
-      //   // axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
-      //   .then(
-      //     response => {
-      //       setLot(response.data)
-      //     })
-      //   .catch(
-      //     error => {
-      //       console.log(error)
-      //     }
-      //   )
-
       axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
-        // axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
         .then(
           response => {
             setProduct(response.data)
@@ -61,7 +44,6 @@ function Lots() {
           }
         )
       axios.get(`${apiUrl}Supplier`, { headers: { "auth-token": token } })
-        // axios.get(`${apiUrl}supplier`, { headers: { "auth-token": token } })
         .then(
           response => {
             setSupplier(response.data)
@@ -73,7 +55,6 @@ function Lots() {
         )
 
       axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
-        // axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token } })
         .then(response => {
           setOrderReception(response.data)
         })
@@ -83,7 +64,6 @@ function Lots() {
         )
 
       axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
-        // axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
         .then(
           response => {
             setOrderLineReception(response.data)
@@ -162,8 +142,6 @@ function Lots() {
                     <th scope='col' className="align-middle">Estat ordre de recepció</th>
                     <th scope='col' className="align-middle">Producte</th>
                     <th scope='col' className="align-middle">Quantitat</th>
-                    {/* <th scope='col' className="align-middle">Lot</th>
-                    <th scope='col' className="align-middle">Serie</th> */}
                     <th scope='col' className="align-middle">Lot/Serie</th>
                   </tr>
                 </thead>
@@ -209,28 +187,6 @@ function Lots() {
 
                           <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
 
-                          {/* <td data-no-colon="true">
-                            <i
-                              className="bi bi-plus-circle icono"
-                              role='button'
-                              onClick={() => {
-                                canviEstatModal();
-                                setLotOSerie('Lot')
-                                setValorsInicials(valors);
-                              }}>
-                            </i>
-                          </td>
-                          <td>
-                            <i className="bi bi-plus-circle icono"
-                              role='button'
-                              onClick={() => {
-                                canviEstatModal();
-                                setLotOSerie('Serie')
-                                setValorsInicials(valors);
-                              }}
-                            >
-                            </i>
-                          </td> */}
                           <td data-no-colon="true">
                             <i className="bi bi-plus-circle icono"
                               role='button'
@@ -240,10 +196,10 @@ function Lots() {
                                 const selectedProduct = products.find(p => p.id === valors.product_id);
                                 const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
 
-                                if(lotOSerie === "Lot"){
+                                if (lotOSerie === "Lot") {
                                   setLotOrSerial("lot");
                                 }
-                                else if(lotOSerie === "Serial"){
+                                else if (lotOSerie === "Serial") {
                                   setLotOrSerial("serie");
                                 }
 
@@ -260,6 +216,7 @@ function Lots() {
                                   production_date: "",
                                   expiration_date: "",
                                   orderlinereception_id: valors.id,
+                                  //cantidad total de la orden de linea de recepcion
                                   quantity_received: valors.quantity_received,
                                 });
                               }}
@@ -294,9 +251,8 @@ function Lots() {
         </div>
       </div>
 
-
       {/* MODAL CON FORMIK */}
-      <LotsLotOSerie products={products} orderreception={orderreception} suppliers={suppliers} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} />
+      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} />
     </>
   );
 }

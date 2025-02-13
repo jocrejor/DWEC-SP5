@@ -34,8 +34,6 @@ const LotSchema = (lotOrSerial) => Yup.object().shape({
   }),
 });
 
-
-
 function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, setValorsInicials, lotOrSerial }) {
   const [errorAgregar, setErrorAgregar] = useState("");
   const [guardado, setGuardado] = useState([]);
@@ -76,7 +74,7 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
                     production_date: "",
                     expiration_date: "",
                   });
-                  canviEstatModal();    // Cerrar el modal
+                  canviEstatModal();
 
                   setErrorAgregar("");
                 }
