@@ -4,11 +4,11 @@ import PropTypes from 'prop-types';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-const FiltresCarrer = ({ onFilter, onClear }) => {
+const FiltresCarrer = ({ onFilter, onClear, initialStorageId }) => {
     const [magatzems, setMagatzems] = useState([]); // Aquí se almacenan los magatzems para los filtros
     const [filters, setFilters] = useState({
         name: '',        // Filtro por nombre de la calle
-        storage_id: ''   // Filtro por id_magatzem (almacen)
+        storage_id: initialStorageId || ''   // Filtro por id_magatzem (almacen)
     });
 
     // Cargar magatzems para los filtros
@@ -38,7 +38,7 @@ const FiltresCarrer = ({ onFilter, onClear }) => {
         e.preventDefault();
         setFilters({
             name: '',
-            storage_id: ''
+            storage_id: initialStorageId || '' // Al limpiar, vuelve al id inicial
         });
         onClear(); // Llamar a la función de borrar los filtros en el componente padre
     };
@@ -57,33 +57,29 @@ const FiltresCarrer = ({ onFilter, onClear }) => {
                     placeholder="Filtra per nom"
                 />
             </div>
-
-            <div className="col-12 col-md-6 col-xl-4 text-light-blue">
+            <div className="col-12 col-md-6 col-xl-4">
                 <label htmlFor="filterStorageId" className="form-label">Magatzem</label>
-                <select
-                    className="form-control"
-                    id="filterStorageId"
-                    name="storage_id"
-                    value={filters.storage_id}
-                    onChange={handleFilterChange}
-                    placeholder="Filtra per magatzem"
-                >
-                    <option value="">Seleccionar Magatzem</option>
-                    {magatzems.map(magatzem => (
-                        <option key={magatzem.id} value={magatzem.id}>
-                            {magatzem.name}
-                        </option>
-                    ))}
-                </select>
+                {/* Mostrar el ID seleccionado dentro de un input */}
+                {filters.storage_id && (
+                
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="selectedStorage"
+                            value={filters.storage_id}  // Muestra la ID del magatzem
+                            readOnly
+                        />
+                )}
             </div>
+
 
             {/* Contenedor para los botones con alineación a la derecha */}
             <div className="col-12 d-flex justify-content-end align-items-center w-100">
                 <button className="btn btn-secondary ps-2 me-2 text-white" onClick={handleClearFilters}>
                     <i className="bi bi-trash px-1 text-white"></i>Netejar
                 </button>
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     className="btn btn-primary me-2 ps-2 orange-button text-white"
                 >
                     <i className="bi bi-funnel px-1 text-white"></i>Filtrar
@@ -94,8 +90,9 @@ const FiltresCarrer = ({ onFilter, onClear }) => {
 };
 
 FiltresCarrer.propTypes = {
-    onFilter: PropTypes.func.isRequired, 
-    onClear: PropTypes.func.isRequired, 
+    onFilter: PropTypes.func.isRequired,
+    onClear: PropTypes.func.isRequired,
+    initialStorageId: PropTypes.string,  // Prop para pasar el magatzem inicial
 };
 
 export default FiltresCarrer;
