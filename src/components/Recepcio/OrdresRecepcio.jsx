@@ -536,7 +536,7 @@ function OrderReception() {
           {orderToReview?.orderreception_status_id === 2 ? (
             <>
               <Button variant="warning" href="#">Incidència</Button>
-              <Button variant="primary" href="#">Lot</Button>
+              <Button variant="primary" href="#">Lot/Serie</Button>
               <Button variant="success" onClick={() => desempaquetarOrdre(orderToReview.id)}>
                 Desempaquetada
               </Button>
