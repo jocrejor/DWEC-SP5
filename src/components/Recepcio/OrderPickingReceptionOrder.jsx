@@ -138,20 +138,16 @@ function OrderPickingReception() {
         orderSelected.forEach((order) => {
             const line = orderLineReception.find((l) => l.id === parseInt(order));
             const product = products.find((p) => p.id === line.product_id);
-            const space = spaces.find((s) => s.product_id === line.product_id);
-
+            let space = spaces.find((s) => s.product_id === line.product_id);
+    
             if (line.quantity_received * product.volume > space.volume_max) {
-                // Buscar esopai buit
+                // Buscar espacio vacío
                 const nouSpace = spaces.find((s) => s.product_id === null && s.volume_max >= line.quantity_received * product.volume);
-
+    
                 space = nouSpace;
-                const spaceCanvi = true;
-
-                if (spaceCanvi) {
-                    alert(`El producte ${line.product_id} ha segut reubicat a un nou espai per falta de capacitat`);
-                }
+                alert(`El producte ${line.product_id} ha segut reubicat a un nou espai per falta de capacitat`);
             }
-
+    
             const newOrderPickingReception = {
                 order_line_reception_id: line.id,
                 product_id: line.product_id,
@@ -162,18 +158,19 @@ function OrderPickingReception() {
                 space_id: space.id,
                 operator_id: parseInt(operariSeleccionat)
             };
-
+    
             axios.post(`${apiUrl}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
                 .then((response) => {
                     console.log(response.data);
                     alert("Order picking reception creat correctament");
-                }
-                ).catch((error) => {        
-                console.error('Error order picking reception:', error.response.data);
-            }); 
+                })
+                .catch((error) => {        
+                    console.error('Error order picking reception:', error.response.data);
+                }); 
         });
         canviEstatModal();
-    }
+    };
+    
 
     //funcions paginació
     useEffect (()=>{
