@@ -193,7 +193,7 @@ function OrderPickingReception() {
                                         <th scope="col">Ordre ID</th>
                                         <th scope="col">Producte</th>
                                         <th scope="col">Data</th>
-                                        <th scope="col">Operari</th>
+                                        <th scope="col">Ubicació</th>
                                     </tr>
                                 </thead>
 
@@ -211,7 +211,7 @@ function OrderPickingReception() {
                                                     <td data-cell="Ordre ID">{order.id}</td>
                                                     <td data-cell="Producte">{product.name}</td>
                                                     <td data-cell="Data">{order.create_date}</td>
-                                                    <td data-cell="Operari">{user.name}</td>
+                                                    <td data-cell="Operari">{order.storage_id} / {order.street_id} / {order.shelf_id} / {order.space_id}</td>
                                                 </tr>
                                             );
                                         })

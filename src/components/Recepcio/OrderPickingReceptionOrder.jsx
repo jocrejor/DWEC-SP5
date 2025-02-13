@@ -137,7 +137,20 @@ function OrderPickingReception() {
     const aceptarOrderPickingReception = async () => {
         orderSelected.forEach((order) => {
             const line = orderLineReception.find((l) => l.id === parseInt(order));
+            const product = products.find((p) => p.id === line.product_id);
             const space = spaces.find((s) => s.product_id === line.product_id);
+
+            if (line.quantity_received * product.volume > space.volume_max) {
+                // Buscar esopai buit
+                const nouSpace = spaces.find((s) => s.product_id === null && s.volume_max >= line.quantity_received * product.volume);
+
+                space = nouSpace;
+                const spaceCanvi = true;
+
+                if (spaceCanvi) {
+                    alert(`El producte ${line.product_id} ha segut reubicat a un nou espai per falta de capacitat`);
+                }
+            }
 
             const newOrderPickingReception = {
                 order_line_reception_id: line.id,
