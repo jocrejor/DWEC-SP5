@@ -39,18 +39,18 @@ function Client() {
   const [tipoModal, setTipoModal] = useState("Crear");
   const [countryId, setCountryId] = useState(null);
   const [valorsInicials, setValorsInicials] = useState({
-  name: "",
-  email: "",
-  phone: "",
-  address: "",
-  nif: "",
-  state_id: "",
-  province_id: "",
-  city_id: "",
-  cp: "",
-  province_name: "",
-  city_name: "",
-});
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    nif: "",
+    state_id: "",
+    province_id: "",
+    city_id: "",
+    cp: "",
+    province_name: "",
+    city_name: "",
+  });
 
   const [clientToView, setClientToView] = useState(null);
   const [states, setStates] = useState([]);
@@ -91,7 +91,6 @@ function Client() {
   const handleFilter = (filters) => {
     console.log("Filtros aplicados:", filters);
 
-    // Filtrado de los clientes
     const filtered = clients.filter((client) => {
       return (
         (filters.name
@@ -108,7 +107,6 @@ function Client() {
       );
     });
 
-    // Ordenar los clientes filtrados
     const sorted = filtered.sort((a, b) => {
       if (sortField === "name") {
         return sortOrder === "asc"
@@ -158,44 +156,43 @@ function Client() {
   const modificarClient = async (id) => {
     try {
       const response = await axios.get(`${apiUrl}/client/${id}`, {
-        headers: {
-          "auth-token": localStorage.getItem("token"),
-        },
+        headers: { "auth-token": localStorage.getItem("token") },
       });
   
       if (response.data) {
+        const client = response.data; 
         setTipoModal("Modificar");
-        const provinceName = provinces.find(
-          (province) => province.id === response.data.province_id
-        )?.name;
-        const cityName = cities.find(
-          (city) => city.id === response.data.city_id
-        )?.name;
   
-        setValorsInicials({
-          ...response.data,
-          state_id: response.data.state_id
-            ? response.data.state_id.toString()
-            : "",
-          province_id: response.data.province_id
-            ? response.data.province_id.toString()
-            : "",
-          city_id: response.data.city_id
-            ? response.data.city_id.toString()
-            : "",
-          province_name: provinceName || "",
-          city_name: cityName || "",
-        });
-  
-        const provincesData = await getData("Province?state_id=" + response.data.state_id);
+        const provincesData = await getData("Province?state_id=" + client.state_id);
         setProvinces(provincesData);
   
-        const citiesData = await getData("City?province_id=" + response.data.province_id);
-        setCities(citiesData);
+        const provinceObj = provincesData.find(
+          (p) => p.name.toLowerCase() === client.province.toLowerCase()
+        );
+        const provinceIdStr = provinceObj ? provinceObj.id.toString() : "";
   
-        setSelectedState(response.data.state_id);
-        setSelectedProvince(response.data.province_id);
+        let citiesData = [];
+        let cityIdStr = "";
+        if (provinceObj) {
+          citiesData = await getData("City?province_id=" + provinceObj.id);
+          setCities(citiesData);
+          const cityObj = citiesData.find(
+            (c) => c.name.toLowerCase() === client.city.toLowerCase()
+          );
+          cityIdStr = cityObj ? cityObj.id.toString() : "";
+        } else {
+          setCities([]);
+        }
+        setValorsInicials({
+          ...client,
+          state_id: client.state_id ? client.state_id.toString() : "",
+          province_id: provinceIdStr,
+          city_id: cityIdStr,
+          cp: client.cp || "",
+        });
   
+        setSelectedState(client.state_id);
+        setSelectedProvince(provinceObj ? provinceObj.id : "");
         setShowModal(true);
       }
     } catch (error) {
@@ -215,7 +212,7 @@ function Client() {
           "auth-token": localStorage.getItem("token"),
         },
       });
-  
+
       if (response.data) {
         const provinceName = provinces.find(
           (province) => province.id === response.data.province_id
@@ -223,7 +220,7 @@ function Client() {
         const cityName = cities.find(
           (city) => city.id === response.data.city_id
         )?.name;
-  
+
         setValorsInicials({
           ...response.data,
           state_id: response.data.state_id
@@ -238,22 +235,22 @@ function Client() {
           province_name: provinceName || "",
           city_name: cityName || "",
         });
-  
+
         setTipoModal("Visualitzar");
-  
+
         const provincesData = await getData(
           "Province?state_id=" + response.data.state_id
         );
         setProvinces(provincesData);
-  
+
         const citiesData = await getData(
           "City?province_id=" + response.data.province_id
         );
         setCities(citiesData);
-  
+
         setSelectedState(response.data.state_id);
         setSelectedProvince(response.data.province_id);
-  
+
         setShowModal(true);
       }
     } catch (error) {
@@ -279,16 +276,27 @@ function Client() {
 
   const actualizarClient = async (values) => {
     try {
+      const provinceObj = provinces.find(
+        (p) => p.id === parseInt(values.province_id)
+      );
+      const cityObj = cities.find(
+        (c) => c.id === parseInt(values.city_id)
+      );
+      const updatedData = {
+        ...values,
+        state_id: parseInt(values.state_id),
+        province: provinceObj ? provinceObj.name : "",
+        city: cityObj ? cityObj.name : "",
+      };
+  
       const response = await axios.put(
         `${apiUrl}/client/${values.id}`,
-        values,
+        updatedData,
         {
-          headers: {
-            "auth-token": localStorage.getItem("token"),
-          },
+          headers: { "auth-token": localStorage.getItem("token") },
         }
       );
-
+  
       if (response.data) {
         setClients((prevClients) =>
           prevClients.map((client) =>
@@ -306,33 +314,35 @@ function Client() {
       console.error("Error al actualizar el cliente", error);
     }
   };
+  
+  
 
   const handleStateChange = (e, setFieldValue) => {
     const selectedStateId = e.target.value;
-    const selectedCountryId = states.find(state => state.id.toString() === selectedStateId)?.country_id;
+    const selectedCountryId = states.find(
+      (state) => state.id.toString() === selectedStateId
+    )?.country_id;
     setCountryId(selectedCountryId);
-    setFieldValue("state_id", selectedStateId); 
+    setFieldValue("state_id", selectedStateId);
   };
 
-
   const handleProvinceChange = async (e, setFieldValue) => {
-    const selectedProvinceId = e.target.value;
+    const selectedProvinceId = e.target.value; 
     setFieldValue("province_id", selectedProvinceId);
     setSelectedProvince(selectedProvinceId);
-
+  
     if (selectedProvinceId) {
-      const allCities = await getData("City");
-
-      const filteredCities = allCities.filter(
-        (city) => city.province_id === parseInt(selectedProvinceId)
-      );
-
+      const filteredCities = await getData(`City?province_id=${selectedProvinceId}`);
       setCities(filteredCities);
       setFieldValue("city_id", "");
     } else {
       setCities([]);
+      setFieldValue("city_id", "");
     }
   };
+  
+  
+  
 
   const postData = async (endpoint, data) => {
     try {
@@ -534,242 +544,243 @@ function Client() {
           <Modal.Title>{tipoModal} Client</Modal.Title>
         </Modal.Header>
         <Formik
-  initialValues={valorsInicials}
-  validationSchema={ClientSchema}
-  enableReinitialize
-  onSubmit={tipoModal === "Crear" ? crearClient : actualizarClient}
->
-  {({
-    values,
-    handleChange,
-    handleSubmit,
-    setFieldValue,
-    errors,
-    touched,
-  }) => {
-    // Si estamos en modo "Visualitzar", preseleccionamos provincia y ciudad
-    useEffect(() => {
-      if (tipoModal === "Visualitzar" && values.province && values.city) {
-        // Se asume que 'province' y 'city' son cadenas que deben coincidir con las opciones
-        const selectedProvince = provinces.find(
-          (province) => province.name === values.province
-        );
-        const selectedCity = cities.find((city) => city.name === values.city);
+          initialValues={valorsInicials}
+          validationSchema={ClientSchema}
+          enableReinitialize
+          onSubmit={tipoModal === "Crear" ? crearClient : actualizarClient}
+        >
+          {({
+            values,
+            handleChange,
+            handleSubmit,
+            setFieldValue,
+            errors,
+            touched,
+          }) => {
+            useEffect(() => {
+              if (
+                tipoModal === "Visualitzar" &&
+                values.province &&
+                values.city
+              ) {
+                const selectedProvince = provinces.find(
+                  (province) => province.name === values.province
+                );
+                const selectedCity = cities.find(
+                  (city) => city.name === values.city
+                );
 
-        // Si encontramos la provincia y la ciudad, asignamos su id a los campos correspondientes
-        if (selectedProvince) {
-          setFieldValue("province_id", selectedProvince.id);
-        }
+                if (selectedProvince) {
+                  setFieldValue("province_id", selectedProvince.id);
+                }
 
-        if (selectedCity) {
-          setFieldValue("city_id", selectedCity.id);
-        }
-      }
-    }, [values.province, values.city, tipoModal, provinces, cities, setFieldValue]);
+                if (selectedCity) {
+                  setFieldValue("city_id", selectedCity.id);
+                }
+              }
+            }, [
+              values.province,
+              values.city,
+              tipoModal,
+              provinces,
+              cities,
+              setFieldValue,
+            ]);
 
-    return (
-      <Form onSubmit={handleSubmit}>
-        <Field type="hidden" name="id" />
-        <Modal.Body>
-          {/* Campo de nombre */}
-          <div className="mb-3">
-            <label className="form-label" htmlFor="name">
-              Nom del client
-            </label>
-            <Field
-              className="form-control"
-              type="text"
-              id="name"
-              name="name"
-              disabled={tipoModal === "Visualitzar"}
-            />
-            {errors.name && touched.name && (
-              <div className="text-danger">{errors.name}</div>
-            )}
-          </div>
+            return (
+              <Form onSubmit={handleSubmit}>
+                <Field type="hidden" name="id" />
+                <Modal.Body>
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="name">
+                      Nom del client
+                    </label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      id="name"
+                      name="name"
+                      disabled={tipoModal === "Visualitzar"}
+                    />
+                    {errors.name && touched.name && (
+                      <div className="text-danger">{errors.name}</div>
+                    )}
+                  </div>
 
-          {/* Campo de correo electrónico */}
-          <div className="mb-3">
-            <label className="form-label" htmlFor="email">
-              Correu electrònic
-            </label>
-            <Field
-              className="form-control"
-              type="email"
-              id="email"
-              name="email"
-              disabled={tipoModal === "Visualitzar"}
-            />
-            {errors.email && touched.email && (
-              <div className="text-danger">{errors.email}</div>
-            )}
-          </div>
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="email">
+                      Correu electrònic
+                    </label>
+                    <Field
+                      className="form-control"
+                      type="email"
+                      id="email"
+                      name="email"
+                      disabled={tipoModal === "Visualitzar"}
+                    />
+                    {errors.email && touched.email && (
+                      <div className="text-danger">{errors.email}</div>
+                    )}
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="phone">
+                      Telèfon
+                    </label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      id="phone"
+                      name="phone"
+                      disabled={tipoModal === "Visualitzar"}
+                    />
+                    {errors.phone && touched.phone && (
+                      <div className="text-danger">{errors.phone}</div>
+                    )}
+                  </div>
 
-          {/* Campo de teléfono */}
-          <div className="mb-3">
-            <label className="form-label" htmlFor="phone">
-              Telèfon
-            </label>
-            <Field
-              className="form-control"
-              type="text"
-              id="phone"
-              name="phone"
-              disabled={tipoModal === "Visualitzar"}
-            />
-            {errors.phone && touched.phone && (
-              <div className="text-danger">{errors.phone}</div>
-            )}
-          </div>
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="address">
+                      Adreça
+                    </label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      id="address"
+                      name="address"
+                      disabled={tipoModal === "Visualitzar"}
+                    />
+                    {errors.address && touched.address && (
+                      <div className="text-danger">{errors.address}</div>
+                    )}
+                  </div>
 
-          {/* Campo de dirección */}
-          <div className="mb-3">
-            <label className="form-label" htmlFor="address">
-              Adreça
-            </label>
-            <Field
-              className="form-control"
-              type="text"
-              id="address"
-              name="address"
-              disabled={tipoModal === "Visualitzar"}
-            />
-            {errors.address && touched.address && (
-              <div className="text-danger">{errors.address}</div>
-            )}
-          </div>
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="nif">
+                      NIF
+                    </label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      id="nif"
+                      name="nif"
+                      disabled={tipoModal === "Visualitzar"}
+                    />
+                    {errors.nif && touched.nif && (
+                      <div className="text-danger">{errors.nif}</div>
+                    )}
+                  </div>
 
-          {/* Campo de NIF */}
-          <div className="mb-3">
-            <label className="form-label" htmlFor="nif">
-              NIF
-            </label>
-            <Field
-              className="form-control"
-              type="text"
-              id="nif"
-              name="nif"
-              disabled={tipoModal === "Visualitzar"}
-            />
-            {errors.nif && touched.nif && (
-              <div className="text-danger">{errors.nif}</div>
-            )}
-          </div>
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="state_id">
+                      Estat
+                    </label>
+                    <Field
+                      as="select"
+                      className="form-control"
+                      id="state_id"
+                      name="state_id"
+                      onChange={(e) => handleStateChange(e, setFieldValue)}
+                      disabled={tipoModal === "Visualitzar"}
+                    >
+                      <option value="">Tria un estat</option>
+                      {states.map((state) => (
+                        <option key={state.id} value={state.id.toString()}>
+                          {state.name}
+                        </option>
+                      ))}
+                    </Field>
+                    {errors.state_id && touched.state_id && (
+                      <div className="text-danger">{errors.state_id}</div>
+                    )}
+                  </div>
 
-          {/* Campo de estado */}
-          <div className="mb-3">
-            <label className="form-label" htmlFor="state_id">
-              Estat
-            </label>
-            <Field
-              as="select"
-              className="form-control"
-              id="state_id"
-              name="state_id"
-              onChange={(e) => handleStateChange(e, setFieldValue)}
-              disabled={tipoModal === "Visualitzar"}
-            >
-              <option value="">Tria un estat</option>
-              {states.map((state) => (
-                <option key={state.id} value={state.id.toString()}>
-                  {state.name}
-                </option>
-              ))}
-            </Field>
-            {errors.state_id && touched.state_id && (
-              <div className="text-danger">{errors.state_id}</div>
-            )}
-          </div>
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="province_id">
+                      Província
+                    </label>
+                    <Field
+                      as="select"
+                      className="form-control"
+                      id="province_id"
+                      name="province_id"
+                      onChange={(e) => handleProvinceChange(e, setFieldValue)}
+                      disabled={tipoModal === "Visualitzar"}
+                    >
+                      <option value="">Tria una província</option>
+                      {provinces.map((province) => (
+                        <option
+                          key={province.id}
+                          value={province.id.toString()}
+                        >
+                          {province.name}
+                        </option>
+                      ))}
+                    </Field>
+                    {errors.province_id && touched.province_id && (
+                      <div className="text-danger">{errors.province_id}</div>
+                    )}
+                  </div>
 
-          {/* Campo de provincia */}
-          <div className="mb-3">
-            <label className="form-label" htmlFor="province_id">
-              Província
-            </label>
-            <Field
-              as="select"
-              className="form-control"
-              id="province_id"
-              name="province_id"
-              onChange={(e) => handleProvinceChange(e, setFieldValue)}
-              disabled={tipoModal === "Visualitzar"}
-            >
-              <option value="">Tria una província</option>
-              {provinces.map((province) => (
-                <option key={province.id} value={province.id.toString()}>
-                  {province.name}
-                </option>
-              ))}
-            </Field>
-            {errors.province_id && touched.province_id && (
-              <div className="text-danger">{errors.province_id}</div>
-            )}
-          </div>
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="city_id">
+                      Ciutat
+                    </label>
+                    <Field
+                      as="select"
+                      className="form-control"
+                      id="city_id"
+                      name="city_id"
+                      disabled={tipoModal === "Visualitzar"}
+                    >
+                      <option value="">Tria una ciutat</option>
+                      {cities.map((city) => (
+                        <option key={city.id} value={city.id.toString()}>
+                          {city.name}
+                        </option>
+                      ))}
+                    </Field>
+                    {errors.city_id && touched.city_id && (
+                      <div className="text-danger">{errors.city_id}</div>
+                    )}
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="cp">
+                      Codi postal
+                    </label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      id="cp"
+                      name="cp"
+                      disabled={tipoModal === "Visualitzar"}
+                    />
+                    {errors.cp && touched.cp && (
+                      <div className="text-danger">{errors.cp}</div>
+                    )}
+                  </div>
+                </Modal.Body>
 
-          {/* Campo de ciudad */}
-          <div className="mb-3">
-            <label className="form-label" htmlFor="city_id">
-              Ciutat
-            </label>
-            <Field
-              as="select"
-              className="form-control"
-              id="city_id"
-              name="city_id"
-              disabled={tipoModal === "Visualitzar"}
-            >
-              <option value="">Tria una ciutat</option>
-              {cities.map((city) => (
-                <option key={city.id} value={city.id.toString()}>
-                  {city.name}
-                </option>
-              ))}
-            </Field>
-            {errors.city_id && touched.city_id && (
-              <div className="text-danger">{errors.city_id}</div>
-            )}
-          </div>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={canviEstatModal}>
+                    Tancar
+                  </Button>
 
-          {/* Campo de código postal */}
-          <div className="mb-3">
-            <label className="form-label" htmlFor="cp">
-              Codi postal
-            </label>
-            <Field
-              className="form-control"
-              type="text"
-              id="cp"
-              name="cp"
-              disabled={tipoModal === "Visualitzar"}
-            />
-            {errors.cp && touched.cp && (
-              <div className="text-danger">{errors.cp}</div>
-            )}
-          </div>
-        </Modal.Body>
+                  {tipoModal === "Crear" && (
+                    <Button variant="primary" type="submit">
+                      Crear
+                    </Button>
+                  )}
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={canviEstatModal}>
-            Tancar
-          </Button>
-
-          {tipoModal === "Crear" && (
-            <Button variant="primary" type="submit">
-              Crear
-            </Button>
-          )}
-
-          {tipoModal === "Modificar" && (
-            <Button variant="primary" type="submit">
-              Modificar
-            </Button>
-          )}
-        </Modal.Footer>
-      </Form>
-    );
-  }}
-</Formik>
-
+                  {tipoModal === "Modificar" && (
+                    <Button variant="primary" type="submit">
+                      Modificar
+                    </Button>
+                  )}
+                </Modal.Footer>
+              </Form>
+            );
+          }}
+        </Formik>
       </Modal>
       <nav aria-label="Page navigation example" className="d-block">
         <ul className="pagination justify-content-center">
