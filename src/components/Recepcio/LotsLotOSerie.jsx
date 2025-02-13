@@ -1,7 +1,7 @@
 import { Formik, Form, Field } from 'formik';
 import PropTypes from 'prop-types';
 import { Button, Modal } from 'react-bootstrap';
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
 import * as Yup from 'yup';
 import axios from 'axios';
 
@@ -49,7 +49,6 @@ function LotsLotOSerie({
   products, canviEstatModal, showModal, valorsInicials, setValorsInicials,
   lotOrSerial, guardado, setGuardado, errorAgregar, setErrorAgregar 
 }) {
-
   return (
     <>
       <Modal show={showModal} onHide={canviEstatModal}>
@@ -100,6 +99,28 @@ function LotsLotOSerie({
                   setErrorAgregar("No pots deixar camps buits");
                   return;
                 }
+                else if (Object.keys(errors).length > 0) {
+                  setErrorAgregar("");
+                  return;
+                }
+
+                const cantidadMaxima = Number(valorsInicials.quantity_received);
+
+                const totalActual = guardado.reduce(
+                  (sum, guardado) => sum + Number(guardado.quantity), 0
+                );
+
+                const nuevaCantidadGuardada = Number(values.quantity);
+
+                if(totalActual + nuevaCantidadGuardada > cantidadMaxima){
+                  setErrorAgregar("La quantitat total no pot superar la quantitat rebuda");
+                  return;
+                }
+
+
+
+
+
                 const newGuardado = {
                   name: values.name,
                   product_id: values.product_id,
