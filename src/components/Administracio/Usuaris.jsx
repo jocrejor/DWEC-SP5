@@ -22,7 +22,7 @@ const UserSchema = Yup.object().shape({
   image: Yup.string().required('Valor requerit')
 });
 
-const userPerPage = 5;
+const userPerPage = 10;
 
 function Usuaris() {
   const [user, setUser] = useState([]);
@@ -30,7 +30,6 @@ function Usuaris() {
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Crear");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [valorsInicials, setValorsInicials] = useState({
     name: '',
     email: '',
@@ -49,14 +48,13 @@ function Usuaris() {
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
 
-  const calcularTotalPagines = (array) => Math.max(1, Math.ceil(array.length / userPerPage));
+  const totalPages = Math.ceil(filteredUsers.length / userPerPage);
 
   useEffect(() => {
     axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } })
       .then((response) => {
         setUser(response.data);
         setFilteredUsers(response.data);
-        setTotalPages(calcularTotalPagines(response.data));
       })
       .catch((error) => {
         console.error(error.response.data);
@@ -114,7 +112,6 @@ function Usuaris() {
       );
     });
     setFilteredUsers(filtered);
-    setTotalPages(calcularTotalPagines(filtered));
     setCurrentPage(1);
   };
 
@@ -124,11 +121,10 @@ function Usuaris() {
     setFilterEmail('');
     setFilterRole('');
     setFilteredUsers(user);
-    setTotalPages(calcularTotalPagines(user));
     setCurrentPage(1);
   };
 
-
+  // Pàgina actual
   const getCurrentPageUser = () => {
     const startIndex = (currentPage - 1) * userPerPage;
     const endIndex = startIndex + userPerPage;
@@ -142,11 +138,11 @@ function Usuaris() {
     }
   };
 
-  //Tanca segon modal
+  //Tanca segon modal modificar
   const tancarSegonModal = () => {
     setShowSecondModal(false);
   };
-  //Tercer modal
+  //Tercer modal contrasenyes 
   const passwordUsuari = (user) => {
     setSelectedUser(user);
     obtenirContrasenyaActual(user.id);
@@ -155,13 +151,13 @@ function Usuaris() {
   const obtenirContrasenyaActual = async (userId) => {
     try {
       const resposta = await axios.get(`${apiUrl}/users/${userId}/password`);
-      setCurrentPassword(resposta.data.password); // Ajusta segons el format del backend
+      setCurrentPassword(resposta.data.password);
     } catch (error) {
       console.error("Error obtenint la contrasenya:", error);
     }
   };
 
-  // Tercer modal per tancar 
+  // Tercer modal per tancar contrasenyes
   const tancarTercerModal = () => {
     setShowTercerModal(false);
   };
@@ -282,7 +278,7 @@ function Usuaris() {
                   <td>
                     <Button
                       style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => passwordUsuari(user)}
-                      className="btn-sm">
+                      className="btn-sm" title="Canviar contrasenya">
                       <i style={{ color: 'gray' }} className="bi bi-key-fill"></i>
                     </Button>
 
@@ -305,66 +301,60 @@ function Usuaris() {
       </div>
       {/* Paginació*/}
       <nav>
-  <ul className="pagination justify-content-center" style={{ backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
-    {/* Flecha Izquierda */}
-    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-      <button
-        className="page-link"
-        onClick={() => paginate(currentPage - 1)}
-        style={{
-          color: currentPage === 1 ? '#A0A0A0' : '#30475E', // Color más claro si está deshabilitado
-          backgroundColor: 'transparent',
-          border: 'none',
-          fontSize: '18px' // Asegurar que el tamaño del símbolo sea el mismo
-        }}
-        disabled={currentPage === 1}
-      >
-        &laquo;
-      </button>
-    </li>
-
-    {/* Números de página */}
-    {Array.from({ length: totalPages }, (_, i) => (
-      <li
-        key={i}
-        className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}
-        style={{ borderRadius: '5px' }}
-      >
-        <button
-          className="page-link"
-          onClick={() => paginate(i + 1)}
-          style={{
-            color: currentPage === i + 1 ? 'white' : '#30475E',
-            backgroundColor: currentPage === i + 1 ? '#30475E' : 'white',
-            border: 'none',
-            borderRadius: '5px',
-            width: '100%'
-          }}
-        >
-          {i + 1}
-        </button>
-      </li>
-    ))}
-
-    {/* Flecha Derecha */}
-    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-      <button
-        className="page-link"
-        onClick={() => paginate(currentPage + 1)}
-        style={{
-          color: currentPage === totalPages ? '#A0A0A0' : '#30475E',
-          backgroundColor: 'transparent',
-          border: 'none',
-          fontSize: '18px'
-        }}
-        disabled={currentPage === totalPages}
-      >
-        &raquo;
-      </button>
-    </li>
-  </ul>
-</nav>
-
+        <ul className="pagination justify-content-center" style={{ backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
+          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              onClick={() => paginate(currentPage - 1)}
+              style={{
+                color: currentPage === 1 ? '#A0A0A0' : '#30475E',
+                backgroundColor: 'transparent',
+                border: 'none',
+                fontSize: '18px'
+              }}
+              disabled={currentPage === 1}
+            >
+              &laquo;
+            </button>
+          </li>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <li
+              key={i}
+              className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}
+              style={{ borderRadius: '5px' }}
+            >
+              <button
+                className="page-link"
+                onClick={() => paginate(i + 1)}
+                style={{
+                  color: currentPage === i + 1 ? 'white' : '#30475E',
+                  backgroundColor: currentPage === i + 1 ? '#30475E' : 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  width: '100%'
+                }}
+              >
+                {i + 1}
+              </button>
+            </li>
+          ))}
+          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+            <button
+              className="page-link"
+              onClick={() => paginate(currentPage + 1)}
+              style={{
+                color: currentPage === totalPages ? '#A0A0A0' : '#30475E',
+                backgroundColor: 'transparent',
+                border: 'none',
+                fontSize: '18px'
+              }}
+              disabled={currentPage === totalPages}
+            >
+              &raquo;
+            </button>
+          </li>
+        </ul>
+      </nav>
       <Modal show={showModal} onHide={tancarModal}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Usuari</Modal.Title>
@@ -507,28 +497,29 @@ function Usuaris() {
         </Modal.Header>
         <Modal.Body>
           <Formik
-            initialValues={{ password: '', confirmPassword: '' }}
+            initialValues={{ oldpassword: '', newpassword: '', confirmPassword: '' }}
             validationSchema={Yup.object({
-              password: Yup.string()
-                .min(8, 'Valor mínim de 8 caràcters.')
+              oldpassword: Yup.string().required('Valor requerit'),
+              newpassword: Yup.string()
+                .min(6, 'Valor mínim de 6 caràcters.')
                 .max(20, 'El valor màxim és de 20 caràcters')
                 .required('Valor requerit'),
               confirmPassword: Yup.string()
-                .oneOf([Yup.ref('password'), null], 'Les contrasenyes han de coincidir')
+                .oneOf([Yup.ref('newpassword'), null], 'Les contrasenyes han de coincidir')
                 .required('Valor requerit'),
             })}
             onSubmit={async (values, { setSubmitting }) => {
               try {
-                const body={
-                  "id": 1, 
-                  "newpassword": "DAVID1",
-                  "oldpassword": "david2"
-                }
-                
+                const body = {
+                  id: values.id,
+                  oldpassword: values.oldpassword,
+                  newpassword: values.newpassword,
+                };
+
                 await axios.post(`${apiUrl}/password`, body);
                 tancarTercerModal();
               } catch (error) {
-                console.error("Error canviant la contrasenya:", error);
+                console.error('Error canviant la contrasenya:', error);
               } finally {
                 setSubmitting(false);
               }
@@ -536,24 +527,29 @@ function Usuaris() {
           >
             {({ errors, touched, isSubmitting }) => (
               <Form>
+
                 <div className="mb-3">
-                  <label htmlFor="currentPassword" className="form-label">Contrasenya Actual</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={currentPassword}
-                    disabled
-                  />
+                  <label htmlFor="oldpassword" className="form-label">Contrasenya Actual</label>
+                  <Field name="oldpassword" type="text" className="form-control" placeholder="Contrasenya Actual" />
+                  {errors.oldpassword && touched.oldpassword && (
+                    <div className="text-danger">{errors.oldpassword}</div>
+                  )}
                 </div>
+
                 <div className="mb-3">
-                  <label htmlFor="password" className="form-label">Nova Contrasenya</label>
-                  <Field name="password" type="password" className="form-control" placeholder="Nova Contrasenya" />
-                  {errors.password && touched.password && <div className="text-danger">{errors.password}</div>}
+                  <label htmlFor="newpassword" className="form-label">Nova Contrasenya</label>
+                  <Field name="newpassword" type="password" className="form-control" placeholder="Nova Contrasenya" />
+                  {errors.newpassword && touched.newpassword && (
+                    <div className="text-danger">{errors.newpassword}</div>
+                  )}
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="confirmPassword" className="form-label">Confirmar Contrasenya</label>
                   <Field name="confirmPassword" type="password" className="form-control" placeholder="Confirmar Contrasenya" />
-                  {errors.confirmPassword && touched.confirmPassword && <div className="text-danger">{errors.confirmPassword}</div>}
+                  {errors.confirmPassword && touched.confirmPassword && (
+                    <div className="text-danger">{errors.confirmPassword}</div>
+                  )}
                 </div>
 
                 <div className="d-flex justify-content-between">
@@ -561,7 +557,7 @@ function Usuaris() {
                     Cancel·lar
                   </Button>
                   <Button className="primary orange-button" type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Guardant..." : "Canviar Contrasenya"}
+                    {isSubmitting ? 'Guardant...' : 'Canviar Contrasenya'}
                   </Button>
                 </div>
               </Form>
