@@ -9,6 +9,7 @@
 }
 
 * {
+* {
     font-family: "Noto Serif", serif;
 }
 
@@ -72,6 +73,7 @@ li:hover i {
 }
 
 .activo a {
+    color: var(--darkBlue)
     color: var(--darkBlue)
 }
 
