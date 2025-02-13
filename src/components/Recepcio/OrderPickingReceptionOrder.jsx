@@ -139,13 +139,20 @@ function OrderPickingReception() {
             const line = orderLineReception.find((l) => l.id === parseInt(order));
             const product = products.find((p) => p.id === line.product_id);
             let space = spaces.find((s) => s.product_id === line.product_id);
+
+            const cantitatOcupada = space.quantity * product.volume;
+            const cantitatLliure = space.volume_max - cantitatOcupada;
     
-            if (line.quantity_received * product.volume > space.volume_max) {
+            if (line.quantity_received * product.volume > cantitatLliure) {
                 // Buscar espacio vacío
                 const nouSpace = spaces.find((s) => s.product_id === null && s.volume_max >= line.quantity_received * product.volume);
     
                 space = nouSpace;
                 alert(`El producte ${line.product_id} ha segut reubicat a un nou espai per falta de capacitat`);
+
+                axios.put(`${apiUrl}space/${nouSpace.storage_id}/${nouSpace.street_id}/${nouSpace.shelf_id}/${nouSpace.id}`, {
+                    product_id: line.product_id,
+                },{headers: { "auth-token": token }})
             }
     
             const newOrderPickingReception = {
