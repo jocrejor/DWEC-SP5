@@ -24,12 +24,12 @@ function OrdresEnviament() {
   const [orderLine, setOrderLine] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [showModalVisualitza, setShowModalVisualitza] = useState(false)
-  const [showModalEnviament,setShowModalEnviament] = useState(false)
+  const [showModalEnviament, setShowModalEnviament] = useState(false)
   const [tipoModal, setTipoModal] = useState('Crear')
   const [valorsInicials, setValorsInicials] = useState({ client_id: '', shipping_date: '', ordershipping_status_id: '' })
   const [valorsLineInicials, setValorsLineInicials] = useState({ shipping_order_id: '', product_id: '', quantity: '', orderline_status_id: '' })
   const [clientes, setClientes] = useState([])
-  const [carriers,setCarriers] = useState([])
+  const [carriers, setCarriers] = useState([])
   const [users, setUsers] = useState([])
   const [products, setProducts] = useState([])
   const [arrayProductos, setArray] = useState([])
@@ -121,7 +121,7 @@ function OrdresEnviament() {
       }
       )
 
-      axios.get(`${apiUrl}carrier`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}carrier`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setCarriers(response.data)
       })
@@ -141,22 +141,33 @@ function OrdresEnviament() {
     canviEstatModal();
     const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-    const orderLinesData = await obtindreOrderLine();
-    const filteredOrders = orderLinesData.filter(order => order.shipping_order_id === valors.id);
-    setOrderLine(filteredOrders);
-    setValorsLineInicials(filteredOrders);
-    setArray(filteredOrders);
+    axios.get(`${apiUrl}orderlineshipping/order/${valors.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setOrderLine(response.data)
+        setValorsLineInicials(response.data);
+        setArray(response.data);
+      })
+      .catch(e => {
+        console.log(e)
+      }
+      )
   };
 
   const visualitzarOrdre = async (valors) => {
     setTipoModal("Visualitzar");
     const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-    const orderLinesData = await obtindreOrderLine();
-    const filteredOrders = orderLinesData.filter(order => order.shipping_order_id === valors.id);
-    setOrderLine(filteredOrders);
-    setValorsLineInicials(filteredOrders);
-    setArray(filteredOrders);
+    axios.get(`${apiUrl}orderlineshipping/order/${valors.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setOrderLine(response.data)
+        setValorsLineInicials(response.data);
+        setArray(response.data);
+      })
+      .catch(e => {
+        console.log(e)
+      }
+      )
+
     canviEstatModalVisualitza();
   }
 
@@ -241,7 +252,7 @@ function OrdresEnviament() {
     setShowModalVisualitza(!showModalVisualitza)
   }
 
-  const canviEstatModalEnviament = () =>{
+  const canviEstatModalEnviament = () => {
     setShowModalEnviament(!showModalEnviament)
   }
 
@@ -257,7 +268,7 @@ function OrdresEnviament() {
               axios.post(`${apiUrl}orderlineshipping`, line, { headers: { "auth-token": localStorage.getItem("token") } })
             })
           })
-          canviEstatModal();
+        canviEstatModal();
         actualitzaDades();
       }
       else {
@@ -265,7 +276,7 @@ function OrdresEnviament() {
         return
       }
     }
-    else if(tipoModal === "Modificar"){
+    else if (tipoModal === "Modificar") {
       for (const idOrderLine of productosEliminados) {
         axios.delete(`${apiUrl}orderlineshipping/${idOrderLine}`, { headers: { "auth-token": localStorage.getItem("token") } });
       }
@@ -284,11 +295,11 @@ function OrdresEnviament() {
       canviEstatModal();
       actualitzaDades();
     }
-    else if(tipoModal === "Enviar"){
+    else if (tipoModal === "Enviar") {
       values.ordershipping_status_id = 4;
       console.log(values)
       axios.put(`${apiUrl}ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
-      canviEstatModalEnviament(); 
+      canviEstatModalEnviament();
       actualitzaDades();
     }
     actualitzaDades();
@@ -302,18 +313,6 @@ function OrdresEnviament() {
       })
   }
 
-  const obtindreOrderLine = async () => {
-    try {
-      const response = await axios.get(`${apiUrl}orderlineshipping`, {
-        headers: { "auth-token": localStorage.getItem("token") }
-      });
-      const datos = response.data;
-      return datos;
-    } catch (error) {
-      return [];
-    }
-  };
-
   const actualitzaFiltres = async (clients, identificador, estats, dataMinima, dataMaxima) => {
     let ordersFiltradas = orders;
     ordersFiltradas = ordersFiltradas.filter((order) => {
@@ -323,7 +322,7 @@ function OrdresEnviament() {
       console.log(dataMinima)
       console.log(order)
       const orderDate = new Date(order.shipping_date);
-      console.log(orderDate) 
+      console.log(orderDate)
       const matchesDateMin = dataMinima ? new Date(dataMinima) <= orderDate : true;
       const matchesDateMax = dataMaxima ? new Date(dataMaxima) >= orderDate : true;
       setCurrentPage(1)
