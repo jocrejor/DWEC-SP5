@@ -17,7 +17,6 @@ function Moviments() {
   const [Orderreception, setOrdrerecepcio] = useState([]);
   const [Orderlinereception, setOrdrelinerecepcio] = useState([]);
   const [incidencies, setIncidencies] = useState([]);
-  
 
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [inventariseleccionat, setSelectedInventory] = useState(null);
@@ -51,6 +50,16 @@ function Moviments() {
           setShowInventoryModal(true);
         } else {
           alert('No se encontró el inventario con ese ID.');
+        }
+        break;
+      }
+      case 'Recepcio': {  
+        const orderReceptionDetails = Orderreception.find(item => item.id === id);
+        if (orderReceptionDetails) {
+          setSelectedOrderReception(orderReceptionDetails);
+          setShowOrderReceptionModal(true);
+        } else {
+          alert('No se encontró la orden de recepción con ese ID.');
         }
         break;
       }
@@ -142,55 +151,54 @@ function Moviments() {
     return user ? user.name : "No funciona";
   };
 
-  // Intercambiar ID en nombre del producto
   const nomProducte = (productId) => {
     const product = producte.find(product => product.id === productId);
     return product ? product.name : "No funciona";
   };
 
-  const handleFilter = (activeFilters) => {
+  const handleFilter = (activarfiltres) => {
     setCurrentPage(1);
 
-    if (Object.keys(activeFilters).length === 0) {
+    if (Object.keys(activarfiltres).length === 0) {
       setFilteredMoviments(moviments);
       return;
     }
     const noufiltre = moviments.filter(mov => {
       let cumple = true;
-      if (activeFilters.magatzem) {
-        if (!mov.storage_id.toString().toLowerCase().includes(activeFilters.magatzem.toLowerCase()))
+      if (activarfiltres.magatzem) {
+        if (!mov.storage_id.toString().toLowerCase().includes(activarfiltres.magatzem.toLowerCase()))
           cumple = false;
       }
-      if (activeFilters.carrer) {
-        if (!mov.street_id.toString().toLowerCase().includes(activeFilters.carrer.toLowerCase()))
+      if (activarfiltres.carrer) {
+        if (!mov.street_id.toString().toLowerCase().includes(activarfiltres.carrer.toLowerCase()))
           cumple = false;
       }
-      if (activeFilters.estanteria) {
-        if (!mov.shelf_id.toString().toLowerCase().includes(activeFilters.estanteria.toLowerCase()))
+      if (activarfiltres.estanteria) {
+        if (!mov.shelf_id.toString().toLowerCase().includes(activarfiltres.estanteria.toLowerCase()))
           cumple = false;
       }
-      if (activeFilters.espai) {
-        if (!mov.space_id.toString().toLowerCase().includes(activeFilters.espai.toLowerCase()))
+      if (activarfiltres.espai) {
+        if (!mov.space_id.toString().toLowerCase().includes(activarfiltres.espai.toLowerCase()))
           cumple = false;
       }
-      if (activeFilters.producte) {
+      if (activarfiltres.producte) {
         const prod = producte.find(p => p.id === mov.product_id);
         const prodName = prod ? prod.name : "";
-        if (!prodName.toLowerCase().includes(activeFilters.producte.toLowerCase()))
+        if (!prodName.toLowerCase().includes(activarfiltres.producte.toLowerCase()))
           cumple = false;
       }
-      if (activeFilters.data) {
-        if (!mov.movement_date.toLowerCase().includes(activeFilters.data.toLowerCase()))
+      if (activarfiltres.data) {
+        if (!mov.movement_date.toLowerCase().includes(activarfiltres.data.toLowerCase()))
           cumple = false;
       }
-      if (activeFilters.operari) {
+      if (activarfiltres.operari) {
         const user = users.find(u => u.id === mov.operator_id);
         const userName = user ? user.name : "";
-        if (!userName.toLowerCase().includes(activeFilters.operari.toLowerCase()))
+        if (!userName.toLowerCase().includes(activarfiltres.operari.toLowerCase()))
           cumple = false;
       }
-      if (activeFilters.origen) {
-        if (!mov.origin.toLowerCase().includes(activeFilters.origen.toLowerCase()))
+      if (activarfiltres.origen) {
+        if (!mov.origin.toLowerCase().includes(activarfiltres.origen.toLowerCase()))
           cumple = false;
       }
       return cumple;
@@ -301,41 +309,36 @@ function Moviments() {
                     <td data-cell="Seleccionar" >
                       <input className="form-check-input" type="checkbox" />
                     </td>
-                    <td  data-cell="ID">
+                    <td data-cell="ID">
                      {valors.id}
                     </td>
-                    <td  data-cell="Producto">
+                    <td data-cell="Producto">
                     {nomProducte(valors.product_id)}
                     </td>
-                    <td  data-cell="Magatzem">
+                    <td data-cell="Magatzem">
                     {valors.storage_id}
                     </td>
-                    <td  data-cell="Carrer">
+                    <td data-cell="Carrer">
                     {valors.street_id}
                     </td>
-                    <td  data-cell="Estanteria">
+                    <td data-cell="Estanteria">
                      {valors.shelf_id}
                     </td>
-                    <td  data-cell="Espai">
+                    <td data-cell="Espai">
                      {valors.space_id}
                     </td>
-                    <td  data-cell="Quantitat">
+                    <td data-cell="Quantitat">
                       {valors.quantity}
                     </td>
-                    <td  data-cell="Data">
+                    <td data-cell="Data">
                       {valors.movement_date}
                     </td>
-                    <td  data-cell="Operari">
+                    <td data-cell="Operari">
                      {usuari(valors.operator_id)}
                     </td>
                     <td  data-cell="Origen">
-                     
-                      <a
-                        href="#"
-                        className="text-decoration-none text-dark"
-                        onClick={() => polsarorigin(valors.origin, valors.origin_id)}
-                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                      >
+                      <a href="#" className="text-decoration-none text-dark" onClick={() => polsarorigin(valors.origin, valors.origin_id)}
+                        style={{ cursor: 'pointer', textDecoration: 'underline' }} >
                         {valors.origin}
                       </a>
                     </td>
@@ -413,11 +416,22 @@ function Moviments() {
   <Modal.Body>
     {inventariseleccionat ? (
       <div>
-        <p className='fw-bold'>ID: {inventariseleccionat.id}</p>
-        <p className='fw-bold'>Date:{inventariseleccionat.created_at}</p>
-        <p className='fw-bold'>Created By: {inventariseleccionat.created_by}</p>
-        <p className='fw-bold'>Inventory Status:{inventariseleccionat.inventory_status}</p>
-        <p className='fw-bold'>Storage ID: {inventariseleccionat.storage_id}</p>
+     <p className="border-bottom pb-2">
+    <span className="fw-bold">ID:</span> {inventariseleccionat.id}
+  </p>
+   <p className="border-bottom pb-2">
+   <span className="fw-bold">Date:</span> {inventariseleccionat.created_at}
+  </p>
+  <p className="border-bottom pb-2">
+  <span className="fw-bold">Created By:</span> {inventariseleccionat.created_by}
+  </p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Inventory Status:</span> {inventariseleccionat.inventory_status}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Storage ID:</span> {inventariseleccionat.storage_id}
+</p>
+
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -438,11 +452,22 @@ function Moviments() {
   <Modal.Body>
     {ordreRecepcioseleccionada ? (
       <div>
-        <p className='fw-bold'>ID:{ordreRecepcioseleccionada.id}</p>
-        <p className='fw-bold'>Supplier ID:{ordreRecepcioseleccionada.supplier_id}</p>
-        <p className='fw-bold'>Estimated Reception Date: {ordreRecepcioseleccionada.estimated_reception_date}</p>
-        <p className='fw-bold'>Created By: {ordreRecepcioseleccionada.created_by}</p>
-        <p className='fw-bold'>Order Reception Status ID: {ordreRecepcioseleccionada.orderreception_status_id}</p>
+  <p className="border-bottom pb-2">
+  <span className="fw-bold">ID:</span> {ordreRecepcioseleccionada.id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Supplier ID:</span> {ordreRecepcioseleccionada.supplier_id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Estimated Reception Date:</span> {ordreRecepcioseleccionada.estimated_reception_date}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Created By:</span> {ordreRecepcioseleccionada.created_by}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Order Reception Status ID:</span> {ordreRecepcioseleccionada.orderreception_status_id}
+</p>
+
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -463,11 +488,22 @@ function Moviments() {
   <Modal.Body>
     {ordrelineaseleccionada ? (
       <div>
-        <p className='fw-bold'>ID: {ordrelineaseleccionada.id}</p>
-        <p className='fw-bold' >Order Reception ID:{ordrelineaseleccionada.order_reception_id}</p>
-        <p className='fw-bold'>Product ID: {ordrelineaseleccionada.product_id}</p>
-        <p className='fw-bold'>Quantity Ordered: {ordrelineaseleccionada.quantity_ordered}</p>
-        <p className='fw-bold'>Quantity Received: {ordrelineaseleccionada.quantity_received}</p>
+     <p className="border-bottom pb-2">
+  <span className="fw-bold">ID:</span> {ordrelineaseleccionada.id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Order Reception ID:</span> {ordrelineaseleccionada.order_reception_id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Product ID:</span> {ordrelineaseleccionada.product_id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Quantity Ordered:</span> {ordrelineaseleccionada.quantity_ordered}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Quantity Received:</span> {ordrelineaseleccionada.quantity_received}
+</p>
+
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -480,7 +516,6 @@ function Moviments() {
   </Modal.Footer>
 </Modal>
 
-{/* Modal Incidencia */}
 <Modal show={showIncidentModal} onHide={() => setShowIncidentModal(false)} centered>
   <Modal.Header closeButton>
     <Modal.Title>Detalles de Incidencia</Modal.Title>
@@ -488,8 +523,37 @@ function Moviments() {
   <Modal.Body>
     {incidencia_seleccionada ? (
       <div>
-        <p><strong>ID:</strong> {incidencia_seleccionada.id}</p>
-        <p>{JSON.stringify(incidencia_seleccionada)}</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">ID:</span> {incidencia_seleccionada.id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Descripción:</span> {incidencia_seleccionada.description}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">ID del Operador:</span> {incidencia_seleccionada.operator_id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Creado el:</span> {incidencia_seleccionada.created_at}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">ID del Proveedor:</span> {incidencia_seleccionada.supplier_id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">ID de Recepción de Línea de Pedido:</span> {incidencia_seleccionada.orderlinereception_id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">ID del Producto:</span> {incidencia_seleccionada.product_id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">ID del Estado de la Línea de Pedido:</span> {incidencia_seleccionada.orderline_status_id}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Cantidad Pedida:</span> {incidencia_seleccionada.quantity_ordered}
+</p>
+<p className="border-bottom pb-2">
+  <span className="fw-bold">Cantidad Recibida:</span> {incidencia_seleccionada.quantity_received}
+</p>
+
       </div>
     ) : (
       <p>No hay detalles disponibles.</p>
@@ -501,6 +565,7 @@ function Moviments() {
     </Button>
   </Modal.Footer>
 </Modal>
+
     
       </div>
     </>
