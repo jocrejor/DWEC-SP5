@@ -24,6 +24,7 @@ td, th{
 
 .fondo-azul{
     background-color: var(--darkBlue);
+    background-color: var(--darkBlue);
 }
 
 
@@ -112,7 +113,19 @@ li:hover i{
 .activo-2{
     background-color: var(--lightBlue) !important;
     border: 1px solid var(--lightBlue);
+    background-color: var(--lightBlue) !important;
+    border: 1px solid var(--lightBlue);
     color: white !important;
+}
+
+#dropdown{
+    display: none;
+}
+
+
+/*HOVER ICONOS*/
+.icono:hover{
+    color: var(--orange) !important;
 }
 
 #dropdown{

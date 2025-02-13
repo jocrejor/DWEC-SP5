@@ -1,414 +1,262 @@
 import { useState, useEffect } from 'react';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
-import { Button, Modal } from 'react-bootstrap';
+import axios from "axios";
 
 import Header from '../Header';
 import Filtres from '../Filtres';
+import LotsLotOSerie from './LotsLotOSerie';
+const apiUrl = import.meta.env.VITE_API_URL;
+const token = localStorage.getItem('token');
 
-const LotSchema = Yup.object().shape({
-  name: Yup.string().min(4, 'Valor mínim de 4 caràcters.').max(50, 'El valor màxim és de 50 caràcters').required('Valor requerit'),
-  product_id: Yup.string().min(1, 'El valor ha de ser una cadena no vacía').required('Valor requerit'),
-  supplier_id: Yup.string().min(1, 'El valor ha de ser una cadena no vacía').required('Valor requerit'),
-  quantity: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
-  production_date: Yup.string().required('Valor requerit'),
-  expiration_date: Yup.string().required('Valor requerit'),
-  orderReception: Yup.string().required('Valor requerit'),
-  orderLineReception: Yup.string().required('Valor requerit'),
-});
-
-
-
+/* LOTS */
 function Lots() {
-  const [lot, setLot] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [orderReceptions, setOrderReceptions] = useState([]);
-  const [orderLineReceptions, setOrderLineReceptions] = useState([]);
+  const [products, setProduct] = useState([]);
+  const [suppliers, setSupplier] = useState([]);
+  const [orderreception, setOrderReception] = useState([]);
+  const [orderreception_status, setOrderReceptionStatus] = useState([]);
+  const [orderline_status, setOrderLineStatus] = useState([]);
+  const [orderlinereception, setOrderLineReception] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [tipoModal, setTipoModal] = useState('Crear');
   const [valorsInicials, setValorsInicials] = useState({
     name: '',
     product_id: '',
     supplier_id: '',
-    quantity: '',
+    quantity: 0,
     production_date: '',
     expiration_date: '',
-    orderReception: '',
-    orderLineReception: '',
+    orderlinereception: '',
+    /* sirve para pasar la cantidad total de la orden al modal,
+    * esta informacion no se añadirá a la base de datos */
+    quantity_received: 0,
   });
+  //estado que determina si un producto será serie o lote
+  const [lotOrSerial, setLotOrSerial] = useState("");
+  const [guardado, setGuardado] = useState([]);
+  const [errorAgregar, setErrorAgregar] = useState("");
 
   useEffect(() => {
-    async function fetchData() {
-      const data = await getData(url, 'Lot');
-      const product = await getData(url, 'Product');
-      const supplier = await getData(url, 'Supplier');
-      const orderReceptionData = await getData(url, 'OrderReception');  // Obtener las órdenes de recepción
-      const orderLineReceptionData = await getData(url, 'OrderLineReception');  // Obtener las líneas de orden de recepción
-      setLot(data);
-      setProducts(product);
-      setSuppliers(supplier);
-      setOrderReceptions(orderReceptionData);
-      setOrderLineReceptions(orderLineReceptionData);
+    const fetchData = async () => {
+      axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
+        .then(
+          response => {
+            setProduct(response.data)
+          })
+        .catch(
+          error => {
+            console.log(error)
+          }
+        )
+      axios.get(`${apiUrl}Supplier`, { headers: { "auth-token": token } })
+        .then(
+          response => {
+            setSupplier(response.data)
+          })
+        .catch(
+          error => {
+            console.log(error)
+          }
+        )
+
+      axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
+        .then(response => {
+          setOrderReception(response.data)
+        })
+        .catch(error => {
+          console.log(error)
+        }
+        )
+
+      axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
+        .then(
+          response => {
+            setOrderLineReception(response.data)
+          })
+        .catch(
+          error => {
+            console.log(error)
+          }
+        )
+
+      axios.get(`${apiUrl}orderreception_status`, { headers: { "auth-token": token } })
+        .then(
+          response => {
+            setOrderReceptionStatus(response.data)
+          })
+        .catch(
+          error => {
+            console.log(error)
+          }
+        )
+
+      axios.get(`${apiUrl}orderline_status`, { headers: { "auth-token": token } })
+        .then(
+          response => {
+            setOrderLineStatus(response.data)
+          })
+        .catch(
+          error => {
+            console.log(error)
+          }
+        )
+
     }
     fetchData();
   }, []);
 
-  const eliminarLot = (id) => {
-    deleteData(url, 'Lot', id);
-    const newLot = lot.filter((item) => item.id !== id);
-    setLot(newLot);
-  };
-
-  const modificarLot = (valors) => {
-    setTipoModal('Modificar');
-    setValorsInicials(valors);
-  };
-
-  const visualitzarLot = (valors) => {
-    setTipoModal('Visualitzar');
-    setValorsInicials(valors);
-  };
-
   const canviEstatModal = () => {
+    setGuardado([]);
+    setErrorAgregar("");
     setShowModal(!showModal);
   };
 
   return (
     <>
       <Header title="Llistat Lots" />
-
       <Filtres />
 
-      <div className="d-flex justify-content-end mt-3 me-3">
-        <Button
-          variant="success"
-          className="btn btn-primary"
-          onClick={() => {
-            canviEstatModal();
-            setTipoModal('Crear');
-          }}
-        >
-          Alta Lots
-        </Button>
-      </div>
-      <div className="table-responsive mx-2">
-        <table className="table table-bordered table-hover table-striped text-center mt-4">
-          <thead className="thead-dark">
-            <tr>
-              <th>ID</th>
-              <th>Nom</th>
-              <th>ID Product</th>
-              <th>ID Supplier</th>
-              <th>Quantitat</th>
-              <th>Data producció</th>
-              <th>Data caducitat</th>
-              <th>Order Reception</th>
-              <th>Order Line Reception</th>
-              <th>Visualitzar</th>
-              <th>Modificar</th>
-              <th>Eliminar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lot.length === 0 ? (
-              <tr>
-                <td colSpan="12" className="text-center">
-                  No hi han lots
-                </td>
-              </tr>
-            ) : (
-              lot.map((valors) => (
-                <tr key={valors.id}>
-                  <td>{valors.id}</td>
-                  <td>{valors.name}</td>
-                  <td>{products.find((product) => product.id === valors.product_id)?.name}</td>
-                  <td>{suppliers.find((supplier) => supplier.id === valors.supplier_id)?.name}</td>
-                  <td>{valors.quantity}</td>
-                  <td>{valors.production_date}</td>
-                  <td>{valors.expiration_date}</td>
-                  <td>{valors.orderReception}</td>
-                  <td>{valors.orderLineReception}</td>
-                  <td>
-                    <Button
-                      variant="primary"
-                      className="btn-sm"
-                      onClick={() => {
-                        visualitzarLot(valors);
-                        canviEstatModal();
-                      }}
-                    >
-                      <i className="bi bi-eye"></i>
-                    </Button>
-                  </td>
-                  <td>
-                    <Button
-                      variant="warning"
-                      className="btn-sm"
-                      onClick={() => {
-                        modificarLot(valors);
-                        canviEstatModal();
-                      }}
-                    >
-                      <i className="bi bi-pencil-square"></i>
-                    </Button>
-                  </td>
-                  <td>
-                    <Button
-                      variant="danger"
-                      className="btn-sm"
-                      onClick={() => {
-                        eliminarLot(valors.id);
-                      }}
-                    >
-                      <i className="bi bi-trash"></i>
-                    </Button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <div className="container-fluid">
+        <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+          <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+            <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+              <div className="form-floating bg-white">
+                <select className="form-select" id="floatingSelect" aria-label="Seleccione una opción">
+                  <option>Tria una opció</option>
+                  <option value="1">Eliminar</option>
+                </select>
+                <label htmlFor="floatingSelect">Accions en lot</label>
+              </div>
+              <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button"><i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+            </div>
+          </div>
+          <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+          <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2"></div>
+        </div>
 
-      <Modal show={showModal} onHide={canviEstatModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>{tipoModal} Lot</Modal.Title>
-        </Modal.Header>
+        <div className="row">
+          <div className="col-12">
+            <div>
+              <table className="table table-striped text-center align-middle">
+                <thead className="table-active border-bottom border-dark-subtle">
+                  <tr>
+                    <th className='align-middle' scope='col'>
+                      <input className='form-check-input' type="checkbox" />
+                    </th>
+                    <th scope='col' className="align-middle">ID</th>
+                    <th scope='col' className="align-middle">Proveïdor</th>
+                    <th scope='col' className="align-middle">Estat ordre línia de recepció</th>
+                    <th scope='col' className="align-middle">Estat ordre de recepció</th>
+                    <th scope='col' className="align-middle">Producte</th>
+                    <th scope='col' className="align-middle">Quantitat</th>
+                    <th scope='col' className="align-middle">Lot/Serie</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orderlinereception.length === 0 ? (
+                    <tr>
+                      <td colSpan="12" className="text-center">
+                        No hi han linies d&apos;ordre de recepció
+                      </td>
+                    </tr>
+                  ) : (
+                    orderlinereception
+                      .filter((valors) => valors.orderline_status_id === 2)
+                      .map((valors) => (
+                        <tr key={`orderlinereception-${valors.id}`}>
+                          <td scope='row' data-cell="Seleccionar">
+                            <input className='form-check-input' type="checkbox" />
+                          </td>
 
-        <Modal.Body>
-          <Formik
-            initialValues={
-              tipoModal === 'Modificar' || tipoModal === 'Visualitzar'
-                ? valorsInicials
-                : {
-                  name: '',
-                  product_id: '',
-                  supplier_id: '',
-                  quantity: '',
-                  production_date: '',
-                  expiration_date: '',
-                  orderReception: '',
-                  orderLineReception: '',
-                }
-            }
-            validationSchema={LotSchema}
-            /** SE ACTUALIZA LA TABLA AL MODIFICAR O CREAR */
-            onSubmit={(values) => {
-              if (tipoModal === 'Crear') {
-                postData(url, 'Lot', values).then((nuevoLote) => {
-                  setLot(prevLot => [...prevLot, nuevoLote]);
-                });
-              } else {
-                updateId(url, 'Lot', values.id, values).then(() => {
-                  setLot(prevLot => prevLot.map(lot => (lot.id === values.id ? values : lot)));
-                });
-              }
-              canviEstatModal();
-            }}
-          /** SIN ACTUALIZAR (VERSIÓN ANTERIOR) */
-          // onSubmit={(values) => {
-          //   tipoModal === 'Crear'
-          //     ? postData(url, 'Lot', values)
-          //     : updateId(url, 'Lot', values.id, values);
-          //   canviEstatModal();
-          // }}
-          >
-            {({ values, errors, touched }) => (
-              <Form>
-                <div className="form-group">
-                  <label htmlFor="name">Nom del lot</label>
-                  <Field
-                    type="text"
-                    name="name"
-                    placeholder="Nom del lot"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.name && touched.name ? (
-                    <div className="text-danger mt-1">{errors.name}</div>
-                  ) : null}
-                </div>
+                          <td data-cell="ID">{valors.id}</td>
 
-                {/* <div className="form-group">
-                  <label htmlFor="product_id">ID del Producte</label>
-                  <Field
-                    type="number"
-                    name="product_id"
-                    placeholder="ID del producte"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.product_id && touched.product_id ? (
-                    <div className="text-danger mt-1">{errors.product_id}</div>
-                  ) : null}
-                </div>
+                          <td data-cell="Proveïdor">
+                            {(() => {
+                              const orderReceptions = orderreception.find(
+                                (or) => or.id === valors.order_reception_id
+                              );
+                              const supplier = suppliers.find((s) => s.id === orderReceptions?.supplier_id);
+                              return supplier ? supplier.name : "Proveïdor no trobat";
+                            })()}
+                          </td>
 
-                <div className="form-group">
-                  <label htmlFor="supplier_id">ID del Proveïdor</label>
-                  <Field
-                    type="number"
-                    name="supplier_id"
-                    placeholder="ID del proveïdor"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.supplier_id && touched.supplier_id ? (
-                    <div className="text-danger mt-1">{errors.supplier_id}</div>
-                  ) : null}
-                </div> */}
-                <div className="form-group">
-                  <label htmlFor="product_id">ID del Producte</label>
-                  <Field as="select" name="product_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona un producte</option>
-                    {products.map((product) => (
-                      <option key={product.id} value={product.id}>
-                        {product.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.product_id && touched.product_id ? (
-                    <div className="text-danger mt-1">{errors.product_id}</div>
-                  ) : null}
-                </div>
+                          <td data-cell="Estat ordre línia de recepció">
+                            {orderline_status.find((status) => status.id === valors.order_reception_id)?.name || "Estat no trobat"}
+                          </td>
 
-                <div className="form-group">
-                  <label htmlFor="supplier_id">ID del Proveïdor</label>
-                  <Field as="select" name="supplier_id" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona un proveïdor</option>
-                    {suppliers.map((supplier) => (
-                      <option key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.supplier_id && touched.supplier_id ? (
-                    <div className="text-danger mt-1">{errors.supplier_id}</div>
-                  ) : null}
-                </div>
+                          <td data-cell="Estat ordre de recepció">
+                            {orderreception_status.find((status) => status.id === valors.orderline_status_id)?.name || "Estat no trobat"}
+                          </td>
 
-                <div className="form-group">
-                  <label htmlFor="quantity">Quantitat</label>
-                  <Field
-                    type="number"
-                    name="quantity"
-                    placeholder="Quantitat del lot"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.quantity && touched.quantity ? (
-                    <div className="text-danger mt-1">{errors.quantity}</div>
-                  ) : null}
-                </div>
+                          <td data-cell="Producte">
+                            {products.find((product) => product.id === valors.product_id)?.name || "Desconegut"}
+                          </td>
 
-                <div className="form-group">
-                  <label htmlFor="production_date">Data de producció</label>
-                  <Field
-                    type="date"
-                    name="production_date"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.production_date && touched.production_date ? (
-                    <div className="text-danger mt-1">{errors.production_date}</div>
-                  ) : null}
-                </div>
+                          <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
 
-                <div className="form-group">
-                  <label htmlFor="expiration_date">Data d&apos;expiració</label>  {/* &apos; es ' */}
-                  <Field
-                    type="date"
-                    name="expiration_date"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.expiration_date && touched.expiration_date ? (
-                    <div className="text-danger mt-1">{errors.expiration_date}</div>
-                  ) : null}
-                </div>
+                          <td data-no-colon="true">
+                            <i className="bi bi-plus-circle icono"
+                              role='button'
+                              onClick={() => {
+                                canviEstatModal();
 
-                {/* <div className="form-group">
-                  <label htmlFor="orderReception">Order Reception</label>
-                  <Field
-                    type="text"
-                    name="orderReception"
-                    placeholder="Order Reception"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.orderReception && touched.orderReception ? (
-                    <div className="text-danger mt-1">{errors.orderReception}</div>
-                  ) : null}
-                </div>
+                                const selectedProduct = products.find(p => p.id === valors.product_id);
+                                const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
 
-                <div className="form-group">
-                  <label htmlFor="orderLineReception">Order Line Reception</label>
-                  <Field
-                    type="text"
-                    name="orderLineReception"
-                    placeholder="Order Line Reception"
-                    className="form-control"
-                    disabled={tipoModal === 'Visualitzar'}
-                  />
-                  {errors.orderLineReception && touched.orderLineReception ? (
-                    <div className="text-danger mt-1">{errors.orderLineReception}</div>
-                  ) : null}
-                </div> */}
+                                if (lotOSerie === "Lot") {
+                                  setLotOrSerial("lot");
+                                }
+                                else if (lotOSerie === "Serial") {
+                                  setLotOrSerial("serie");
+                                }
 
-                <div className="form-group">
-                  <label htmlFor="orderReception">Order Reception</label>
-                  <Field as="select" name="orderReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona una orden de recepció</option>
-                    {orderReceptions.map((order) => (
-                      <option key={order.id} value={order.id}>
-                        {order.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.orderReception && touched.orderReception ? (
-                    <div className="text-danger mt-1">{errors.orderReception}</div>
-                  ) : null}
-                </div>
+                                const orderReceptions = orderreception.find(
+                                  (or) => or.id === valors.order_reception_id
+                                );
+                                const supplier = suppliers.find((s) => s.id === orderReceptions?.supplier_id);
 
-                <div className="form-group">
-                  <label htmlFor="orderLineReception">Order Line Reception</label>
-                  <Field as="select" name="orderLineReception" className="form-control" disabled={tipoModal === 'Visualitzar'}>
-                    <option value="">Selecciona una línea de orden de recepció</option>
-                    {orderLineReceptions.map((line) => (
-                      <option key={line.id} value={line.id}>
-                        {line.name}
-                      </option>
-                    ))}
-                  </Field>
-                  {errors.orderLineReception && touched.orderLineReception ? (
-                    <div className="text-danger mt-1">{errors.orderLineReception}</div>
-                  ) : null}
-                </div>
-
-                <div className="form-group d-flex justify-content-between mt-3">
-                  <Button
-                    variant="secondary"
-                    onClick={canviEstatModal}
-                    className="btn btn-secondary"
-                  >
-                    Tancar
-                  </Button>
-                  {tipoModal !== 'Visualitzar' && (
-                    <Button
-                      variant={tipoModal === 'Modificar' ? 'success' : 'info'}
-                      type="submit"
-                      className="btn"
-                    >
-                      {tipoModal}
-                    </Button>
+                                setValorsInicials({
+                                  name: "",
+                                  product_id: valors.product_id,
+                                  supplier_id: supplier ? supplier.id : "",
+                                  quantity: lotOSerie === "Serial" ? 1 : "",
+                                  production_date: "",
+                                  expiration_date: "",
+                                  orderlinereception_id: valors.id,
+                                  //cantidad total de la orden de linea de recepcion
+                                  quantity_received: valors.quantity_received,
+                                });
+                              }}
+                            >
+                            </i>
+                          </td>
+                        </tr>
+                      ))
                   )}
-                </div>
-              </Form>
-            )}
-          </Formik>
-        </Modal.Body>
-      </Modal>
+                </tbody>
+              </table>
+              <nav aria-label="Page navigation example" className="d-block">
+                <ul className="pagination justify-content-center">
+                  <li className="page-item">
+                    <a className="page-link text-light-blue" href="#" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                  <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+                  <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+                  <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+                  <li className="page-item">
+                    <a className="page-link text-light-blue" href="#" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL CON FORMIK */}
+      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} />
     </>
   );
 }
