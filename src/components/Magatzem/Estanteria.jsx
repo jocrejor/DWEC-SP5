@@ -17,8 +17,10 @@ const ShelfSchema = Yup.object().shape({
 function Shelf() {
   const [shelves, setShelves] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false); // For viewing shelf
   const [modalType, setModalType] = useState("Crear");
   const [initialValues, setInitialValues] = useState({ name: '', storage_id: '', street_id: '' });
+  const [selectedShelf, setSelectedShelf] = useState(null); // Store selected shelf
   const navigate = useNavigate();
   const { magatzem, carrer } = useParams();
 
@@ -53,20 +55,19 @@ function Shelf() {
     setShowModal(true);
   };
 
- 
-  const viewSupplier = (valors) => {
-    console.log("Viewing supplier:", valors);
-    
+  const viewShelf = (shelf) => {
+    setSelectedShelf(shelf);  // Set the selected shelf's data
+    setShowViewModal(true);    // Open the modal
   };
 
   const modSuppliers = (valors) => {
     console.log("Modifying supplier:", valors);
-    editShelf(valors); 
+    editShelf(valors);
   };
 
   const deleteSuppliers = (id) => {
     console.log("Deleting supplier:", id);
-    deleteShelf(id); 
+    deleteShelf(id);
   };
 
   const canviEstatModal = () => {
@@ -134,25 +135,65 @@ function Shelf() {
                   <td>{values.street_id}</td>
                   <td><Button onClick={() => handleShelfClick(values.id)}>Espai</Button></td>
                   <td data-no-colon="true">
-                  <span onClick={() => viewSupplier(values)} style={{ cursor: "pointer" }}>
-                    <i className="bi bi-eye"></i>
-                  </span>
+                    <span onClick={() => viewShelf(values)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-eye"></i>
+                    </span>
 
-                  <span onClick={() => modSuppliers(values)} className="mx-2" style={{ cursor: "pointer" }}>
-                    <i className="bi bi-pencil-square"></i>
-                  </span>
+                    <span onClick={() => modSuppliers(values)} className="mx-2" style={{ cursor: "pointer" }}>
+                      <i className="bi bi-pencil-square"></i>
+                    </span>
 
-                  <span onClick={() => deleteSuppliers(values.id)} style={{ cursor: "pointer" }}>
-                    <i className="bi bi-trash"></i>
-                  </span>
-                </td>
+                    <span onClick={() => deleteSuppliers(values.id)} style={{ cursor: "pointer" }}>
+                      <i className="bi bi-trash"></i>
+                    </span>
+                  </td>
                 </tr>
               ))}
           </tbody>
         </table>
+        <nav aria-label="Page navigation example" className="d-block">
+          <ul className="pagination justify-content-center">
+            <li className="page-item">
+              <a className="page-link text-light-blue" href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+            <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+            <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+            <li className="page-item">
+              <a className="page-link text-light-blue" href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
       </div>
 
-      {}
+      {/* Modal for Viewing Shelf */}
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Visualitzar Estanteria</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedShelf ? (
+            <div>
+              <p><strong>Nom:</strong> {selectedShelf.name}</p>
+              <p><strong>ID Magatzem:</strong> {selectedShelf.storage_id}</p>
+              <p><strong>ID Carrer:</strong> {selectedShelf.street_id}</p>
+            </div>
+          ) : (
+            <p>No shelf selected.</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            Tancar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal for Creating/Editing Shelf */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{modalType} Estanteria</Modal.Title>

@@ -22,10 +22,12 @@ const SpaceSchema = Yup.object().shape({
 function Space() {
     const [spaces, setSpaces] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false); // Modal para ver el espacio
     const [modalType, setModalType] = useState("Crear");
     const [initialValues, setInitialValues] = useState({
         name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', shelf_id: ''
     });
+    const [selectedSpace, setSelectedSpace] = useState(null); // Para almacenar el espacio seleccionado
     const navigate = useNavigate();
     const { magatzem, carrer, estanteria } = useParams();
 
@@ -35,7 +37,7 @@ function Space() {
                 headers: { "auth-token": localStorage.getItem("token") }
             })
                 .then(response => {
-                    
+
                     const filteredSpaces = response.data.filter(space =>
                         space.storage_id === magatzem &&
                         space.street_id === carrer &&
@@ -69,20 +71,20 @@ function Space() {
         setModalType("Crear");
     };
 
-   
-    const viewSupplier = (valors) => {
-        console.log("Viewing supplier:", valors);
-        
+    // Mostrar el modal con los detalles del espacio
+    const viewSpace = (space) => {
+        setSelectedSpace(space); // Establecer el espacio seleccionado
+        setShowViewModal(true); // Mostrar el modal
     };
 
     const modSuppliers = (valors) => {
-        console.log("Modifying supplier:", valors);
-        editSpace(valors); 
+        console.log("Modificando espacio:", valors);
+        editSpace(valors);
     };
 
     const deleteSuppliers = (id) => {
-        console.log("Deleting supplier:", id);
-        deleteSpace(id); 
+        console.log("Eliminando espacio:", id);
+        deleteSpace(id);
     };
 
     return (
@@ -127,7 +129,7 @@ function Space() {
                                     <td>{values.street_id}</td>
                                     <td>{values.shelf_id}</td>
                                     <td data-no-colon="true">
-                                        <span onClick={() => viewSupplier(values)} style={{ cursor: "pointer" }}>
+                                        <span onClick={() => viewSpace(values)} style={{ cursor: "pointer" }}>
                                             <i className="bi bi-eye"></i>
                                         </span>
 
@@ -143,9 +145,55 @@ function Space() {
                             ))}
                         </tbody>
                     </table>
+                    <nav aria-label="Page navigation example" className="d-block">
+                        <ul className="pagination justify-content-center">
+                            <li className="page-item">
+                                <a className="page-link text-light-blue" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+                            <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+                            <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+                            <li className="page-item">
+                                <a className="page-link text-light-blue" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             )}
 
+            {/* Modal para Ver Espacio */}
+            <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Visualitzar Espai</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedSpace ? (
+                        <div>
+                            <p><strong>Nom:</strong> {selectedSpace.name}</p>
+                            <p><strong>ID Producte:</strong> {selectedSpace.product_id}</p>
+                            <p><strong>Quantitat:</strong> {selectedSpace.quantity}</p>
+                            <p><strong>Volumen:</strong> {selectedSpace.maxVol}</p>
+                            <p><strong>Pes:</strong> {selectedSpace.maxWeight}</p>
+                            <p><strong>ID Magatzem:</strong> {selectedSpace.storage_id}</p>
+                            <p><strong>ID Carrer:</strong> {selectedSpace.street_id}</p>
+                            <p><strong>ID Estanteria:</strong> {selectedSpace.shelf_id}</p>
+                        </div>
+                    ) : (
+                        <p>No se ha seleccionado ningún espacio.</p>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+                        Tancar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Modal para Crear/Modificar Espacio */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>{modalType} Espai</Modal.Title>

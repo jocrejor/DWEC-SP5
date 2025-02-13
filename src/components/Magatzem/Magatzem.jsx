@@ -22,6 +22,8 @@ function Storage() {
   const [valorsInicials, setValorsInicials] = useState({ name: '', type: '', address: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5); // Puedes ajustar cuántos ítems por página deseas
+  const [viewStorage, setViewStorage] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,12 +76,9 @@ function Storage() {
     setShowModal(true);
   };
 
-  const modSuppliers = (valors) => {
-    modificarStorage(valors); 
-  };
-
   const viewSupplier = (valors) => {
-    console.log("Viewing supplier", valors);
+    setViewStorage(valors);
+    setShowViewModal(true);
   };
 
   const deleteSuppliers = async (id) => {
@@ -162,7 +161,7 @@ function Storage() {
                     <i className="bi bi-eye"></i>
                   </span>
 
-                  <span onClick={() => modSuppliers(valors)} className="mx-2" style={{ cursor: "pointer" }}>
+                  <span onClick={() => modificarStorage(valors)} className="mx-2" style={{ cursor: "pointer" }}>
                     <i className="bi bi-pencil-square"></i>
                   </span>
 
@@ -268,6 +267,18 @@ function Storage() {
               </Form>
             )}
           </Formik>
+        </Modal.Body>
+      </Modal>
+
+      {/* Modal for View Storage Details */}
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>View Magatzem</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p><strong>Nom:</strong> {viewStorage?.name}</p>
+          <p><strong>Tipus:</strong> {viewStorage?.type}</p>
+          <p><strong>Adreça:</strong> {viewStorage?.address}</p>
         </Modal.Body>
       </Modal>
     </>

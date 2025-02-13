@@ -15,14 +15,16 @@ const StreetSchema = Yup.object().shape({
 
 function Street() {
   const [streets, setStreets] = useState([]);
-  const [filteredStreets, setFilteredStreets] = useState([]); 
+  const [filteredStreets, setFilteredStreets] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false); // Modal de visualización
   const [tipoModal, setTipoModal] = useState("Crear");
   const [valorsInicials, setValorsInicials] = useState({ name: '', storage_id: '' });
+  const [selectedStreet, setSelectedStreet] = useState(null); // Estado para la calle seleccionada
   const navigate = useNavigate();
   const { magatzem } = useParams();
   const [filters, setFilters] = useState({
-    storage_id: magatzem, 
+    storage_id: magatzem,
   });
 
   useEffect(() => {
@@ -31,7 +33,7 @@ function Street() {
     })
       .then(response => {
         setStreets(response.data);
-        setFilteredStreets(response.data); 
+        setFilteredStreets(response.data);
       })
       .catch(error => {
         console.log('Error fetching data:', error);
@@ -39,12 +41,12 @@ function Street() {
   }, [magatzem]);
 
   useEffect(() => {
-    
+
     const filtered = streets.filter(street => {
-      return street.storage_id === filters.storage_id; 
+      return street.storage_id === filters.storage_id;
     });
-    setFilteredStreets(filtered); 
-  }, [filters, streets]); 
+    setFilteredStreets(filtered);
+  }, [filters, streets]);
 
   const eliminarStreet = async (id) => {
     try {
@@ -72,25 +74,24 @@ function Street() {
     setTipoModal("Crear");
   };
 
-  
+
   const handleFilter = (filters) => {
-    setFilters(filters); 
+    setFilters(filters);
   };
 
-
   const viewSupplier = (valors) => {
-    console.log("Viewing supplier:", valors);
-    
+    setSelectedStreet(valors);  // Establece la calle seleccionada
+    setShowViewModal(true);     // Muestra el modal de visualización
   };
 
   const modSuppliers = (valors) => {
     console.log("Modifying supplier:", valors);
-    modificarStreet(valors); 
+    modificarStreet(valors);
   };
 
   const deleteSuppliers = (id) => {
     console.log("Deleting supplier:", id);
-    eliminarStreet(id); 
+    eliminarStreet(id);
   };
 
   return (
@@ -179,7 +180,27 @@ function Street() {
         </nav>
       </div>
 
-      {}
+      {/* Modal para visualización de la calle */}
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Visualitzar Carrer</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedStreet && (
+            <>
+              <p><strong>ID:</strong> {selectedStreet.id}</p>
+              <p><strong>Nom:</strong> {selectedStreet.name}</p>
+              <p><strong>ID Magatzem:</strong> {selectedStreet.storage_id}</p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            Tancar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Carrer</Modal.Title>
