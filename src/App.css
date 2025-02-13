@@ -3,11 +3,16 @@
     --lightBlue: #30475E;
     --orange: #FF7000;
     --grey: #ECECEC;
+    --darkBlue: #222831;
+    --lightBlue: #30475E;
+    --orange: #FF7000;
+    --grey: #ECECEC;
     --title: #FF7F50;
     --badge: #DC3545;
     --logout: #A52A2A;
 }
 
+* {
 * {
     font-family: "Noto Serif", serif;
     color: var(--lightBlue);
@@ -21,7 +26,9 @@ td, th{
     background-color: var(--darkBlue);
 }
 
+
 .fondo-azul-claro{
+    background-color: var(--lightBlue);
     background-color: var(--lightBlue);
 }
 
@@ -35,18 +42,25 @@ td, th{
 
 .bg-orange{
     background-color: var(--orange);
+    background-color: var(--orange);
 }
 
 .orange-button{
+    background-color: var(--orange);
+    border-color: var(--orange);
     background-color: var(--orange);
     border-color: var(--orange);
 }
 
 .bg-grey {
     background-color: var(--grey);
+.bg-grey {
+    background-color: var(--grey);
 }
 
 .orange-button:hover{
+    background-color: var(--lightBlue);
+    border-color: var(--lightBlue);
     background-color: var(--lightBlue);
     border-color: var(--lightBlue);
 }
@@ -62,13 +76,18 @@ li:hover{
 li:hover a,
 li:hover i{
     color: var(--lightBlue) !important;
+    color: var(--lightBlue) !important;
 }
 
 .text-light-blue{
     color: var(--lightBlue) !important;
+    color: var(--lightBlue) !important;
 }
 
 .activo{
+    background-color: var(--grey);
+    color: var(--darkBlue) !important;
+    border: 1px solid var(--lightBlue) !important;
     background-color: var(--grey);
     color: var(--darkBlue) !important;
     border: 1px solid var(--lightBlue) !important;
@@ -77,9 +96,11 @@ li:hover i{
 
 .activo a {
     color: var(--darkBlue)
+    color: var(--darkBlue)
 }
 
 .no-hover:hover{
+    background-color: var(--darkBlue);
     background-color: var(--darkBlue);
     color: white !important;
 }
@@ -140,8 +161,26 @@ li:hover i{
         content: attr(data-cell) ": ";
         font-weight: 700;
         text-transform: capitalize;
+
+    /*Taula responsive*/
+
+    th{
+        display: none;
     }
 
+    td{
+        display: block;
+    }
+
+    td::before{
+        content: attr(data-cell) ": ";
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    td[data-no-colon="true"]::before {
+        content: ""; 
+    }
     td[data-no-colon="true"]::before {
         content: ""; 
     }
