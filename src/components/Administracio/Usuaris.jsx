@@ -519,7 +519,13 @@ function Usuaris() {
             })}
             onSubmit={async (values, { setSubmitting }) => {
               try {
-                await axios.put(`${apiUrl}/users/${selectedUser?.id}/password`, { password: values.password });
+                const body={
+                  "id": 1, 
+                  "newpassword": "DAVID1",
+                  "oldpassword": "david2"
+                }
+                
+                await axios.post(`${apiUrl}/password`, body);
                 tancarTercerModal();
               } catch (error) {
                 console.error("Error canviant la contrasenya:", error);
