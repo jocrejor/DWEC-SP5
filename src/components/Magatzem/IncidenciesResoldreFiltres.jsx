@@ -1,13 +1,11 @@
 import axios from 'axios';
-
 import  { useState, useEffect } from 'react';
-const apiUrl = import.meta.env.VITE_API_URL;
 
 function IncidenciesResoldreFiltres({onFilter, onClear}) {
     
     const [orderlineStatus, setOrderlineStatus] = useState([]);
     const [filters, setFilters] = useState({
-        status: ''
+        orderline_status_id: ''
     })
     
     /*Carguem l'ordre line status desde l'API */
@@ -40,7 +38,7 @@ function IncidenciesResoldreFiltres({onFilter, onClear}) {
     const cleanFilters = (e) => {
         e.preventDefault()
         setFilters({
-            orderlineStatus: ''
+            orderline_status_id: ''
         });
         onClear()
     }
@@ -49,27 +47,23 @@ function IncidenciesResoldreFiltres({onFilter, onClear}) {
         <>
         <form className="row bg-grey pt-3 px-2 mx-0 text-light-blue">
             <div className="col-12 col-md-6 col-xl-4">
-                <label htmlFor="status" className="form-label">Estat</label>
+                <label htmlFor="orderline_status_id" className="form-label">Estat</label>
                 <select
                     className="form-control"
-                    id="orderlineStatus"
-                    name="orderlineStatus"
-                    value={filters.orderlineStatus}
+                    id="orderline_status_id"
+                    name="orderline_status_id"
+                    value={filters.orderline_status_id}
                     onChange={filter}
-                    placeholder="Filtra estat"
                 >
-                    <option value="">Seleccionar nom</option>
-                    {Array.isArray(orderlineStatus) && orderlineStatus.map(status => (
-                        <option key={status.id} value={status.name}>
+                    <option value="">Seleccionar estat</option>
+                    {orderlineStatus.map(status => (
+                        <option key={status.id} value={status.id}>
                             {status.name}
                         </option>
                     ))}
                 </select>
             </div>
             <div className="row bg-grey pt-3 px-2 mx-0">
-                <div>
-
-                </div>
                 <div className="row bg-grey pb-3 mx-0">
                     <div className="col-xl-4"></div>
                     <div className="col-xl-4"></div>

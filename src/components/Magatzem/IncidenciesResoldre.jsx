@@ -12,23 +12,27 @@ const IncidenciaSchema = Yup.object().shape({
     description: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(200, 'El valor màxim és de 200 caracters')
 })
 
+// Paginació
+const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
+
 function IncidenciesResoldre() {
 
-    const [incidents, setIncident]              = useState([])
-    const [products, setProducts]               = useState([])
-    const [orderlineStatus, setOrderlineStatus] = useState([])
-    const [statuses, setStatus]                 = useState([])
-    const [userProfile, setUserProfile]         = useState([])
-    const [suppliers, setSupplier]              = useState([])
-    const [showModal, setShowModal]             = useState(false)
-    const [tipoModal, setTipoModal]             = useState("Crear")
-    const [filters, setFilters]                 = useState({ orderlineStatus: '' });
+    const [incidents, setIncident]                  = useState([])
+    const [filteredIncidents, setFilteredIncidents] = useState([]);
+    const [products, setProducts]                   = useState([])
+    const [orderlineStatus, setOrderlineStatus]     = useState([])
+    const [statuses, setStatus]                     = useState([])
+    const [userProfile, setUserProfile]             = useState([])
+    const [suppliers, setSupplier]                  = useState([])
+    const [showModal, setShowModal]                 = useState(false)
+    const [tipoModal, setTipoModal]                 = useState("Crear")
     //Paginació
-    const [currentPage, setCurrentPage]         = useState(1)
-    const [totalPages, setTotalPages]           = useState(1)
-    const [incidentsPage, setIncidentsPage]     = useState([])
+    const [currentPage, setCurrentPage]             = useState(1)
+    const [totalPages, setTotalPages]               = useState(1)
+    const [incidentsPage, setIncidentsPage]         = useState([])
     //Acaba paginació
-    const [valorsInicials, setValorsInicials]   = useState({
+    const [valorsInicials, setValorsInicials]       = useState({
+        id: '',
         product: '',
         quantity_received: '',
         description: '',
@@ -38,11 +42,11 @@ function IncidenciesResoldre() {
         created_at: '',
         orderline_status_id: '', // Se llena con el estado de la base de datos
     })
+    const displayedIncidents = filteredIncidents.slice(
+        (currentPage - 1) * elementsPaginacio,
+        currentPage * elementsPaginacio
+    );
     
-
-    // Paginació
-    const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
-
     // Obtindreels index. 
     useEffect(() => {
         const totalPages = Math.ceil(incidents.length / elementsPaginacio);
@@ -69,24 +73,30 @@ function IncidenciesResoldre() {
     };
 
     useEffect(() => {
+        setFilteredIncidents(incidents);
+        setCurrentPage(1);
+      }, [incidents]);
+    useEffect(() => {
         const indexOfLastItem = currentPage * elementsPaginacio;
         const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
         const currentItems = incidents.slice(indexOfFirstItem, indexOfLastItem);
         setIncidentsPage(currentItems)
     }, [currentPage, incidents])
 
-    /*Proves de filtres*/
-    const handleFilter = (newFilters) => {
-        setFilters(newFilters);
-        const filteredIncidents = incidents.filter(incident =>
-            (newFilters.orderlineStatus === '' || incident.orderline_status_id === Number(newFilters.orderlineStatus))
-        );
-        setIncidentsPage(filteredIncidents);
+    /* FILTRES */
+    const handleFilterChange = (filters) => {
+        const filtered = incidents.filter(incident => {
+            return filters.orderline_status_id === '' || 
+                   Number(incident.orderline_status_id) === Number(filters.orderline_status_id);
+        });
+    
+        setFilteredIncidents(filtered);
+        setCurrentPage(1);
     };
 
-    const handleClear = () => {
-        setFilters({ status: '' });
-        setIncidentsPage(incidents);
+    const handleFilterRestart = () => {
+        setFilteredIncidents(incidents);
+        setCurrentPage(1);
     };
 
     const getStatusNames = () => {
@@ -178,7 +188,8 @@ function IncidenciesResoldre() {
 
         axios.put(`${apiURL}incident/${id}`, updatedData, { headers: { "auth-token": token } })
             .then(response => setIncident(prevIncidents =>
-                prevIncidents.map(incidents => incidents.id === updatedData.id ? response.data : incidents)
+                prevIncidents.map(incidents => incidents.id === updatedData.id ? response.data : incidents),
+                getDataIncident()
             ))
             .catch(error => console.log(error)
         );
@@ -199,12 +210,12 @@ function IncidenciesResoldre() {
     };
 
     useEffect(() => {
-        getDataProduct();
-        getDataIncident();
-        getDataOrderLineStatus();
-        getDataUserProfile();
-        getSupplier();
-        getStatusNames();
+        getDataProduct()
+        getDataIncident()
+        getDataOrderLineStatus()
+        getDataUserProfile()
+        getSupplier()
+        getStatusNames()
     }, []);
 
     const visualitzarIncident = (valors) => {
@@ -218,7 +229,7 @@ function IncidenciesResoldre() {
         setTipoModal("Resol");
         console.log(valors)
         setValorsInicials({
-            ...valors,
+            ...valors || '',
         });
         setShowModal(true);
     }
@@ -254,7 +265,7 @@ function IncidenciesResoldre() {
 
     return (
         <>
-            <Filtres onFilter={handleFilter} onClear={handleClear} />
+            <Filtres onFilter={handleFilterChange} onClear={handleFilterRestart} />
 
             {/*Botó per a fer un alta <Button variant='success' onClick={()=>{canviEstatModal(); setTipoModal("Crear")}}>Llistat ordres de recepció</Button>*/}
             <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
@@ -303,12 +314,12 @@ function IncidenciesResoldre() {
                         </tr>
                     </thead>
                     <tbody>
-                        {incidentsPage.length === 0 ? (
+                        {filteredIncidents.length === 0 && incidentsPage.length === 0 ? (
                             <tr>
                                 <td colSpan="7" className="text-center">No hi ha incidències</td>
                             </tr>
                         ) : (
-                            incidentsPage.map((valors) => (
+                            displayedIncidents.map((valors) => (
                                 <tr key={valors.id}>
                                     <td data-cell="Data de creació" className='text-center'>
                                         {valors.created_at ? new Date(valors.created_at).toISOString().split('T')[0] : "Data no disponible"}
@@ -388,7 +399,7 @@ function IncidenciesResoldre() {
                                         name="id"
                                         disabled
                                         className="text-light-blue form-control"
-                                        value={values.id} />
+                                        value={values.id || ''} />
                                  </div>
 
                                 {/* Descripció */}
@@ -399,7 +410,7 @@ function IncidenciesResoldre() {
                                         name="description"
                                         disabled = {tipoModal == "Visualitzar"}
                                         className="text-light-blue form-control"
-                                        value={values.description} />
+                                        value={values.description || ''} />
                                     {errors.description && touched.description ? <div className="invalid-feedback">{errors.description}</div> : null}
                                 </div>
 
@@ -422,7 +433,7 @@ function IncidenciesResoldre() {
                                         name="product"
                                         disabled
                                         className="text-light-blue form-control"
-                                        value={getProductName(values.product_id)} />
+                                        value={getProductName(values.product_id || '')} />
                                 </div>
 
                                 {/* Proveedor */}
@@ -433,7 +444,7 @@ function IncidenciesResoldre() {
                                         name="supplier_id"
                                         disabled
                                         className="text-light-blue form-control"
-                                        value={getSupplierName(values.supplier_id)} />
+                                        value={getSupplierName(values.supplier_id || '')} />
                                 </div>
 
                                 {/* Operador */}
@@ -444,7 +455,7 @@ function IncidenciesResoldre() {
                                         name="operator_id"
                                         disabled
                                         className="text-light-blue form-control"
-                                        value={getUserProfileName(values.operator_id)} />
+                                        value={getUserProfileName(values.operator_id || '')} />
                                 </div>
 
                                 {/* Cantidad pedida */}
@@ -455,7 +466,7 @@ function IncidenciesResoldre() {
                                         name="quantity_ordered"
                                         disabled
                                         className="text-light-blue form-control"
-                                        value={values.quantity_ordered} />
+                                        value={values.quantity_ordered || ''} />
                                 </div>
 
                                 {/* Cantidad recibida */}
@@ -466,7 +477,7 @@ function IncidenciesResoldre() {
                                         name="quantity_received"
                                         disabled = {tipoModal == "Visualitzar"}
                                         className="text-light-blue form-control"
-                                        value={values.quantity_received} />
+                                        value={values.quantity_received || ''} />
                                     {errors.quantity_received && touched.quantity_received ? <div className="invalid-feedback">{errors.quantity_received}</div> : null}
                                 </div>
 
@@ -479,7 +490,7 @@ function IncidenciesResoldre() {
                                             name="orderline_status_id"
                                             className="text-light-blue form-control"
                                             disabled
-                                            value={getStatusId(values.orderline_status_id)}
+                                            value={getStatusId(values.orderline_status_id || '')}
                                         />
                                     ) : (
                                         <Field
