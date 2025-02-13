@@ -16,7 +16,7 @@ const LotSchema = (lotOrSerial) => Yup.object().shape({
   product_id: Yup.string()
     .required("Quantitat requerida"),
   quantity: Yup.number()
-    .min(0, "La quantitat no pot ser negativa")
+    .min(1, "La quantitat ha de ser almenys 1")
     .required("Valor requerit"),
   // Agregar condicionalmente las fechas si es un lot
   ...(lotOrSerial === "lot" && {
@@ -34,9 +34,21 @@ const LotSchema = (lotOrSerial) => Yup.object().shape({
   }),
 });
 
-function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, setValorsInicials, lotOrSerial }) {
-  const [errorAgregar, setErrorAgregar] = useState("");
-  const [guardado, setGuardado] = useState([]);
+
+function limpiarCampos(resetForm, lotOrSerial, setErrorAgregar) {
+  resetForm({
+    name: "",
+    quantity: lotOrSerial === "serie" ? 1 : "",
+    production_date: "",
+    expiration_date: "",
+  });
+  setErrorAgregar("");
+}
+
+function LotsLotOSerie({
+  products, canviEstatModal, showModal, valorsInicials, setValorsInicials,
+  lotOrSerial, guardado, setGuardado, errorAgregar, setErrorAgregar 
+}) {
 
   return (
     <>
@@ -51,7 +63,7 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
             initialValues={valorsInicials}
             validationSchema={LotSchema(lotOrSerial)}
           >
-            {({ values, errors, touched }) => {
+            {({ values, errors, touched, resetForm }) => {
               const handleSave = async () => {
                 if (guardado.length === 0) {
                   setErrorAgregar("No hi ha registres per gravar");
@@ -177,9 +189,9 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
                           {errors.expiration_date && touched.expiration_date && <div className="text-danger">{errors.expiration_date}</div>}
                         </div>
                       </div>
-                      {errorAgregar && <div className="text-danger mt-2">{errorAgregar}</div>}
                     </>
                   )}
+                  {errorAgregar && <div className="text-danger mt-2">{errorAgregar}</div>}
 
                   {/* Tabla de registros */}
                   <div className='mt-4'>
@@ -224,7 +236,13 @@ function LotsLotOSerie({ products, canviEstatModal, showModal, valorsInicials, s
                   </div>
 
                   <div className="form-group d-flex justify-content-between mt-3">
-                    <Button variant="secondary" onClick={canviEstatModal}>Tancar</Button>
+                    <Button className='me-auto' variant="secondary" onClick={() => canviEstatModal()}>
+                      Tancar
+                    </Button>
+                    <Button className="btn btn-secondary ps-2 me-2 text-white" onClick={() => { setGuardado([]); limpiarCampos(resetForm, lotOrSerial, setErrorAgregar); }}>
+                      <i className="bi bi-trash px-1 text-white"></i>
+                      Netejar
+                    </Button>
                     <Button className="btn text-white orange-button" onClick={handleSave}>Gravar</Button>
                   </div>
                 </Form>
@@ -244,6 +262,10 @@ LotsLotOSerie.propTypes = {
   showModal: PropTypes.bool.isRequired,
   valorsInicials: PropTypes.object.isRequired,
   setValorsInicials: PropTypes.func.isRequired,
+  guardado: PropTypes.array.isRequired,
+  setGuardado: PropTypes.func.isRequired,
+  errorAgregar: PropTypes.string.isRequired,
+  setErrorAgregar: PropTypes.func.isRequired,
 };
 
 export default LotsLotOSerie;

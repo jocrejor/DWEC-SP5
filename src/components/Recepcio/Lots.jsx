@@ -30,6 +30,8 @@ function Lots() {
   });
   //estado que determina si un producto será serie o lote
   const [lotOrSerial, setLotOrSerial] = useState("");
+  const [guardado, setGuardado] = useState([]);
+  const [errorAgregar, setErrorAgregar] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,6 +103,8 @@ function Lots() {
   }, []);
 
   const canviEstatModal = () => {
+    setGuardado([]);
+    setErrorAgregar("");
     setShowModal(!showModal);
   };
 
@@ -252,7 +256,7 @@ function Lots() {
       </div>
 
       {/* MODAL CON FORMIK */}
-      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} />
+      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} />
     </>
   );
 }
