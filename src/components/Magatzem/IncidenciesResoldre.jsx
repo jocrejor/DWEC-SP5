@@ -14,20 +14,21 @@ const IncidenciaSchema = Yup.object().shape({
 
 function IncidenciesResoldre() {
 
-    const [incidents, setIncident] = useState([])
-    const [products, setProducts] = useState([])
+    const [incidents, setIncident]              = useState([])
+    const [products, setProducts]               = useState([])
     const [orderlineStatus, setOrderlineStatus] = useState([])
-    const [statuses, setStatus] = useState([])
-    const [userProfile, setUserProfile] = useState([])
-    const [suppliers, setSupplier] = useState([])
-    const [showModal, setShowModal] = useState(false)
-    const [tipoModal, setTipoModal] = useState("Crear")
+    const [statuses, setStatus]                 = useState([])
+    const [userProfile, setUserProfile]         = useState([])
+    const [suppliers, setSupplier]              = useState([])
+    const [showModal, setShowModal]             = useState(false)
+    const [tipoModal, setTipoModal]             = useState("Crear")
+    const [filters, setFilters]                 = useState({ orderlineStatus: '' });
     //Paginació
-    const [currentPage, setCurrentPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(1)
-    const [incidentsPage, setIncidentsPage] = useState([])
+    const [currentPage, setCurrentPage]         = useState(1)
+    const [totalPages, setTotalPages]           = useState(1)
+    const [incidentsPage, setIncidentsPage]     = useState([])
     //Acaba paginació
-    const [valorsInicials, setValorsInicials] = useState({
+    const [valorsInicials, setValorsInicials]   = useState({
         product: '',
         quantity_received: '',
         description: '',
@@ -73,6 +74,20 @@ function IncidenciesResoldre() {
         const currentItems = incidents.slice(indexOfFirstItem, indexOfLastItem);
         setIncidentsPage(currentItems)
     }, [currentPage, incidents])
+
+    /*Proves de filtres*/
+    const handleFilter = (newFilters) => {
+        setFilters(newFilters);
+        const filteredIncidents = incidents.filter(incident =>
+            (newFilters.orderlineStatus === '' || incident.orderline_status_id === Number(newFilters.orderlineStatus))
+        );
+        setIncidentsPage(filteredIncidents);
+    };
+
+    const handleClear = () => {
+        setFilters({ status: '' });
+        setIncidentsPage(incidents);
+    };
 
     const getStatusNames = () => {
         const apiURL = import.meta.env.VITE_API_URL
@@ -239,7 +254,8 @@ function IncidenciesResoldre() {
 
     return (
         <>
-            <Filtres />
+            <Filtres onFilter={handleFilter} onClear={handleClear} />
+
             {/*Botó per a fer un alta <Button variant='success' onClick={()=>{canviEstatModal(); setTipoModal("Crear")}}>Llistat ordres de recepció</Button>*/}
             <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
                 <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
