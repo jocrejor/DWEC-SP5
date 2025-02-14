@@ -1,13 +1,9 @@
 import { useState } from 'react'
 import logo from '../assets/logo_footer2.png';
 import '../App'
-<<<<<<<<< Temporary merge branch 1
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-
+import { Link,useNavigate  } from 'react-router-dom';
 import Nav from 'react-bootstrap/Nav';
 import { Modal,Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 
 
 function Lateral() {
@@ -17,15 +13,6 @@ function Lateral() {
     const liInactive = 'list-group-item fondo-azul-claro';
     const linkActive = 'text-decoration-none d-block';
     const linkInactive = 'text-decoration-none text-white d-block';
-
-=========
-import Nav from 'react-bootstrap/Nav';
-import { Modal,Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-
-
-function Lateral() {
-    const [showModal, setShowModal] = useState(false);
   
     const navigate = useNavigate();
 

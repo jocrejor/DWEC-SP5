@@ -7,8 +7,8 @@ import axios from 'axios';
 import Header from './Header';
 
 const SignupSchema = Yup.object().shape({
-  email: Yup.string().email('Correu electrònic invàlid').required('Camp obligatori'),
-  password: Yup.string().min(6, 'Molt curta').max(20, 'Molt llarga').required('Camp obligatori'),
+  email: Yup.string().email('Correo electrónico inválido').required('Campo obligatorio'),
+  password: Yup.string().min(6, 'Demasiado corta').max(20, 'Demasiado larga').required('Campo obligatorio'),
 });
 
 function Login() {
