@@ -4,21 +4,23 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import Filtres from '../Filtres';
+import FilterEstanteria from './FilterEstanteria';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const ShelfSchema = Yup.object().shape({
   name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
-  storage_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
-  street_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
+  storage_id: Yup.string().required('Valor requerit'),
+  street_id: Yup.string().required('Valor requerit'),
 });
 
 function Shelf() {
   const [shelves, setShelves] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false); // For viewing shelf
   const [modalType, setModalType] = useState("Crear");
   const [initialValues, setInitialValues] = useState({ name: '', storage_id: '', street_id: '' });
+  const [selectedShelf, setSelectedShelf] = useState(null); // Store selected shelf
   const navigate = useNavigate();
   const { magatzem, carrer } = useParams();
 
@@ -31,42 +33,45 @@ function Shelf() {
           setShelves(response.data);
         })
         .catch(error => {
-          console.log('Error fetching data:', error);
+          console.error('Error fetching shelves:', error);
         });
     }
   }, [magatzem, carrer]);
 
-  const viewSupplier = async (id) => {
+  const deleteShelf = async (id) => {
     try {
       await axios.delete(`${apiUrl}/shelf/${id}`, {
         headers: { "auth-token": localStorage.getItem("token") }
       });
       setShelves(shelves.filter(item => item.id !== id));
     } catch (error) {
-      console.log('Error deleting shelf:', error);
+      console.error('Error deleting shelf:', error);
     }
   };
 
-  const deleteSuppliers = async (id) => {
-    try {
-      await axios.delete(`${apiUrl}/supplier/${id}`, {
-        headers: { "auth-token": localStorage.getItem("token") }
-      });
-      // After deleting the supplier, you may want to update the list
-      setShelves(shelves.filter(item => item.id !== id));
-    } catch (error) {
-      console.log('Error deleting supplier:', error);
-    }
-  };
-
-  const modSuppliers = (values) => {
+  const editShelf = (values) => {
     setModalType("Modificar");
     setInitialValues(values);
     setShowModal(true);
   };
 
-  const openModal = () => {
-    setShowModal(!showModal);
+  const viewShelf = (shelf) => {
+    setSelectedShelf(shelf);  // Set the selected shelf's data
+    setShowViewModal(true);    // Open the modal
+  };
+
+  const modSuppliers = (valors) => {
+    console.log("Modifying supplier:", valors);
+    editShelf(valors);
+  };
+
+  const deleteSuppliers = (id) => {
+    console.log("Deleting supplier:", id);
+    deleteShelf(id);
+  };
+
+  const canviEstatModal = () => {
+    setShowModal(true);
     setModalType("Crear");
   };
 
@@ -76,7 +81,7 @@ function Shelf() {
 
   return (
     <>
-      <Filtres />
+      <FilterEstanteria />
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -95,41 +100,42 @@ function Shelf() {
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
-            <button type="button" onClick={openModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+            <button type="button" onClick={canviEstatModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
               <i className="bi bi-plus-circle text-white pe-1"></i>Crear Estanteria
             </button>
           </div>
         </div>
       </div>
+
       <h2>Magatzem: {magatzem}</h2>
       <h2>Carrer: {carrer}</h2>
+
       <div className="table-responsive mt-3">
         <table className="table table-striped text-center">
           <thead className="table-active border-bottom border-dark-subtle">
             <tr>
-              <th scope="col"><input className="form-check-input" type="checkbox" name="" id="" /></th>
-              <th scope="col">ID</th>
-              <th scope="col">Nom</th>
-              <th scope="col">ID Magatzem</th>
-              <th scope="col">ID Carrer</th>
-              <th scope="col">Espai</th>
-              <th scope="col">Accions</th>
-              
+              <th><input className="form-check-input" type="checkbox" /></th>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>ID Magatzem</th>
+              <th>ID Carrer</th>
+              <th>Espai</th>
+              <th>Accions</th>
             </tr>
           </thead>
           <tbody>
-            {shelves.map((values) => (
-              <tr key={values.id}>
-                <td scope="row" data-cell="Seleccionar">
-                  <input className="form-check-input" type="checkbox" name="" id="" />
-                </td>
-                <td>{values.id}</td>
-                <td>{values.name}</td>
-                <td>{values.storage_id}</td>
-                <td>{values.street_id}</td>
-                <td><Button onClick={() => handleShelfClick(values.id)}>Espai</Button></td>
-                <td data-no-colon="true">
-                    <span onClick={() => viewSupplier(values)} style={{ cursor: "pointer" }}>
+            {shelves
+              .filter(shelf => shelf.storage_id === magatzem && shelf.street_id === carrer)
+              .map((values) => (
+                <tr key={values.id}>
+                  <td><input className="form-check-input" type="checkbox" /></td>
+                  <td>{values.id}</td>
+                  <td>{values.name}</td>
+                  <td>{values.storage_id}</td>
+                  <td>{values.street_id}</td>
+                  <td><Button onClick={() => handleShelfClick(values.id)}>Espai</Button></td>
+                  <td data-no-colon="true">
+                    <span onClick={() => viewShelf(values)} style={{ cursor: "pointer" }}>
                       <i className="bi bi-eye"></i>
                     </span>
 
@@ -140,9 +146,9 @@ function Shelf() {
                     <span onClick={() => deleteSuppliers(values.id)} style={{ cursor: "pointer" }}>
                       <i className="bi bi-trash"></i>
                     </span>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
         <nav aria-label="Page navigation example" className="d-block">
@@ -164,7 +170,30 @@ function Shelf() {
         </nav>
       </div>
 
-      {/* Modal for Create/Modify Shelf */}
+      {/* Modal for Viewing Shelf */}
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Visualitzar Estanteria</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedShelf ? (
+            <div>
+              <p><strong>Nom:</strong> {selectedShelf.name}</p>
+              <p><strong>ID Magatzem:</strong> {selectedShelf.storage_id}</p>
+              <p><strong>ID Carrer:</strong> {selectedShelf.street_id}</p>
+            </div>
+          ) : (
+            <p>No shelf selected.</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            Tancar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal for Creating/Editing Shelf */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{modalType} Estanteria</Modal.Title>
@@ -186,50 +215,29 @@ function Shelf() {
                 }
                 setShowModal(false);
                 window.location.reload();
-              } catch (e) {
-                console.log('Error on submit:', e);
+              } catch (error) {
+                console.error('Error on submit:', error);
               }
             }}
           >
-            {({ values, errors, touched }) => (
+            {({ errors, touched }) => (
               <Form>
                 <div>
-                  <label htmlFor='name'>Nom</label>
-                  <Field
-                    type="text"
-                    name="name"
-                    placeholder="Nom de l'estanteria"
-                    autoComplete="off"
-                    value={values.name}
-                    className="form-control"
-                  />
+                  <label>Nom</label>
+                  <Field type="text" name="name" className="form-control" />
                   {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
                 </div>
                 <div>
-                  <label htmlFor='storage_id'>ID Magatzem</label>
-                  <Field
-                    type="text"
-                    name="storage_id"
-                    placeholder="ID del magatzem"
-                    autoComplete="off"
-                    value={values.storage_id}
-                    className="form-control"
-                  />
+                  <label>ID Magatzem</label>
+                  <Field type="text" name="storage_id" className="form-control" />
                   {errors.storage_id && touched.storage_id && <div className="text-danger">{errors.storage_id}</div>}
                 </div>
                 <div>
-                  <label htmlFor='street_id'>ID Carrer</label>
-                  <Field
-                    type="text"
-                    name="street_id"
-                    placeholder="ID del carrer"
-                    autoComplete="off"
-                    value={values.street_id}
-                    className="form-control"
-                  />
+                  <label>ID Carrer</label>
+                  <Field type="text" name="street_id" className="form-control" />
                   {errors.street_id && touched.street_id && <div className="text-danger">{errors.street_id}</div>}
                 </div>
-                <Button type="submit" variant="primary">{modalType === "Crear" ? "Crear" : "Modificar"}</Button>
+                <Button type="submit">{modalType === "Crear" ? "Crear" : "Modificar"}</Button>
               </Form>
             )}
           </Formik>

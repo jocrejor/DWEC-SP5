@@ -43,4 +43,4 @@ function Filtres(props) {
     )
 }
 
-export default Filtres
+export default Filtres;

@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import Filtres from '../Filtres';
+import FiltresEspai from './FiltresEspai';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -14,27 +14,37 @@ const SpaceSchema = Yup.object().shape({
     quantity: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
     maxVol: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
     maxWeight: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
-    storage_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
-    street_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
-    selft_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
+    storage_id: Yup.string().required('Valor requerit'),
+    street_id: Yup.string().required('Valor requerit'),
+    shelf_id: Yup.string().required('Valor requerit'),
 });
 
 function Space() {
     const [spaces, setSpaces] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false); // Modal para ver el espacio
     const [modalType, setModalType] = useState("Crear");
     const [initialValues, setInitialValues] = useState({
-        name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', selft_id: ''
+        name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', shelf_id: ''
     });
+    const [selectedSpace, setSelectedSpace] = useState(null); // Para almacenar el espacio seleccionado
     const navigate = useNavigate();
     const { magatzem, carrer, estanteria } = useParams();
 
     useEffect(() => {
         if (magatzem && carrer && estanteria) {
-            axios.get(`${apiUrl}/space?storage_id=${magatzem}&street_id=${carrer}&selft_id=${estanteria}`, {
+            axios.get(`${apiUrl}/space`, {
                 headers: { "auth-token": localStorage.getItem("token") }
             })
-                .then(response => setSpaces(response.data))
+                .then(response => {
+
+                    const filteredSpaces = response.data.filter(space =>
+                        space.storage_id === magatzem &&
+                        space.street_id === carrer &&
+                        space.shelf_id === estanteria
+                    );
+                    setSpaces(filteredSpaces);
+                })
                 .catch(error => console.error('Error fetching data:', error));
         }
     }, [magatzem, carrer, estanteria]);
@@ -50,11 +60,6 @@ function Space() {
         }
     };
 
-    // Define the missing functions
-    const viewSupplier = (valors) => {
-        console.log("Viewing supplier:", valors);
-        // Implement the viewing logic (e.g., navigate to a detailed view)
-    };
     const editSpace = (values) => {
         setModalType("Modificar");
         setInitialValues(values);
@@ -66,34 +71,25 @@ function Space() {
         setModalType("Crear");
     };
 
+    // Mostrar el modal con los detalles del espacio
+    const viewSpace = (space) => {
+        setSelectedSpace(space); // Establecer el espacio seleccionado
+        setShowViewModal(true); // Mostrar el modal
+    };
+
+    const modSuppliers = (valors) => {
+        console.log("Modificando espacio:", valors);
+        editSpace(valors);
+    };
+
+    const deleteSuppliers = (id) => {
+        console.log("Eliminando espacio:", id);
+        deleteSpace(id);
+    };
+
     return (
         <>
-            <Filtres />
-
-            <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
-                <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
-                    <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
-                        <div className="form-floating bg-white">
-                            <select className="form-select" id="floatingSelect" aria-label="Seleccione una opció">
-                                <option selected>Tria una opció</option>
-                                <option value="1">Eliminar</option>
-                            </select>
-                            <label htmlFor="floatingSelect">Accions en lot</label>
-                        </div>
-                        <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button">
-                            <i className="bi bi-check-circle text-white px-1"></i>Aplicar
-                        </button>
-                    </div>
-                </div>
-                <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
-                <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
-                    <div className="d-flex h-100 justify-content-xl-end">
-                        <button type="button" onClick={toggleModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
-                            <i className="bi bi-plus-circle text-white pe-1"></i>Crear Espai
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <FiltresEspai />
 
             <h2>Magatzem: {magatzem}</h2>
             <h2>Carrer: {carrer}</h2>
@@ -131,17 +127,17 @@ function Space() {
                                     <td>{values.maxWeight}</td>
                                     <td>{values.storage_id}</td>
                                     <td>{values.street_id}</td>
-                                    <td>{values.selft_id}</td>
+                                    <td>{values.shelf_id}</td>
                                     <td data-no-colon="true">
-                                        <span onClick={() => viewSupplier(values)} style={{ cursor: "pointer" }}>
+                                        <span onClick={() => viewSpace(values)} style={{ cursor: "pointer" }}>
                                             <i className="bi bi-eye"></i>
                                         </span>
 
-                                        <span onClick={() => editSpace(values)} className="mx-2" style={{ cursor: "pointer" }}>
+                                        <span onClick={() => modSuppliers(values)} className="mx-2" style={{ cursor: "pointer" }}>
                                             <i className="bi bi-pencil-square"></i>
                                         </span>
 
-                                        <span onClick={() => deleteSpace(values.id)} style={{ cursor: "pointer" }}>
+                                        <span onClick={() => deleteSuppliers(values.id)} style={{ cursor: "pointer" }}>
                                             <i className="bi bi-trash"></i>
                                         </span>
                                     </td>
@@ -169,13 +165,42 @@ function Space() {
                 </div>
             )}
 
+            {/* Modal para Ver Espacio */}
+            <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Visualitzar Espai</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedSpace ? (
+                        <div>
+                            <p><strong>Nom:</strong> {selectedSpace.name}</p>
+                            <p><strong>ID Producte:</strong> {selectedSpace.product_id}</p>
+                            <p><strong>Quantitat:</strong> {selectedSpace.quantity}</p>
+                            <p><strong>Volumen:</strong> {selectedSpace.maxVol}</p>
+                            <p><strong>Pes:</strong> {selectedSpace.maxWeight}</p>
+                            <p><strong>ID Magatzem:</strong> {selectedSpace.storage_id}</p>
+                            <p><strong>ID Carrer:</strong> {selectedSpace.street_id}</p>
+                            <p><strong>ID Estanteria:</strong> {selectedSpace.shelf_id}</p>
+                        </div>
+                    ) : (
+                        <p>No se ha seleccionado ningún espacio.</p>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+                        Tancar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Modal para Crear/Modificar Espacio */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>{modalType} Espai</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Formik
-                        initialValues={modalType === 'Modificar' ? initialValues : { name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', selft_id: '' }}
+                        initialValues={modalType === 'Modificar' ? initialValues : { name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', shelf_id: '' }}
                         validationSchema={SpaceSchema}
                         onSubmit={async (values) => {
                             try {

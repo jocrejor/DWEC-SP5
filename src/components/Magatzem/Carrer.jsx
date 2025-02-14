@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import Filtres from '../Filtres';
+import FiltresCarrer from './FiltresCarrer';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -15,11 +15,17 @@ const StreetSchema = Yup.object().shape({
 
 function Street() {
   const [streets, setStreets] = useState([]);
+  const [filteredStreets, setFilteredStreets] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false); // Modal de visualización
   const [tipoModal, setTipoModal] = useState("Crear");
   const [valorsInicials, setValorsInicials] = useState({ name: '', storage_id: '' });
+  const [selectedStreet, setSelectedStreet] = useState(null); // Estado para la calle seleccionada
   const navigate = useNavigate();
   const { magatzem } = useParams();
+  const [filters, setFilters] = useState({
+    storage_id: magatzem,
+  });
 
   useEffect(() => {
     axios.get(`${apiUrl}/street?storage_id=${magatzem}`, {
@@ -27,11 +33,20 @@ function Street() {
     })
       .then(response => {
         setStreets(response.data);
+        setFilteredStreets(response.data);
       })
       .catch(error => {
         console.log('Error fetching data:', error);
       });
   }, [magatzem]);
+
+  useEffect(() => {
+
+    const filtered = streets.filter(street => {
+      return street.storage_id === filters.storage_id;
+    });
+    setFilteredStreets(filtered);
+  }, [filters, streets]);
 
   const eliminarStreet = async (id) => {
     try {
@@ -59,25 +74,29 @@ function Street() {
     setTipoModal("Crear");
   };
 
-  // Define the missing functions
+
+  const handleFilter = (filters) => {
+    setFilters(filters);
+  };
+
   const viewSupplier = (valors) => {
-    console.log("Viewing supplier:", valors);
-    // Implement the viewing logic (e.g., navigate to a detailed view)
+    setSelectedStreet(valors);  // Establece la calle seleccionada
+    setShowViewModal(true);     // Muestra el modal de visualización
   };
 
   const modSuppliers = (valors) => {
     console.log("Modifying supplier:", valors);
-    modificarStreet(valors); // Reusing the existing modificarStreet logic
+    modificarStreet(valors);
   };
 
   const deleteSuppliers = (id) => {
     console.log("Deleting supplier:", id);
-    eliminarStreet(id); // Reusing the existing eliminarStreet logic
+    eliminarStreet(id);
   };
 
   return (
     <>
-      <Filtres />
+      <FiltresCarrer onFilter={handleFilter} onClear={() => setFilters({ storage_id: magatzem })} initialStorageId={magatzem} />
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -116,7 +135,7 @@ function Street() {
             </tr>
           </thead>
           <tbody>
-            {streets.map((valors) => (
+            {filteredStreets.map((valors) => (
               <tr key={valors.id}>
                 <td scope="row" data-cell="Seleccionar">
                   <input className="form-check-input" type="checkbox" name="" id="" />
@@ -126,18 +145,18 @@ function Street() {
                 <td>{valors.storage_id}</td>
                 <td><Button onClick={() => handleStreetClick(valors.id)}>Estanteria</Button></td>
                 <td data-no-colon="true">
-                    <span onClick={() => viewSupplier(valors)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-eye"></i>
-                    </span>
+                  <span onClick={() => viewSupplier(valors)} style={{ cursor: "pointer" }}>
+                    <i className="bi bi-eye"></i>
+                  </span>
 
-                    <span onClick={() => modSuppliers(valors)} className="mx-2" style= {{ cursor: "pointer" }}>
-                      <i className="bi bi-pencil-square"></i>
-                    </span>
+                  <span onClick={() => modSuppliers(valors)} className="mx-2" style={{ cursor: "pointer" }}>
+                    <i className="bi bi-pencil-square"></i>
+                  </span>
 
-                    <span onClick={() => deleteSuppliers(valors.id)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-trash"></i>
-                    </span>
-                  </td>
+                  <span onClick={() => deleteSuppliers(valors.id)} style={{ cursor: "pointer" }}>
+                    <i className="bi bi-trash"></i>
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -161,7 +180,27 @@ function Street() {
         </nav>
       </div>
 
-      {/* Modal for Create/Modify Street */}
+      {/* Modal para visualización de la calle */}
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Visualitzar Carrer</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedStreet && (
+            <>
+              <p><strong>ID:</strong> {selectedStreet.id}</p>
+              <p><strong>Nom:</strong> {selectedStreet.name}</p>
+              <p><strong>ID Magatzem:</strong> {selectedStreet.storage_id}</p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            Tancar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Carrer</Modal.Title>
