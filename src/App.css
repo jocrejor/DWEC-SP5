@@ -19,13 +19,13 @@
     color: var(--lightBlue);
 }
 
+
 td, th{
     color: var(--lightBlue) !important;
 }
 
 .fondo-azul{
-    background-color: var(--darkBlue);
-    background-color: var(--darkBlue);
+    background-color: var(--darkBlue) !important;
 }
 
 
@@ -113,49 +113,44 @@ li:hover i{
 
 .activo-2{
     background-color: var(--lightBlue) !important;
-    border: 1px solid var(--lightBlue);
-    background-color: var(--lightBlue) !important;
-    border: 1px solid var(--lightBlue);
+    border: 1px solid var(--lightBlue) !important;
     color: white !important;
 }
 
-#dropdown{
-    display: none;
+
+#pagination li {
+    cursor: pointer;
+}
+
+.outline-orange{
+    color: var(--orange);
+    border-color: var(--orange);
+    background-color: transparent;
+}
+
+.outline-orange:hover{
+    background-color:var(--orange);
+    color: white;
+    border-color: var(--orange);
+}
+
+.outline-blue{
+    color: var(--lightBlue);
+    border-color: var(--lightBlue);
+    background-color: transparent;
+}
+
+.outline-blue:hover{
+    background-color:var(--lightBlue);
+    color: white;
+    border-color: var(--lightBlue);
 }
 
 
-/*HOVER ICONOS*/
-.icono:hover{
-    color: var(--orange) !important;
-}
 
-#dropdown{
-    display: none;
-}
-
-
-/*HOVER ICONOS*/
-.icono:hover{
-    color: var(--orange) !important;
-}
 
 @media only screen and (max-width: 1199px)
 {
-
-    nav{
-        display: none;
-        top: 5.7em;
-    }
-
-    .show{
-        border-top: 1px solid white;
-        position: absolute;
-        display: block;
-        width: 100%;
-        max-height: calc(100vh - 5.7em);
-        animation: slideDown 0.4s ease-in-out;
-        z-index: 5;
-    }
 
     #logo {
         width: 5em;
@@ -165,16 +160,6 @@ li:hover i{
 
     th{
         display: none;
-    }
-
-    td{
-        display: block;
-    }
-
-    td::before{
-        content: attr(data-cell) ": ";
-        font-weight: 700;
-        text-transform: capitalize;
     }
 
     .m-customized{
@@ -201,30 +186,4 @@ li:hover i{
         content: ""; 
     }
 
-    /*********** DESPLAZAMIENTO DEL MENÚ ***********/
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-
-}
-
-
-/*Gabi*/
-.page-link {
-    background-color: var(--orange) !important;
-    color: white !important;
-}
-
-.page-link:hover {
-    background-color: var(--lightBlue) !important;
-    color: white !important;
 }

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Row, Col, Table, Button, Tab } from 'react-bootstrap/'
 import Header from '../Header'
 import axios from 'axios';
-
+import { movMagatzem } from './movMagatzem';
 
 
 
@@ -13,6 +13,8 @@ function CompletarInventari() {
   const { id } = useParams();
   const navigate = useNavigate();
   const apiURL = import.meta.env.VITE_API_URL;
+  const user = JSON.parse(localStorage.getItem('user'));
+
 
   const [storages, setStorages] = useState([]);
   const [selectedInventory, setSelectedInventory] = useState(null);
@@ -27,43 +29,43 @@ function CompletarInventari() {
 
   useEffect(() => {
     const fetchData = async () => {
-      axios.get(`${apiURL}inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setSelectedInventory(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/inventory_status`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setInventoryStatus(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setInventoryLines(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}storage`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/storage`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setStorages(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}product`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/product`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setProducts(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}space`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/space`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setSpaces(response.data);
         })
         .catch(e => { console.log(e.response.data) })
 
-      axios.get(`${apiURL}inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
+      axios.get(`${apiURL}/inventory_reason`, { headers: { "auth-token": localStorage.getItem('token') } })
         .then(response => {
           setInventoryReasons(response.data);
         })
@@ -111,16 +113,16 @@ function CompletarInventari() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const lineId = name;
-    const field = 'justification';
-    console.log(value)
-    console.log(name)
+    const lineId = parseInt(name);
+    const field = 'inventory_reason_id';
+    const newValue = parseInt(value);
+
     setUpdatedInventoryLines((prev) => {
       const index = prev.findIndex((line) => line.id === lineId);
 
       if (index != -1) {
         const updatedLines = [...prev];
-        updatedLines[index] = { ...updatedLines[index], [field]: value };
+        updatedLines[index] = { ...updatedLines[index], [field]: newValue };
         return updatedLines;
       }
       return [
@@ -133,11 +135,14 @@ function CompletarInventari() {
   const handleSubmit = async () => {
     const updatedLines = selectedInventoryLines.map(async (line) => {
       const updatedLine = updatedInventoryLines.find((updated) => updated.id === line.id);
-
+      const defaultReason = inventoryReasons.find(reason => reason.name === "Recompte cíclic")?.id;
+      console.log(updatedLine)
       if (updatedLine) {
-        line = { ...line, justification: updatedLine?.justification }
+        line = { ...line, inventory_reason_id: updatedLine?.inventory_reason_id || defaultReason}
+        console.log('AQUI 1:')
         console.log(line)
-        //await updateId(url, "InventoryLine", line.id, line);
+        axios.put(`${apiURL}/inventoryline/${line.id}`, line, { headers: { "auth-token": localStorage.getItem('token') } })
+        movMagatzem(line.product_id, user.id,line.quantity_real, "inventoryline", line.id, line.storage_id, line.street_id, line.shelf_id, line.space_id)
         return line;
       }
 
@@ -146,26 +151,41 @@ function CompletarInventari() {
     setSelectedInventoryLines(updatedLines);
 
     selectedInventoryLines.map(async (line) => {
-      const space = spaces.find((space) => space.id === line.space_id);
-      const updatedQuantity = space.quantity - line.real_quantity;
-      console.log(space.id + ' : product-id: ' + line.product_id + ' - ' + space.quantity + ' - ' + line.real_quantity + ' = ' + updatedQuantity)
+      const space = spaces.find((space) => 
+                  space.id === line.space_id && 
+                  space.storage_id === line.storage_id &&
+                  space.shelf_id === line.shelf_id &&
+                  space.street_id === line.street_id);
 
+                  console.log(line)
+
+      const updatedQuantity = (space?.quantity === null) ? 100 - line.quantity_real : space?.quantity - line.quantity_real;
+      // No actualiza el espacio
       if (space) {
-        const updatedSpace = { ...space, quantity: updatedQuantity || space.quantity }
-        console.log(updatedSpace);
-        //await updateId(url, 'Space', space.id, updatedSpace)
-        axios.put(`${apiURL}space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+        const updatedSpace = { ...space, 
+          product_id: (space?.product_id === null) ? line.product_id : space?.product_id, 
+          quantity: updatedQuantity || space?.quantity }
+
+          console.log()
+       // axios.put(`${apiURL}/space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
       };
+
+      
+
     })
 
     const updatedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Completat').id }
 
-    //await updateId(url, 'Inventory', selectedInventory.id, updatedInvetory);
-    axios.put(`${apiURL}inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+    //axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
     alert('Inventari completat amb èxit');
-    navigate('/inventaris');
+   // navigate('/inventaris');
 
+  }
+
+  const changeDate = (date) => {
+    const newDate = new Date(date);
+    return newDate.toLocaleDateString();
   }
 
   return (
@@ -186,7 +206,7 @@ function CompletarInventari() {
               <tbody className='text-light-blue'>
                 <tr>
                   <td data-cell="ID Inventari: ">{selectedInventory?.id}</td>
-                  <td data-cell="Data: ">{selectedInventory?.created_at}</td>
+                  <td data-cell="Data: ">{changeDate(selectedInventory?.created_at)}</td>
                   <td data-cell="Estat: ">{selectedInventory?.inventory_status}</td>
                   <td data-cell="Magatzem: ">{(storages.find(storage => storage.id === selectedInventory?.storage_id))?.name}</td>
                 </tr>
@@ -205,25 +225,25 @@ function CompletarInventari() {
               <tbody>
                 {
                   (selectedInventoryLines.length === 0) ?
-                    <tr><td colSpan={4} className='text-center'>No hay nada</td></tr> :
+                    <tr><td colSpan={4} className='text-center'>No existix informació per a ser mostrat.</td></tr> :
                     selectedInventoryLines.map((value) => {
 
                       return (
                         <tr key={value.id}>
                           <td data-cell="Producte: ">{(products.find(product => product.id === value.product_id))?.name}</td>
                           <td data-cell="Quantitat Estimada: ">{value.quantity_estimated}</td>
-                          <td data-cell="Quantitat Real: ">{value.real_quantity}</td>
+                          <td data-cell="Quantitat Real: ">{value.quantity_real}</td>
                           <td data-cell="Justificació: ">
                             <select
                               name={value.id}
                               className='form-select'
                               onChange={handleInputChange}
-                              value={value.justification}
+                              defaultValue={value.inventory_reason_id || inventoryReasons.find(reason => reason.name === "Recompte cíclic")?.id}
                             >
                               <option>Selecciona una opció</option>
                               {inventoryReasons.map((reason) => {
                                 return (
-                                  <option value={reason.id} id={reason.id}>{reason.name}</option>
+                                  <option value={reason.id} key={reason.id}>{reason.name}</option>
                                 )
                               })}
                             </select>
