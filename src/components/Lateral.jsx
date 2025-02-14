@@ -1,7 +1,6 @@
 import {useState}from 'react'
 import logo from '../assets/logo_footer2.png';
 import '../App'
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import Nav from 'react-bootstrap/Nav';
