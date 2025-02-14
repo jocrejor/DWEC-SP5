@@ -28,4 +28,4 @@ function DadesGeografiques() {
   }
   
 
-export default DadesGeografiques
+export default DadesGeografiques;

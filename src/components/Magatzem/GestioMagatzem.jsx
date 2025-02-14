@@ -4,7 +4,7 @@ import {Routes,Route,Outlet } from 'react-router-dom';
 import Magatzem from './Magatzem';
 import Carrer from './Carrer';
 import Estanteria from './Estanteria';
-import Espai from './Espai';
+import Espai from './Espai'; 
 
 
 const GestioMagatzem = () => {

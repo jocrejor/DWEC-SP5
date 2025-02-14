@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { url, postData, getData, deleteData, updateId } from '../../apiAccess/crud';
-import { Button, Modal } from 'react-bootstrap';
-import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
+import Filtres from '../Filtres';
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const SpaceSchema = Yup.object().shape({
     name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
@@ -12,175 +15,187 @@ const SpaceSchema = Yup.object().shape({
     maxVol: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
     maxWeight: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
     storage_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
-    steet_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
+    street_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
     selft_id: Yup.string().min(3, 'Valor mínim de 3 caracters.').max(30, 'El valor màxim és de 30 caracters').required('Valor requerit'),
 });
 
 function Space() {
-    const [spaces, setSpace] = useState([]);
+    const [spaces, setSpaces] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [tipoModal, setTipoModal] = useState("Crear");
-    const [valorsInicials, setValorsInicials] = useState({ name: '', product_id: '', quantity: '', maxVol:'', maxWeight: '', storage_id: '', street_id: '', selft_id: '' });
+    const [modalType, setModalType] = useState("Crear");
+    const [initialValues, setInitialValues] = useState({
+        name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', selft_id: ''
+    });
+    const navigate = useNavigate();
+    const { magatzem, carrer, estanteria } = useParams();
 
-     const {magatzem,carrer,estanteria}= useParams();
-
-
-    useEffect( () => {
-        const fetchData = async () => {
-        const data = await getData(url, "Space")
-        setSpace(data)
+    useEffect(() => {
+        if (magatzem && carrer && estanteria) {
+            axios.get(`${apiUrl}/space?storage_id=${magatzem}&street_id=${carrer}&selft_id=${estanteria}`, {
+                headers: { "auth-token": localStorage.getItem("token") }
+            })
+                .then(response => setSpaces(response.data))
+                .catch(error => console.error('Error fetching data:', error));
         }
-        fetchData()
-    }, [])
+    }, [magatzem, carrer, estanteria]);
 
-    const eliminarSpace = (id) => {
-        deleteData(url, "Space", id)
-        const newshelfs = spaces.filter(item => item.id != id)
-        setSpace(newshelfs)
-    }
+    const deleteSpace = async (id) => {
+        try {
+            await axios.delete(`${apiUrl}/space/${id}`, {
+                headers: { "auth-token": localStorage.getItem("token") }
+            });
+            setSpaces(spaces.filter(item => item.id !== id));
+        } catch (error) {
+            console.error('Error deleting space:', error);
+        }
+    };
 
-    const modificarSpace = (valors) => {
-        setTipoModal("Modificar")
-        setValorsInicials(valors);
-    }
+    // Define the missing functions
+    const viewSupplier = (valors) => {
+        console.log("Viewing supplier:", valors);
+        // Implement the viewing logic (e.g., navigate to a detailed view)
+    };
+    const editSpace = (values) => {
+        setModalType("Modificar");
+        setInitialValues(values);
+        setShowModal(true);
+    };
 
-
-    const canviEstatModal = () => {
-        setShowModal(!showModal)
-    }
+    const toggleModal = () => {
+        setShowModal(!showModal);
+        setModalType("Crear");
+    };
 
     return (
         <>
-              <h2>magatzem {magatzem}</h2>
-              <h2>carrer {carrer}</h2>
-              <h2>estanteria {estanteria} </h2>
-            <Button variant='success' onClick={() => { canviEstatModal(); setTipoModal("Crear"); }}>Alta Espai</Button>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Nom</th>
-                        <th>Id Producte</th>
-                        <th>Quantitat</th>
-                        <th>Volumen</th>
-                        <th>Pes</th>
-                        <th>ID Magatzem</th>
-                        <th>ID Carrer</th>
-                        <th>ID Estanteria</th>
-                        <th>Modificar</th>
-                        <th>Eliminar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {(spaces.length === 0) ?
-                        <tr><td>No hi han espais</td></tr>
-                        : spaces.map((valors) => {
-                            return (
-                                <tr key={valors.id}>
-                                    <td>{valors.id}</td>
-                                    <td>{valors.name}</td>
-                                    <td>{valors.product_id}</td>
-                                    <td>{valors.quantity}</td>
-                                    <td>{valors.maxVol}</td>
-                                    <td>{valors.maxWeight}</td>
-                                    <td>{valors.storage_id}</td>
-                                    <td>{valors.street_id}</td>
-                                    <td>{valors.selft_id}</td>
-                                    <td><Button variant="warning" onClick={() => modificarSpace(valors)}>Modificar</Button></td>
-                                    <td><Button variant="primary" onClick={() => eliminarSpace(valors.id)}>Eliminar</Button></td>
-                                </tr>)
-                        })}
-                </tbody>
-            </table>
+            <Filtres />
 
-            <Modal show={showModal} onHide={canviEstatModal}>
-                <Modal.Header closeButton >
-                    <Modal.Title>{tipoModal} Espai</Modal.Title>
+            <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+                <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+                    <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+                        <div className="form-floating bg-white">
+                            <select className="form-select" id="floatingSelect" aria-label="Seleccione una opció">
+                                <option selected>Tria una opció</option>
+                                <option value="1">Eliminar</option>
+                            </select>
+                            <label htmlFor="floatingSelect">Accions en lot</label>
+                        </div>
+                        <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button">
+                            <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+                        </button>
+                    </div>
+                </div>
+                <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+                <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+                    <div className="d-flex h-100 justify-content-xl-end">
+                        <button type="button" onClick={toggleModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+                            <i className="bi bi-plus-circle text-white pe-1"></i>Crear Espai
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Magatzem: {magatzem}</h2>
+            <h2>Carrer: {carrer}</h2>
+            <h2>Estanteria: {estanteria}</h2>
+
+            {spaces.length === 0 ? (
+                <p>No hi han espais</p>
+            ) : (
+                <div className="table-responsive mt-3">
+                    <table className="table table-striped text-center">
+                        <thead className="table-active border-bottom border-dark-subtle">
+                            <tr>
+                                <th scope="col"><input className="form-check-input" type="checkbox" /></th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Nom</th>
+                                <th scope="col">ID Producte</th>
+                                <th scope="col">Quantitat</th>
+                                <th scope="col">Volumen</th>
+                                <th scope="col">Pes</th>
+                                <th scope="col">ID Magatzem</th>
+                                <th scope="col">ID Carrer</th>
+                                <th scope="col">ID Estanteria</th>
+                                <th scope="col">Accions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {spaces.map((values) => (
+                                <tr key={values.id}>
+                                    <td><input className="form-check-input" type="checkbox" /></td>
+                                    <td>{values.id}</td>
+                                    <td>{values.name}</td>
+                                    <td>{values.product_id}</td>
+                                    <td>{values.quantity}</td>
+                                    <td>{values.maxVol}</td>
+                                    <td>{values.maxWeight}</td>
+                                    <td>{values.storage_id}</td>
+                                    <td>{values.street_id}</td>
+                                    <td>{values.selft_id}</td>
+                                    <td data-no-colon="true">
+                                        <span onClick={() => viewSupplier(values)} style={{ cursor: "pointer" }}>
+                                            <i className="bi bi-eye"></i>
+                                        </span>
+
+                                        <span onClick={() => editSpace(values)} className="mx-2" style={{ cursor: "pointer" }}>
+                                            <i className="bi bi-pencil-square"></i>
+                                        </span>
+
+                                        <span onClick={() => deleteSpace(values.id)} style={{ cursor: "pointer" }}>
+                                            <i className="bi bi-trash"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <nav aria-label="Page navigation example" className="d-block">
+                        <ul className="pagination justify-content-center">
+                            <li className="page-item">
+                                <a className="page-link text-light-blue" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
+                            <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
+                            <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+                            <li className="page-item">
+                                <a className="page-link text-light-blue" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            )}
+
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{modalType} Espai</Modal.Title>
                 </Modal.Header>
-
                 <Modal.Body>
                     <Formik
-                        initialValues={tipoModal === 'Modificar' ? valorsInicials : { name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', selft_id: '' }}
+                        initialValues={modalType === 'Modificar' ? initialValues : { name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', selft_id: '' }}
                         validationSchema={SpaceSchema}
-                        onSubmit={values => {
-                            console.log(values)
-                            tipoModal === "Crear" ? postData(url, "Space", values) : updateId(url, "Space", values.id, values)
-                            canviEstatModal()
-
+                        onSubmit={async (values) => {
+                            try {
+                                if (modalType === "Crear") {
+                                    await axios.post(`${apiUrl}/space`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+                                } else {
+                                    await axios.put(`${apiUrl}/space/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } });
+                                }
+                                setShowModal(false);
+                                window.location.reload();
+                            } catch (error) {
+                                console.error('Error on submit:', error);
+                            }
                         }}
                     >
-                        {({ values, errors, touched }) => (
+                        {({ errors, touched }) => (
                             <Form>
-                                <div>
-                                    <label htmlFor='name'>Nom</label>
-                                    <Field type="text" name="name" placeholder="Nom del magatzem" autoComplete="off"
-                                        value={values.name}
-                                    />
-                                    {errors.name && touched.name ? <div>{errors.name}</div> : null}
-                                </div>
-
-                                <div>
-                                    <label htmlFor='product_id'>ID Prodcute</label>
-                                    <Field type="text" name="product_id" placeholder="Id del producte" autoComplete="off"
-                                        value={values.product_id}
-                                    />
-                                    {errors.product_id && touched.product_id ? <div>{errors.product_id}</div> : null}
-                                </div>
-
-                                <div>
-                                    <label htmlFor='quantity'>Quantitat</label>
-                                    <Field type="number" name="quantity" step="40" placeholder="Quantitat" autoComplete="off"
-                                        value={values.quantity}
-                                    />
-                                    {errors.quantity && touched.quantity ? <div>{errors.quantity}</div> : null}
-                                </div>
-
-                                <div>
-                                    <label htmlFor='maxVol'>Volum</label>
-                                    <Field type="number" name="maxVol" step="40" placeholder="Volumen" autoComplete="off"
-                                        value={values.maxVol}
-                                    />
-                                    {errors.maxVol && touched.maxVol ? <div>{errors.maxVol}</div> : null}
-                                </div>
-
-                                <div>
-                                    <label htmlFor='maxWeight'>Pes</label>
-                                    <Field type="number" name="maxWeight" step="40" placeholder="Pes" autoComplete="off"
-                                        value={values.maxWeight}
-                                    />
-                                    {errors.maxWeight && touched.maxWeight ? <div>{errors.maxWeight}</div> : null}
-                                </div>
-                                
-
-                                <div>
-                                    <label htmlFor='storage_id'>ID Magatzem</label>
-                                    <Field type="text" name="storage_id" placeholder="Id del magatzem" autoComplete="off"
-                                        value={values.storage_id}
-                                    />
-                                    {errors.storage_id && touched.storage_id ? <div>{errors.storage_id}</div> : null}
-                                </div>
-
-                                <div>
-                                    <label htmlFor='steet_id'>ID Carrer</label>
-                                    <Field type="text" name="street_id" placeholder="Id del carrer" autoComplete="off"
-                                        value={values.street_id}
-                                    />
-                                    {errors.stestreet_idet_id && touched.street_id ? <div>{errors.street_id}</div> : null}
-                                </div>
-
-                                <div>
-                                    <label htmlFor='selft_id'>ID Esatnteria</label>
-                                    <Field type="text" name="selft_id" placeholder="Id de la estanteria" autoComplete="off"
-                                        value={values.selft_id}
-                                    />
-                                    {errors.selft_id && touched.selft_id ? <div>{errors.selft_id}</div> : null}
-                                </div>
-
-
-                                <div>
-                                    <Button variant="secondary" onClick={canviEstatModal}>Close</Button>
-                                    <Button variant={tipoModal === "Modificar" ? "success" : "info"} type="submit">{tipoModal}</Button>
-                                </div>
+                                <Field type="text" name="name" placeholder="Nom de l'espai" className="form-control" />
+                                {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
+                                <Button variant="primary" type="submit">{modalType === "Crear" ? "Crear" : "Modificar"}</Button>
                             </Form>
                         )}
                     </Formik>

@@ -160,8 +160,21 @@ li:hover i{
     #logo {
         width: 5em;
     }
-    .m-customized{
-        margin-top: 5.8em;
+
+    /*Taula responsive*/
+
+    th{
+        display: none;
+    }
+
+    td{
+        display: block;
+    }
+
+    td::before{
+        content: attr(data-cell) ": ";
+        font-weight: 700;
+        text-transform: capitalize;
     }
 
     .m-customized{
