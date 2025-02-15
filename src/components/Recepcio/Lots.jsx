@@ -195,17 +195,31 @@ function Lots() {
                             <i className="bi bi-plus-circle icono"
                               role='button'
                               onClick={() => {
-                                canviEstatModal();
+                                
 
                                 const selectedProduct = products.find(p => p.id === valors.product_id);
                                 const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
 
                                 if (lotOSerie === "Lot") {
                                   setLotOrSerial("lot");
+                                  if (true) {
+                                    alert(`Este ${lotOrSerial} ya está creado`);
+                                    return;
+                                  }
                                 }
                                 else if (lotOSerie === "Serial") {
                                   setLotOrSerial("serie");
+                                  if (true) {
+                                    alert(`Esta ${lotOrSerial} ya está creada`);
+                                    return;
+                                  }
                                 }
+
+                                canviEstatModal();
+                                // if(true){
+                                //   alert(`Este ${lotOrSerial} ya está creado`);
+
+                                // }
 
                                 const orderReceptions = orderreception.find(
                                   (or) => or.id === valors.order_reception_id
