@@ -47,7 +47,7 @@ function limpiarCampos(resetForm, lotOrSerial, setErrorAgregar) {
 
 function LotsLotOSerie({
   products, canviEstatModal, showModal, valorsInicials, setValorsInicials,
-  lotOrSerial, guardado, setGuardado, errorAgregar, setErrorAgregar 
+  lotOrSerial, guardado, setGuardado, errorAgregar, setErrorAgregar
 }) {
   return (
     <>
@@ -67,6 +67,24 @@ function LotsLotOSerie({
                 if (guardado.length === 0) {
                   setErrorAgregar("No hi ha registres per gravar");
                   return;
+                }
+
+                //verifica que la cantidad total guardada coincida con quantity_received
+                const cantidadMaxima = Number(valorsInicials.quantity_received);
+                console.log("Cantidad max:", cantidadMaxima)
+                
+                const totalGuardado = guardado.reduce(
+                  (sum, item) => sum + Number(item.quantity),
+                  0
+                );
+                console.log("Total guardado:", totalGuardado)
+
+                if (totalGuardado !== cantidadMaxima) {
+                  setErrorAgregar("La quantitat total guardada no coincideix amb la quantitat rebuda");
+                  return;
+                }
+                else{
+                  setErrorAgregar("");
                 }
 
                 try {
@@ -104,18 +122,18 @@ function LotsLotOSerie({
                   return;
                 }
 
-                const cantidadMaxima = Number(valorsInicials.quantity_received);
+                // const cantidadMaxima = Number(valorsInicials.quantity_received);
 
-                const totalActual = guardado.reduce(
-                  (sum, guardado) => sum + Number(guardado.quantity), 0
-                );
+                // const totalActual = guardado.reduce(
+                //   (sum, guardado) => sum + Number(guardado.quantity), 0
+                // );
 
-                const nuevaCantidadGuardada = Number(values.quantity);
+                // const nuevaCantidadGuardada = Number(values.quantity);
 
-                if(totalActual + nuevaCantidadGuardada > cantidadMaxima){
-                  setErrorAgregar("La quantitat total no pot superar la quantitat rebuda");
-                  return;
-                }
+                // if(totalActual + nuevaCantidadGuardada > cantidadMaxima){
+                //   setErrorAgregar("La quantitat total no pot superar la quantitat rebuda");
+                //   return;
+                // }
 
 
 
