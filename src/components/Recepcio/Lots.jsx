@@ -34,19 +34,20 @@ function Lots() {
   const [guardado, setGuardado] = useState([]);
   const [errorAgregar, setErrorAgregar] = useState("");
   const [lotYaCreados, setLotYaCreados] = useState([]);
+  const [showModalVisualitzar, setShowModalVisualitzar] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
-      .then(
-        response => {
-          setLot(response.data)
-        })
-      .catch(
-        error => {
-          console.log(error)
-        }
-      )
+        .then(
+          response => {
+            setLot(response.data)
+          })
+        .catch(
+          error => {
+            console.log(error)
+          }
+        )
 
       axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
         .then(
@@ -206,11 +207,38 @@ function Lots() {
                           <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
 
                           <td data-no-colon="true">
+                            <i className="bi bi-eye icono"
+                              role='button'
+                              onClick={() => {
+                                const selectedProduct = products.find(p => p.id === valors.product_id);
+                                const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
+
+                                const hayLotOSerie = lots.some((lot) => lot.orderlinereception_id === valors.id);
+                                const hayLotOSerie2 = lotYaCreados.includes(valors.id);
+
+                                if (hayLotOSerie || hayLotOSerie2) {
+                                  console.log(`Visualizar ${valors.id}`);
+                                  setShowModalVisualitzar(true);
+                                }
+                                else {
+                                  if (lotOSerie === "Lot") {
+                                    alert(`No hi ha cap lot creat per a aquesta ordre encara.`)
+                                  }
+                                  else if (lotOSerie === "Serial") {
+                                    alert(`No hi ha cap sèrie creada per a aquesta ordre encara.`);
+                                  }
+                                }
+                              }}
+                            >
+
+                            </i>
+                          </td>
+
+                          <td data-no-colon="true">
                             <i className="bi bi-plus-circle icono"
                               role='button'
                               onClick={() => {
                                 console.log("Lot ya creados: ", lotYaCreados)
-                                
 
                                 const selectedProduct = products.find(p => p.id === valors.product_id);
                                 const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
