@@ -105,8 +105,8 @@ function CompletarInventari() {
 
 
   useEffect(() => {
-    console.log(updatedInventoryLines)
-    console.log(selectedInventoryLines)
+    //console.log(updatedInventoryLines)
+    //console.log(selectedInventoryLines)
 
   }, [updatedInventoryLines, selectedInventoryLines])
 
@@ -167,7 +167,7 @@ function CompletarInventari() {
           quantity: updatedQuantity || space?.quantity }
 
           console.log()
-       // axios.put(`${apiURL}/space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+       axios.put(`${apiURL}/space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
       };
 
       
@@ -176,10 +176,10 @@ function CompletarInventari() {
 
     const updatedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Completat').id }
 
-    //axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+    axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
     alert('Inventari completat amb èxit');
-   // navigate('/inventaris');
+    navigate('/inventaris');
 
   }
 
