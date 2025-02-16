@@ -17,6 +17,7 @@ function Lots() {
   const [orderline_status, setOrderLineStatus] = useState([]);
   const [orderlinereception, setOrderLineReception] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [tipoModal, setTipoModal] = useState('Crear')
   const [valorsInicials, setValorsInicials] = useState({
     name: '',
     product_id: '',
@@ -34,7 +35,7 @@ function Lots() {
   const [guardado, setGuardado] = useState([]);
   const [errorAgregar, setErrorAgregar] = useState("");
   const [lotYaCreados, setLotYaCreados] = useState([]);
-  const [showModalVisualitzar, setShowModalVisualitzar] = useState(false);
+  // const [showModalVisualitzar, setShowModalVisualitzar] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,6 +124,12 @@ function Lots() {
     setShowModal(!showModal);
   };
 
+  const hayLotOSerie = (valors) =>
+    lots.some((lot) => lot.orderlinereception_id === valors.id);
+
+  const hayLotOSerie2 = (valors) =>
+    lotYaCreados.includes(valors.id);
+
   return (
     <>
       <Header title="Llistat Lots" />
@@ -210,78 +217,84 @@ function Lots() {
 
                           <td data-no-colon="true">
                             <div className="d-lg-flex justify-content-lg-center gap-3">
-                            <i className="bi bi-eye icono"
-                              role='button'
-                              onClick={() => {
-                                const selectedProduct = products.find(p => p.id === valors.product_id);
-                                const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
+                              {(hayLotOSerie(valors) || hayLotOSerie2(valors)) ? (
+                                <i className="bi bi-eye icono"
+                                  role='button'
+                                  onClick={() => {
+                                    console.log(`Visualitzar ${valors.id}`);
 
-                                const hayLotOSerie = lots.some((lot) => lot.orderlinereception_id === valors.id);
-                                const hayLotOSerie2 = lotYaCreados.includes(valors.id);
+                                    const selectedProduct = products.find(p => p.id === valors.product_id);
+                                    const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
 
-                                if (hayLotOSerie || hayLotOSerie2) {
-                                  console.log(`Visualizar ${valors.id}`);
-                                  setShowModalVisualitzar(true);
-                                }
-                                else {
-                                  if (lotOSerie === "Lot") {
-                                    alert(`No hi ha cap lot creat per a aquesta ordre encara.`)
-                                  }
-                                  else if (lotOSerie === "Serial") {
-                                    alert(`No hi ha cap sèrie creada per a aquesta ordre encara.`);
-                                  }
-                                }
-                              }}
-                            >
+                                    if (lotOSerie === "Lot") {
+                                      setLotOrSerial("lot");
+                                    }
+                                    else if (lotOSerie === "Serial") {
+                                      setLotOrSerial("serie");
+                                    }
 
-                            </i>
-                            <i className="bi bi-plus-circle icono"
-                              role='button'
-                              onClick={() => {
-                                console.log("Lot ya creados: ", lotYaCreados)
+                                    canviEstatModal();
+                                    setTipoModal("Visualitzar");
 
-                                const selectedProduct = products.find(p => p.id === valors.product_id);
-                                const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
+                                    const lot = lots.find((lot) => lot.orderlinereception_id === valors.id);
 
-                                const hayLotOSerie = lots.some((lot) => lot.orderlinereception_id === valors.id);
-                                const hayLotOSerie2 = lotYaCreados.includes(valors.id);
+                                    console.log("PRODUCTO: ", lot);
 
-                                if (lotOSerie === "Lot") {
-                                  setLotOrSerial("lot");
-                                  if (hayLotOSerie || hayLotOSerie2) {
-                                    alert("Este lot ja està creat.");
-                                    return;
-                                  }
-                                }
-                                else if (lotOSerie === "Serial") {
-                                  setLotOrSerial("serie");
-                                  if (hayLotOSerie || hayLotOSerie2) {
-                                    alert("Esta serie ja està creada.");
-                                    return;
-                                  }
-                                }
+                                    setValorsInicials({
+                                      name: lot.name,
+                                      product_id: lot.product_id,
+                                      supplier_id: lot.supplier_id,
+                                      quantity: lot.quantity,
+                                      production_date: lot.production_date.split("T")[0],
+                                      expiration_date: lot.expiration_date.split("T")[0],
+                                      orderlinereception_id: lot.orderlinereception_id,
+                                      //cantidad total de la orden de linea de recepcion
+                                      quantity_received: valors.quantity_received,
+                                    });
 
-                                canviEstatModal();
+                                    console.log("AAA");
+                                  }}
+                                >
+                                </i>
+                              ) : (
+                                <i className="bi bi-plus-circle icono"
+                                  role='button'
+                                  onClick={() => {
+                                    console.log("Lot ya creados: ", lotYaCreados)
 
-                                const orderReceptions = orderreception.find(
-                                  (or) => or.id === valors.order_reception_id
-                                );
-                                const supplier = suppliers.find((s) => s.id === orderReceptions?.supplier_id);
+                                    const selectedProduct = products.find(p => p.id === valors.product_id);
+                                    const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
 
-                                setValorsInicials({
-                                  name: "",
-                                  product_id: valors.product_id,
-                                  supplier_id: supplier ? supplier.id : "",
-                                  quantity: lotOSerie === "Serial" ? 1 : "",
-                                  production_date: "",
-                                  expiration_date: "",
-                                  orderlinereception_id: valors.id,
-                                  //cantidad total de la orden de linea de recepcion
-                                  quantity_received: valors.quantity_received,
-                                });
-                              }}
-                            >
-                            </i>
+                                    if (lotOSerie === "Lot") {
+                                      setLotOrSerial("lot");
+                                    }
+                                    else if (lotOSerie === "Serial") {
+                                      setLotOrSerial("serie");
+                                    }
+
+                                    canviEstatModal();
+                                    setTipoModal("Crear");
+
+                                    const orderReceptions = orderreception.find(
+                                      (or) => or.id === valors.order_reception_id
+                                    );
+                                    const supplier = suppliers.find((s) => s.id === orderReceptions?.supplier_id);
+
+                                    setValorsInicials({
+                                      name: "",
+                                      product_id: valors.product_id,
+                                      supplier_id: supplier ? supplier.id : "",
+                                      quantity: lotOSerie === "Serial" ? 1 : "",
+                                      production_date: "",
+                                      expiration_date: "",
+                                      orderlinereception_id: valors.id,
+                                      //cantidad total de la orden de linea de recepcion
+                                      quantity_received: valors.quantity_received,
+                                    });
+                                  }}
+                                >
+                                </i>
+                              )}
                             </div>
                           </td>
 
@@ -391,7 +404,8 @@ function Lots() {
       </div>
 
       {/* MODAL CON FORMIK */}
-      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} setLotYaCreados={setLotYaCreados} />
+      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} setLotYaCreados={setLotYaCreados} tipoModal={tipoModal}
+        suppliers={suppliers} />
     </>
   );
 }
