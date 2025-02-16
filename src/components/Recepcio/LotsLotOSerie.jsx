@@ -249,20 +249,20 @@ function LotsLotOSerie({
                       <tbody>
                         {guardado.length === 0 ? (
                           <tr>
-                            <td colSpan={lotOrSerial === "lot" ? 5 : 3}>No hi han registres</td>
+                            <td data-no-colon="true" colSpan={lotOrSerial === "lot" ? 5 : 3}>No hi han registres</td>
                           </tr>
                         ) : (
                           guardado.map((guardar, index) => (
                             <tr key={index}>
-                              <td className='text-break'>{guardar.quantity}</td>
-                              <td className='text-break'>{guardar.name}</td>
+                              <td className='text-break' data-cell="Quantitat">{guardar.quantity}</td>
+                              <td className='text-break' data-cell="Nom">{guardar.name}</td>
                               {lotOrSerial === "lot" && (
                                 <>
-                                  <td className='text-break'>{guardar.production_date}</td>
-                                  <td className='text-break'>{guardar.expiration_date}</td>
+                                  <td className='text-break' data-cell="Data producció">{guardar.production_date}</td>
+                                  <td className='text-break' data-cell="Data expiració">{guardar.expiration_date}</td>
                                 </>
                               )}
-                              <td>
+                              <td data-no-colon="true">
                                 <i className="bi bi-trash icono" onClick={() => handleDeleteRecord(index)} role='button'></i>
                               </td>
                             </tr>
