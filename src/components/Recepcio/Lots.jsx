@@ -9,6 +9,7 @@ const token = localStorage.getItem('token');
 
 /* LOTS */
 function Lots() {
+  const [lots, setLot] = useState([]);
   const [products, setProduct] = useState([]);
   const [suppliers, setSupplier] = useState([]);
   const [orderreception, setOrderReception] = useState([]);
@@ -32,9 +33,21 @@ function Lots() {
   const [lotOrSerial, setLotOrSerial] = useState("");
   const [guardado, setGuardado] = useState([]);
   const [errorAgregar, setErrorAgregar] = useState("");
+  const [lotYaCreados, setLotYaCreados] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
+      axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
+      .then(
+        response => {
+          setLot(response.data)
+        })
+      .catch(
+        error => {
+          console.log(error)
+        }
+      )
+
       axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
         .then(
           response => {
@@ -45,6 +58,7 @@ function Lots() {
             console.log(error)
           }
         )
+
       axios.get(`${apiUrl}Supplier`, { headers: { "auth-token": token } })
         .then(
           response => {
@@ -195,31 +209,31 @@ function Lots() {
                             <i className="bi bi-plus-circle icono"
                               role='button'
                               onClick={() => {
+                                console.log("Lot ya creados: ", lotYaCreados)
                                 
 
                                 const selectedProduct = products.find(p => p.id === valors.product_id);
                                 const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
 
+                                const hayLotOSerie = lots.some((lot) => lot.orderlinereception_id === valors.id);
+                                const hayLotOSerie2 = lotYaCreados.includes(valors.id);
+
                                 if (lotOSerie === "Lot") {
                                   setLotOrSerial("lot");
-                                  if (true) {
-                                    alert(`Este ${lotOrSerial} ya está creado`);
+                                  if (hayLotOSerie || hayLotOSerie2) {
+                                    alert("Este lot ja està creat.");
                                     return;
                                   }
                                 }
                                 else if (lotOSerie === "Serial") {
                                   setLotOrSerial("serie");
-                                  if (true) {
-                                    alert(`Esta ${lotOrSerial} ya está creada`);
+                                  if (hayLotOSerie || hayLotOSerie2) {
+                                    alert("Esta serie ja està creada.");
                                     return;
                                   }
                                 }
 
                                 canviEstatModal();
-                                // if(true){
-                                //   alert(`Este ${lotOrSerial} ya está creado`);
-
-                                // }
 
                                 const orderReceptions = orderreception.find(
                                   (or) => or.id === valors.order_reception_id
@@ -270,7 +284,7 @@ function Lots() {
       </div>
 
       {/* MODAL CON FORMIK */}
-      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} />
+      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} setLotYaCreados={setLotYaCreados} />
     </>
   );
 }

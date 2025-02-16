@@ -1,13 +1,11 @@
 import { Formik, Form, Field } from 'formik';
 import PropTypes from 'prop-types';
 import { Button, Modal } from 'react-bootstrap';
-// import { useState, useEffect } from "react";
 import * as Yup from 'yup';
 import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const token = localStorage.getItem('token');
-
 
 const LotSchema = (lotOrSerial) => Yup.object().shape({
   name: Yup.string()
@@ -47,7 +45,7 @@ function limpiarCampos(resetForm, lotOrSerial, setErrorAgregar) {
 
 function LotsLotOSerie({
   products, canviEstatModal, showModal, valorsInicials, setValorsInicials,
-  lotOrSerial, guardado, setGuardado, errorAgregar, setErrorAgregar
+  lotOrSerial, guardado, setGuardado, errorAgregar, setErrorAgregar, setLotYaCreados
 }) {
   return (
     <>
@@ -69,10 +67,10 @@ function LotsLotOSerie({
                   return;
                 }
 
-                //verifica que la cantidad total guardada coincida con quantity_received
+                //verifica que la cantidad total guardada no supere el quantity_received
                 const cantidadMaxima = Number(valorsInicials.quantity_received);
                 console.log("Cantidad max:", cantidadMaxima)
-                
+
                 const totalGuardado = guardado.reduce(
                   (sum, item) => sum + Number(item.quantity),
                   0
@@ -80,10 +78,10 @@ function LotsLotOSerie({
                 console.log("Total guardado:", totalGuardado)
 
                 if (totalGuardado !== cantidadMaxima) {
-                  setErrorAgregar("La quantitat total guardada no coincideix amb la quantitat rebuda");
+                  setErrorAgregar(`La quantitat total guardada no coincideix amb la quantitat rebuda, tens ${totalGuardado} unitats guardades i has de tindre ${cantidadMaxima}.`);
                   return;
                 }
-                else{
+                else {
                   setErrorAgregar("");
                 }
 
@@ -106,6 +104,9 @@ function LotsLotOSerie({
                   canviEstatModal();
 
                   setErrorAgregar("");
+
+                  console.log("ID order line reception: ", values.orderlinereception_id);
+                  setLotYaCreados(prevIds => [...prevIds, values.orderlinereception_id]);
                 }
                 catch (error) {
                   console.error("Error al guardar:", error);
@@ -122,22 +123,19 @@ function LotsLotOSerie({
                   return;
                 }
 
-                // const cantidadMaxima = Number(valorsInicials.quantity_received);
+                //comprueba que la cantidad sea exactamente quantity_received
+                const cantidadMaxima = Number(valorsInicials.quantity_received);
 
-                // const totalActual = guardado.reduce(
-                //   (sum, guardado) => sum + Number(guardado.quantity), 0
-                // );
+                const totalActual = guardado.reduce(
+                  (sum, guardado) => sum + Number(guardado.quantity), 0
+                );
 
-                // const nuevaCantidadGuardada = Number(values.quantity);
+                const nuevaCantidadGuardada = Number(values.quantity);
 
-                // if(totalActual + nuevaCantidadGuardada > cantidadMaxima){
-                //   setErrorAgregar("La quantitat total no pot superar la quantitat rebuda");
-                //   return;
-                // }
-
-
-
-
+                if (totalActual + nuevaCantidadGuardada > cantidadMaxima) {
+                  setErrorAgregar("La quantitat total no pot superar la quantitat rebuda");
+                  return;
+                }
 
                 const newGuardado = {
                   name: values.name,
@@ -233,7 +231,7 @@ function LotsLotOSerie({
                   {errorAgregar && <div className="text-danger mt-2">{errorAgregar}</div>}
 
                   {/* Tabla de registros */}
-                  <div className='mt-4'>
+                  <div className='mt-4 w-100'>
                     <table className="table table-striped text-center align-middle">
                       <thead className="table-active border-bottom border-dark-subtle">
                         <tr>
@@ -256,12 +254,12 @@ function LotsLotOSerie({
                         ) : (
                           guardado.map((guardar, index) => (
                             <tr key={index}>
-                              <td>{guardar.quantity}</td>
-                              <td>{guardar.name}</td>
+                              <td className='text-break'>{guardar.quantity}</td>
+                              <td className='text-break'>{guardar.name}</td>
                               {lotOrSerial === "lot" && (
                                 <>
-                                  <td>{guardar.production_date}</td>
-                                  <td>{guardar.expiration_date}</td>
+                                  <td className='text-break'>{guardar.production_date}</td>
+                                  <td className='text-break'>{guardar.expiration_date}</td>
                                 </>
                               )}
                               <td>
