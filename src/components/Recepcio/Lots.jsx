@@ -161,7 +161,9 @@ function Lots() {
                     <th scope='col' className="align-middle">Estat ordre de recepció</th>
                     <th scope='col' className="align-middle">Producte</th>
                     <th scope='col' className="align-middle">Quantitat</th>
-                    <th scope='col' className="align-middle">Lot/Serie</th>
+                    {/* <th scope='col' className="align-middle">Visualitzar</th>
+                    <th scope='col' className="align-middle">Lot/Serie</th> */}
+                    <th scope='col' className="align-middle">Accions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -207,6 +209,7 @@ function Lots() {
                           <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
 
                           <td data-no-colon="true">
+                            <div className="d-lg-flex justify-content-lg-center gap-3">
                             <i className="bi bi-eye icono"
                               role='button'
                               onClick={() => {
@@ -232,9 +235,6 @@ function Lots() {
                             >
 
                             </i>
-                          </td>
-
-                          <td data-no-colon="true">
                             <i className="bi bi-plus-circle icono"
                               role='button'
                               onClick={() => {
@@ -282,7 +282,86 @@ function Lots() {
                               }}
                             >
                             </i>
+                            </div>
                           </td>
+
+                          {/* <td data-no-colon="true">
+                            <i className="bi bi-eye icono"
+                              role='button'
+                              onClick={() => {
+                                const selectedProduct = products.find(p => p.id === valors.product_id);
+                                const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
+
+                                const hayLotOSerie = lots.some((lot) => lot.orderlinereception_id === valors.id);
+                                const hayLotOSerie2 = lotYaCreados.includes(valors.id);
+
+                                if (hayLotOSerie || hayLotOSerie2) {
+                                  console.log(`Visualizar ${valors.id}`);
+                                  setShowModalVisualitzar(true);
+                                }
+                                else {
+                                  if (lotOSerie === "Lot") {
+                                    alert(`No hi ha cap lot creat per a aquesta ordre encara.`)
+                                  }
+                                  else if (lotOSerie === "Serial") {
+                                    alert(`No hi ha cap sèrie creada per a aquesta ordre encara.`);
+                                  }
+                                }
+                              }}
+                            >
+
+                            </i>
+                          </td> */}
+
+                          {/* <td data-no-colon="true">
+                            <i className="bi bi-plus-circle icono"
+                              role='button'
+                              onClick={() => {
+                                console.log("Lot ya creados: ", lotYaCreados)
+
+                                const selectedProduct = products.find(p => p.id === valors.product_id);
+                                const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
+
+                                const hayLotOSerie = lots.some((lot) => lot.orderlinereception_id === valors.id);
+                                const hayLotOSerie2 = lotYaCreados.includes(valors.id);
+
+                                if (lotOSerie === "Lot") {
+                                  setLotOrSerial("lot");
+                                  if (hayLotOSerie || hayLotOSerie2) {
+                                    alert("Este lot ja està creat.");
+                                    return;
+                                  }
+                                }
+                                else if (lotOSerie === "Serial") {
+                                  setLotOrSerial("serie");
+                                  if (hayLotOSerie || hayLotOSerie2) {
+                                    alert("Esta serie ja està creada.");
+                                    return;
+                                  }
+                                }
+
+                                canviEstatModal();
+
+                                const orderReceptions = orderreception.find(
+                                  (or) => or.id === valors.order_reception_id
+                                );
+                                const supplier = suppliers.find((s) => s.id === orderReceptions?.supplier_id);
+
+                                setValorsInicials({
+                                  name: "",
+                                  product_id: valors.product_id,
+                                  supplier_id: supplier ? supplier.id : "",
+                                  quantity: lotOSerie === "Serial" ? 1 : "",
+                                  production_date: "",
+                                  expiration_date: "",
+                                  orderlinereception_id: valors.id,
+                                  //cantidad total de la orden de linea de recepcion
+                                  quantity_received: valors.quantity_received,
+                                });
+                              }}
+                            >
+                            </i>
+                          </td> */}
                         </tr>
                       ))
                   )}
