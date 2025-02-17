@@ -157,15 +157,3 @@ li:hover i{
 
 
 }
-
-
-/*Gabi*/
-.page-link {
-    background-color: var(--orange) !important;
-    color: white !important;
-}
-
-.page-link:hover {
-    background-color: var(--lightBlue) !important;
-    color: white !important;
-}

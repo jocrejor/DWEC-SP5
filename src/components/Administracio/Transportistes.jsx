@@ -42,7 +42,7 @@ function Transportistes() {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const pageSize = 10;
   const totalPages = Math.ceil(carriersFiltrats.length / pageSize);
   const displayedCarriers = carriersFiltrats.slice(
     (currentPage - 1) * pageSize,
@@ -350,16 +350,16 @@ function Transportistes() {
               tipoModal === 'Crear'
                 ? valorsInicials
                 : {
-                    name: '',
-                    address: '',
-                    nif: '',
-                    phone: '',
-                    email: '',
-                    state_id: 0,
-                    province: '',
-                    city: '',
-                    cp: '',
-                  }
+                  name: '',
+                  address: '',
+                  nif: '',
+                  phone: '',
+                  email: '',
+                  state_id: 0,
+                  province: '',
+                  city: '',
+                  cp: '',
+                }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
@@ -517,14 +517,14 @@ function Transportistes() {
                   {touched.cp && errors.cp && <div className="invalid-feedback">{errors.cp}</div>}
                 </div>
                 <div className="form-group text-right">
-                  <Button type="submit"  className="orange-button btn btn-secondary">
+                  <Button type="submit" className="orange-button btn btn-secondary">
                     {tipoModal === 'Crear' ? 'Alta Transportista' : 'Modificar Transportista'}
                   </Button>
                 </div>
               </Form>
             )}
           </Formik>
-        </Modal.Body> 
+        </Modal.Body>
       </Modal>
 
       <Modal show={showModal} onHide={canviEstatModal}>
@@ -537,16 +537,16 @@ function Transportistes() {
               tipoModal === 'Modificar'
                 ? valorsInicials
                 : {
-                    name: '',
-                    address: '',
-                    nif: '',
-                    phone: '',
-                    email: '',
-                    state_id: 0,
-                    province: '',
-                    city: '',
-                    cp: '',
-                  }
+                  name: '',
+                  address: '',
+                  nif: '',
+                  phone: '',
+                  email: '',
+                  state_id: 0,
+                  province: '',
+                  city: '',
+                  cp: '',
+                }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
@@ -709,24 +709,38 @@ function Transportistes() {
 
       <nav aria-label="Page navigation" className="d-block mt-4">
         <ul className="pagination justify-content-center">
-          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`} >
-            <button className="page-link" onClick={() => canviPag(currentPage - 1)} aria-label="Anterior">
-              <span aria-hidden="true" className='text-white'>&laquo;</span>
+          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+            <button
+              className="page-link "
+              onClick={() => canviPag(currentPage - 1)}
+              aria-label="Anterior"
+            >
+              <span aria-hidden="true">&laquo;</span>
             </button>
           </li>
           {[...Array(totalPages)].map((_, index) => {
             const page = index + 1;
             return (
-              <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
-                <button className="page-link" onClick={() => canviPag(page)}>
+              <li
+                key={page}
+                className={`page-item ${currentPage === page ? 'active' : ''}`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => canviPag(page)}
+                >
                   {page}
                 </button>
               </li>
             );
           })}
           <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-            <button className="page-link" onClick={() => canviPag(currentPage + 1)} aria-label="Següent">
-              <span aria-hidden="true" className='text-white'>&raquo;</span>
+            <button
+              className="page-link"
+              onClick={() => canviPag(currentPage + 1)}
+              aria-label="Següent"
+            >
+              <span aria-hidden="true">&raquo;</span>
             </button>
           </li>
         </ul>
