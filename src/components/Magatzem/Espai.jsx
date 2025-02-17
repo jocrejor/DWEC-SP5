@@ -21,15 +21,23 @@ const SpaceSchema = Yup.object().shape({
 
 function Space() {
     const [spaces, setSpaces] = useState([]);
+    const [filteredSpaces, setFilteredSpaces] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [showViewModal, setShowViewModal] = useState(false); // Modal para ver el espacio
+    const [showViewModal, setShowViewModal] = useState(false);
     const [modalType, setModalType] = useState("Crear");
     const [initialValues, setInitialValues] = useState({
         name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', shelf_id: ''
     });
-    const [selectedSpace, setSelectedSpace] = useState(null); // Para almacenar el espacio seleccionado
+    const [selectedSpace, setSelectedSpace] = useState(null);
     const navigate = useNavigate();
     const { magatzem, carrer, estanteria } = useParams();
+    const [filters, setFilters] = useState({
+        storage_id: magatzem,
+        street_id: carrer,
+        shelf_id: estanteria
+    });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
 
     useEffect(() => {
         if (magatzem && carrer && estanteria) {
@@ -37,17 +45,25 @@ function Space() {
                 headers: { "auth-token": localStorage.getItem("token") }
             })
                 .then(response => {
-
                     const filteredSpaces = response.data.filter(space =>
                         space.storage_id === magatzem &&
                         space.street_id === carrer &&
                         space.shelf_id === estanteria
                     );
                     setSpaces(filteredSpaces);
+                    setFilteredSpaces(filteredSpaces); // Set filtered spaces
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }
     }, [magatzem, carrer, estanteria]);
+
+    // Función para manejar la paginación
+    const paginate = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    // Filtrar los espacios que se deben mostrar según la página actual
+    const currentSpaces = filteredSpaces.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const deleteSpace = async (id) => {
         try {
@@ -55,6 +71,7 @@ function Space() {
                 headers: { "auth-token": localStorage.getItem("token") }
             });
             setSpaces(spaces.filter(item => item.id !== id));
+            setFilteredSpaces(filteredSpaces.filter(item => item.id !== id)); // Actualizamos también los espacios filtrados
         } catch (error) {
             console.error('Error deleting space:', error);
         }
@@ -71,7 +88,6 @@ function Space() {
         setModalType("Crear");
     };
 
-    // Mostrar el modal con los detalles del espacio
     const viewSpace = (space) => {
         setSelectedSpace(space); // Establecer el espacio seleccionado
         setShowViewModal(true); // Mostrar el modal
@@ -87,13 +103,18 @@ function Space() {
         deleteSpace(id);
     };
 
+    // Función para manejar el cambio de filtros
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters); // Actualizar los filtros con los nuevos valores
+    };
+
     return (
         <>
-            <FiltresEspai />
-
-            <h2>Magatzem: {magatzem}</h2>
-            <h2>Carrer: {carrer}</h2>
-            <h2>Estanteria: {estanteria}</h2>
+            {/* Componente de filtros */}
+            <FiltresEspai
+                filters={filters}
+                onFilterChange={handleFilterChange}
+            />
 
             {spaces.length === 0 ? (
                 <p>No hi han espais</p>
@@ -116,7 +137,7 @@ function Space() {
                             </tr>
                         </thead>
                         <tbody>
-                            {spaces.map((values) => (
+                            {currentSpaces.map((values) => (
                                 <tr key={values.id}>
                                     <td><input className="form-check-input" type="checkbox" /></td>
                                     <td>{values.id}</td>
@@ -145,18 +166,28 @@ function Space() {
                             ))}
                         </tbody>
                     </table>
+
+                    {/* Pagination Controls */}
                     <nav aria-label="Page navigation example" className="d-block">
                         <ul className="pagination justify-content-center">
                             <li className="page-item">
-                                <a className="page-link text-light-blue" href="#" aria-label="Previous">
+                                <a className="page-link text-light-blue" href="#" onClick={() => paginate(currentPage - 1)} aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
-                            <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-                            <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-                            <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+                            {Array.from({ length: Math.ceil(filteredSpaces.length / itemsPerPage) }).map((_, index) => (
+                                <li key={index} className="page-item">
+                                    <a
+                                        className={`page-link ${currentPage === index + 1 ? 'activo-2' : 'text-light-blue'}`}
+                                        href="#"
+                                        onClick={() => paginate(index + 1)}
+                                    >
+                                        {index + 1}
+                                    </a>
+                                </li>
+                            ))}
                             <li className="page-item">
-                                <a className="page-link text-light-blue" href="#" aria-label="Next">
+                                <a className="page-link text-light-blue" href="#" onClick={() => paginate(currentPage + 1)} aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>

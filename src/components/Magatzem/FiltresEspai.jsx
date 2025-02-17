@@ -1,124 +1,130 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 
-
 const apiUrl = import.meta.env.VITE_API_URL;
 
-const FiltresEspai = ({ onFilter, onClear }) => {
-    const [shelfs, setEstanteries] = useState([]); // Aquí se almacenan los magatzems para los filtros
-    const [filters, setFilters] = useState({
-        nom: '',          // Filtro por nombre de la calle
-        id_storage: '',   // Filtro por id_storage (almacen)
-        id_street: ''     // Filtro por id_street
-    });
+const FiltresEspai = ({ filters }) => {
+  const [magatzem, setMagatzem] = useState(null); 
+  const [carrer, setCarrer] = useState(null);     
+  const [shelf, setShelf] = useState(null);      
 
-    // Cargar magatzems para los filtros
-    useEffect(() => {
-        axios.get(`${apiUrl}/magatzem`, { headers: { "auth-token": localStorage.getItem("token") } })
-            .then(response => {
-                setEstanteries(response.data);
-            })
-            .catch(e => {
-                console.log(e);
-            });
-    }, []);
+  useEffect(() => {
+    
+    if (filters.storage_id) {
+      axios.get(`${apiUrl}/magatzem/${filters.storage_id}`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      })
+      .then(response => {
+        setMagatzem(response.data);  
+      })
+      .catch(error => {
+        console.error('Error al cargar el magatzem:', error);
+      });
+    }
 
-    const handleFilterChange = (e) => {
-        setFilters({
-            ...filters,
-            [e.target.name]: e.target.value,
-        });
-    };
+    
+    if (filters.street_id) {
+      axios.get(`${apiUrl}/carrer/${filters.street_id}`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      })
+      .then(response => {
+        setCarrer(response.data);  
+      })
+      .catch(error => {
+        console.error('Error al cargar el carrer:', error);
+      });
+    }
 
-    const handleFilterSubmit = (e) => {
-        e.preventDefault();
-        onFilter(filters);  // Pasa los filtros hacia el componente padre
-    };
+    
+    if (filters.shelf_id) {
+      axios.get(`${apiUrl}/shelf/${filters.shelf_id}`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      })
+      .then(response => {
+        setShelf(response.data);  // Guardar el shelf en el estado
+      })
+      .catch(error => {
+        console.error('Error al cargar el shelf:', error);
+      });
+    }
+  }, [filters]);
 
-    const handleClearFilters = (e) => {
-        e.preventDefault();
-        setFilters({
-            nom: '',
-            id_storage: '',
-            id_street: ''
-        });
-        onClear(); // Llamar a la función de borrar los filtros en el componente padre
-    };
+  return (
+    <form className="row bg-grey pt-3 px-2 mx-0 text-light-blue">
+      {}
+      <div className="col-12 col-md-6 col-xl-4">
+        <label htmlFor="filterName" className="form-label">Nom del Espai</label>
+        <input
+          type="text"
+          className="form-control"
+          id="filterName"
+          name="name"
+          value={filters.name || ''}
+          readOnly
+          placeholder="Filtra per nom"
+        />
+      </div>
 
-    return (
-        <form className="row bg-grey pt-3 px-2 mx-0 text-light-blue" onSubmit={handleFilterSubmit}>
-            <div className="col-12 col-md-6 col-xl-4">
-                <label htmlFor="filterNom" className="form-label">Nom Espai</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="filterNom"
-                    name="nom"
-                    value={filters.nom}
-                    onChange={handleFilterChange}
-                    placeholder="Filtra per nom"
-                />
-            </div>
+      {}
+      <div className="col-12 col-md-6 col-xl-4">
+        <label htmlFor="filterStorageId" className="form-label">Magatzem</label>
+        <input
+          type="text"
+          className="form-control"
+          id="filterStorageId"
+          value={magatzem ? magatzem.id : filters.storage_id} 
+          readOnly 
+        />
+      </div>
 
-            <div className="col-12 col-md-6 col-xl-4">
-                <label htmlFor="filterIdStreet" className="form-label">Carrer</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="filterIdStreet"
-                    name="id_street"
-                    value={filters.id_street}
-                    onChange={handleFilterChange}
-                    placeholder="Filtra per ID del carrer"
-                />
-            </div>
+      {}
+      <div className="col-12 col-md-6 col-xl-4">
+        <label htmlFor="filterStreetId" className="form-label">Carrer</label>
+        <input
+          type="text"
+          className="form-control"
+          id="filterStreetId"
+          value={carrer ? carrer.id : filters.street_id} 
+          readOnly 
+        />
+      </div>
 
-            <div className="col-12 col-md-6 col-xl-4">
-                <label htmlFor="filterIdStorage" className="form-label">Magatzem</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="filterIdStorage"
-                    name="id_magatzem"
-                    value={filters.id_storage}
-                    onChange={handleFilterChange}
-                    placeholder="Filtra per ID del magatzem"
-                />
-            </div>
+      {}
+      <div className="col-12 col-md-6 col-xl-4">
+        <label htmlFor="filterShelfId" className="form-label">Estanteria</label>
+        <input
+          type="text"
+          className="form-control"
+          id="filterShelfId"
+          value={shelf ? shelf.id : filters.shelf_id} 
+          readOnly 
+        />
+      </div>
 
-            <div className="col-12 col-md-6 col-xl-4">
-                <label htmlFor="filterIdShelf" className="form-label">Estanteria</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="filterIdShelf"
-                    name="id_shelf"
-                    value={filters.id_shelf}
-                    onChange={handleFilterChange}
-                    placeholder="Filtra per ID de la estanteria"
-                />
-            </div>
-
-            {/* Contenedor para los botones con alineación a la derecha */}
-            <div className="col-12 d-flex justify-content-end align-items-center w-100">
-                <button className="btn btn-secondary ps-2 me-2 text-white" onClick={handleClearFilters}>
-                    <i className="bi bi-trash px-1 text-white"></i>Netejar
-                </button>
-                <button 
-                    type="submit" 
-                    className="btn btn-primary me-2 ps-2 orange-button text-white"
-                >
-                    <i className="bi bi-funnel px-1 text-white"></i>Filtrar
-                </button>
-            </div>
-        </form>
-    );
+      {}
+      <div className="col-12 d-flex justify-content-end align-items-center w-100">
+        <button className="btn btn-secondary ps-2 me-2 text-white" onClick={() => window.location.reload()}>
+          <i className="bi bi-trash px-1 text-white"></i>Netejar
+        </button>
+        <button
+          type="submit"
+          className="btn btn-primary me-2 ps-2 orange-button text-white"
+        >
+          <i className="bi bi-funnel px-1 text-white"></i>Filtrar
+        </button>
+      </div>
+    </form>
+  );
 };
 
 FiltresEspai.propTypes = {
-    onFilter: PropTypes.func.isRequired, 
-    onClear: PropTypes.func.isRequired, 
+  filters: PropTypes.shape({
+    storage_id: PropTypes.string.isRequired,
+    street_id: PropTypes.string.isRequired,
+    shelf_id: PropTypes.string.isRequired, 
+    name: PropTypes.string,
+  }).isRequired,
 };
 
 export default FiltresEspai;

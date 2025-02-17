@@ -17,14 +17,18 @@ function Street() {
   const [streets, setStreets] = useState([]);
   const [filteredStreets, setFilteredStreets] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // Puedes ajustar cuántos ítems por página deseas
   const [showViewModal, setShowViewModal] = useState(false); // Modal de visualización
   const [tipoModal, setTipoModal] = useState("Crear");
   const [valorsInicials, setValorsInicials] = useState({ name: '', storage_id: '' });
   const [selectedStreet, setSelectedStreet] = useState(null); // Estado para la calle seleccionada
   const navigate = useNavigate();
   const { magatzem } = useParams();
+  const { magatzem_name } = useParams();
   const [filters, setFilters] = useState({
     storage_id: magatzem,
+    name: magatzem_name,
   });
 
   useEffect(() => {
@@ -41,12 +45,13 @@ function Street() {
   }, [magatzem]);
 
   useEffect(() => {
-
-    const filtered = streets.filter(street => {
-      return street.storage_id === filters.storage_id;
-    });
+    const filtered = streets.filter(street => street.storage_id === filters.storage_id);
     setFilteredStreets(filtered);
   }, [filters, streets]);
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const eliminarStreet = async (id) => {
     try {
@@ -74,7 +79,6 @@ function Street() {
     setTipoModal("Crear");
   };
 
-
   const handleFilter = (filters) => {
     setFilters(filters);
   };
@@ -93,6 +97,11 @@ function Street() {
     console.log("Deleting supplier:", id);
     eliminarStreet(id);
   };
+
+  // Calcular las calles a mostrar para la página actual
+  const indexOfLastStreet = currentPage * itemsPerPage;
+  const indexOfFirstStreet = indexOfLastStreet - itemsPerPage;
+  const currentStreets = filteredStreets.slice(indexOfFirstStreet, indexOfLastStreet);
 
   return (
     <>
@@ -121,7 +130,7 @@ function Street() {
           </div>
         </div>
       </div>
-      <h2>Magatzem: {magatzem}</h2>
+     
       <div className="table-responsive mt-3">
         <table className="table table-striped text-center">
           <thead className="table-active border-bottom border-dark-subtle">
@@ -135,7 +144,7 @@ function Street() {
             </tr>
           </thead>
           <tbody>
-            {filteredStreets.map((valors) => (
+            {currentStreets.map((valors) => (
               <tr key={valors.id}>
                 <td scope="row" data-cell="Seleccionar">
                   <input className="form-check-input" type="checkbox" name="" id="" />
@@ -161,18 +170,24 @@ function Street() {
             ))}
           </tbody>
         </table>
+      
+        {/* Paginación */}
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className="page-item">
-              <a className="page-link text-light-blue" href="#" aria-label="Previous">
+              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={() => paginate(currentPage - 1)}>
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-            <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-            <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+            {[...Array(Math.ceil(filteredStreets.length / itemsPerPage))].map((_, index) => (
+              <li key={index} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
+                <a className="page-link text-light-blue" href="#" onClick={() => paginate(index + 1)}>
+                  {index + 1}
+                </a>
+              </li>
+            ))}
             <li className="page-item">
-              <a className="page-link text-light-blue" href="#" aria-label="Next">
+              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={() => paginate(currentPage + 1)}>
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
