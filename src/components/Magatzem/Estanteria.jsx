@@ -135,10 +135,6 @@ function Shelf() {
           </div>
         </div>
       </div>
-
-      <h2>Magatzem: {magatzem}</h2>
-      <h2>Carrer: {carrer}</h2>
-
       <div className="table-responsive mt-3">
         <table className="table table-striped text-center">
           <thead className="table-active border-bottom border-dark-subtle">

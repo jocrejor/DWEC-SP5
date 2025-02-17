@@ -104,10 +104,6 @@ function Space() {
                 onFilterChange={handleFilterChange} 
             />
 
-            <h2>Magatzem: {magatzem}</h2>
-            <h2>Carrer: {carrer}</h2>
-            <h2>Estanteria: {estanteria}</h2>
-
             {spaces.length === 0 ? (
                 <p>No hi han espais</p>
             ) : (

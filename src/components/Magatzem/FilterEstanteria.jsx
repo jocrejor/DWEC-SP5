@@ -40,7 +40,7 @@ const FilterEstanteria = ({ filters }) => {
     <form className="row bg-grey pt-3 px-2 mx-0 text-light-blue">
       {}
       <div className="col-12 col-md-6 col-xl-4">
-        <label htmlFor="filterName" className="form-label">Nom del Carrer</label>
+        <label htmlFor="filterName" className="form-label">Nom de Estanteria</label>
         <input
           type="text"
           className="form-control"
