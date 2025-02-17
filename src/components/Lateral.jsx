@@ -103,7 +103,11 @@ function Lateral() {
                                     setActiveOption('orderpickingreception') }} to="/orderpickingreception">{activeOption == 'OrdesRecepcio' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Ordres Picking R
                                 </Link>
                             </li>
-                            <li className={activeOption == 'EstatsOrdre' ? liActive : liInactive}><Link className={activeOption == 'EstatsOrdre' ? linkActive : linkInactive} onClick={() => { setActiveOption('EstatsOrdre') }} to="/estatsOrdreList">{activeOption == 'EstatsOrdre' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Estats Ordres</Link></li>
+                            <li className={activeOption == 'EstatsOrdre' ? liActive : liInactive}>
+                                <Link className={activeOption == 'EstatsOrdre' ? linkActive : linkInactive} onClick={() => { 
+                                    setActiveOption('EstatsOrdre') }} to="/estatsOrdreList">{activeOption == 'EstatsOrdre' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Estats Ordres
+                                </Link>
+                            </li>
                             <li className={activeOption == 'EstatsLinia' ? liActive : liInactive}><Link className={activeOption == 'EstatsLinia' ? linkActive : linkInactive} onClick={() => { setActiveOption('EstatsLinia') }} to="/estatsLinia">{activeOption == 'EstatsLinia' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Estats Línia</Link></li>
                             <li className={activeOption == 'Productes' ? liActive : liInactive}><Link className={activeOption == 'Productes' ? linkActive : linkInactive} onClick={() => { setActiveOption('Productes') }} to="/productes">{activeOption == 'Productes' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Productes</Link></li>
                             <li className={activeOption == 'Lots' ? liActive : liInactive}><Link className={activeOption == 'Lots' ? linkActive : linkInactive} onClick={() => { setActiveOption('Lots') }} to="/lots">{activeOption == 'Lots' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Lots</Link></li>
