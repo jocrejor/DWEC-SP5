@@ -166,7 +166,7 @@ function Transportista() {
                 });
               }}
             >
-              <i class="bi bi-plus-circle text-white pe-1"></i>Crear
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
             </Button>
           </div>
         </div>
@@ -175,7 +175,7 @@ function Transportista() {
       <div className='container-fluid pt-3'>
 
         <table className='table table-striped border m-2'>
-          <thead class="table-active border-bottom border-dark-subtle text-center ">
+          <thead className="table-active border-bottom border-dark-subtle text-center ">
             <tr>
               <th scope="col">ID</th>
               <th scope="col">Nom</th>
