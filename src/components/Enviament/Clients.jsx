@@ -482,7 +482,7 @@ function Client() {
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
           <button className="btn btn-success border-white text-white mt-2 me-4 my-md-2 flex-grow-1 flex-xl-grow-0" onClick={openImportModal}>
-          <i className="bi bi-file-earmark-arrow-up pe-1"></i>Importar
+          <i className="bi bi-file-earmark-arrow-up pe-1 text-white"></i>Importar
           </button>
             <button
               className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
