@@ -4,6 +4,7 @@ import { movMagatzem } from "../Magatzem/movMagatzem";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const OrderPickingShippingPicking = () => {
+  const [orderShipping, setOrderShipping] = useState([]);
   const [orderPickingShipping, setOrderPickingShipping] = useState([]); //order picking shipping
   const [orderLineShipping, setOrderLineShipping] = useState([]); //order line shipping
   const [products, setProducts] = useState([]); //product
@@ -26,6 +27,15 @@ const OrderPickingShippingPicking = () => {
   const location = useLocation();
 
   const dataFetch = async () => {
+    try {
+      const orderShipping = await axios.get(`${apiUrl}/ordershipping`, {
+        headers: { "auth-token": token },
+      });
+      setOrderShipping(orderShipping.data);
+    } catch (error) {
+      console.log("Error order shipping: ", error);
+    }
+
     try {
       //order line shipping
       const orderLineShipping = await axios.get(`${apiUrl}/orderlineshipping`, {
@@ -220,6 +230,18 @@ const OrderPickingShippingPicking = () => {
     setOrderPickingPage(currentItems);
   }, [currentPage, orderPickingShipping]);
 
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0"); // Día con 2 dígitos
+    const month = String(d.getMonth() + 1).padStart(2, "0"); // Mes (0-11) + 1
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const seconds = String(d.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  };
+
   return (
     <>
       <div className="container-fluid">
@@ -289,11 +311,17 @@ const OrderPickingShippingPicking = () => {
                       const product = products.find(
                         (p) => p.id === order.product_id
                       );
+                      const orderLineToFind = orderLineShipping.find(
+                        (o) => o.id === order.order_line_shipping_id
+                      );
+                      const orderShippingToFind = orderShipping.find(
+                        (o) => o.id === orderLineToFind.shipping_order_id
+                      );
                       return (
                         <tr key={order.id}>
                           <td className="d-flex justify-content-center align-items-center">
                             <i
-                              className="bi bi-arrow-down"
+                              className="bi bi-arrow-up"
                               onClick={() =>
                                 completarOrderPicking(
                                   order.order_line_shipping_id,
@@ -302,9 +330,9 @@ const OrderPickingShippingPicking = () => {
                               }
                             ></i>
                           </td>
-                          <td data-cell="Ordre ID">{order.id}</td>
+                          <td data-cell="Ordre ID">{orderShippingToFind.id}</td>
                           <td data-cell="Producte">{product.name}</td>
-                          <td data-cell="Data">{order.create_date}</td>
+                          <td data-cell="Data">{formatDate(order.created_date)}</td>
                           <td data-cell="Operari">{user.name}</td>
                         </tr>
                       );
