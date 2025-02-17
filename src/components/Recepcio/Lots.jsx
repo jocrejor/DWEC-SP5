@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from "axios";
 
 import Header from '../Header';
-import Filtres from '../Filtres';
+//david import Filtres from '../Filtres';
 import LotsLotOSerie from './LotsLotOSerie';
 const apiUrl = import.meta.env.VITE_API_URL;
 const token = localStorage.getItem('token');
@@ -111,7 +111,7 @@ function Lots() {
   return (
     <>
       <Header title="Gestió de Lots" />
-      <Filtres />
+      {/*<Filtres />*/}
 
       <div className="container-fluid">
         <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">

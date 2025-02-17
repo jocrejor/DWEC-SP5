@@ -163,7 +163,7 @@ function Lateral() {
                                 </Link>
                             </li>
                             <li className={activeOption == 'Moviments' ? liActive : liInactive}>
-                                <Link className={activeOption == 'Moviments' ? linkActive : linkInactive} onClick={() => { setActiveOption('Moviments') }} href="/moviments">
+                                <Link className={activeOption == 'Moviments' ? linkActive : linkInactive} onClick={() => { setActiveOption('Moviments') }} to="/moviments">
                                     {activeOption == 'Moviments' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}
                                     Moviments
                                 </Link>
