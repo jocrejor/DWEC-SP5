@@ -69,7 +69,7 @@ function Home() {
   const chartData2 = {
     labels: orderLineCounts.map(item => item.status),
     datasets: [{
-      label: 'Quantitat de línies d\'ordres per estat',
+      label: 'Quantitat d\'ordres en línia',
       data: orderLineCounts.map(item => item.quantity),
       backgroundColor: ['#4CAF50', '#FF9800', '#2196F3', '#E91E63', '#9C27B0'],
       borderColor: ['#388E3C', '#F57C00', '#1976D2', '#C2185B', '#7B1FA2'],
@@ -82,13 +82,13 @@ function Home() {
       <Header title='Panel de control' />
       <div className='container mt-4 row'>
         <div className='col-md-6 col-sm-12'>
-          <h2 className='text-center'>Ordres de Recepció per Estat</h2>
+          <h2 className='text-center'>Ordres de Recepció</h2>
           <div className='mt-4'>
             <Bar data={chartData} />
           </div>
         </div>
         <div className='col-md-6 col-sm-12'>
-          <h2 className='text-center'>Línies d'Ordres per Estat</h2>
+          <h2 className='text-center'>Línies d'Ordres</h2>
           <div className="mt-4">
             <Bar data={chartData2} />
           </div>
