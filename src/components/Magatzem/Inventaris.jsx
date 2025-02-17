@@ -193,7 +193,7 @@ function Inventaris() {
     if (!values.street_id) {
       filteredSpaces = spaces.filter(space => space.storage_id === values.storage_id);
     } else {
-      filteredSpaces = spaces.filter(space => (space.storage_id === values.storage_id && space.street_id === values.street_id));
+      filteredSpaces = spaces.filter(space => space.storage_id === values.storage_id && space.street_id === values.street_id);
     };
     console.log(values)
     console.log(filteredSpaces);

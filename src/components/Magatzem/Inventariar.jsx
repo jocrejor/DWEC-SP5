@@ -145,13 +145,6 @@ function Inventariar() {
   }, [selectedInventory, inventoryLines, products, streets, shelfs, spaces])
 
 
-  const displayData = () => {
-    console.log(selectedStreets)
-    console.log(selectedShelfs)
-    console.log(selectedSpaces)
-  }
-
-
 
   useEffect(() => {
     //console.log(updatedInventoryLines)
@@ -218,7 +211,7 @@ function Inventariar() {
       setSelectedInventoryLines(updatedLines);
       setSelectedInventory(updatedSelectedInventory);
       //console.log(updatedSelectedInventory)
-      alert("Linia actualitzada amb èxit");
+      alert("Inventari actualitzat amb èxit");
       navigate('/inventaris');
     }
 
@@ -360,7 +353,7 @@ function Inventariar() {
                       alert("Linia afegida amb èxit");
                       handleClose();
                   } else {
-                    alert("No hi ha espai suficient");
+                    alert("No hi ha espai suficient. La quantitat màxima és de " + selectedSpace.quantity + " unitats.");
                   }
                   
                 }}
