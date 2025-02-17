@@ -4,6 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
+import Filtres from "./OrdresRecepcioFiltres";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -267,6 +268,44 @@ function OrderReception() {
     }
   };
 
+  const actualitzaFiltres = (id, nomEstat, data, estat) => {
+    let filteredOrders = orderReceptions;
+
+    if (id) {
+      filteredOrders = filteredOrders.filter(order => order.id.toString().includes(id));
+    }
+
+    if (nomEstat) {
+      filteredOrders = filteredOrders.filter(order => {
+        const supplier = suppliers.find(sup => sup.id === order.supplier_id);
+        return supplier && supplier.name.toLowerCase().includes(nomEstat.toLowerCase());
+      });
+    }
+
+    if (data) {
+      filteredOrders = filteredOrders.filter(order => order.estimated_reception_date.includes(data));
+  }
+
+    if (estat) {
+      filteredOrders = filteredOrders.filter(order => {
+        const status = orderReceptionStatus.find(status => status.id === order.orderreception_status_id);
+        return status && status.name.toLowerCase().includes(estat.toLowerCase());
+      });
+    }
+
+    setOrderReceptions(filteredOrders);
+  };
+
+  const netejaFiltres = () => {
+    axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setOrderReceptions(response.data);
+      })
+      .catch(() => {
+        setError("Error carregant les dades.");
+      });
+  };
+
   const handleSubmit = async (values) => {
     try {
       if (tipoModal === 'Crear') {
@@ -317,77 +356,116 @@ function OrderReception() {
   return (
     <>
       <Header title="Llistat Ordres de Recepció" />
-      <Button
-        variant="success"
-        onClick={() => {
-          setTipoModal('Crear');
-          setValorsInicials({
-            supplier_id: '',
-            estimated_reception_date: '',
-          });
-          canviEstatModal();
-        }}
-      >
-        Nova Ordre de Recepció
-      </Button>
-      {loading ? (
-        <Spinner animation="border" />
-      ) : error ? (
-        <div>{error}</div>
-      ) : orderReceptions.length === 0 ? (
-        <div>No hi ha ordres</div>
-      ) : (
-        <Table striped bordered hover>
-          <thead>
+      <Filtres onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres} />
+      <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+        <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+          <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+            <div className="form-floating bg-white">
+              <select className="form-select" id="floatingSelect" aria-label="Selecciona una opció">
+                <option value="" disabled selected>Tria una opció</option>
+                <option value="1">Eliminar</option>
+              </select>
+              <label for="floatingSelect">Accions en lot</label>
+            </div>
+            <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0"
+              type="button"
+              aria-label="Aplicar acció en lot">
+              <i className="bi bi-check-circle text-white px-1"></i>Aplicar</button>
+          </div>
+        </div>
+        <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+        <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 order-xl-2">
+          <div className="d-flex h-100 justify-content-xl-end"></div>
+          <Button
+            className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+            onClick={() => {
+              setTipoModal('Crear');
+              setValorsInicials({
+                supplier_id: '',
+                estimated_reception_date: '',
+              });
+              canviEstatModal();
+            }}
+            aria-label="Crear nova ordre de recepció">
+            <i class="bi bi-plus-circle text-white pe-1"></i>Crear</Button>
+        </div>
+      </div>
+
+      <div className='container-fluid pt-3'>
+        <Table className='table table-striped border text-center m-2' aria-live="polite">
+          <thead class="table-active border-bottom border-dark-subtle">
             <tr>
               <th>Id</th>
               <th>Proveïdor</th>
               <th>Data Estimada</th>
               <th>Estat</th>
               <th>Accions</th>
-
             </tr>
           </thead>
           <tbody>
-          {orderReceptions
-  .filter((ordre) => ordre.orderreception_status_id !== 4)
-  .map((valors) => (
-              <tr key={valors.id}>
-                <td>{valors.id}</td>
-                <td>{suppliers.find((sup) => sup.id === valors.supplier_id)?.name}</td>
-                <td>{formateaFecha(valors.estimated_reception_date)}</td>
-                <td>{getStatusName(valors.orderreception_status_id)}</td>
-                <td>
-                  {valors.orderreception_status_id === 3 && (
-                    <Button variant="info" onClick={() => emmagatzemarOrdre(valors)}>
-                      Emmagatzemada
-                    </Button>
-                  )}
+            {orderReceptions.length === 0 ? (
+              <tr>
+                <td colSpan="5">No hi ha ordres de recepció</td>
+              </tr>
+            ) : (
+              orderReceptions
+                .filter((ordre) => ordre.orderreception_status_id !== 4)
+                .map((valors) => (
+                  <tr key={valors.id}>
+                    <td data-cell="ID">{valors.id}</td>
+                    <td data-cell="Proveïdor">{suppliers.find((sup) => sup.id === valors.supplier_id)?.name}</td>
+                    <td data-cell="Data Estimada">{formateaFecha(valors.estimated_reception_date)}</td>
+                    <td data-cell="Estat">{getStatusName(valors.orderreception_status_id)}</td>
+                    <td data-no-colon="true">
+                      {valors.orderreception_status_id === 3 && (
+                        <span onClick={() => emmagatzemarOrdre(valors)} style={{ cursor: "pointer" }} aria-label="Emmagatzemada">
+                          <i className="bi bi-check"></i>
+                        </span>
+                      )}
 
-                  {(valors.orderreception_status_id === 1 || valors.orderreception_status_id === 2) && (
-                    <>
-                      <Button variant="info" onClick={() => revisarOrdre(valors)}>
-                        Revisar
-                      </Button>
-
-                      {valors.orderreception_status_id === 1 && (
+                      {(valors.orderreception_status_id === 1 || valors.orderreception_status_id === 2) && (
                         <>
-                          <Button variant="warning" onClick={() => modificarOrdre(valors)}>
-                            Modificar
-                          </Button>
-                          <Button variant="primary" onClick={() => eliminarOrdre(valors.id)}>
-                            Eliminar
-                          </Button>
+                          <span onClick={() => revisarOrdre(valors)} style={{ cursor: "pointer" }} aria-label="Revisar">
+                            <i className="bi bi-eye pe-2"></i>
+                          </span>
+
+                          {valors.orderreception_status_id === 1 && (
+                            <>
+                              <span onClick={() => modificarOrdre(valors)} style={{ cursor: "pointer" }} aria-label="Modificar">
+                                <i className="bi bi-pencil-square pe-2"></i>
+                              </span>
+                              <span onClick={() => eliminarOrdre(valors.id)} style={{ cursor: "pointer" }} aria-label="Eliminar">
+                                <i className="bi bi-trash"></i>
+                              </span>
+                            </>
+                          )}
                         </>
                       )}
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
+                    </td>
+                  </tr>
+                ))
+            )}
           </tbody>
         </Table>
-      )}
+      </div>
+
+      <nav aria-label="Paginació" class="d-block">
+        <ul class="pagination justify-content-center">
+          <li class="page-item">
+            <a class="page-link text-light-blue" href="#" aria-label="Pàgina anterior">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
+          <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
+          <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
+          <li class="page-item">
+            <a class="page-link text-light-blue" href="#" aria-label="Pàgina següent">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
 
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
@@ -395,7 +473,9 @@ function OrderReception() {
         </Modal.Header>
         <Modal.Body>
           {loadingModal ? (
-            <Spinner animation="border" />
+            <div className="text-center">
+              <Spinner animation="border" />
+            </div>
           ) : (
             <Formik
               enableReinitialize
@@ -405,102 +485,122 @@ function OrderReception() {
             >
               {({ errors, touched }) => (
                 <Form>
-                  <div>
+                  {/* PROVEÏDOR */}
+                  <div className="form-group">
                     <label htmlFor="supplier_id">Proveïdor</label>
-                    <Field as="select" id="supplier_id" name="supplier_id">
+                    <Field
+                      as="select"
+                      id="supplier_id"
+                      name="supplier_id"
+                      className={`form-control ${touched.supplier_id && errors.supplier_id ? 'is-invalid' : ''}`}
+                    >
                       <option value="">Selecciona un proveïdor</option>
                       {suppliers.map((sup) => (
-                        <option key={sup.id} value={sup.id}>
-                          {sup.name}
-                        </option>
+                        <option key={sup.id} value={sup.id}>{sup.name}</option>
                       ))}
                     </Field>
                     {errors.supplier_id && touched.supplier_id && (
-                      <div>{errors.supplier_id}</div>
+                      <div className="invalid-feedback">{errors.supplier_id}</div>
                     )}
                   </div>
 
-                  <div>
+                  {/* DATA ESTIMADA */}
+                  <div className="form-group mt-2">
                     <label htmlFor="estimated_reception_date">Data Estimada</label>
                     <Field
                       id="estimated_reception_date"
                       type="date"
                       name="estimated_reception_date"
+                      className={`form-control ${touched.estimated_reception_date && errors.estimated_reception_date ? 'is-invalid' : ''}`}
                       value={valorsInicials.estimated_reception_date}
-                      onChange={(e) => {
-                        setValorsInicials({
-                          ...valorsInicials,
-                          estimated_reception_date: e.target.value,
-                        });
-                      }}
+                      onChange={(e) => setValorsInicials({ ...valorsInicials, estimated_reception_date: e.target.value })}
                     />
-                    {errors.estimated_reception_date &&
-                      touched.estimated_reception_date && (
-                        <div>{errors.estimated_reception_date}</div>
-                      )}
+                    {errors.estimated_reception_date && touched.estimated_reception_date && (
+                      <div className="invalid-feedback">{errors.estimated_reception_date}</div>
+                    )}
                   </div>
 
-                  <div>
+                  {/* PRODUCTE */}
+                  <div className="form-group mt-2">
                     <label htmlFor="product">Producte</label>
                     <Field
                       as="select"
                       id="product"
                       name="product"
+                      className="form-control"
                       onChange={(e) => setProductId(e.target.value)}
                       value={productId}
                     >
                       <option value="">Selecciona un producte</option>
                       {products.map((product) => (
-                        <option key={product.id} value={product.name}>
-                          {product.name}
-                        </option>
+                        <option key={product.id} value={product.name}>{product.name}</option>
                       ))}
                     </Field>
                   </div>
 
-                  <div>
+                  {/* QUANTITAT */}
+                  <div className="form-group mt-2">
                     <label htmlFor="quantity">Quantitat</label>
                     <input
                       type="number"
                       id="quantity"
                       name="quantity"
+                      className="form-control"
                       value={quantity}
                       onChange={(e) => setQuantity(e.target.value)}
                       min="1"
                     />
                   </div>
-                  <button type="button" onClick={afegirProducte}>
-                    Afegir Producte
-                  </button>
 
-                  <div>
-                    <h4>Productes Afegits</h4>
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>Producte</th>
-                          <th>Quantitat</th>
-                          <th>Eliminar</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selectedProducts.map((prod, index) => (
-                          <tr key={index}>
-                            <td>{prod.name}</td>
-                            <td>{prod.quantity}</td>
-                            <td>
-                              <button type="button" onClick={() => eliminarProducte(index)}>
-                                Eliminar
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
+                  {/* BOTÓ AFEGIR PRODUCTE */}
+                  <div className="text-end mt-3">
+                    <Button variant="info" type="button" className="btn orange-button text-white" onClick={afegirProducte}>
+                      Afegir Producte
+                    </Button>
                   </div>
-                  <Button variant="primary" type="submit">
-                    {tipoModal === 'Crear' ? 'Crear' : 'Modificar'}
-                  </Button>
+
+                  {/* PRODUCTES AFEGITS */}
+                  {selectedProducts.length > 0 && (
+                    <div className="mt-3">
+                      <h4>Productes Afegits</h4>
+                      <Table striped bordered hover className="table-sm">
+                        <thead>
+                          <tr>
+                            <th>Producte</th>
+                            <th>Quantitat</th>
+                            <th>Eliminar</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedProducts.map((prod, index) => (
+                            <tr key={index}>
+                              <td>{prod.name}</td>
+                              <td>{prod.quantity}</td>
+                              <td>
+                                <Button variant="danger" size="sm" onClick={() => eliminarProducte(index)}>
+                                  <i className="bi bi-trash"></i>
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </div>
+                  )}
+
+                  {/* BOTONS D'ACCIÓ */}
+                  <div className="form-group text-right mt-3">
+                    <Button variant="secondary" onClick={canviEstatModal}>
+                      Tanca
+                    </Button>
+                    <Button
+                      variant={tipoModal === 'Modificar' ? 'success' : 'info'}
+                      type="submit"
+                      className="btn orange-button text-white ms-2"
+                    >
+                      {tipoModal}
+                    </Button>
+                  </div>
                 </Form>
               )}
             </Formik>
@@ -516,14 +616,15 @@ function OrderReception() {
         <Modal.Body>
           {orderToReview ? (
             <div>
+              {/* Detalls de l'Ordre */}
               <p><strong>Id:</strong> {orderToReview.id}</p>
               <p><strong>Proveïdor:</strong> {suppliers.find((sup) => sup.id === orderToReview.supplier_id)?.name}</p>
               <p><strong>Data Estimada:</strong> {formateaFecha(orderToReview.estimated_reception_date)}</p>
               <p><strong>Estat:</strong> {getStatusName(orderToReview.orderreception_status_id)}</p>
 
-              {/* Taula de productes associats a l'ordre */}
-              <h5>Productes:</h5>
-              <Table striped bordered hover>
+              {/* Taula de Productes Associats */}
+              <h5 className="mt-3">Productes:</h5>
+              <Table striped bordered hover className="table-sm">
                 <thead>
                   <tr>
                     <th>Producte</th>
@@ -539,35 +640,48 @@ function OrderReception() {
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan="2">No hi ha productes associats a aquesta ordre.</td></tr>
+                    <tr>
+                      <td colSpan="2" className="text-center">No hi ha productes associats a aquesta ordre.</td>
+                    </tr>
                   )}
                 </tbody>
               </Table>
             </div>
           ) : (
-            <Spinner animation="border" />
+            <div className="text-center">
+              <Spinner animation="border" />
+            </div>
           )}
         </Modal.Body>
+
+        {/* Botons d'Acció */}
         <Modal.Footer>
-          {orderToReview?.orderreception_status_id === 1 ? (
+          {/* Estat 1: Descarregada */}
+          {orderToReview?.orderreception_status_id === 1 && (
             <>
               <Button variant="secondary" onClick={() => setShowReviewModal(false)}>
                 Tancar
               </Button>
-              <Button variant="success" onClick={() => descarregarOrdre(orderToReview.id)}>
+              <Button className="btn orange-button text-white ms-2" onClick={() => descarregarOrdre(orderToReview.id)}>
                 Descarregada
               </Button>
             </>
-          ) : null}
-          {orderToReview?.orderreception_status_id === 2 ? (
+          )}
+
+          {/* Estat 2: Incidència i Desempaquetada */}
+          {orderToReview?.orderreception_status_id === 2 && (
             <>
-              <Button variant="warning" href="#">Incidència</Button>
-              <Button variant="primary" href="#">Lot/Serie</Button>
-              <Button variant="success" onClick={() => desempaquetarOrdre(orderToReview.id)}>
+              <Button variant="warning" onClick={() => alert('Incidència')} className="ms-2">
+                Incidència
+              </Button>
+              <Button variant="primary" onClick={() => alert('Lot/Serie')} className="ms-2">
+                Lot/Serie
+              </Button>
+              <Button variant="success" onClick={() => desempaquetarOrdre(orderToReview.id)} className="ms-2">
                 Desempaquetada
               </Button>
             </>
-          ) : null}
+          )}
         </Modal.Footer>
       </Modal>
     </>
