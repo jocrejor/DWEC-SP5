@@ -28,7 +28,10 @@ function Shelf() {
     storage_id: magatzem,
     street_id: carrer,
   });
-  
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // You can adjust this number
+
   // Actualiza los filtros si cambian los parámetros de la URL
   useEffect(() => {
     setFilters({
@@ -57,6 +60,14 @@ function Shelf() {
     });
     setFilteredShelfs(filtered);
   }, [filters, shelves]);
+
+  // Handle Page Change
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Get current items based on page and items per page
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredShelfs.slice(indexOfFirstItem, indexOfLastItem);
 
   const deleteShelf = async (id) => {
     try {
@@ -149,7 +160,7 @@ function Shelf() {
             </tr>
           </thead>
           <tbody>
-            {filteredShelfs.map((values) => (
+            {currentItems.map((values) => (
               <tr key={values.id}>
                 <td><input className="form-check-input" type="checkbox" /></td>
                 <td>{values.id}</td>
@@ -174,18 +185,28 @@ function Shelf() {
             ))}
           </tbody>
         </table>
+
+        {/* Pagination Controls */}
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className="page-item">
-              <a className="page-link text-light-blue" href="#" aria-label="Previous">
+              <a className="page-link text-light-blue" href="#" onClick={() => paginate(currentPage - 1)} aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-            <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-            <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
+            {Array.from({ length: Math.ceil(filteredShelfs.length / itemsPerPage) }).map((_, index) => (
+              <li key={index} className="page-item">
+                <a
+                  className={`page-link ${currentPage === index + 1 ? 'activo-2' : 'text-light-blue'}`}
+                  href="#"
+                  onClick={() => paginate(index + 1)}
+                >
+                  {index + 1}
+                </a>
+              </li>
+            ))}
             <li className="page-item">
-              <a className="page-link text-light-blue" href="#" aria-label="Next">
+              <a className="page-link text-light-blue" href="#" onClick={() => paginate(currentPage + 1)} aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
@@ -193,7 +214,7 @@ function Shelf() {
         </nav>
       </div>
 
-      {}
+      {/* Modal for Viewing Shelf */}
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Visualitzar Estanteria</Modal.Title>
