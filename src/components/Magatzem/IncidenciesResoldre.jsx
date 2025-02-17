@@ -18,7 +18,7 @@ const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
 function IncidenciesResoldre() {
 
     const [incidents, setIncident]                  = useState([])
-    const [filteredIncidents, setFilteredIncidents] = useState([]);
+    const [filteredIncidents, setFilteredIncidents] = useState([])
     const [products, setProducts]                   = useState([])
     const [orderlineStatus, setOrderlineStatus]     = useState([])
     const [statuses, setStatus]                     = useState([])
