@@ -76,7 +76,7 @@ function OrderPickingReception() {
         };
         
         //actualitzar order line
-        axios.put(`${apiUrl}orderlinereception/${lineId}`, updatedLine, {headers: { "auth-token": token }})
+        axios.put(`${apiUrl}/orderlinereception/${lineId}`, updatedLine, {headers: { "auth-token": token }})
             .then((response) => {
                 console.log("Linea actualitzada correctament", response.data);
             })
@@ -85,7 +85,7 @@ function OrderPickingReception() {
             });
         
         // eliminar la order picking
-        await axios.delete(`${apiUrl}orderpickingreception/${orderPickingId}`, {headers: { "auth-token": token }})
+        await axios.delete(`${apiUrl}/orderpickingreception/${orderPickingId}`, {headers: { "auth-token": token }})
             .then((response) => {
                 console.log("order picking esborrada", response.data);
             })
@@ -102,7 +102,7 @@ function OrderPickingReception() {
                 quantity: space.quantity + lineActualitzar.quantity_received,
             };
 
-            axios.put(`${apiUrl}space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`, updatedSpace, {headers: { "auth-token": token }})
+            axios.put(`${apiUrl}/space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`, updatedSpace, {headers: { "auth-token": token }})
                 .then((response) => {
                     console.log("Quantitat space actialitzada", response.data);
                 })

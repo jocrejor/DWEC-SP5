@@ -150,7 +150,7 @@ function OrderPickingReception() {
                 space = nouSpace;
                 alert(`El producte ${line.product_id} ha segut reubicat a un nou espai per falta de capacitat`);
 
-                axios.put(`${apiUrl}space/${nouSpace.storage_id}/${nouSpace.street_id}/${nouSpace.shelf_id}/${nouSpace.id}`, {
+                axios.put(`${apiUrl}/space/${nouSpace.storage_id}/${nouSpace.street_id}/${nouSpace.shelf_id}/${nouSpace.id}`, {
                     product_id: line.product_id,
                 },{headers: { "auth-token": token }})
             }
@@ -166,7 +166,7 @@ function OrderPickingReception() {
                 operator_id: parseInt(operariSeleccionat)
             };
     
-            axios.post(`${apiUrl}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
+            axios.post(`${apiUrl}/orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
                 .then((response) => {
                     console.log(response.data);
                     alert("Order picking reception creat correctament");
