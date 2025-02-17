@@ -193,11 +193,16 @@ function OrdresEnviament() {
     setTipoModal("Enviar");
     const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-    const orderLinesData = await obtindreOrderLine();
-    const filteredOrders = orderLinesData.filter(order => order.shipping_order_id === valors.id);
-    setOrderLine(filteredOrders);
-    setValorsLineInicials(filteredOrders);
-    setArray(filteredOrders);
+    axios.get(`${apiUrl}/orderlineshipping/order/${valors.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setOrderLine(response.data)
+        setValorsLineInicials(response.data);
+        setArray(response.data);
+      })
+      .catch(e => {
+        console.log(e)
+      }
+      )
     canviEstatModalEnviament();
   }
 
