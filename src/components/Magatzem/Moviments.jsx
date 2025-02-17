@@ -103,38 +103,38 @@ function Moviments() {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        const agafamoviments = await axios.get(`${apiUrl}movement`, {
+        const agafamoviments = await axios.get(`${apiUrl}/movement`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
         setMoviments(agafamoviments.data);
         setFilteredMoviments(agafamoviments.data);
 
-        const agafainventari = await axios.get(`${apiUrl}inventory`, {
+        const agafainventari = await axios.get(`${apiUrl}/inventory`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
         setInventari(agafainventari.data);
 
-        const agafaordrerecepcio = await axios.get(`${apiUrl}orderreception`, {
+        const agafaordrerecepcio = await axios.get(`${apiUrl}/orderreception`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
         setOrdrerecepcio(agafaordrerecepcio.data);
 
-        const agafaordrelinerecepcio = await axios.get(`${apiUrl}orderlinereception`, {
+        const agafaordrelinerecepcio = await axios.get(`${apiUrl}/orderlinereception`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
         setOrdrelinerecepcio(agafaordrelinerecepcio.data);
 
-        const agafaincidencies = await axios.get(`${apiUrl}incident`, {
+        const agafaincidencies = await axios.get(`${apiUrl}/incident`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
         setIncidencies(agafaincidencies.data);
 
-        const agafausuaris = await axios.get(`${apiUrl}users`, {
+        const agafausuaris = await axios.get(`${apiUrl}/users`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
         setUsers(agafausuaris.data);
 
-        const agafaproductes = await axios.get(`${apiUrl}product`, {
+        const agafaproductes = await axios.get(`${apiUrl}/product`, {
           headers: { "auth-token": localStorage.getItem("token") }
         });
         setProduct(agafaproductes.data);
