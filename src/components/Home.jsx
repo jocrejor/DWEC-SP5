@@ -21,12 +21,10 @@ function Home() {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        // Obtenir totes les ordres de recepció
         const { data: orders } = await axios.get(`${apiUrl}/orderreception`, {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        // Comptar quantes ordres hi ha per cada estat
         const statusCounts = statusList.map(status => {
           const quantity = orders.filter(order => order.orderreception_status_id === status.id).length;
           return { id: status.id, status: status.name, quantity };
@@ -38,12 +36,10 @@ function Home() {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        // Obtenir totes les línies d'ordres
         const { data: orderLines } = await axios.get(`${apiUrl}/orderlinereception`, {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        // Comptar quantes línies d'ordre hi ha per cada estat
         const lineStatusCounts = lineStatusList.map(status => {
           const quantity = orderLines.filter(line => line.orderline_status_id === status.id).length;
           return { id: status.id, status: status.name, quantity };
