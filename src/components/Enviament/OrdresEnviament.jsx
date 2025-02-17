@@ -153,6 +153,24 @@ function OrdresEnviament() {
       )
   };
 
+  const ordrePreparada = async (valors) => {
+    setTipoModal("Preparada");
+    const fechaFormateada = formateaFecha(valors.shipping_date);
+    setValorsInicials({ ...valors, shipping_date: fechaFormateada });
+    axios.get(`${apiUrl}/orderlineshipping/order/${valors.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setOrderLine(response.data)
+        setValorsLineInicials(response.data);
+        setArray(response.data);
+      })
+      .catch(e => {
+        console.log(e)
+      }
+      )
+
+    canviEstatModalVisualitza();
+  }
+
   const visualitzarOrdre = async (valors) => {
     setTipoModal("Visualitzar");
     const fechaFormateada = formateaFecha(valors.shipping_date);
@@ -208,7 +226,6 @@ function OrdresEnviament() {
       setArray(prevProductos => prevProductos.filter(producto => producto.product_id !== idProducto));
     }
   };
-
 
   const afegirProducte = (producte) => {
     setArray(prevProductos => {
@@ -297,9 +314,15 @@ function OrdresEnviament() {
     }
     else if (tipoModal === "Enviar") {
       values.ordershipping_status_id = 4;
-      console.log(values)
       axios.put(`${apiUrl}/ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
       canviEstatModalEnviament();
+      actualitzaDades();
+    }
+    else if (tipoModal === "Preparada"){
+      console.log(values)
+      values.ordershipping_status_id = 3;
+      axios.put(`${apiUrl}/ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
+      canviEstatModalVisualitza();
       actualitzaDades();
     }
     actualitzaDades();
@@ -403,6 +426,13 @@ function OrdresEnviament() {
                         </span>
                       </>
                     )}
+                    {estatExistent(valors.ordershipping_status_id) === "Preparant-se" && (
+                      <>
+                        <span onClick={() => ordrePreparada(valors)} className="mx-2" style={{ cursor: "pointer" }}>
+                          <i class="bi bi-check fs-5"></i>
+                        </span>
+                      </>
+                    )}
                     {estatExistent(valors.ordershipping_status_id) === "Preparada" && (
                       <>
                         <span onClick={() => enviarOrdre(valors)} className="mx-2" style={{ cursor: "pointer" }}>
@@ -455,7 +485,7 @@ function OrdresEnviament() {
             initialValues={(tipoModal === 'Modificar' ? valorsInicials : {
               client_id: '',
               shipping_date: '',
-              ordershipping_status_id: 3
+              ordershipping_status_id: 2
             })}
             validationSchema={OrderShippingSchema}
             onSubmit={values => {
@@ -579,7 +609,6 @@ function OrdresEnviament() {
                     Afegir
                   </Button>
                 </div>
-
               </Form>
             )}
           </Formik>
@@ -591,13 +620,14 @@ function OrdresEnviament() {
         </Modal.Header>
         <Modal.Body>
           <Formik
-            initialValues={(tipoModal === 'Visualitzar' ? valorsInicials : {
+            initialValues={(tipoModal === 'Visualitzar' || "Preparada" ? valorsInicials : {
               client_id: '',
               shipping_date: '',
               ordershipping_status_id: 1
             })}
             validationSchema={OrderShippingSchema}
             onSubmit={values => {
+              console.log(values)
               grabar(values)
             }}
           >
@@ -609,7 +639,9 @@ function OrdresEnviament() {
             }) => (
               <Form>
                 <div>
-                  <Button className='mb-4' variant={"info"} type='submit'>{tipoModal}</Button>
+                {tipoModal === "Preparada" &&(
+                    <button type='submit' className='btn btn-secondary'>Preparada</button>
+                  )}         
                 </div>
                 <div className='form-group'>
                   <label htmlFor='client_id'>Client</label>

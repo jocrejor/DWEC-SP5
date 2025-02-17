@@ -7,7 +7,7 @@ function Filtres({onFilterChange, onFilterRestart}) {
     const [status,SetStatus] = useState([])
 
     useEffect(() => {
-        axios.get(`${apiUrl}client`, { headers: { "auth-token": localStorage.getItem("token") } })
+        axios.get(`${apiUrl}/client`, { headers: { "auth-token": localStorage.getItem("token") } })
         .then(response => {
           console.log(response)
           setClients(response.data)
@@ -17,7 +17,7 @@ function Filtres({onFilterChange, onFilterRestart}) {
         }
         )
 
-        axios.get(`${apiUrl}ordershipping_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+        axios.get(`${apiUrl}/ordershipping_status`, { headers: { "auth-token": localStorage.getItem("token") } })
         .then(response => {
           console.log(response)
           SetStatus(response.data)
