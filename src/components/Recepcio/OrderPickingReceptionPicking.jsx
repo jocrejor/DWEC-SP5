@@ -28,34 +28,34 @@ function OrderPickingReception() {
     const dataFetch = async ()=>{
         try{
         //order line reception
-            const orderLineReception = await axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token }})
+            const orderLineReception = await axios.get(`${apiUrl}/orderlinereception`, { headers: { "auth-token": token }})
             setOrderLineReception(orderLineReception.data)
         }catch{(error) => {console.error('Error order line:', error);}};
 
         //order picking reception
         try {
-            const orderpickingreception = await axios.get(`${apiUrl}orderpickingreception`, { headers: { "auth-token": token } })
+            const orderpickingreception = await axios.get(`${apiUrl}/orderpickingreception`, { headers: { "auth-token": token } })
             setOrderPickingReception(orderpickingreception.data);
         }
         catch{(error) => {console.error('Error order picking:', error);}};
 
         //product
         try {
-            const product = await axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
+            const product = await axios.get(`${apiUrl}/product`, { headers: { "auth-token": token } })
             setProducts(product.data);
         }
         catch{(error) => {console.error('Error product:', error);}};
 
         //space
         try {
-            const space = await axios.get(`${apiUrl}space`, { headers: { "auth-token": token } })
+            const space = await axios.get(`${apiUrl}/space`, { headers: { "auth-token": token } })
             setSpaces(space.data);
         }
         catch{(error) => {console.error('Error space:', error);}};
 
         //user
         try {
-            const user = await axios.get(`${apiUrl}users`, { headers: { "auth-token": token } })
+            const user = await axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } })
             setUsers(user.data);
         }
         catch{(error) => {console.error('Error user:', error);}};
