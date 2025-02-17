@@ -44,16 +44,55 @@ function Lateral() {
                     </div>
                     <nav className="collapse d-xl-block" id="navbarToggleExternalContent">
                         <ul className="list-group list-group-flush border-top border-bottom ">
-                            <li className="list-group-item py-3 px-1 text-white fondo-azul no-hover"><i className="bi bi-house-fill px-1 text-white"></i>Administració</li>
-                            <li className={activeOption == 'Usuaris' ? liActive : liInactive}><Link className={activeOption == 'Usuaris' ? linkActive : linkInactive} onClick={() => { setActiveOption('Usuaris') }} to="/usuaris">{activeOption == 'Usuaris' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Usuaris</Link></li>
-                            <li className={activeOption == 'Rols' ? liActive : liInactive}><Link className={activeOption == 'Rols' ? linkActive : linkInactive} onClick={() => { setActiveOption('Rols') }} to="/rols">{activeOption == 'Rols' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Rols</Link></li>
-                            <li className={activeOption == 'DadesGeografiques' ? liActive : liInactive}><Link className={activeOption == 'DadesGeografiques' ? linkActive : linkInactive} onClick={() => { setActiveOption('DadesGeografiques'); console.log(activeOption) }} to="/dadesGeografiques">{activeOption == 'DadesGeografiques' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Dades geogràfiques</Link></li>
-                            <li className={activeOption == 'Transportistes' ? liActive : liInactive}><Link className={activeOption == 'Transportistes' ? linkActive : linkInactive} onClick={() => { setActiveOption('Transportistes') }} to="/transportistes">{activeOption == 'Transportistes' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Transportistes</Link></li>
+                            <li className="list-group-item py-3 px-1 text-white fondo-azul no-hover">
+                                <i className="bi bi-house-fill px-1 text-white"></i>Administració</li>
+                            <li className={activeOption == 'Usuaris' ? liActive : liInactive}>
+                                <Link className={activeOption == 'Usuaris' ? linkActive : linkInactive} onClick={() => { setActiveOption('Usuaris') }} to="/usuaris">
+                                    {activeOption == 'Usuaris' ? <i className="bi bi-caret-right-fill pe-1"></i> : null} Usuaris
+                                </Link>
+                            </li>
+                            <li className={activeOption == 'Rols' ? liActive : liInactive}>
+                                <Link className={activeOption == 'Rols' ? linkActive : linkInactive} onClick={() => { setActiveOption('Rols') }} to="/rols">
+                                    {activeOption == 'Rols' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Rols
+                                </Link>
+                            </li>
+                            <li className={activeOption == 'DadesGeografiques' ? liActive : liInactive}>
+                                <Link className={activeOption == 'DadesGeografiques' ? linkActive : linkInactive} onClick={() => {
+                                     setActiveOption('DadesGeografiques');}
+                                    } to="/dadesGeografiques">{activeOption == 'DadesGeografiques' ? 
+                                    <i className="bi bi-caret-right-fill pe-1"></i> : null}Dades geogràfiques
+                                </Link>
+                            </li>
+                            <li className={activeOption == 'Transportistes' ? liActive : liInactive}>
+                                <Link className={activeOption == 'Transportistes' ? linkActive : linkInactive} onClick={() => { setActiveOption('Transportistes') }} to="/transportistes">
+                                    {activeOption == 'Transportistes' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Transportistes
+                                </Link>
+                            </li>
+                            
                             <li className="list-group-item py-3 px-1 text-white fondo-azul border-top no-hover"><i className="bi bi-send px-1 text-white"></i>Enviament</li>
-                            <li className={activeOption == 'Clients' ? liActive : liInactive}><Link className={activeOption == 'Clients' ? linkActive : linkInactive} onClick={() => { setActiveOption('Clients'); console.log(activeOption) }} to="/clients">{activeOption == 'Clients' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Clients</Link></li>
-                            <li className={activeOption == 'OrdesEnviament' ? liActive : liInactive}><Link className={activeOption == 'OrdesEnviament' ? linkActive : linkInactive} onClick={() => { setActiveOption('OrdesEnviament') }} to="/ordesEnviament">{activeOption == 'OrdesEnviament' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Ordres d'enviament <span className="badge rounded-pill bg-danger px-3 ms-2 text-white">9</span></Link></li>
+                            
+                            
+                            <li className={activeOption == 'Clients' ? liActive : liInactive}>
+                                <Link className={activeOption == 'Clients' ? linkActive : linkInactive} onClick={() => {
+                                    setActiveOption('Clients'); }
+                                    } to="/clients">{activeOption == 'Clients' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Clients
+                                </Link>
+                            </li>
+                            <li className={activeOption == 'OrdesEnviament' ? liActive : liInactive}>
+                                <Link className={activeOption == 'OrdesEnviament' ? linkActive : linkInactive} onClick={() => {
+                                     setActiveOption('OrdesEnviament') }} to="/ordesEnviament">{activeOption == 'OrdesEnviament' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Ordres d'enviament 
+                                     <span className="badge rounded-pill bg-danger px-3 ms-2 text-white">9</span>
+                                </Link>
+                            </li>
+
                             <li className="list-group-item py-3 px-1 text-white fondo-azul border-top no-hover"><i className="bi bi-inboxes px-1 text-white"></i>Recepció</li>
-                            <li className={activeOption == 'Proveidors' ? liActive : liInactive}><Link className={activeOption == 'Proveidors' ? linkActive : linkInactive} onClick={() => { setActiveOption('Proveidors') }} to="/proveidors">{activeOption == 'Proveidors' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Proveïdors</Link></li>
+                            
+                            
+                            <li className={activeOption == 'Proveidors' ? liActive : liInactive}>
+                                <Link className={activeOption == 'Proveidors' ? linkActive : linkInactive} onClick={() => { setActiveOption('Proveidors') }} to="/proveidors">{
+                                    activeOption == 'Proveidors' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Proveïdors
+                                </Link>
+                            </li>
                             <li className={activeOption == 'OrdesRecepcio' ? liActive : liInactive}><Link className={activeOption == 'OrdesRecepcio' ? linkActive : linkInactive} onClick={() => { setActiveOption('OrdesRecepcio') }} to="/ordesRecepcio">{activeOption == 'OrdesRecepcio' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Ordres de recepció</Link></li>
                             <li className={activeOption == 'EstatsOrdre' ? liActive : liInactive}><Link className={activeOption == 'EstatsOrdre' ? linkActive : linkInactive} onClick={() => { setActiveOption('EstatsOrdre') }} to="/estatsOrdreList">{activeOption == 'EstatsOrdre' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Estats Ordres</Link></li>
                             <li className={activeOption == 'EstatsLinia' ? liActive : liInactive}><Link className={activeOption == 'EstatsLinia' ? linkActive : linkInactive} onClick={() => { setActiveOption('EstatsLinia') }} to="/estatsLinia">{activeOption == 'EstatsLinia' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Estats Línia</Link></li>
