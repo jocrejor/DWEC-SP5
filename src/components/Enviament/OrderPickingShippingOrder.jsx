@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { Modal } from "react-bootstrap";
 
-function OrderPickingShipping() {
+function OrderPickingShippingOrder() {
   const [orderShipping, setOrderShipping] = useState([]);
   const [orderLineShipping, setOrderLineShipping] = useState([]);
   const [products, setProducts] = useState([]);
@@ -257,7 +257,7 @@ function OrderPickingShipping() {
               </button>
               <button
                 onClick={() => {
-                  navigate(`orderpickingshipping/picking`);
+                  navigate(`/orderpickingshipping/picking`);
                 }}
                 type="button"
                 className="btn btn-dark ms-2 border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
@@ -468,4 +468,4 @@ function OrderPickingShipping() {
   );
 }
 
-export default OrderPickingShipping;
+export default OrderPickingShippingOrder;

@@ -3,7 +3,7 @@ import axios from "axios";
 import { movMagatzem } from "../Magatzem/movMagatzem";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const OrderPickingShipping = () => {
+const OrderPickingShippingPicking = () => {
   const [orderPickingShipping, setOrderPickingShipping] = useState([]); //order picking shipping
   const [orderLineShipping, setOrderLineShipping] = useState([]); //order line shipping
   const [products, setProducts] = useState([]); //product
@@ -379,4 +379,4 @@ const OrderPickingShipping = () => {
   );
 };
 
-export default OrderPickingShipping;
+export default OrderPickingShippingPicking;
