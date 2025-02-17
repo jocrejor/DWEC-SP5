@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import FiltresEspai from './FiltresEspai';
+import FiltresEspai from './FiltresEspai'; // Mantengo el nombre de tu componente de filtros
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -30,6 +30,11 @@ function Space() {
     const [selectedSpace, setSelectedSpace] = useState(null); // Para almacenar el espacio seleccionado
     const navigate = useNavigate();
     const { magatzem, carrer, estanteria } = useParams();
+    const [filters, setFilters] = useState({
+        storage_id: magatzem,
+        street_id: carrer,
+        shelf_id: estanteria
+    });
 
     useEffect(() => {
         if (magatzem && carrer && estanteria) {
@@ -37,7 +42,6 @@ function Space() {
                 headers: { "auth-token": localStorage.getItem("token") }
             })
                 .then(response => {
-
                     const filteredSpaces = response.data.filter(space =>
                         space.storage_id === magatzem &&
                         space.street_id === carrer &&
@@ -87,9 +91,18 @@ function Space() {
         deleteSpace(id);
     };
 
+    // Función para manejar el cambio de filtros
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters); // Actualizar los filtros con los nuevos valores
+    };
+
     return (
         <>
-            <FiltresEspai />
+            {/* Componente de filtros */}
+            <FiltresEspai 
+                filters={filters} 
+                onFilterChange={handleFilterChange} 
+            />
 
             <h2>Magatzem: {magatzem}</h2>
             <h2>Carrer: {carrer}</h2>

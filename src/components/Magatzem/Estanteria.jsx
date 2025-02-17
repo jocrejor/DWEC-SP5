@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import FilterEstanteria from './FilterEstanteria';
+import FilterEstanteria from './FilterEstanteria'; // Componente de filtros
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -16,13 +16,26 @@ const ShelfSchema = Yup.object().shape({
 
 function Shelf() {
   const [shelves, setShelves] = useState([]);
+  const [filteredShelfs, setFilteredShelfs] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false); // For viewing shelf
+  const [showViewModal, setShowViewModal] = useState(false);
   const [modalType, setModalType] = useState("Crear");
   const [initialValues, setInitialValues] = useState({ name: '', storage_id: '', street_id: '' });
-  const [selectedShelf, setSelectedShelf] = useState(null); // Store selected shelf
+  const [selectedShelf, setSelectedShelf] = useState(null);
   const navigate = useNavigate();
   const { magatzem, carrer } = useParams();
+  const [filters, setFilters] = useState({
+    storage_id: magatzem,
+    street_id: carrer,
+  });
+  
+  // Actualiza los filtros si cambian los parámetros de la URL
+  useEffect(() => {
+    setFilters({
+      storage_id: magatzem,
+      street_id: carrer,
+    });
+  }, [magatzem, carrer]);
 
   useEffect(() => {
     if (magatzem && carrer) {
@@ -37,6 +50,13 @@ function Shelf() {
         });
     }
   }, [magatzem, carrer]);
+
+  useEffect(() => {
+    const filtered = shelves.filter(shelf => {
+      return shelf.storage_id === filters.storage_id && shelf.street_id === filters.street_id;
+    });
+    setFilteredShelfs(filtered);
+  }, [filters, shelves]);
 
   const deleteShelf = async (id) => {
     try {
@@ -56,17 +76,17 @@ function Shelf() {
   };
 
   const viewShelf = (shelf) => {
-    setSelectedShelf(shelf);  // Set the selected shelf's data
-    setShowViewModal(true);    // Open the modal
+    setSelectedShelf(shelf);
+    setShowViewModal(true);
   };
 
   const modSuppliers = (valors) => {
-    console.log("Modifying supplier:", valors);
+    console.log("Modifying shelf:", valors);
     editShelf(valors);
   };
 
   const deleteSuppliers = (id) => {
-    console.log("Deleting supplier:", id);
+    console.log("Deleting shelf:", id);
     deleteShelf(id);
   };
 
@@ -79,9 +99,18 @@ function Shelf() {
     navigate(`../espai/${magatzem}/${carrer}/${id}`);
   };
 
+  const handleFilter = (filters) => {
+    setFilters(filters); // Actualiza los filtros
+  };
+
   return (
     <>
-      <FilterEstanteria />
+      {/* Filtro de Estanteria */}
+      <FilterEstanteria 
+        filters={filters}
+        onFilterChange={handleFilter}
+      />
+
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
@@ -124,31 +153,29 @@ function Shelf() {
             </tr>
           </thead>
           <tbody>
-            {shelves
-              .filter(shelf => shelf.storage_id === magatzem && shelf.street_id === carrer)
-              .map((values) => (
-                <tr key={values.id}>
-                  <td><input className="form-check-input" type="checkbox" /></td>
-                  <td>{values.id}</td>
-                  <td>{values.name}</td>
-                  <td>{values.storage_id}</td>
-                  <td>{values.street_id}</td>
-                  <td><Button onClick={() => handleShelfClick(values.id)}>Espai</Button></td>
-                  <td data-no-colon="true">
-                    <span onClick={() => viewShelf(values)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-eye"></i>
-                    </span>
+            {filteredShelfs.map((values) => (
+              <tr key={values.id}>
+                <td><input className="form-check-input" type="checkbox" /></td>
+                <td>{values.id}</td>
+                <td>{values.name}</td>
+                <td>{values.storage_id}</td>
+                <td>{values.street_id}</td>
+                <td><Button onClick={() => handleShelfClick(values.id)}>Espai</Button></td>
+                <td data-no-colon="true">
+                  <span onClick={() => viewShelf(values)} style={{ cursor: "pointer" }}>
+                    <i className="bi bi-eye"></i>
+                  </span>
 
-                    <span onClick={() => modSuppliers(values)} className="mx-2" style={{ cursor: "pointer" }}>
-                      <i className="bi bi-pencil-square"></i>
-                    </span>
+                  <span onClick={() => modSuppliers(values)} className="mx-2" style={{ cursor: "pointer" }}>
+                    <i className="bi bi-pencil-square"></i>
+                  </span>
 
-                    <span onClick={() => deleteSuppliers(values.id)} style={{ cursor: "pointer" }}>
-                      <i className="bi bi-trash"></i>
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                  <span onClick={() => deleteSuppliers(values.id)} style={{ cursor: "pointer" }}>
+                    <i className="bi bi-trash"></i>
+                  </span>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
         <nav aria-label="Page navigation example" className="d-block">
