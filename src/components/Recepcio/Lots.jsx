@@ -251,8 +251,6 @@ function Lots() {
                                       //cantidad total de la orden de linea de recepcion
                                       quantity_received: valors.quantity_received,
                                     });
-
-                                    console.log("AAA");
                                   }}
                                 >
                                 </i>
