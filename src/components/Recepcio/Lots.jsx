@@ -35,9 +35,10 @@ function Lots() {
   const [guardado, setGuardado] = useState([]);
   const [errorAgregar, setErrorAgregar] = useState("");
   const [lotYaCreados, setLotYaCreados] = useState([]);
-
-
   const [filteredOrderLineReception, setFilteredOrderLineReception] = useState([]);
+
+
+  const [arrayVisualitzar, setArrayVisualitzar] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -242,10 +243,8 @@ function Lots() {
                           <td data-cell="Estat ordre de recepció">
                             {(() => {
                               const orderRec = orderreception.find(or => or.id === valors.order_reception_id);
-                              console.log("OrderRec", orderRec)
                               if (orderRec) {
                                 const status = orderreception_status.find(s => s.id === orderRec.orderreception_status_id);
-                                console.log("Status", status)
                                 return status ? status.name : "Estat no trobat";
                               }
                               return "Orden no trobada";
@@ -279,11 +278,11 @@ function Lots() {
                                     canviEstatModal();
                                     setTipoModal("Visualitzar");
 
-                                    const lot = lots.find((lot) => lot.orderlinereception_id === valors.id);
+                                    const filteredLots = lots.filter((lot) => lot.orderlinereception_id === valors.id);
 
-                                    console.log("PRODUCTO: ", lot);
+                                    console.log("Lotes filtrados: ", filteredLots);
 
-                                    setValorsInicials({
+                                    const transformedLots = filteredLots.map((lot) => ({
                                       name: lot.name,
                                       product_id: lot.product_id,
                                       supplier_id: lot.supplier_id,
@@ -291,9 +290,27 @@ function Lots() {
                                       production_date: lot.production_date.split("T")[0],
                                       expiration_date: lot.expiration_date.split("T")[0],
                                       orderlinereception_id: lot.orderlinereception_id,
-                                      //cantidad total de la orden de linea de recepcion
-                                      quantity_received: valors.quantity_received,
-                                    });
+                                      quantity_received: valors.quantity_received, // suponiendo que este dato se mantiene igual para todos
+                                    }));
+                                    
+                                    console.log("Todos los lotes: ", transformedLots);
+
+                                    setArrayVisualitzar(transformedLots);
+                                    // const lot = lots.find((lot) => lot.orderlinereception_id === valors.id);
+
+                                    // console.log("PRODUCTO: ", lot);
+
+                                    // setValorsInicials({
+                                    //   name: lot.name,
+                                    //   product_id: lot.product_id,
+                                    //   supplier_id: lot.supplier_id,
+                                    //   quantity: lot.quantity,
+                                    //   production_date: lot.production_date.split("T")[0],
+                                    //   expiration_date: lot.expiration_date.split("T")[0],
+                                    //   orderlinereception_id: lot.orderlinereception_id,
+                                    //   //cantidad total de la orden de linea de recepcion
+                                    //   quantity_received: valors.quantity_received,
+                                    // });
                                   }}
                                 >
                                 </i>
@@ -445,8 +462,7 @@ function Lots() {
       </div>
 
       {/* MODAL CON FORMIK */}
-      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} setLotYaCreados={setLotYaCreados} tipoModal={tipoModal}
-        suppliers={suppliers} />
+      <LotsLotOSerie products={products} orderreception={orderreception} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} setLotYaCreados={setLotYaCreados} tipoModal={tipoModal} suppliers={suppliers} arrayVisualitzar={arrayVisualitzar} />
     </>
   );
 }

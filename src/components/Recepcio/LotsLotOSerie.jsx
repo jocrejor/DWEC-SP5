@@ -44,8 +44,8 @@ function limpiarCampos(resetForm, lotOrSerial, setErrorAgregar) {
 }
 
 function LotsLotOSerie({
-  products, canviEstatModal, showModal, valorsInicials, setValorsInicials,
-  lotOrSerial, guardado, setGuardado, errorAgregar, setErrorAgregar, setLotYaCreados, tipoModal, suppliers
+  products, orderreception, canviEstatModal, showModal, valorsInicials, setValorsInicials, lotOrSerial, guardado,
+  setGuardado, errorAgregar, setErrorAgregar, setLotYaCreados, tipoModal, suppliers, arrayVisualitzar
 }) {
   return (
     <>
@@ -149,14 +149,6 @@ function LotsLotOSerie({
 
                 setGuardado(prevGuardado => [...prevGuardado, newGuardado]);
 
-                // setValorsInicials(prevValues => ({
-                //   ...prevValues,
-                //   name: "",
-                //   quantity: lotOrSerial === "serie" ? 1 : "",
-                //   production_date: "",
-                //   expiration_date: "",
-                // }));
-
                 setErrorAgregar("");
               };
 
@@ -164,73 +156,91 @@ function LotsLotOSerie({
                 setGuardado(prevGuardado => prevGuardado.filter((_, i) => i !== index));
               };
 
-              // const producte = products.find((producte) => producte.id === values.product_id);
-
               return (
                 <Form>
-                  {console.log(values)}
-                  {tipoModal === "Visualitzar" && (
+                  {tipoModal === "Visualitzar" ? (
                     <>
-                      {/* Nombre lote/serie */}
-                      <div className="form-group">
-                        <label htmlFor="name">Nom</label>
-                        <Field type="text" name="name" className="form-control" disabled />
+                      <div className="table-responsive">
+                        <table className="table table-striped text-center align-middle">
+                          <thead className="table-active border-bottom border-dark-subtle">
+                            <tr>
+                              <th scope="col" className="align-middle d-none">Nom</th>
+                              <th scope="col" className="align-middle d-none">Producte</th>
+                              <th scope="col" className="align-middle d-none">Proveïdor</th>
+                              <th scope="col" className="align-middle d-none">Quantitat</th>
+                              {lotOrSerial === "lot" && (
+                                <>
+                                  <th scope="col" className="align-middle d-none">Data de produccio</th>
+                                  <th scope="col" className="align-middle d-none">Data de caducitat</th>
+                                </>
+                              )}
+                              <th scope="col" className="align-middle d-none">ID d'ordre de linea de recepció</th>
+                              <th scope="col" className="align-middle d-none">Quantitat rebuda</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {arrayVisualitzar.length === 0 ? (
+                              <tr>
+                                <td colSpan="10" className="text-center">
+                                  No hay lotes disponibles.
+                                </td>
+                              </tr>
+                            ) : (
+                              arrayVisualitzar.map((lot, index) => (
+                                <tr key={`lot-${index}`}>
+                                  <td className='d-block' data-cell="Nom">
+                                    <span className='fw-bold d-none d-xl-inline'>Nom: </span>{lot.name}
+                                  </td>
+                                  <td className='d-block' data-cell="Producte">
+                                    <span className='fw-bold d-none d-xl-inline'>Producte: </span>
+                                    {products.find((product) => product.id === lot.product_id)?.name || '-'}
+                                  </td>
+                                  <td className='d-block' data-cell="Proveïdor">
+                                    <span className='fw-bold d-none d-xl-inline'>Proveïdor: </span>
+                                    {suppliers.find((supplier) => supplier.id === lot.supplier_id)?.name || '-'}
+                                  </td>
+                                  <td className='d-block' data-cell="Quantitat">
+                                    <span className='fw-bold d-none d-xl-inline'>Quantitat: </span>
+                                    {lot.quantity}
+                                  </td>
+                                  {lotOrSerial === "lot" && (
+                                    <>
+                                      <td className='d-block' data-cell="Data de produccio">
+                                        <span className='fw-bold d-none d-xl-inline'>Data de produccio: </span>{lot.production_date}
+                                      </td>
+                                      <td className='d-block' data-cell="Data de caducitat">
+                                        <span className='fw-bold d-none d-xl-inline'>Data de caducitat: </span>{lot.expiration_date}
+                                      </td>
+                                    </>
+                                  )}
+                                  <td className='d-block' data-cell="ID Ordre de linea de recepció">
+                                    <span className='fw-bold d-none d-xl-inline'>ID Ordre de linea de recepció: </span>{lot.orderlinereception_id}
+                                  </td>
+                                  <td className='d-block' data-cell="Quantitat total rebuda">
+                                    <span className='fw-bold d-none d-xl-inline'>Quantitat total rebuda: </span>{lot.quantity_received}
+                                  </td>
+
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
                       </div>
                     </>
-                  )}
-
-                  {/* Producto */}
-                  <div className="form-group">
-                    <label htmlFor="product_id">Producte</label>
-                    <Field as="select" name="product_id" className="form-control" disabled>
-                      <option value="">Selecciona un producte</option>
-                      {products.map(product => (
-                        <option key={product.id} value={product.id}>
-                          {product.name}
-                        </option>
-                      ))}
-                    </Field>
-                  </div>
-
-                  {tipoModal === "Visualitzar" && (
+                  ) : (
                     <>
-                      {/* Proveidor */}
+                      {/* Producto */}
                       <div className="form-group">
-                        <label htmlFor="supplier_id">Proveïdor</label>
-                        <Field as="select" name="supplier_id" className="form-control" disabled>
+                        <label htmlFor="product_id">Producte</label>
+                        <Field as="select" name="product_id" className="form-control" disabled>
                           <option value="">Selecciona un producte</option>
-                          {suppliers.map(supplier => (
-                            <option key={supplier.id} value={supplier.id}>
-                              {supplier.name}
+                          {products.map(product => (
+                            <option key={product.id} value={product.id}>
+                              {product.name}
                             </option>
                           ))}
                         </Field>
                       </div>
-                      {/* Quantitat */}
-                      <div className="form-group">
-                        <label htmlFor="quantity">Quantitat</label>
-                        <Field type="text" name="quantity" className="form-control" disabled />
-                      </div>
-                      {/* Data producció */}
-                      <div className="form-group">
-                        <label htmlFor="production_date">Data producció</label>
-                        <Field type="date" name="production_date" className="form-control" disabled />
-                      </div>
-                      {/* Data expiració */}
-                      <div className="form-group">
-                        <label htmlFor="expiration_date">Data expiració</label>
-                        <Field type="date" name="expiration_date" className="form-control" disabled />
-                      </div>
-                      {/* Ordre de linea de recepció */}
-                      <div className="form-group">
-                        <label htmlFor="orderlinereception_id">Ordre de línia de recepció</label>
-                        <Field type="number" name="orderlinereception_id" className="form-control" disabled />
-                      </div>
-                    </>
-                  )}
-
-                  {tipoModal === "Crear" && (
-                    <>
                       {/* Cantidad */}
                       <div className="form-group">
                         <label htmlFor="quantity_reveived">Quantitat de la ordre</label>
@@ -261,7 +271,6 @@ function LotsLotOSerie({
                           {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
                         </div>
                       </div>
-
                       {/* Campos adicionales solo para "Lot" */}
                       {lotOrSerial === "lot" && (
                         <>
@@ -323,8 +332,8 @@ function LotsLotOSerie({
                         </table>
                       </div>
                     </>
-                  )
-                  }
+                  )}
+
 
 
 
