@@ -103,9 +103,9 @@ function Lateral() {
                                     Proveïdors
                                 </Link>
                             </li>
-                            <li className={activeOption == 'OrdesRecepcio' ? liActive : liInactive}>
-                                <Link className={activeOption == 'OrdesRecepcio' ? linkActive : linkInactive} onClick={() => {setActiveOption('OrdesRecepcio') }} to="/ordesRecepcio">
-                                    {activeOption == 'OrdesRecepcio' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}
+                            <li className={activeOption == 'OrdresRecepcio' ? liActive : liInactive}>
+                                <Link className={activeOption == 'OrdresRecepcio' ? linkActive : linkInactive} onClick={() => {setActiveOption('OrdresRecepcio') }} to="/ordresRecepcio">
+                                    {activeOption == 'OrdresRecepcio' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}
                                     Ordres de recepció
                                 </Link>
                             </li>
