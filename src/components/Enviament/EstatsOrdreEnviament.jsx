@@ -3,7 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
-import Filtres from "../Filtres";
+import Filter from "../EstatsOrdresEnviamentFiltres";
 import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -85,10 +85,32 @@ function OrderShipping_Status() {
     }
   };
 
+  const actualitzaFiltres = async (estats) => {
+    let ordersFiltradas = orderShippingStatus;
+    ordersFiltradas = ordersFiltradas.filter((order) => {
+      const matchesStatus = estats ? order.id === parseInt(estats) : true;
+      console.log(order.id)
+      return matchesStatus;
+    });
+    setOrderShippingStatus(ordersFiltradas);
+  }
+
+  const actualitzaDades = () => {
+    axios.get(`${apiUrl}ordershipping_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+      .then(response => {
+        setOrderShippingStatus(response.data)
+      })
+  }
+
+  const netejaFiltres = () => {
+    actualitzaDades();
+    document.getElementById("status").value = "";
+  }
+
   return (
     <>
       <Header title="Llistat Estats de Ordre" />
-      <Filtres />
+      <Filter onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres} />
       <div className="container-fluid pt-3">
         <Table striped bordered hover>
           <thead className="table-active border-bottom border-dark-subtle text-center">
