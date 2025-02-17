@@ -76,6 +76,8 @@ function IncidenciesResoldre() {
         setFilteredIncidents(incidents);
         setCurrentPage(1);
       }, [incidents]);
+
+      
     useEffect(() => {
         const indexOfLastItem = currentPage * elementsPaginacio;
         const indexOfFirstItem = indexOfLastItem - elementsPaginacio;

@@ -21,7 +21,8 @@ function IncidenciesResoldreFiltres({onFilter, onClear}) {
     /*UseEffect*/
     useEffect(() => {
         getDataOrderLineStatus()
-    })
+    },[]) // DAVID
+    
 
     const filter = (e) => {
         setFilters({
