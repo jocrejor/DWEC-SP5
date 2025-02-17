@@ -93,7 +93,16 @@ function Lateral() {
                                     activeOption == 'Proveidors' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Proveïdors
                                 </Link>
                             </li>
-                            <li className={activeOption == 'OrdesRecepcio' ? liActive : liInactive}><Link className={activeOption == 'OrdesRecepcio' ? linkActive : linkInactive} onClick={() => { setActiveOption('OrdesRecepcio') }} to="/ordesRecepcio">{activeOption == 'OrdesRecepcio' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Ordres de recepció</Link></li>
+                            <li className={activeOption == 'OrdesRecepcio' ? liActive : liInactive}>
+                                <Link className={activeOption == 'OrdesRecepcio' ? linkActive : linkInactive} onClick={() => { 
+                                    setActiveOption('OrdesRecepcio') }} to="/ordesRecepcio">{activeOption == 'OrdesRecepcio' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Ordres de recepció
+                                </Link>
+                            </li>
+                            <li className={activeOption == 'OrdesRecepcio' ? liActive : liInactive}>
+                                <Link className={activeOption == 'orderpickingreception' ? linkActive : linkInactive} onClick={() => { 
+                                    setActiveOption('orderpickingreception') }} to="/orderpickingreception">{activeOption == 'OrdesRecepcio' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Ordres Picking R
+                                </Link>
+                            </li>
                             <li className={activeOption == 'EstatsOrdre' ? liActive : liInactive}><Link className={activeOption == 'EstatsOrdre' ? linkActive : linkInactive} onClick={() => { setActiveOption('EstatsOrdre') }} to="/estatsOrdreList">{activeOption == 'EstatsOrdre' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Estats Ordres</Link></li>
                             <li className={activeOption == 'EstatsLinia' ? liActive : liInactive}><Link className={activeOption == 'EstatsLinia' ? linkActive : linkInactive} onClick={() => { setActiveOption('EstatsLinia') }} to="/estatsLinia">{activeOption == 'EstatsLinia' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Estats Línia</Link></li>
                             <li className={activeOption == 'Productes' ? liActive : liInactive}><Link className={activeOption == 'Productes' ? linkActive : linkInactive} onClick={() => { setActiveOption('Productes') }} to="/productes">{activeOption == 'Productes' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}Productes</Link></li>
@@ -118,7 +127,7 @@ function Lateral() {
 
                 <Modal.Body>
       <h4 >Vols eixir del teu perfil d'usuari?</h4>
-    <div class="d-flex justify-content-end">
+    <div className="d-flex justify-content-end">
     <Button type="submit"
             id="enviar"
             className="mt-2 orange-button"
