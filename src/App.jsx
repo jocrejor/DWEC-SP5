@@ -35,7 +35,7 @@ import Incidencies from './components/Magatzem/Incidencies';
 import Moviments from './components/Magatzem/Moviments';
 import Inventariar from './components/Magatzem/Inventariar';
 import CompletarInventari from './components/Magatzem/CompletarInventari';
-import './App.js';
+
 import OrderPickingReception from './components/Recepcio/OrderPickingReception';
 import OrderPickingShipping from './components/Enviament/OrderPickingShipping';
 
@@ -82,13 +82,13 @@ function App() {
 
                 <Route path="/rols" element={<Rols />} />
 
-                <Route path="/dadesGeografiques" element={<DadesGeografiques />} />
+                <Route path="/dadesGeografiques/*" element={<DadesGeografiques />} />
 
                 <Route path="/transportistes" element={<Transportistes />} />
 
                 <Route path="/clients" element={<Clients />} />
 
-                <Route path="/ordresEnviament" element={<OrdresEnviament />} />
+                <Route path="/ordesEnviament" element={<OrdresEnviament />} />
 
                 <Route path="/proveidors" element={<Proveidors />} />
 
@@ -104,7 +104,7 @@ function App() {
 
                 <Route path="/lots" element={<Lots />} />
 
-                <Route path="/GestioMagatzem/*" element={<GestioMagatzem/>} / >
+                <Route path="/GestioMagatzem/*" element={<GestioMagatzem/>} />
                    
                                    
                 <Route path="/inventaris/" element={<Inventaris />} />
@@ -117,9 +117,9 @@ function App() {
 
                 <Route path="/moviments" element={<Moviments />} />
                 
-                <Route path="/orderpickingreception" element={<OrderPickingReception />} />
+                <Route path="/orderpickingreception/*" element={<OrderPickingReception />} />
 
-                <Route path="/orderpickingshipping" element={<OrderPickingShipping />} />
+                <Route path="/orderpickingshipping/*" element={<OrderPickingShipping />} />
 
                 <Route path="/" element={<Home />} />
 

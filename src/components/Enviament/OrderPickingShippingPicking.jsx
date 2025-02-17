@@ -28,7 +28,7 @@ const OrderPickingShippingPicking = () => {
   const dataFetch = async () => {
     try {
       //order line shipping
-      const orderLineShipping = await axios.get(`${apiUrl}orderlineshipping`, {
+      const orderLineShipping = await axios.get(`${apiUrl}/orderlineshipping`, {
         headers: { "auth-token": token },
       });
       setOrderLineShipping(orderLineShipping.data);
@@ -41,9 +41,10 @@ const OrderPickingShippingPicking = () => {
     //order picking reception
     try {
       const orderpickingshipping = await axios.get(
-        `${apiUrl}orderpickingshipping`,
+        `${apiUrl}/orderpickingshipping`,
         { headers: { "auth-token": token } }
       );
+      console.log(orderpickingshipping.data);
       setOrderPickingShipping(orderpickingshipping.data);
     } catch {
       (error) => {
@@ -53,7 +54,7 @@ const OrderPickingShippingPicking = () => {
 
     //product
     try {
-      const product = await axios.get(`${apiUrl}product`, {
+      const product = await axios.get(`${apiUrl}/product`, {
         headers: { "auth-token": token },
       });
       setProducts(product.data);
@@ -65,7 +66,7 @@ const OrderPickingShippingPicking = () => {
 
     //space
     try {
-      const space = await axios.get(`${apiUrl}space`, {
+      const space = await axios.get(`${apiUrl}/space`, {
         headers: { "auth-token": token },
       });
       setSpaces(space.data);
@@ -77,7 +78,7 @@ const OrderPickingShippingPicking = () => {
 
     //user
     try {
-      const user = await axios.get(`${apiUrl}users`, {
+      const user = await axios.get(`${apiUrl}/users`, {
         headers: { "auth-token": token },
       });
       setUsers(user.data);
@@ -106,7 +107,7 @@ const OrderPickingShippingPicking = () => {
 
     //actualitzar order line
     axios
-      .put(`${apiUrl}orderlineshipping/${lineId}`, updatedLine, {
+      .put(`${apiUrl}/orderlineshipping/${lineId}`, updatedLine, {
         headers: { "auth-token": token },
       })
       .then((response) => {
@@ -118,7 +119,7 @@ const OrderPickingShippingPicking = () => {
 
     // eliminar la order picking
     await axios
-      .delete(`${apiUrl}orderpickingshipping/${orderPickingId}`, {
+      .delete(`${apiUrl}/orderpickingshipping/${orderPickingId}`, {
         headers: { "auth-token": token },
       })
       .then((response) => {
@@ -141,7 +142,7 @@ const OrderPickingShippingPicking = () => {
 
       axios
         .put(
-          `${apiUrl}space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`,
+          `${apiUrl}/space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`,
           updatedSpace,
           { headers: { "auth-token": token } }
         )
