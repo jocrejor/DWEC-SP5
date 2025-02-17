@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from "axios";
 
 import Header from '../Header';
-import Filtres from '../Filtres';
+import Filtres from '../OrdreLiniesRecepcioFiltres';
 import LotsLotOSerie from './LotsLotOSerie';
 const apiUrl = import.meta.env.VITE_API_URL;
 const token = localStorage.getItem('token');
@@ -35,7 +35,9 @@ function Lots() {
   const [guardado, setGuardado] = useState([]);
   const [errorAgregar, setErrorAgregar] = useState("");
   const [lotYaCreados, setLotYaCreados] = useState([]);
-  // const [showModalVisualitzar, setShowModalVisualitzar] = useState(false);
+
+
+  const [filteredOrderLineReception, setFilteredOrderLineReception] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,6 +87,7 @@ function Lots() {
         .then(
           response => {
             setOrderLineReception(response.data)
+            setFilteredOrderLineReception(response.data)
           })
         .catch(
           error => {
@@ -130,10 +133,35 @@ function Lots() {
   const hayLotOSerie2 = (valors) =>
     lotYaCreados.includes(valors.id);
 
+  const actualitzaFiltres = (supplierValue, productValue, quantityValue) => {
+    let filtered = orderlinereception; // Datos originales
+    if (supplierValue) {
+      filtered = filtered.filter(valors => {
+        const orderRec = orderreception.find(or => or.id === valors.order_reception_id);
+        return orderRec && parseInt(orderRec.supplier_id) === parseInt(supplierValue);
+      });
+    }
+    // if (statusValue) {
+    //   filtered = filtered.filter(valors => parseInt(valors.orderline_status_id) === parseInt(statusValue));
+    // }
+    if (productValue) {
+      filtered = filtered.filter(valors => parseInt(valors.product_id) === parseInt(productValue));
+    }
+    if (quantityValue) {
+      filtered = filtered.filter(valors => parseInt(valors.quantity_received) === parseInt(quantityValue));
+    }
+
+    setFilteredOrderLineReception(filtered);
+  };
+
+  const netejaFiltres = () => {
+    setFilteredOrderLineReception(orderlinereception);
+  };
+
   return (
     <>
       <Header title="Llistat Lots" />
-      <Filtres />
+      <Filtres onFilterChange={actualitzaFiltres} onFilterRestart={netejaFiltres} />
 
       <div className="container-fluid">
         <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
@@ -174,17 +202,23 @@ function Lots() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orderlinereception.length === 0 ? (
+                  {filteredOrderLineReception.length === 0 ? (
                     <tr>
                       <td colSpan="12" className="text-center">
                         No hi han linies d&apos;ordre de recepció
                       </td>
                     </tr>
                   ) : (
-                    orderlinereception
-                      .filter((valors) => valors.orderline_status_id === 2)
+                    filteredOrderLineReception
+                      .filter((valors) => valors.orderline_status_id === 1)
+                      .filter((valors) => {
+                        const orderRec = orderreception.find(
+                          (or) => or.id === valors.order_reception_id
+                        );
+                        return orderRec && orderRec.orderreception_status_id === 2; // Filtro por orderreception_status_id
+                      })
                       .map((valors) => (
-                        <tr key={`orderlinereception-${valors.id}`}>
+                        <tr key={`filteredOrderLineReception-${valors.id}`}>
                           <td scope='row' data-cell="Seleccionar">
                             <input className='form-check-input' type="checkbox" />
                           </td>
@@ -202,11 +236,20 @@ function Lots() {
                           </td>
 
                           <td data-cell="Estat ordre línia de recepció">
-                            {orderline_status.find((status) => status.id === valors.order_reception_id)?.name || "Estat no trobat"}
+                            {orderline_status.find((status) => status.id === valors.orderline_status_id)?.name || "Estat no trobat"}
                           </td>
 
                           <td data-cell="Estat ordre de recepció">
-                            {orderreception_status.find((status) => status.id === valors.orderline_status_id)?.name || "Estat no trobat"}
+                            {(() => {
+                              const orderRec = orderreception.find(or => or.id === valors.order_reception_id);
+                              console.log("OrderRec", orderRec)
+                              if (orderRec) {
+                                const status = orderreception_status.find(s => s.id === orderRec.orderreception_status_id);
+                                console.log("Status", status)
+                                return status ? status.name : "Estat no trobat";
+                              }
+                              return "Orden no trobada";
+                            })()}
                           </td>
 
                           <td data-cell="Producte">

@@ -367,6 +367,9 @@ LotsLotOSerie.propTypes = {
   setGuardado: PropTypes.func.isRequired,
   errorAgregar: PropTypes.string.isRequired,
   setErrorAgregar: PropTypes.func.isRequired,
+  setLotYaCreados: PropTypes.func.isRequired,
+  tipoModal: PropTypes.string.isRequired,
+  suppliers: PropTypes.array.isRequired,
 };
 
 export default LotsLotOSerie;
