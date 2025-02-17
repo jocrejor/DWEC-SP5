@@ -250,21 +250,17 @@ const handleImport = async () => {
 
       console.log("Datos CSV antes del filtrado:", csvData);
 
-      // Filtrar filas inválidas antes de enviar
-      const filteredData = csvData.filter(
-        (item) => item.name && typeof item.name === "string" && item.name.trim() !== ""
-      );
+      // Ya no estamos filtrando, vamos a enviar los datos directamente
+      const filteredData = csvData;
 
-      console.log("Datos CSV después del filtrado:", filteredData);
+      console.log("Datos CSV que se enviarán a la API:", filteredData);
 
       if (filteredData.length === 0) {
         console.error("Error: No hay datos válidos para importar.");
         return;
       }
 
-      // Enviar los datos dentro de un objeto con la propiedad 'value'
-      console.log("Datos que se enviarán a la API:", { value: filteredData });
-
+      // Enviar los datos directamente
       const response = await axios.post(
         `${apiUrl}/supplier`,
         { value: filteredData }, // Enviar los datos dentro de 'value'
@@ -283,6 +279,7 @@ const handleImport = async () => {
     }
   }
 };
+
 
   return (
     <>
