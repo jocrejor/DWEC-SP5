@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Formik, Form, Field } from 'formik';
+import { Link }   from 'react-router-dom'
 import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
@@ -14,6 +15,11 @@ const OrderReceptionSchema = Yup.object().shape({
     supplier_id: Yup.number().required('Proveïdor requerit'),
     estimated_reception_date: Yup.date().required('Data estimada requerida'),
 });
+
+const IncidenciaSchema = Yup.object().shape({
+    quantity_received: Yup.number().positive().integer().required('Tens que introduïr una cantitat vàlida'),
+    description: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(200, 'El valor màxim és de 200 caracters')
+})
 
 function OrderReception() {
     const [orderReceptions, setOrderReceptions] = useState([]);
@@ -40,21 +46,6 @@ function OrderReception() {
     const [orderPage, setOrderPage] = useState([]);
 
     const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
-
-    /*Incidències*/
-    const [showIncidentModal, setShowIncidentModal] = useState(false);
-    const [incidents, setIncident] = useState([])
-    const [valorsInicialsIncidents, setValorsInicialsIncidents] = useState({
-        id: '',
-        product: '',
-        quantity_received: '',
-        description: '',
-        supplier: '',
-        operator: '',
-        quantity_ordered: '',
-        created_at: '',
-        orderline_status_id: '', // Se llena con el estado de la base de datos
-    })
 
     const obrirModalIncidencia = async (ordre) => {
         setOrderToReview(ordre); // Asignamos la orden a revisar
@@ -442,6 +433,22 @@ function OrderReception() {
     };
 
     /*Así comensa tot lo relacionat en les incidències (menos el UseState i boto de crear incidència)*/
+    /*Incidències*/
+    const [showIncidentModal, setShowIncidentModal] = useState(false);
+    const [incidents, setIncident] = useState([])
+    const [orderlineStatus, setOrderlineStatus]     = useState([])
+    const [valorsInicialsIncidents, setValorsInicialsIncidents] = useState({
+        id: '',
+        product: '',
+        quantity_received: '',
+        description: '',
+        supplier: '',
+        operator: '',
+        quantity_ordered: '',
+        created_at: '',
+        orderline_status_id: '', // Se llena con el estado de la base de datos
+    })
+
     const getDataIncident = () => {
         const apiURL = import.meta.env.VITE_API_URL
         const token = localStorage.getItem("token")
@@ -469,8 +476,23 @@ function OrderReception() {
             );
     }
 
+    const getDataOrderLineStatus = () => {
+        const apiURL = import.meta.env.VITE_API_URL
+        const token = localStorage.getItem("token")
+
+        axios.get(`${apiURL}/orderline_status`, { headers: { "auth-token": token } })
+            .then(response => setOrderlineStatus(response.data))
+            .catch(error => console.log(error))
+    }
+
+    const getStatusId = (statusId) => {
+        const status = orderlineStatus.find(s => Number(s.id) === Number(statusId));
+        return status ? status.name : "Estat desconegut";
+    }
+
     useEffect(() => {
         getDataIncident()
+        getDataOrderLineStatus()
     }, [])
 
     return (
@@ -496,6 +518,11 @@ function OrderReception() {
                 <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
                 <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 order-xl-2">
                     <div className="d-flex h-100 justify-content-xl-end">
+                    <Button type="button" onClick={() => console.log("Prova Crear incident")} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+                            <Link to="/incidencies/incidenciesResoldre" className="text-reset text-decoration-none">
+                                Resoldre Incidències
+                            </Link>
+                    </Button>
                     <Button
                         className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
                         onClick={() => {
@@ -846,6 +873,50 @@ function OrderReception() {
                                     )}
                                 </tbody>
                             </Table>
+                            {/* Formulario de Creación de Incidència */}
+                <Formik
+                    initialValues={valorsInicials}
+                    validationSchema={IncidenciaSchema}
+                    onSubmit={values => {
+                        console.log("Valores enviados a updateDataIncident:", values);
+                        updateDataIncident(values);
+                        canviEstatModal();
+                    }}
+                >
+                        {({ values, errors, touched }) => (
+                            <Form>
+                                <div className="form-group">
+                                    <label className='fw-bolder' htmlFor='description'>Descripció</label>
+                                    <Field
+                                        type="text"
+                                        name="description"
+                                        className="text-light-blue form-control"
+                                        value={values.description || ''} />
+                                    {errors.description && touched.description ? <div className="invalid-feedback">{errors.description}</div> : null}
+                                </div>
+                                <div className="form-group">
+                                    <label className='fw-bolder' htmlFor='quantity_received'>Cantitat recibida</label>
+                                    <Field
+                                        type="number"
+                                        name="quantity_received"
+                                        className="text-light-blue form-control"
+                                        value={values.quantity_received || ''} />
+                                    {errors.quantity_received && touched.quantity_received ? <div className="invalid-feedback">{errors.quantity_received}</div> : null}
+                                </div>
+                                <div className="form-group">
+                                    <label className="fw-bolder" htmlFor="orderline_status_id">Estat</label>
+                                    <Field as="select" name="orderline_status_id" className="text-light-blue form-control">
+                                        {orderlineStatus.map(status => 
+                                            <option key={status.id} value={status.id}>{status.name}</option>
+                                        )}
+                                    </Field>
+                                    {errors.status && touched.status ? (
+                                        <div className="invalid-feedback">{errors.status}</div>
+                                    ) : null}
+                                </div>
+                            </Form>
+                        )}
+                    </Formik>
                         </div>
                     ) : (
                         <Spinner animation="border" />
