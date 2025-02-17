@@ -75,7 +75,7 @@ function OrdresEnviament() {
   }, [currentPage, orders])
 
   useEffect(() => {
-    axios.get(`${apiUrl}ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setOrder(response.data)
       })
@@ -84,7 +84,7 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}client`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/client`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         console.log(response)
         setClientes(response.data)
@@ -94,7 +94,7 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}users`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/users`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setUsers(response.data)
       })
@@ -103,7 +103,7 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}product`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setProducts(response.data)
       })
@@ -112,7 +112,7 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}ordershipping_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/ordershipping_status`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setStatus(response.data)
       })
@@ -121,7 +121,7 @@ function OrdresEnviament() {
       }
       )
 
-    axios.get(`${apiUrl}carrier`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/carrier`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setCarriers(response.data)
       })
@@ -141,7 +141,7 @@ function OrdresEnviament() {
     canviEstatModal();
     const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-    axios.get(`${apiUrl}orderlineshipping/order/${valors.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/orderlineshipping/order/${valors.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setOrderLine(response.data)
         setValorsLineInicials(response.data);
@@ -157,7 +157,7 @@ function OrdresEnviament() {
     setTipoModal("Visualitzar");
     const fechaFormateada = formateaFecha(valors.shipping_date);
     setValorsInicials({ ...valors, shipping_date: fechaFormateada });
-    axios.get(`${apiUrl}orderlineshipping/order/${valors.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/orderlineshipping/order/${valors.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setOrderLine(response.data)
         setValorsLineInicials(response.data);
@@ -184,16 +184,16 @@ function OrdresEnviament() {
   }
 
   const eliminarOrder = (id) => {
-    axios.get(`${apiUrl}orderlineshipping`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/orderlineshipping`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then((response) => {
         const responseData = response.data;
         const idOrderLine = responseData.id;
         responseData.map(orderLine => {
           if (id === orderLine.shipping_order_id) {
-            axios.delete(`${apiUrl}orderlineshipping/${orderLine.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+            axios.delete(`${apiUrl}/orderlineshipping/${orderLine.id}`, { headers: { "auth-token": localStorage.getItem("token") } })
           }
         })
-        axios.delete(`${apiUrl}ordershipping/${id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+        axios.delete(`${apiUrl}/ordershipping/${id}`, { headers: { "auth-token": localStorage.getItem("token") } })
           .then(() => {
             const newOrders = orders.filter(order => order.id !== id)
             setOrder(newOrders)
@@ -259,13 +259,13 @@ function OrdresEnviament() {
   const grabar = (values) => {
     if (tipoModal === "Crear") {
       if (arrayProductos.length > 0) {
-        axios.post(`${apiUrl}ordershipping`, values, { headers: { "auth-token": localStorage.getItem("token") } })
+        axios.post(`${apiUrl}/ordershipping`, values, { headers: { "auth-token": localStorage.getItem("token") } })
           .then(response => {
             const resultat = response.data;
             arrayProductos.map(line => {
               const novaId = resultat.results.insertId
               line.shipping_order_id = novaId
-              axios.post(`${apiUrl}orderlineshipping`, line, { headers: { "auth-token": localStorage.getItem("token") } })
+              axios.post(`${apiUrl}/orderlineshipping`, line, { headers: { "auth-token": localStorage.getItem("token") } })
             })
           })
         canviEstatModal();
@@ -278,17 +278,17 @@ function OrdresEnviament() {
     }
     else if (tipoModal === "Modificar") {
       for (const idOrderLine of productosEliminados) {
-        axios.delete(`${apiUrl}orderlineshipping/${idOrderLine}`, { headers: { "auth-token": localStorage.getItem("token") } });
+        axios.delete(`${apiUrl}/orderlineshipping/${idOrderLine}`, { headers: { "auth-token": localStorage.getItem("token") } });
       }
-      axios.put(`${apiUrl}ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
+      axios.put(`${apiUrl}/ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
         .then(response => {
           arrayProductos.map(line => {
             if (line.id) {
-              axios.put(`${apiUrl}orderlineshipping/${line.id}`, line, { headers: { "auth-token": localStorage.getItem("token") } })
+              axios.put(`${apiUrl}/orderlineshipping/${line.id}`, line, { headers: { "auth-token": localStorage.getItem("token") } })
             }
             else {
               const newProduct = { ...line, shipping_order_id: values.id };
-              axios.post(`${apiUrl}orderlineshipping`, newProduct, { headers: { "auth-token": localStorage.getItem("token") } });
+              axios.post(`${apiUrl}/orderlineshipping`, newProduct, { headers: { "auth-token": localStorage.getItem("token") } });
             }
           })
         })
@@ -298,7 +298,7 @@ function OrdresEnviament() {
     else if (tipoModal === "Enviar") {
       values.ordershipping_status_id = 4;
       console.log(values)
-      axios.put(`${apiUrl}ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
+      axios.put(`${apiUrl}/ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
       canviEstatModalEnviament();
       actualitzaDades();
     }
@@ -307,7 +307,7 @@ function OrdresEnviament() {
   }
 
   const actualitzaDades = () => {
-    axios.get(`${apiUrl}ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/ordershipping`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => {
         setOrder(response.data)
       })
