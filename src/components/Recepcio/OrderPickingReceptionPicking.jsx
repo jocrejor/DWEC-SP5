@@ -201,16 +201,19 @@ function OrderPickingReception() {
                                     {orderPickingPage
                                         .filter(order => order.operator_id === parseInt(usuariFiltrar))
                                         .map(order => {
-                                            const user = users.find(u => u.id === order.operator_id);
                                             const product = products.find(p => p.id === order.product_id);
+                                            const linea = orderLineReception.find(line => line.id === order.order_line_reception_id);
+
+                                            let date = new Date(order.create_date);
+                                            const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} - ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
                                             return (
                                                 <tr key={order.id}>
                                                     <td className="d-flex justify-content-center align-items-center">
                                                         <i className="bi bi-arrow-down" onClick={() => completarOrderPicking(order.order_line_reception_id, order.id)}></i>
                                                     </td>
-                                                    <td data-cell="Ordre ID">{order.id}</td>
+                                                    <td data-cell="Ordre ID">{linea ? linea.order_reception_id : 'No disponible'}</td>
                                                     <td data-cell="Producte">{product.name}</td>
-                                                    <td data-cell="Data">{order.create_date}</td>
+                                                    <td data-cell="Data">{formattedDate}</td>
                                                     <td data-cell="Operari">{order.storage_id} / {order.street_id} / {order.shelf_id} / {order.space_id}</td>
                                                 </tr>
                                             );
