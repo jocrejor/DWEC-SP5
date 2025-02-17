@@ -240,45 +240,61 @@ const handleImportChange = (event) => {
 };
 
 const handleImport = async () => {
-  if (csvData) {
+  if (csvData && csvData.length > 0) {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Error: No hay token de autenticación.");
-        return;
-      }
-
       console.log("Datos CSV antes del filtrado:", csvData);
 
-      // Ya no estamos filtrando, vamos a enviar los datos directamente
-      const filteredData = csvData;
-
-      console.log("Datos CSV que se enviarán a la API:", filteredData);
-
-      if (filteredData.length === 0) {
+      // Verificar si hay datos válidos antes de enviar
+      if (csvData.length === 0) {
         console.error("Error: No hay datos válidos para importar.");
         return;
       }
 
-      // Enviar los datos directamente
-      const response = await axios.post(
-        `${apiUrl}/supplier`,
-        { value: filteredData }, // Enviar los datos dentro de 'value'
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "auth-token": token,
-          },
-        }
-      );
+      // Itera sobre cada proveedor en csvData y envíalos uno por uno
+      for (let i = 0; i < csvData.length; i++) {
+        const provider = csvData[i];
 
-      console.log("Importación exitosa:", response.data);
+        // Asegúrate de que el objeto tenga los campos correctos antes de enviarlo
+        if (provider.name && provider.address && provider.nif && provider.phone && provider.email) {
+          const response = await fetch(`${apiUrl}/supplier`, {
+            method: 'POST', // Método HTTP para crear un nuevo proveedor
+            headers: {
+              "Content-Type": "application/json", // Tipo de contenido que se está enviando
+              "auth-token": localStorage.getItem("token") // Autenticación usando el token
+            },
+            body: JSON.stringify(provider) // Convierte el objeto proveedor en JSON
+          });
+
+          if (response.ok) {
+            const responseData = await response.json();
+            console.log("Proveedor importado exitosamente:", responseData);
+          } else {
+            console.error("Error al importar proveedor:", provider.name);
+          }
+        } else {
+          console.error("Datos incompletos para el proveedor:", provider);
+        }
+      }
+
+      // Después de importar todos los proveedores, recarga la lista actualizada
+      const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      });
+
+      // Actualiza el estado con la nueva lista de proveedores
+      setSuppliers(updatedSuppliers.data);
+
+      // Cerrar el modal de importación si todo fue bien
       setShowImportModal(false);
     } catch (error) {
       console.error("Error al importar:", error);
     }
+  } else {
+    console.error("Error: No se encontraron datos válidos en el CSV.");
   }
 };
+
+
 
 
   return (
