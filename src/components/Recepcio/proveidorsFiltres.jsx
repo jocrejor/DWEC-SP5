@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -15,15 +15,14 @@ const FiltresProveidors = ({ onFilter, onClear }) => {
     // Cargar los proveedores desde la API
     useEffect(() => {
         axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } })
-        .then(response => {
-          console.log(response)
-          setSuppliers(response.data)
-        })
-        .catch(e => {
-          console.log(e)
-        }
-        )
-    },[])
+            .then(response => {
+                console.log(response);
+                setSuppliers(response.data);
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }, []);
 
     const filtrat = (e) => {
         setFilters({
@@ -48,6 +47,20 @@ const FiltresProveidors = ({ onFilter, onClear }) => {
         onClear();
     };
 
+    // Función para eliminar duplicados
+    const eliminarDuplicados = (arr, key) => {
+        return arr.filter((value, index, self) => 
+            index === self.findIndex((t) => (
+                t[key] === value[key]
+            ))
+        );
+    };
+
+    // Filtrar los proveedores por propiedades únicas
+    const uniqueSuppliers = eliminarDuplicados(suppliers, 'name');
+    const uniqueNifs = eliminarDuplicados(suppliers, 'nif');
+    const uniqueEmails = eliminarDuplicados(suppliers, 'email');
+
     return (
         <form className="row bg-grey pt-3 px-2 mx-0 text-light-blue">
             <div className="col-12 col-md-6 col-xl-4">
@@ -61,7 +74,7 @@ const FiltresProveidors = ({ onFilter, onClear }) => {
                     placeholder="Filtra per nom"
                 >
                     <option value="">Seleccionar nom</option>
-                    {Array.isArray(suppliers) && suppliers.map(supplier => (
+                    {Array.isArray(uniqueSuppliers) && uniqueSuppliers.map(supplier => (
                         <option key={supplier.id} value={supplier.name}>
                             {supplier.name}
                         </option>
@@ -80,7 +93,7 @@ const FiltresProveidors = ({ onFilter, onClear }) => {
                     placeholder="Filtra per NIF"
                 >
                     <option value="">Seleccionar NIF</option>
-                    {Array.isArray(suppliers) && suppliers.map(supplier => (
+                    {Array.isArray(uniqueNifs) && uniqueNifs.map(supplier => (
                         <option key={supplier.id} value={supplier.nif}>
                             {supplier.nif}
                         </option>
@@ -113,7 +126,7 @@ const FiltresProveidors = ({ onFilter, onClear }) => {
                     placeholder="Filtra per Email"
                 >
                     <option value="">Seleccionar Email</option>
-                    {Array.isArray(suppliers) && suppliers.map(supplier => (
+                    {Array.isArray(uniqueEmails) && uniqueEmails.map(supplier => (
                         <option key={supplier.id} value={supplier.email}>
                             {supplier.email}
                         </option>

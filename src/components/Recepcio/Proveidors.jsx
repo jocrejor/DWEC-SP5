@@ -14,7 +14,9 @@ const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
 const supplierschema = Yup.object().shape({
   name: Yup.string().min(3, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
-  nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit'),
+  nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit').test('is-unique', 'Aquest NIF ja existeix', (value) => {
+    return !suppliers.some((supplier) => supplier.nif === value);
+  }),
   phone: Yup.string().matches(/^(\+\d{1,3}\s?)?(\d{9}|\d{3}\s\d{3}\s\d{3})$/,'El telèfon ha de ser correcte (ex: +34 911234567, 621121124, 932 123 456)').required('Valor requerit'),
   email: Yup.string().email('Email no vàlid').required('Valor requerit'),
   state_id: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
@@ -230,11 +232,12 @@ const handleImportChange = (event) => {
   if (file) {
     Papa.parse(file, {
       complete: (result) => {
-        console.log("CSV Parsed Result:", result); // Log para verificar el parseo
-        setCsvData(result.data); // Guardar los datos del CSV
+        console.log("CSV Parsed Result:", result); 
+        // Guardar los datos del CSV
+        setCsvData(result.data); 
       },
-      header: true, // Asumiendo que el CSV tiene una fila de encabezado
-      skipEmptyLines: true, // Evita líneas en blanco
+      header: true,
+      skipEmptyLines: true,
     });
   }
 };
@@ -250,19 +253,18 @@ const handleImport = async () => {
         return;
       }
 
-      // Itera sobre cada proveedor en csvData y envíalos uno por uno
       for (let i = 0; i < csvData.length; i++) {
         const provider = csvData[i];
 
         // Asegúrate de que el objeto tenga los campos correctos antes de enviarlo
         if (provider.name && provider.address && provider.nif && provider.phone && provider.email) {
           const response = await fetch(`${apiUrl}/supplier`, {
-            method: 'POST', // Método HTTP para crear un nuevo proveedor
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json", // Tipo de contenido que se está enviando
-              "auth-token": localStorage.getItem("token") // Autenticación usando el token
+              "Content-Type": "application/json",
+              "auth-token": localStorage.getItem("token")
             },
-            body: JSON.stringify(provider) // Convierte el objeto proveedor en JSON
+            body: JSON.stringify(provider)
           });
 
           if (response.ok) {
