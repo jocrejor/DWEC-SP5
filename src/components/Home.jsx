@@ -9,13 +9,14 @@ import 'chart.js/auto';
 
 function Home() {
   const [orderCounts, setOrderCounts] = useState([]);
+  const [orderLineCounts, setOrderLineCounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obtenir la llista d'estats
+        // Obtenir la llista d'estats de les ordres
         const { data: statusList } = await axios.get(`${apiUrl}/orderreception_status`, {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
@@ -30,8 +31,24 @@ function Home() {
           const quantity = orders.filter(order => order.orderreception_status_id === status.id).length;
           return { id: status.id, status: status.name, quantity };
         });
-
         setOrderCounts(statusCounts);
+
+        // Obtenir la llista d'estats de les línies d'ordres
+        const { data: lineStatusList } = await axios.get(`${apiUrl}/orderline_status`, {
+          headers: { 'auth-token': localStorage.getItem('token') },
+        });
+
+        // Obtenir totes les línies d'ordres
+        const { data: orderLines } = await axios.get(`${apiUrl}/orderlinereception`, {
+          headers: { 'auth-token': localStorage.getItem('token') },
+        });
+
+        // Comptar quantes línies d'ordre hi ha per cada estat
+        const lineStatusCounts = lineStatusList.map(status => {
+          const quantity = orderLines.filter(line => line.orderline_status_id === status.id).length;
+          return { id: status.id, status: status.name, quantity };
+        });
+        setOrderLineCounts(lineStatusCounts);
       } catch (error) {
         console.error('Error carregant les dades:', error);
       } finally {
@@ -53,22 +70,32 @@ function Home() {
     }],
   };
 
-  const columns = [
-    { headerName: 'Estat', field: 'status', sortable: true, filter: true, flex: 1 },
-    { headerName: 'Quantitat', field: 'quantity', sortable: true, flex: 1 },
-  ];
+  const chartData2 = {
+    labels: orderLineCounts.map(item => item.status),
+    datasets: [{
+      label: 'Quantitat de línies d\'ordres per estat',
+      data: orderLineCounts.map(item => item.quantity),
+      backgroundColor: ['#4CAF50', '#FF9800', '#2196F3', '#E91E63', '#9C27B0'],
+      borderColor: ['#388E3C', '#F57C00', '#1976D2', '#C2185B', '#7B1FA2'],
+      borderWidth: 2,
+    }],
+  };
 
   return (
     <>
       <Header title='Panel de control' />
-      <div className="col-md-6 col-sm-12">
-        <div className='container mt-4'>
+      <div className='container mt-4 row'>
+        <div className='col-md-6 col-sm-12'>
           <h2 className='text-center'>Ordres de Recepció per Estat</h2>
-          <>
-            <div className='mt-4'>
-              <Bar data={chartData} />
-            </div>
-          </>
+          <div className='mt-4'>
+            <Bar data={chartData} />
+          </div>
+        </div>
+        <div className='col-md-6 col-sm-12'>
+          <h2 className='text-center'>Línies d'Ordres per Estat</h2>
+          <div className="mt-4">
+            <Bar data={chartData2} />
+          </div>
         </div>
       </div>
     </>
