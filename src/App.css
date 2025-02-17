@@ -16,7 +16,7 @@
 
 
 td, th{
-    color: var(--lightBlue) !important;
+    color: var(--blauClar) !important;
 }
 
 .fondo-azul{
@@ -220,3 +220,4 @@ li:hover i{
         
     }
 }
+
