@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import FiltresEspai from './FiltresEspai'; // Mantengo el nombre de tu componente de filtros
+import FiltresEspai from './FiltresEspai'; 
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -22,12 +22,12 @@ const SpaceSchema = Yup.object().shape({
 function Space() {
     const [spaces, setSpaces] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [showViewModal, setShowViewModal] = useState(false); // Modal para ver el espacio
+    const [showViewModal, setShowViewModal] = useState(false); 
     const [modalType, setModalType] = useState("Crear");
     const [initialValues, setInitialValues] = useState({
         name: '', product_id: '', quantity: '', maxVol: '', maxWeight: '', storage_id: '', street_id: '', shelf_id: ''
     });
-    const [selectedSpace, setSelectedSpace] = useState(null); // Para almacenar el espacio seleccionado
+    const [selectedSpace, setSelectedSpace] = useState(null); 
     const navigate = useNavigate();
     const { magatzem, carrer, estanteria } = useParams();
     const [filters, setFilters] = useState({

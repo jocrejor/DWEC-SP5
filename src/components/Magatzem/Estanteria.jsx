@@ -197,7 +197,7 @@ function Shelf() {
         </nav>
       </div>
 
-      {/* Modal for Viewing Shelf */}
+      {}
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Visualitzar Estanteria</Modal.Title>
