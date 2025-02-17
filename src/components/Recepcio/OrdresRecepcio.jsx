@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
 import Filtres from "./OrdresRecepcioFiltres";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -33,42 +34,18 @@ function OrderReception() {
   const [orderReceptionStatus, setorderReceptionStatus] = useState([]);
   const [orderLineStatus, setOrderLineStatus] = useState([]);
   const [orderLines, setOrderLines] = useState([]);
+  // Estats Paginació
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [orderPage, setOrderPage] = useState([]);
-
   const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [ordersRes, suppliersRes] = await Promise.all([
-          axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
-          axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } })
-        ]);
-        setOrderReceptions(ordersRes.data);
-        setSuppliers(suppliersRes.data);
-      } catch (err) {
-        console.error("Error carregant dades:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
+  // Funcions paginació
   useEffect(() => {
     const totalPages = Math.ceil(orderReceptions.length / elementsPaginacio);
     setTotalPages(totalPages);
-  }, [orderReceptions]);
-
-  useEffect(() => {
-    const indexOfLastItem = currentPage * elementsPaginacio;
-    const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
-    const currentItems = orderReceptions.slice(indexOfFirstItem, indexOfLastItem);
-    setOrderPage(currentItems);
-  }, [currentPage, orderReceptions]);
+    console.log(totalPages)
+  }, [orderReceptions])
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -85,6 +62,13 @@ function OrderReception() {
       setCurrentPage(currentPage + 1);
     }
   };
+
+  useEffect(() => {
+    const indexOfLastItem = currentPage * elementsPaginacio;
+    const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
+    const currentItems = orderReceptions.slice(indexOfFirstItem, indexOfLastItem);
+    setOrderPage(currentItems)
+  }, [currentPage, orderReceptions])
 
   const fetchInitialData = async () => {
     setLoading(true);
@@ -426,19 +410,20 @@ function OrderReception() {
         </div>
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 order-xl-2">
-          <div className="d-flex h-100 justify-content-xl-end"></div>
-          <Button
-            className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
-            onClick={() => {
-              setTipoModal('Crear');
-              setValorsInicials({
-                supplier_id: '',
-                estimated_reception_date: '',
-              });
-              canviEstatModal();
-            }}
-            aria-label="Crear nova ordre de recepció">
-            <i class="bi bi-plus-circle text-white pe-1"></i>Crear</Button>
+          <div className="d-flex h-100 justify-content-xl-end">
+            <Button
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+              onClick={() => {
+                setTipoModal('Crear');
+                setValorsInicials({
+                  supplier_id: '',
+                  estimated_reception_date: '',
+                });
+                canviEstatModal();
+              }}
+              aria-label="Crear nova ordre de recepció">
+              <i class="bi bi-plus-circle text-white pe-1"></i>Crear</Button>
+          </div>
         </div>
       </div>
 
@@ -454,12 +439,12 @@ function OrderReception() {
             </tr>
           </thead>
           <tbody>
-            {orderReceptions.length === 0 ? (
+            {orderPage.length === 0 ? (
               <tr>
                 <td colSpan="5">No hi ha ordres de recepció</td>
               </tr>
             ) : (
-              orderReceptions
+              orderPage
                 .filter((ordre) => ordre.orderreception_status_id !== 4)
                 .map((valors) => (
                   <tr key={valors.id}>
@@ -502,7 +487,7 @@ function OrderReception() {
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
+              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
@@ -515,7 +500,7 @@ function OrderReception() {
               </li>
             ))}
             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); goToNextPage(); }}>
+              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => { e.preventDefault(); goToNextPage(); }}>
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
@@ -727,13 +712,13 @@ function OrderReception() {
           {/* Estat 2: Incidència i Desempaquetada */}
           {orderToReview?.orderreception_status_id === 2 && (
             <>
-              <Button variant="warning" onClick={() => alert('Incidència')} className="ms-2">
+              <Button variant="danger" onClick={() => alert('Incidència')} className="ms-2">
                 Incidència
               </Button>
               <Button variant="primary" onClick={() => alert('Lot/Serie')} className="ms-2">
                 Lot/Serie
               </Button>
-              <Button variant="success" onClick={() => desempaquetarOrdre(orderToReview.id)} className="ms-2">
+              <Button className="btn orange-button text-white ms-2" onClick={() => desempaquetarOrdre(orderToReview.id)}>
                 Desempaquetada
               </Button>
             </>

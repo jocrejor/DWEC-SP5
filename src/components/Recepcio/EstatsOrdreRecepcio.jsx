@@ -23,6 +23,41 @@ function OrderReception_Status() {
   const [tipoModal, setTipoModal] = useState('Crear');
   const [valorsInicials, setValorsInicials] = useState({ name: '' });
   const [error, setError] = useState(null);
+  // Estats Paginació
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [orderPage, setOrderPage] = useState([]);
+  const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
+
+  // Funcions paginació
+  useEffect(() => {
+    const totalPages = Math.ceil(ordersReceptionStatus.length / elementsPaginacio);
+    setTotalPages(totalPages);
+    console.log(totalPages)
+  }, [ordersReceptionStatus])
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    const indexOfLastItem = currentPage * elementsPaginacio;
+    const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
+    const currentItems = ordersReceptionStatus.slice(indexOfFirstItem, indexOfLastItem);
+    setOrderPage(currentItems)
+  }, [currentPage, ordersReceptionStatus])
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -153,12 +188,12 @@ function OrderReception_Status() {
             </tr>
           </thead>
           <tbody>
-            {ordersReceptionStatus.length === 0 ? (
+            {orderPage.length === 0 ? (
               <tr>
                 <td colSpan="3">No hi ha estats de ordre</td>
               </tr>
             ) : (
-              ordersReceptionStatus.map((valors) => (
+              orderPage.map((valors) => (
                 <tr key={valors.id}>
                   <td data-cell="ID">{valors.id}</td>
                   <td data-cell="Nom">{valors.name}</td>
@@ -177,25 +212,30 @@ function OrderReception_Status() {
             )}
           </tbody>
         </Table>
-      </div>
+        {/* Paginació */}
+        <nav aria-label="Page navigation example" className="d-block">
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
 
-      <nav aria-label="Paginació" class="d-block">
-        <ul class="pagination justify-content-center">
-          <li class="page-item">
-            <a class="page-link text-light-blue" href="#" aria-label="Pàgina anterior">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
-          <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
-          <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
-          <li class="page-item">
-            <a class="page-link text-light-blue" href="#" aria-label="Pàgina següent">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
+                  {number}
+                </a>
+              </li>
+            ))}
+            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => { e.preventDefault(); goToNextPage(); }}>
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
 
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
