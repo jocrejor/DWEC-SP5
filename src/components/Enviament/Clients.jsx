@@ -62,6 +62,12 @@ function Client() {
   const [filteredClients, setFilteredClients] = useState([]);
   const [sortField, setSortField] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const openImportModal = () => setShowImportModal(true);
+  const closeImportModal = () => setShowImportModal(false);
+  
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,6 +93,19 @@ function Client() {
 
     fetchData();
   }, []);
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleFileUpload = () => {
+    if (!selectedFile) {
+      alert("Por favor, selecciona un archivo CSV");
+      return;
+    }
+  
+    closeImportModal();
+  };
 
   const handleFilter = (filters) => {
     console.log("Filtros aplicados:", filters);
@@ -458,9 +477,13 @@ function Client() {
             </button>
           </div>
         </div>
+        
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
+          <button className="btn btn-success border-white text-white mt-2 me-4 my-md-2 flex-grow-1 flex-xl-grow-0" onClick={openImportModal}>
+          <i className="bi bi-file-earmark-arrow-up pe-1"></i>Importar
+          </button>
             <button
               className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
               onClick={openCrearModal}
@@ -546,7 +569,22 @@ function Client() {
           </tbody>
         </table>
       </div>
-
+      <Modal show={showImportModal} onHide={closeImportModal} backdrop="static">
+        <Modal.Header closeButton>
+          <Modal.Title>Importar Clientes</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <input type="file" accept=".csv" className="form-control" onChange={handleFileChange} />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeImportModal}>
+            Cancelar
+          </Button>
+          <Button variant="success" onClick={handleFileUpload}>
+            Subir Archivo
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <Modal
         size="lg"
         show={showModal}
