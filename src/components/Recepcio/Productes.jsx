@@ -19,61 +19,7 @@ function Productes() {
   const [products, setProducts] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [showModalUpolad, setShowModalUpload] = useState(false)
-  const [showModalUpolad, setShowModalUpload] = useState(false)
   const [tipoModal, setTipoModal]  = useState("Crear")
-  const [valorsInicials, setValorsInicials] = useState({ name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '' })
-  const [image, setImage] = useState({id:0, file: null})
-  const [messageImage, setMessageImage] = useState('');
-  const [messageError, setMessageError] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [productsPage,setProductsPage]= useState([]);
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem('token');
-  
-  // Paginació
-  const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
-  
- 
-  // Obtindreels index. 
-  useEffect (()=>{
-    const totalPages = Math.ceil(products.length / elementsPaginacio);
-    setTotalPages(totalPages);
-    console.log(totalPages)
-  },[products])
-
-  // Función para cambiar de página
-  const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  // Funciones para "anterior" y "siguiente"
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  useEffect(()=> {
-    const indexOfLastItem = currentPage * elementsPaginacio;
-    const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
-    const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
-    setProductsPage(currentItems)
-  },[currentPage,products])
-
-
-  useEffect( () => {
-   
-   axios.get(`${apiUrl}/product` , { headers: {"auth-token" : `${token}`} })
-    .then((response) => setProducts(response.data) ) 
-    .catch((error) => {console.log(error)})
-    
   const [valorsInicials, setValorsInicials] = useState({ name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '' })
   const [image, setImage] = useState({id:0, file: null})
   const [messageImage, setMessageImage] = useState('');
@@ -130,17 +76,7 @@ function Productes() {
   }, [])
 
 
-
 const eliminarProducte = (id) =>{
-  axios.delete(`${apiUrl}/product/${id}` , { headers: {"auth-token" : `${token}`} })
-    .then((response) =>{ 
-      console.log(response) 
-      const newproducts = products.filter(item => item.id != id)
-      setProducts(newproducts)
-    }) 
-    .catch((error) => {console.log(error)})
-     
- 
   axios.delete(`${apiUrl}/product/${id}` , { headers: {"auth-token" : `${token}`} })
     .then((response) =>{ 
       console.log(response) 
@@ -165,29 +101,11 @@ const canviEstatModal = () =>{
 
 const canviEstatModalUpload = () =>{
   setShowModalUpload(!showModalUpolad)
-    setMessageError('')
 }
 
-const canviEstatModalUpload = () =>{
-  setShowModalUpload(!showModalUpolad)
-}
-
-const grabar = (values)=>{
-  setMessageError('');
 const grabar = (values)=>{
   setMessageError('');
   if(tipoModal==="Crear"){
-    axios.post(`${apiUrl}/product` ,values,  { headers: {"auth-token" : `${token}`} })
-    .then((response) =>{ 
-      console.log(response.data.message) 
-      canviEstatModal()
-      axios.get(`${apiUrl}/product` , { headers: {"auth-token" : `${token}`} })
-           .then((response) => setProducts(response.data) ) 
-           .catch((error) => {setMessageImage(error)})
-
-    }) 
-    .catch((error) => {setMessageError(error.response.data)})
-  
     axios.post(`${apiUrl}/product` ,values,  { headers: {"auth-token" : `${token}`} })
     .then((response) =>{ 
       console.log(response.data.message) 
@@ -331,63 +249,7 @@ return (
 
      <table className="table table-striped text-center">
         <thead className="table-active border-bottom border-dark-subtle">
-<Header title="Llistat productes" />
-<div className="container-fluid">
-          <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
-            <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
-              <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
-                <div className="form-floating bg-white">
-                  <select
-                    className="form-select"
-                    id="floatingSelect"
-                    aria-label="Seleccione una opción"
-                  >
-                    <option>Tria una opció</option>
-                    <option value="1">Eliminar</option>
-                  </select>
-                  <label htmlFor="floatingSelect">Accions en lot</label>
-                </div>
-                <button
-                  className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0"
-                  type="button"
-                >
-                  <i className="bi bi-check-circle text-white px-1"></i>Aplicar
-                </button>
-              </div>
-            </div>
-            <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
-            <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
-              <div className="d-flex h-100 justify-content-xl-end">
-                <button
-                  onClick={() => {
-                    canviEstatModal(); 
-                    setTipoModal("Crear");
-                  }}
-                  type="button"
-                  className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
-                >
-                  <i className="bi bi-plus-circle text-white pe-1"></i>Crear
-                </button>
-                <button
-                  onClick={() => {
-                    setTabla("ListarOrder");
-                  }}
-                  type="button"
-                  className="btn btn-dark ms-2 border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
-                >
-                  Llistar Orders Picking
-                </button>
-              </div>
-            </div>
-          </div>
-
-
-
-
-     <table className="table table-striped text-center">
-        <thead className="table-active border-bottom border-dark-subtle">
         <tr>
-        <th scope="col"></th>
         <th scope="col"></th>
           <th scope="col">Id</th>
           <th scope="col">Nom</th>
@@ -398,25 +260,18 @@ return (
           <th scope="col">SKU</th>
           <th scope="col" colSpan={3} >Accions</th>
         
-          <th scope="col" colSpan={3} >Accions</th>
-        
         </tr>
         </thead>
         <tbody>
         {(productsPage.length == 0)?
-        {(productsPage.length == 0)?
           <tr><th>No hi han articles</th></tr>
-           
-        :productsPage.map((valors) => {
            
         :productsPage.map((valors) => {
           return (
           <tr key={valors.id}>
             <td><img src={valors.image_url}  height="50"/></td>
-            <td><img src={valors.image_url}  height="50"/></td>
             <td>{valors.id}</td>
             <td>{valors.name}</td>
-            <td>{valors.description.slice(0,30)}</td>
             <td>{valors.description.slice(0,30)}</td>
             <td>{valors.volume}</td>
             <td>{valors.weight}</td>
@@ -425,47 +280,11 @@ return (
             <td><span onClick={()=> {updateImage(valors)}}><i className="bi bi-image"></i></span></td>
             <td><span onClick={()=> {modificarProducte(valors);canviEstatModal(); }}><i className="bi bi-pencil-square"></i></span></td>
             <td><span  onClick={()=> {eliminarProducte(valors.id)}}> <i className="bi bi-trash"></i></span></td>
-            <td><span onClick={()=> {updateImage(valors)}}><i className="bi bi-image"></i></span></td>
-            <td><span onClick={()=> {modificarProducte(valors);canviEstatModal(); }}><i className="bi bi-pencil-square"></i></span></td>
-            <td><span  onClick={()=> {eliminarProducte(valors.id)}}> <i className="bi bi-trash"></i></span></td>
 
           </tr>)
         })}
         </tbody>
       </table>
-      
-      </div>      
-      
-      <nav aria-label="Page navigation example" className="d-block">
-          <ul className="pagination justify-content-center">
-            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-              <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
-                <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
-                  {number}
-                </a>
-              </li>
-            ))}
-            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {e.preventDefault(); goToNextPage(); }}>
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-
-
-
-
-
-
-
-
       
       </div>      
       
@@ -509,7 +328,6 @@ return (
           
       <Formik
         initialValues= {(tipoModal==='Modificar'?valorsInicials: {name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '' })}
-        initialValues= {(tipoModal==='Modificar'?valorsInicials: {name: '', description: '', volume: 0, weight: 0, lotorserial: 'Non', sku: '' })}
         validationSchema={ProducteSchema}
         onSubmit={ values => { grabar(values)} }
       >
@@ -522,12 +340,9 @@ return (
           <Form>
             <div className="form-group">
               
-            <div className="form-group">
-              
               <label htmlFor='name'>Nom </label>
               <Field
                 type="text" 
-                className="form-control"
                 className="form-control"
                 name="name"
                 placeholder="Nom del producte"
@@ -539,11 +354,9 @@ return (
             </div>
             {/*Em senc atacat*/}
             <div className="form-group">
-            <div className="form-group">
               <label htmlFor='description'>Descripció </label>
               <Field
                 as='textarea'
-                className="form-control"
                 className="form-control"
                 type="text"
                 name="description"
@@ -555,11 +368,9 @@ return (
             </div>
 
             <div className="form-group">
-            <div className="form-group">
               <label htmlFor='volume'>Volumen </label>
               <Field
                 type="number"
-                className="form-control"
                 className="form-control"
                 name="volume"
                 step="0.001"
@@ -573,11 +384,9 @@ return (
 
 
             <div className="form-group">
-            <div className="form-group">
               <label htmlFor='weight'>Pes </label>
               <Field
                 type="number"
-                className="form-control"
                 className="form-control"
                 name="weight"
                 step="1"
@@ -589,13 +398,10 @@ return (
             </div>
 
             <div className="form-group">
-            <div className="form-group">
               <label htmlFor='lotorserial'>Control lot o serie</label>
               <Field
                 as="select"
                 name="lotorserial"
-                className="form-control"
-                value={values.lotorserial}
                 className="form-control"
                 value={values.lotorserial}
               >
@@ -617,11 +423,9 @@ return (
             </div>
 
             <div className="form-group">
-            <div className="form-group">
               <label htmlFor='sku'>SKU </label>
               <Field
                 type="text"
-                className="form-control"
                 className="form-control"
                 name="sku"
                 placeholder="sku del producte"
@@ -632,11 +436,7 @@ return (
             </div>
             <div className="mb-3">
                 <p className='text-danger'>{messageError}</p>
-            <div className="mb-3">
-                <p className='text-danger'>{messageError}</p>
             </div>
-            <div className="form-group">
-              <Button variant="secondary" onClick={canviEstatModal}>Close</Button>
             <div className="form-group">
               <Button variant="secondary" onClick={canviEstatModal}>Close</Button>
 
@@ -703,18 +503,8 @@ return (
 
 </>
 )
-</Modal.Body>
-</Modal>
-
-
-
-
-
-</>
-)
 }
 
 export default Productes
-
 
 
