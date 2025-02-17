@@ -80,8 +80,7 @@ li:hover i {
 }
 
 .activo a {
-    color: var(--darkBlue)
-    color: var(--darkBlue)
+    color: var(--darkBlue);
 }
 
 .no-hover:hover {
@@ -148,7 +147,8 @@ li:hover i {
     border-color: var(--lightBlue);
 }
 
-
+@media only screen and (max-width: 1199px)
+{
     nav {
         display: none;
         top: 5.7em;
@@ -218,4 +218,3 @@ li:hover i {
         
     }
 }
-

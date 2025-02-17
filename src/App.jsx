@@ -21,7 +21,7 @@ import EstatsOrdreEnviament from './components/Enviament/EstatsOrdreEnviament.js
 import Proveidors from './components/Recepcio/Proveidors';
 import OrdresRecepcio from './components/Recepcio/OrdresRecepcio';
 import EstatsOrdreRecepcio from './components/Recepcio/EstatsOrdreRecepcio';
-import EstatsOrdreRecepcioLinia from './components/Recepcio/EstatsOrdreRecepcioLinia.jsx';
+import EstatsLinia from './components/Recepcio/EstatsOrdreRecepcioLinia.jsx';
 
 import Lots from './components/Recepcio/Lots';
 
@@ -98,7 +98,7 @@ function App() {
 
                 <Route path="/estatsOrdreRecepcio" element={<EstatsOrdreRecepcio />} />
 
-                <Route path="/estatsOrdreRecepcioLinia" element={<EstatsOrdreRecepcioLinia />} />
+                <Route path="/estatsLinia" element={<EstatsLinia />} />
 
                 <Route path="/productes" element={<Productes />} />
 

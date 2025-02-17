@@ -14,7 +14,7 @@ const FiltresProveidors = ({ onFilter, onClear }) => {
 
     // Cargar los proveedores desde la API
     useEffect(() => {
-        axios.get(`${apiUrl}supplier`, { headers: { "auth-token": localStorage.getItem("token") } })
+        axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } })
         .then(response => {
           console.log(response)
           setSuppliers(response.data)
