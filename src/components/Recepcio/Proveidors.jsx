@@ -223,40 +223,67 @@ function Proveidors() {
     setCurrentPage(1);
   };
 
-  // Maneja el cambio del archivo CSV
-  const handleImportChange = (event) => {
-    const file = event.target.files[0];
+// Maneja el cambio del archivo CSV
+const handleImportChange = (event) => {
+  const file = event.target.files[0];
 
-    if (file) {
-      Papa.parse(file, {
-        complete: (result) => {
-          console.log('CSV Parsed: ', result);
-          setCsvData(result.data); // Guardar los datos del CSV
-        },
-        header: true, // Asumiendo que el CSV tiene una fila de encabezado
-      });
-    }
-  };
+  if (file) {
+    Papa.parse(file, {
+      complete: (result) => {
+        console.log("CSV Parsed Result:", result); // Log para verificar el parseo
+        setCsvData(result.data); // Guardar los datos del CSV
+      },
+      header: true, // Asumiendo que el CSV tiene una fila de encabezado
+      skipEmptyLines: true, // Evita líneas en blanco
+    });
+  }
+};
 
-  const handleImport = async () => {
-    if (csvData) {
-      try {
-        const response = await axios.post(`${apiUrl}/supplier`, {
-          supplier: csvData, // Enviar los datos procesados
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-  
-        console.log('Importación exitosa:', response.data);
-        setShowImportModal(false); // Cerrar el modal después de la importación
-      } catch (error) {
-        console.error('Error al importar:', error);
+const handleImport = async () => {
+  if (csvData) {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Error: No hay token de autenticación.");
+        return;
       }
+
+      console.log("Datos CSV antes del filtrado:", csvData);
+
+      // Filtrar filas inválidas antes de enviar
+      const filteredData = csvData.filter(
+        (item) => item.name && typeof item.name === "string" && item.name.trim() !== ""
+      );
+
+      console.log("Datos CSV después del filtrado:", filteredData);
+
+      if (filteredData.length === 0) {
+        console.error("Error: No hay datos válidos para importar.");
+        return;
+      }
+
+      // Enviar los datos dentro de un objeto con la propiedad 'value'
+      console.log("Datos que se enviarán a la API:", { value: filteredData });
+
+      const response = await axios.post(
+        `${apiUrl}/supplier`,
+        { value: filteredData }, // Enviar los datos dentro de 'value'
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": token,
+          },
+        }
+      );
+
+      console.log("Importación exitosa:", response.data);
+      setShowImportModal(false);
+    } catch (error) {
+      console.error("Error al importar:", error);
     }
-  };
-  
+  }
+};
+
   return (
     <>
       <Header title="Llistat de proveidors" />
