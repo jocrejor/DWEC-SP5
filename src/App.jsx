@@ -88,7 +88,7 @@ function App() {
 
                 <Route path="/clients" element={<Clients />} />
 
-                <Route path="/ordresEnviament" element={<OrdresEnviament />} />
+                <Route path="/ordesEnviament" element={<OrdresEnviament />} />
 
                 <Route path="/proveidors" element={<Proveidors />} />
 
