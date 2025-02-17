@@ -168,9 +168,9 @@ const OrderPickingShippingPicking = () => {
 
       movMagatzem(
         lineActualitzar.product_id,
-        lineActualitzar.operator_id,
+        usuariFiltrar,
         lineActualitzar.quantity,
-        "General",
+        "PickingShi",
         space.storage_id,
         space.storage_id,
         space.street_id,
@@ -181,9 +181,9 @@ const OrderPickingShippingPicking = () => {
 
       movMagatzem(
         lineActualitzar.product_id,
-        lineActualitzar.operator_id,
+        usuariFiltrar,
         lineActualitzar.quantity,
-        "Enviament",
+        "PickingShi",
         space.storage_id,
         space.storage_id,
         space.street_id,
