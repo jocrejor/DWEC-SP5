@@ -35,7 +35,7 @@ function Lots() {
 
   useEffect(() => {
     const fetchData = async () => {
-      axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}/Product`, { headers: { "auth-token": token } })
         .then(
           response => {
             setProduct(response.data)
@@ -45,7 +45,7 @@ function Lots() {
             console.log(error)
           }
         )
-      axios.get(`${apiUrl}Supplier`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}/Supplier`, { headers: { "auth-token": token } })
         .then(
           response => {
             setSupplier(response.data)
@@ -56,7 +56,7 @@ function Lots() {
           }
         )
 
-      axios.get(`${apiUrl}OrderReception`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}/OrderReception`, { headers: { "auth-token": token } })
         .then(response => {
           setOrderReception(response.data)
         })
@@ -65,7 +65,7 @@ function Lots() {
         }
         )
 
-      axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}/orderlinereception`, { headers: { "auth-token": token } })
         .then(
           response => {
             setOrderLineReception(response.data)
@@ -76,7 +76,7 @@ function Lots() {
           }
         )
 
-      axios.get(`${apiUrl}orderreception_status`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}/orderreception_status`, { headers: { "auth-token": token } })
         .then(
           response => {
             setOrderReceptionStatus(response.data)
@@ -87,7 +87,7 @@ function Lots() {
           }
         )
 
-      axios.get(`${apiUrl}orderline_status`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": token } })
         .then(
           response => {
             setOrderLineStatus(response.data)
@@ -110,7 +110,7 @@ function Lots() {
 
   return (
     <>
-      <Header title="Llistat Lots" />
+      <Header title="Gestió de Lots" />
       <Filtres />
 
       <div className="container-fluid">
