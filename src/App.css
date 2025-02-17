@@ -1,4 +1,4 @@
-:root{
+:root {
     --darkBlue: #222831;
     --lightBlue: #30475E;
     --orange: #FF7000;
@@ -28,19 +28,19 @@ td, th{
     background-color: var(--lightBlue);
 }
 
-.logout{
+.logout {
     background-color: var(--logout);
 }
 
-.bg-title{
+.bg-title {
     background-color: var(--title);
 }
 
-.bg-orange{
+.bg-orange {
     background-color: var(--orange);
 }
 
-.orange-button{
+.orange-button {
     background-color: var(--orange);
     border-color: var(--orange);
 }
@@ -49,7 +49,7 @@ td, th{
     background-color: var(--grey);
 }
 
-.orange-button:hover{
+.orange-button:hover {
     background-color: var(--lightBlue);
     border-color: var(--lightBlue);
 }
@@ -64,15 +64,15 @@ li:hover{
 }
 
 li:hover a,
-li:hover i{
+li:hover i {
     color: var(--lightBlue) !important;
 }
 
-.text-light-blue{
+.text-light-blue {
     color: var(--lightBlue) !important;
 }
 
-.activo{
+.activo {
     background-color: var(--grey);
     color: var(--darkBlue) !important;
     border: 1px solid var(--lightBlue) !important;
@@ -81,24 +81,25 @@ li:hover i{
 
 .activo a {
     color: var(--darkBlue)
+    color: var(--darkBlue)
 }
 
-.no-hover:hover{
+.no-hover:hover {
     background-color: var(--darkBlue);
      color: white !important;
 }
 
-.no-hover:hover i{
+.no-hover:hover i {
     color: white !important;
 }
 
-.activo-2{
+.activo-2 {
     background-color: var(--lightBlue) !important;
     border: 1px solid var(--lightBlue) !important;
     color: white !important;
 }
 
-#dropdown{
+#dropdown {
     display: none;
 }
 
@@ -148,15 +149,12 @@ li:hover i{
 }
 
 
-@media only screen and (max-width: 1199px)
-{
-
-    nav{
+    nav {
         display: none;
         top: 5.7em;
     }
 
-    .show{
+    .show {
         border-top: 1px solid white;
         position: absolute;
         display: block;
@@ -183,7 +181,7 @@ li:hover i{
         display: none;
     }
 
-    td{
+    td {
         display: block;
     }
 
@@ -194,7 +192,7 @@ li:hover i{
     }
 
     td[data-no-colon="true"]::before {
-        content: ""; 
+        content: "";
     }
 
     /*********** DESPLAZAMIENTO DEL MENÚ ***********/
