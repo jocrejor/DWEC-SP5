@@ -34,35 +34,35 @@ function OrderPickingReception() {
     const dataFetch = async ()=>{
         try{
         //order line reception
-        const orderLineReception = await axios.get(`${apiUrl}orderlinereception`, { headers: { "auth-token": token } 
+        const orderLineReception = await axios.get(`${apiUrl}/orderlinereception`, { headers: { "auth-token": token } 
         })
         setOrderLineReception(orderLineReception.data)
         }catch{(error) => {console.error('Error order line:', error);}};
         
         //order reception
         try{
-        const orderReception = await axios.get(`${apiUrl}orderreception`, { headers: { "auth-token": token }})
+        const orderReception = await axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": token }})
         setOrderReception(orderReception.data)
         }
         catch{(error) => {console.error('Error order reception:', error);}};
 
         //product
         try {
-            const product = await axios.get(`${apiUrl}product`, { headers: { "auth-token": token } })
+            const product = await axios.get(`${apiUrl}/product`, { headers: { "auth-token": token } })
             setProducts(product.data);
         }
         catch{(error) => {console.error('Error product:', error);}};
 
         //space
         try {
-            const space = await axios.get(`${apiUrl}space`, { headers: { "auth-token": token } })
+            const space = await axios.get(`${apiUrl}/space`, { headers: { "auth-token": token } })
             setSpaces(space.data);
         }
         catch{(error) => {console.error('Error space:', error);}};
 
         //user
         try {
-            const user = await axios.get(`${apiUrl}users`, { headers: { "auth-token": token } })
+            const user = await axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } })
             setUsers(user.data);
         }
         catch{(error) => {console.error('Error user:', error);}};
@@ -150,7 +150,7 @@ function OrderPickingReception() {
                 space = nouSpace;
                 alert(`El producte ${line.product_id} ha segut reubicat a un nou espai per falta de capacitat`);
 
-                axios.put(`${apiUrl}space/${nouSpace.storage_id}/${nouSpace.street_id}/${nouSpace.shelf_id}/${nouSpace.id}`, {
+                axios.put(`${apiUrl}/space/${nouSpace.storage_id}/${nouSpace.street_id}/${nouSpace.shelf_id}/${nouSpace.id}`, {
                     product_id: line.product_id,
                 },{headers: { "auth-token": token }})
             }
@@ -166,7 +166,7 @@ function OrderPickingReception() {
                 operator_id: parseInt(operariSeleccionat)
             };
     
-            axios.post(`${apiUrl}orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
+            axios.post(`${apiUrl}/orderpickingreception`, newOrderPickingReception, { headers: { "auth-token": localStorage.getItem("token") }})
                 .then((response) => {
                     console.log(response.data);
                     alert("Order picking reception creat correctament");
