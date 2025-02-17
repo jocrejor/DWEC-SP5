@@ -7,7 +7,7 @@ import Header from '../Header'
 import InventarisFiltres from './InventarisFiltres'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-import jsPDF from 'jspdf'
+import {jsPDF} from 'jspdf'
 import 'jspdf-autotable';
 
 
@@ -272,16 +272,27 @@ function Inventaris() {
 
   const generarPDF = (inventory) => {
     const doc = new jsPDF();
-    doc.text('Inventaris', 14, 14);
-    doc.autotable({
-      head:[['ID', 'Data', 'Estat', 'Magatzem']],
+    doc.setFontSize(18);
+    doc.text("Informe d'inventari completat", 65, 20);
+
+
+
+    doc.autoTable({
+      startY: 30,
+      head:[['ID Inventari', 'Data', 'Estat', 'Magatzem']],
       body:[
-        [(inventory.id).toString(), changeDate(inventory.created_at), inventoryStatus.find(inv => inv.id === inventory.status_id)?.name, storages.find(st => st.id === inventory.storage_id)?.name]
+        [inventory.id, changeDate(inventory.created_at), inventoryStatus.find(inv => inv.id === inventory.inventory_status)?.name, storages.find(st => st.id === inventory.storage_id)?.name]
       ]
     })
-   doc.autoTable({html: '#report'})
-    doc.save('inventaris.pdf');
+
+    doc.autoTable({
+      startY: 60,
+      head:[['Carrer', 'Estanteria', 'Espai', 'Producte', 'Quantitat Estimada', 'Quantitat Real', 'Justificació']],
+      body: selectedInventoryLines.map(line => ([line.street_id, line.shelf_id, line.space_id, products.find(product => product.id === line.product_id)?.name, line?.quantity_estimated, line?.quantity_real, inventoryReasons.find(reason => reason.id === line?.inventory_reason_id)?.name]))     
+    });
+    doc.save("Informe d'Inventari.dpf");
   }
+
 
   return (
     <>
@@ -481,7 +492,6 @@ function Inventaris() {
                         (selectedInventoryLines.length === 0) ?
                           <tr><td colSpan={7} className='text-center'>No existix informació per a ser mostrat.</td></tr> :
                           selectedInventoryLines.map((value) => {
-                            console.log(value)
                             return (
                               <tr key={value.id}>
                                 <td data-cell="Carrer: ">{value.street_id}</td>

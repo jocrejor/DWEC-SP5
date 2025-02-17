@@ -39,6 +39,10 @@ function Inventariar() {
   const [selectedStreets, setSelectedStreets] = useState([]);
   const [selectedShelfs, setSelectedShelfs] = useState([]);
   const [selectedSpaces, setSelectedSpaces] = useState([]);
+  const [selectedStreet, setSelectedStreet] = useState(null);
+  const [filteredShelfs, setFilteredShelfs] = useState([]);
+  const [filteredSpaces, setFilteredSpaces] = useState([]);
+  const [selectedSpace, setSelectedSpace] = useState(null);
 
 
   useEffect(() => {
@@ -110,8 +114,8 @@ function Inventariar() {
         if (a.street_id < b.street_id) return -1;
         if (a.street_id > b.street_id) return 1;
 
-        if (a.selft < b.selft_id) return -1;
-        if (a.selft_id > b.selft_id) return 1;
+        if (a.shelf_id < b.shelf_id) return -1;
+        if (a.shelf_id > b.shelf_id) return 1;
 
         if (a.space_id < b.space_id) return -1;
         if (a.space_id > b.space_id) return 1;
@@ -121,15 +125,15 @@ function Inventariar() {
       })
 
       const filteredStreets = streets.filter((street) => {
-        street.storage_id === selectedInventory.storage_id;
+        return street.storage_id === selectedInventory?.storage_id;
       });
-
+      //console.log(filteredStreets)
       const filteredShelfs = shelfs.filter((shelf) => {
-        shelf.storage_id === selectedInventory.storage_id
+        return shelf.storage_id === selectedInventory?.storage_id
       })
 
       const filteredSpaces = spaces.filter((space) => {
-        space.storage_id === selectedInventory.storage_id;
+        return space.storage_id === selectedInventory?.storage_id;
       })
 
       setSelectedStreets(filteredStreets);
@@ -140,7 +144,7 @@ function Inventariar() {
     } else {
       setSelectedInventoryLines([]);
     }
-  }, [selectedInventory])
+  }, [selectedInventory, inventoryLines, products, streets, shelfs, spaces])
 
 
   const displayData = () => {
@@ -153,7 +157,7 @@ function Inventariar() {
 
   useEffect(() => {
     //console.log(updatedInventoryLines)
-    console.log(selectedInventoryLines)
+    //console.log(selectedInventoryLines)
 
   }, [updatedInventoryLines, selectedInventoryLines])
 
@@ -290,7 +294,7 @@ function Inventariar() {
                               placeholder='0'
                               className='form-control'
                               onChange={handleInputChange}
-                              disabled={inputLocked}
+                              defaultValue={value.quantity_real}
                             />
                           </td>
                           <td>
@@ -332,14 +336,53 @@ function Inventariar() {
             </Modal.Header>
             <Modal.Body>
               <Formik
-                initialValues={{ storage_id: '', street_id: '' }}
+                initialValues={{street_id: '', shelf_id: '', space_id: '', product_id: '', quantity_real: '', inventory_reason_id: 6}}
                 validationSchema={InventoryLineSchema}
-                onSubmit={values => {
-                  createInventory(values);
-                  handleClose();
+                onSubmit={ async(values) =>  {
+                  console.log(selectedSpace)
+                  const updatedQuantity = (selectedSpace?.quantity === null) ? 100 - values.quantity_real : selectedSpace?.quantity - values.quantity_real;
+                  
+
+                  if(updatedQuantity >= 0){
+                    const updatedSpace = {...selectedSpace, quantity: updatedQuantity}
+                    //await axios.put(`${apiURL}/space/${selectedSpace.id}-${selectedSpace.storage_id}-${selectedSpace.street_id}-${selectedSpace.shelf_id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+                    const newLine = {
+                      ...values,
+                      inventory_id: selectedInventory.id,
+                      storage_id: selectedInventory.storage_id,
+                      operator_id: user.id,
+                      quantity_estimated: selectedSpace.quantity,
+                    }
+                    await axios.post(`${apiURL}/inventoryline`, newLine, { headers: { "auth-token": localStorage.getItem('token') } })
+
+                    await axios.get(`${apiURL}/inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
+                      .then(response => {
+                        setInventoryLines(response.data);
+                      })
+                      alert("Linia afegida amb èxit");
+                      handleClose();
+                  } else {
+                    alert("No hi ha espai suficient");
+                  }
+                  /*if(selectedSpace && selectedSpace.quantity >= values.quantity_real){
+
+                    const newLine = {
+                      ...values,
+                      inventory_id: selectedInventory.id,
+                      storage_id: selectedInventory.storage_id,
+                      operator_id: user.id,
+                      quantity_estimated: selectedSpace.quantity,
+                    }
+                    console.log(selectedSpace)
+                    console.log(newLine)
+
+                  } else {
+                    console.log("No hi ha espai suficient")
+                  }*/
+                  
                 }}
               >
-                {({ errors, touched, setFieldValue }) => (
+                {({ errors, touched, setFieldValue, values }) => (
                   <Form>
                     <div>
                       <label htmlFor="street_id" className='py-3 text-light-blue'>Carrer:</label>
@@ -348,15 +391,17 @@ function Inventariar() {
                         name='street_id'
                         className='form-select'
                         onChange={(e) => {
-                          setSelectedStorageId(e.target.value);
-                          setFieldValue('storage_id', e.target.value);
+                          setFieldValue('street_id', e.target.value);
+                          setFieldValue('shelf_id', '');
+                          setFieldValue('space_id', '');
+                          setFilteredShelfs(selectedShelfs.filter((shelf) => shelf.street_id === String(e.target.value)));
                         }}
                       >
                         <option value=''>Selecciona un carrer</option>
                         {
-                          streets.map((street) => {
+                          selectedStreets.map((street) => {
                             return (
-                              <option key={street.id} value={street.id}>{street.name}</option>
+                              <option key={street.id} value={street.id}>{street.id}</option>
                             );
                           })
                         }
@@ -370,13 +415,19 @@ function Inventariar() {
                         as='select'
                         name='shelf_id'
                         className='form-select'
+                        disabled={!values.street_id}
+                        onChange={(e) => {
+                          setFieldValue('shelf_id', e.target.value);
+                          setFieldValue('space_id', '');
+                          setFilteredSpaces(selectedSpaces.filter((space) => space.shelf_id === String(e.target.value) && space.street_id === values.street_id));
+                        }}
 
                       >
                         <option value=''>Selecciona una estanteria</option>
                         {
-                          shelfs.map((shelf) => {
+                          filteredShelfs.map((shelf) => {
                             return (
-                              <option key={shelf.id} value={shelf.id} >{shelf.name}</option>
+                              <option key={shelf.id} value={shelf.id} >{shelf.id}</option>
                             );
                           })
                         }
@@ -390,13 +441,18 @@ function Inventariar() {
                         as='select'
                         name='space_id'
                         className='form-select'
+                        disabled={!values.shelf_id}
+                        onChange={(e) => {
+                          setFieldValue('space_id', e.target.value);
+                          setSelectedSpace(selectedSpaces.find((space) => space.id === e.target.value));
+                        }}
 
                       >
                         <option value=''>Selecciona un espai</option>
                         {
-                          spaces.map((space) => {
+                          filteredSpaces.map((space) => {
                             return (
-                              <option key={space.id} value={space.id} >{space.name}</option>
+                              <option key={space.id} value={space.id} >{space.id}</option>
                             );
                           })
                         }
@@ -431,13 +487,14 @@ function Inventariar() {
                         name='quantity_real'
                         className='form-control'
                         placeholder="0"
+                        
                       >
                       </Field>
                       {errors.quantity_real && touched.quantity_real ? <div className='text-danger'>{errors.quantity_real}</div> : null}
                     </div>
 
                     <div>
-                      <label htmlFor="inventory_reason_id" className='py-3 text-light-blue'>Producte:</label>
+                      <label htmlFor="inventory_reason_id" className='py-3 text-light-blue'>Justificació:</label>
                       <Field
                         as='select'
                         name='inventory_reason_id'
@@ -471,4 +528,3 @@ function Inventariar() {
 }
 
 export default Inventariar
-/*className='text-decoration-none text-orange cursor-pointer'*/
