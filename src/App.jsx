@@ -88,8 +88,10 @@ function App() {
 
                 <Route path="/clients" element={<Clients />} />
 
-                <Route path="/ordesEnviament" element={<OrdresEnviament />} />
+                <Route path="/ordresEnviament" element={<OrdresEnviament />} />
 
+                <Route path="/estatsOrdreEnviament" element={<EstatsOrdreEnviament />} />
+                
                 <Route path="/proveidors" element={<Proveidors />} />
 
                 <Route path="/ordresRecepcio" element={<OrdresRecepcio />} />
@@ -97,8 +99,6 @@ function App() {
                 <Route path="/estatsOrdreRecepcio" element={<EstatsOrdreRecepcio />} />
 
                 <Route path="/estatsOrdreRecepcioLinia" element={<EstatsOrdreRecepcioLinia />} />
-
-                <Route path="/estatsOrdreEnviament" element={<EstatsOrdreEnviament />} />
 
                 <Route path="/productes" element={<Productes />} />
 
