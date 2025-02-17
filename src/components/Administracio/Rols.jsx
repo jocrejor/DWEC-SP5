@@ -45,13 +45,13 @@ function Rols() {
 
   const handleFilterChange = () => {
     const filtered = roles.filter(role =>
-      role.name.toLowerCase().includes(filterName.toLowerCase()),
-      setTotalPages(calcularTotalPagines(filtered)),
-      setCurrentPage(1)
+      role.name.toLowerCase().includes(filterName.toLowerCase())
     );
     setFilteredRoles(filtered);
-
+    setTotalPages(calcularTotalPagines(filtered));
+    setCurrentPage(1);
   };
+  
 
   const handleClearFilter = () => {
     setFilterName('');
@@ -65,9 +65,10 @@ function Rols() {
     if (isConfirmed) {
       try {
         await axios.delete(`${apiUrl}/Role/${id}`, { headers: { "auth-token": token } });
+        const rolesActualitzats = roles.filter((item) => item.id !== id);
         setRoles((prevRoles) => prevRoles.filter((item) => item.id !== id));
         setFilteredRoles((prevRoles) => prevRoles.filter((item) => item.id !== id));
-        setTotalPages(calcularTotalPagines(updatedRoles));
+        setTotalPages(calcularTotalPagines(rolesActualitzats));
 
       } catch (error) {
         console.error('Error en suprimir el rol:', error);
@@ -219,7 +220,7 @@ function Rols() {
       <nav>
         <ul className="pagination justify-content-center" style={{ backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
           <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-            <button className="page-link" onClick={() => paginate(currentPage - 1)}>&laquo;</button>
+          <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>&laquo;</button>
           </li>
           {Array.from({ length: totalPages }, (_, i) => (
             <li 

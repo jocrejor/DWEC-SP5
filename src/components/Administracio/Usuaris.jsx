@@ -43,7 +43,7 @@ function Usuaris() {
   const [filterRole, setFilterRole] = useState('');
   const [showSecondModal, setShowSecondModal] = useState(false);
   const [showTercerModal, setShowTercerModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState('');
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
