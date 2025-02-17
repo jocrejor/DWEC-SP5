@@ -25,6 +25,7 @@ function CompletarInventari() {
   const [updatedInventoryLines, setUpdatedInventoryLines] = useState([]);
   const [inventoryStatus, setInventoryStatus] = useState([]);
   const [inventoryReasons, setInventoryReasons] = useState([]);
+  const [selectedSpaces, setSelectedSpaces] = useState([]);
 
 
   useEffect(() => {
@@ -97,16 +98,21 @@ function CompletarInventari() {
         return 0;
 
       })
+      
+      const filteredSpaces = spaces.filter((space) => {
+        return space.storage_id === selectedInventory?.storage_id;
+      })
+      setSelectedSpaces(filteredSpaces);
       setSelectedInventoryLines(filteredInventoryLines);
     } else {
       setSelectedInventoryLines([]);
     }
-  }, [selectedInventory])
+  }, [selectedInventory, spaces])
 
 
   useEffect(() => {
-    //console.log(updatedInventoryLines)
-    //console.log(selectedInventoryLines)
+    console.log(updatedInventoryLines)
+    console.log(selectedInventoryLines)
 
   }, [updatedInventoryLines, selectedInventoryLines])
 
@@ -132,7 +138,7 @@ function CompletarInventari() {
   }
 
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const updatedLines = selectedInventoryLines.map(async (line) => {
       const updatedLine = updatedInventoryLines.find((updated) => updated.id === line.id);
       const defaultReason = inventoryReasons.find(reason => reason.name === "Recompte cíclic")?.id;
@@ -149,25 +155,28 @@ function CompletarInventari() {
       return line;
     })
     setSelectedInventoryLines(updatedLines);
+    console.log("SELECTED INVENTORY");
+    console.log(selectedInventory)
+    console.log("INVENTORY LINES: ")
+    console.log(selectedInventoryLines)
+    console.log("SPACES");
+    console.log(selectedSpaces)
 
-    selectedInventoryLines.map(async (line) => {
-      const space = spaces.find((space) => 
-                  space.id === line.space_id && 
-                  space.storage_id === line.storage_id &&
-                  space.shelf_id === line.shelf_id &&
-                  space.street_id === line.street_id);
+    selectedInventoryLines.map((line) => {
+      const space = selectedSpaces.find((sp) => (sp.id === line.space_id && sp.shelf_id === line.shelf_id && sp.street_id === line.street_id));
 
                   console.log(line)
+                  console.log("ESPACIO: ")
+                  console.log(space)
 
-      const updatedQuantity = (space?.quantity === null) ? 100 - line.quantity_real : space?.quantity - line.quantity_real;
-      // No actualiza el espacio
+      const updatedQuantity = (space.quantity === null) ? 100 - line.quantity_real : space.quantity - line.quantity_real;
       if (space) {
         const updatedSpace = { ...space, 
           product_id: (space?.product_id === null) ? line.product_id : space?.product_id, 
           quantity: updatedQuantity || space?.quantity }
 
           console.log()
-       axios.put(`${apiURL}/space/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+         //axios.put(`${apiURL}/space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
       };
 
       
@@ -176,10 +185,10 @@ function CompletarInventari() {
 
     const updatedInventory = { ...selectedInventory, inventory_status: inventoryStatus.find(status => status.name === 'Completat').id }
 
-    axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+    //axios.put(`${apiURL}/inventory/${selectedInventory.id}`, updatedInventory, { headers: { "auth-token": localStorage.getItem('token') } })
 
-    alert('Inventari completat amb èxit');
-    navigate('/inventaris');
+    //alert('Inventari completat amb èxit');
+    //navigate('/inventaris');
 
   }
 

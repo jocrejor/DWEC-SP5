@@ -32,14 +32,12 @@ function Inventariar() {
   const [updatedInventoryLines, setUpdatedInventoryLines] = useState([]);
   const [inventoryStatus, setInventoryStatus] = useState([]);
   const [inventoryReasons, setInventoryReasons] = useState([]);
-  const [inputLocked, setInputLocked] = useState(false);
   const [streets, setStreets] = useState([]);
   const [shelfs, setShelfs] = useState([]);
   const [spaces, setSpaces] = useState([]);
   const [selectedStreets, setSelectedStreets] = useState([]);
   const [selectedShelfs, setSelectedShelfs] = useState([]);
   const [selectedSpaces, setSelectedSpaces] = useState([]);
-  const [selectedStreet, setSelectedStreet] = useState(null);
   const [filteredShelfs, setFilteredShelfs] = useState([]);
   const [filteredSpaces, setFilteredSpaces] = useState([]);
   const [selectedSpace, setSelectedSpace] = useState(null);
@@ -344,8 +342,8 @@ function Inventariar() {
                   
 
                   if(updatedQuantity >= 0){
-                    const updatedSpace = {...selectedSpace, quantity: updatedQuantity}
-                    //await axios.put(`${apiURL}/space/${selectedSpace.id}-${selectedSpace.storage_id}-${selectedSpace.street_id}-${selectedSpace.shelf_id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+                    //const updatedSpace = {...selectedSpace, product_id: values.product_id, quantity: updatedQuantity}
+                    //await axios.put(`${apiURL}/space/${selectedSpace.storage_id}/${selectedSpace.street_id}/${selectedSpace.shelf_id}/${selectedSpace.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
                     const newLine = {
                       ...values,
                       inventory_id: selectedInventory.id,
@@ -364,21 +362,6 @@ function Inventariar() {
                   } else {
                     alert("No hi ha espai suficient");
                   }
-                  /*if(selectedSpace && selectedSpace.quantity >= values.quantity_real){
-
-                    const newLine = {
-                      ...values,
-                      inventory_id: selectedInventory.id,
-                      storage_id: selectedInventory.storage_id,
-                      operator_id: user.id,
-                      quantity_estimated: selectedSpace.quantity,
-                    }
-                    console.log(selectedSpace)
-                    console.log(newLine)
-
-                  } else {
-                    console.log("No hi ha espai suficient")
-                  }*/
                   
                 }}
               >
