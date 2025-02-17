@@ -33,7 +33,58 @@ function OrderReception() {
   const [orderReceptionStatus, setorderReceptionStatus] = useState([]);
   const [orderLineStatus, setOrderLineStatus] = useState([]);
   const [orderLines, setOrderLines] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [orderPage, setOrderPage] = useState([]);
 
+  const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [ordersRes, suppliersRes] = await Promise.all([
+          axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
+          axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } })
+        ]);
+        setOrderReceptions(ordersRes.data);
+        setSuppliers(suppliersRes.data);
+      } catch (err) {
+        console.error("Error carregant dades:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const totalPages = Math.ceil(orderReceptions.length / elementsPaginacio);
+    setTotalPages(totalPages);
+  }, [orderReceptions]);
+
+  useEffect(() => {
+    const indexOfLastItem = currentPage * elementsPaginacio;
+    const indexOfFirstItem = indexOfLastItem - elementsPaginacio;
+    const currentItems = orderReceptions.slice(indexOfFirstItem, indexOfLastItem);
+    setOrderPage(currentItems);
+  }, [currentPage, orderReceptions]);
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   const fetchInitialData = async () => {
     setLoading(true);
@@ -284,7 +335,7 @@ function OrderReception() {
 
     if (data) {
       filteredOrders = filteredOrders.filter(order => order.estimated_reception_date.includes(data));
-  }
+    }
 
     if (estat) {
       filteredOrders = filteredOrders.filter(order => {
@@ -447,25 +498,30 @@ function OrderReception() {
             )}
           </tbody>
         </Table>
-      </div>
+        {/* Paginació */}
+        <nav aria-label="Page navigation example" className="d-block">
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
 
-      <nav aria-label="Paginació" class="d-block">
-        <ul class="pagination justify-content-center">
-          <li class="page-item">
-            <a class="page-link text-light-blue" href="#" aria-label="Pàgina anterior">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          <li class="page-item"><a class="page-link activo-2" href="#">1</a></li>
-          <li class="page-item"><a class="page-link text-light-blue" href="#">2</a></li>
-          <li class="page-item"><a class="page-link text-light-blue" href="#">3</a></li>
-          <li class="page-item">
-            <a class="page-link text-light-blue" href="#" aria-label="Pàgina següent">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
+                  {number}
+                </a>
+              </li>
+            ))}
+            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); goToNextPage(); }}>
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
 
       <Modal show={showModal} onHide={canviEstatModal}>
         <Modal.Header closeButton>
