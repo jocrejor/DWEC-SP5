@@ -34,6 +34,8 @@ function OrderReception() {
   const [orderReceptionStatus, setorderReceptionStatus] = useState([]);
   const [orderLineStatus, setOrderLineStatus] = useState([]);
   const [orderLines, setOrderLines] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [operariSeleccionat, setOperariSeleccionat] = useState("");
   // Estats Paginació
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -73,18 +75,20 @@ function OrderReception() {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [ordersRes, suppliersRes, productsRes, statusesRes, statusLineRes] = await Promise.all([
+      const [ordersRes, suppliersRes, productsRes, statusesRes, statusLineRes, usersRes] = await Promise.all([
         axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/supplier`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } }),
         axios.get(`${apiUrl}/orderreception_status`, { headers: { "auth-token": localStorage.getItem("token") } }),
-        axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } })
+        axios.get(`${apiUrl}/orderline_status`, { headers: { "auth-token": localStorage.getItem("token") } }),
+        axios.get(`${apiUrl}/users`, { headers: { "auth-token": localStorage.getItem("token") } })
       ]);
       setOrderReceptions(ordersRes.data);
       setSuppliers(suppliersRes.data);
       setProducts(productsRes.data);
       setorderReceptionStatus(statusesRes.data);
       setOrderLineStatus(statusLineRes.data);
+      setUsers(usersRes.data);
       setError(null);
     } catch (err) {
       console.error("Error al carregar dades:", err);
@@ -97,6 +101,10 @@ function OrderReception() {
   useEffect(() => {
     fetchInitialData();
   }, []);
+
+  const handleInputChange = (event) => {
+    setOperariSeleccionat(event.target.value);
+  };
 
   const formateaFecha = (fecha) => {
     const fechaSoloFecha = fecha.split('T')[0];
@@ -222,14 +230,17 @@ function OrderReception() {
     setShowReviewModal(true);
   };
 
-  const descarregarOrdre = async (ordreId) => {
+  const descarregarOrdre = async (ordreId, operatorId) => {
     try {
-      await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderreception_status_id: 2 }, {
+      await axios.put(`${apiUrl}/orderreception/${ordreId}`, {
+        orderreception_status_id: 2,
+        created_by: operariSeleccionat,
+      }, {
         headers: { "auth-token": localStorage.getItem("token") },
       });
 
       setOrderReceptions(prev => prev.map(order =>
-        order.id === ordreId ? { ...order, orderreception_status_id: 2 } : order
+        order.id === ordreId ? { ...order, orderreception_status_id: 2, created_by: operatorId } : order
       ));
 
       setShowReviewModal(false);
@@ -241,17 +252,39 @@ function OrderReception() {
 
   const desempaquetarOrdre = async (ordreId) => {
     try {
-      await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderreception_status_id: 3 }, {
+      const orderLinesResponse = await axios.get(`${apiUrl}/orderlinereception`, {
+        params: { order_reception_id: ordreId },
         headers: { "auth-token": localStorage.getItem("token") },
       });
+
+      const orderLines = orderLinesResponse.data;
+
+      const updatePromises = orderLines.map(line => {
+        return axios.put(`${apiUrl}/orderlinereception/${line.id}`, {
+          quantity_received: line.quantity_ordered,
+        }, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
+      });
+
+      await Promise.all(updatePromises);
+
+      await axios.put(`${apiUrl}/orderreception/${ordreId}`, {
+        orderreception_status_id: 3,
+      }, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+
       setOrderReceptions(prev => prev.map(order =>
         order.id === ordreId ? { ...order, orderreception_status_id: 3 } : order
       ));
+
       setShowReviewModal(false);
     } catch (err) {
       console.error("Error canviant l'estat de l'ordre:", err);
     }
   };
+
 
   const emmagatzemarOrdre = async (ordreId) => {
     try {
@@ -454,7 +487,7 @@ function OrderReception() {
                     <td data-cell="Estat">{getStatusName(valors.orderreception_status_id)}</td>
                     <td data-no-colon="true">
                       {valors.orderreception_status_id === 3 && (
-                        <span onClick={() => emmagatzemarOrdre(valors)} style={{ cursor: "pointer" }} aria-label="Emmagatzemada">
+                        <span onClick={() => emmagatzemarOrdre(valors.id)} style={{ cursor: "pointer" }} aria-label="Emmagatzemada">
                           <i className="bi bi-check"></i>
                         </span>
                       )}
@@ -484,28 +517,30 @@ function OrderReception() {
           </tbody>
         </Table>
         {/* Paginació */}
-        <nav aria-label="Page navigation example" className="d-block">
-          <ul className="pagination justify-content-center">
-            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-              <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
-                <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
-                  {number}
+        {totalPages > 1 && (
+          <nav aria-label="Page navigation example" className="d-block">
+            <ul className="pagination justify-content-center">
+              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
+                  <span aria-hidden="true">&laquo;</span>
                 </a>
               </li>
-            ))}
-            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => { e.preventDefault(); goToNextPage(); }}>
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+                <li key={number} className={`page-item ${currentPage === number ? 'activo-2' : ''}`}>
+                  <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
+                    {number}
+                  </a>
+                </li>
+              ))}
+              <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => { e.preventDefault(); goToNextPage(); }}>
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        )}
       </div>
 
       <Modal show={showModal} onHide={canviEstatModal}>
@@ -652,24 +687,23 @@ function OrderReception() {
       {/* Modal per Revisar Ordre */}
       <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Revisió Ordre de Recepció</Modal.Title>
+          <Modal.Title>Ordre de Recepció</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {orderToReview ? (
             <div>
-              {/* Detalls de l'Ordre */}
               <p><strong>Id:</strong> {orderToReview.id}</p>
               <p><strong>Proveïdor:</strong> {suppliers.find((sup) => sup.id === orderToReview.supplier_id)?.name}</p>
               <p><strong>Data Estimada:</strong> {formateaFecha(orderToReview.estimated_reception_date)}</p>
               <p><strong>Estat:</strong> {getStatusName(orderToReview.orderreception_status_id)}</p>
 
-              {/* Taula de Productes Associats */}
               <h5 className="mt-3">Productes:</h5>
               <Table striped bordered hover className="table-sm">
                 <thead>
                   <tr>
                     <th>Producte</th>
                     <th>Quantitat</th>
+                    <th>Accions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -678,46 +712,65 @@ function OrderReception() {
                       <tr key={index}>
                         <td>{products.find((product) => product.id === linea.product_id)?.name}</td>
                         <td>{linea.quantity_ordered}</td>
+                        <td>
+                          {orderToReview?.orderreception_status_id === 2 && (
+                            <>
+                              <Button className="btn btn-danger mb-2" onClick={() => alert(`Incidència per ${linea.product_id}`)}>
+                                Incidència
+                              </Button>
+                         {/*     <Button variant="secondary" onClick={() => alert(`Lot/Serie per ${linea.product_id}`)} className="ms-2">
+                                Lot/Serie
+                              </Button> */}
+                            </>
+                          )}
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="2" className="text-center">No hi ha productes associats a aquesta ordre.</td>
+                      <td colSpan="3" className="text-center">No hi ha productes associats a aquesta ordre.</td>
                     </tr>
                   )}
                 </tbody>
               </Table>
+
+              {orderToReview.orderreception_status_id === 1 && (
+                <div className="mt-3">
+                  <label htmlFor="created_by">Operari Associat:</label>
+                  <select className="form-select" name="operari" aria-label="Seleccione un operari"
+                    value={operariSeleccionat} onChange={handleInputChange}
+                  >
+                    <option value="" selected disabled>Tria una opció</option>
+                    {users.map((user) => {
+                      return (
+                        <option value={user.id}>{user.name}</option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center">
-              <Spinner animation="border" />
-            </div>
-          )}
+          ) : null}
         </Modal.Body>
 
         {/* Botons d'Acció */}
         <Modal.Footer>
-          {/* Estat 1: Descarregada */}
           {orderToReview?.orderreception_status_id === 1 && (
             <>
               <Button variant="secondary" onClick={() => setShowReviewModal(false)}>
                 Tancar
               </Button>
-              <Button className="btn orange-button text-white ms-2" onClick={() => descarregarOrdre(orderToReview.id)}>
+              <Button
+                className="btn orange-button text-white ms-2"
+                onClick={() => descarregarOrdre(orderToReview.id)}
+              >
                 Descarregada
               </Button>
             </>
           )}
 
-          {/* Estat 2: Incidència i Desempaquetada */}
           {orderToReview?.orderreception_status_id === 2 && (
             <>
-              <Button variant="danger" onClick={() => alert('Incidència')} className="ms-2">
-                Incidència
-              </Button>
-              <Button variant="primary" onClick={() => alert('Lot/Serie')} className="ms-2">
-                Lot/Serie
-              </Button>
               <Button className="btn orange-button text-white ms-2" onClick={() => desempaquetarOrdre(orderToReview.id)}>
                 Desempaquetada
               </Button>

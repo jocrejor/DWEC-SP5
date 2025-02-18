@@ -20,25 +20,25 @@ function Filtres({ onFilterChange, onFilterRestart }) {
     return (
         <>
             <div className="row bg-grey pt-3 px-2 mx-0">
-                <div className="col-12 col-md-6 col-xl-3">
+                <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
                         <label htmlFor="id" className="form-label">ID</label>
                         <input type="number" placeholder='Ex: 01' className="form-control" id="id" />
                     </div>
                 </div>
-                <div className="col-12 col-md-6 col-xl-3">
+                <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
                         <label htmlFor="supplier" className="form-label">Proveïdor</label>
                         <input type="text" placeholder='Ex: ABC S.L.' className="form-control" id="supplier" />
                     </div>
                 </div>
-                <div className="col-12 col-md-6 col-xl-3">
+                <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
                         <label htmlFor="estimated_reception_date" className="form-label">Data Estimada</label>
                         <input type="date" className="form-control" id="estimated_reception_date" />
                     </div>
                 </div>
-                <div className="col-12 col-md-6 col-xl-3">
+                <div className="col-12 col-md-6 col-xl-4">
                     <div className="mb-3 text-light-blue">
                         <label htmlFor="orderreception_status_id" className="form-label">Estat</label>
                         <input type="text" placeholder='Ex: Pendent' className="form-control" id="orderreception_status_id" />
