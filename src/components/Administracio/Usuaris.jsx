@@ -358,8 +358,9 @@ function Usuaris() {
           {tipoModal === 'Visualitzar' ? (
             <div>
               <h5>Nom: {selectedUser?.name}</h5>
-              <p>Email: {selectedUser?.email}</p>
-              <p>Password: {selectedUser?.password}</p>
+              <h5>Email: {selectedUser?.email}</h5>
+              <h5>Rol: {selectedUser?.userprofile_id}</h5>
+
             </div>
           ) : (
             <Formik
