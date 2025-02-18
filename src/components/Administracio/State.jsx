@@ -161,7 +161,7 @@ function State() {
                   <td data-cell="Nombre">
                     <Button 
                       title="Veure Provincias"
-                      onClick={() => navigate(`/dadesGeografiques/province/${item.id}`)}
+                      onClick={() => navigate(`./province/${item.id}`)}
                     >
                       Provincies
                     </Button>

@@ -20,7 +20,6 @@ const ProvinciaSchema = Yup.object().shape({
 });
 
 function Province() {
-  // Extraemos el parámetro "stateId" de la URL
   const { stateId } = useParams();
   const navigate = useNavigate();
 
@@ -317,9 +316,7 @@ function Province() {
                     </Button>
                   </td>
                   <td data-cell="City">
-                    <Button size="sm" onClick={() => navigate(`./DadesGeografiques/City/${prov.id}`)}>
-                      City
-                    </Button>
+                  <Button size="sm" onClick={() => navigate(`../city/${prov.id}`)}> City </Button>
                   </td>
                   <td className="fs-5" data-no-colon="true">
                     <i

@@ -85,7 +85,7 @@ function Moviments() {
         }
         break;
       }
-      case 'orderliner': {
+      case 'PickingShi': {
         const orderLineReceptionDetails = Orderlinereception.find(item => item.id === id);
         if (orderLineReceptionDetails) {
           setSelectedOrderLine(orderLineReceptionDetails);

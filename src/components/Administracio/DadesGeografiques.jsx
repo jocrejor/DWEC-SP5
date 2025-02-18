@@ -26,7 +26,7 @@ function Error404() {
 	<div>
   	<Header title="Pàgina no trobada" />
   	<div className="d-flex justify-content-center align-items-center" >
-  	<img  className="img-fluid m-4" src=""/>
+  	<img  className="img-fluid m-4" src="" />
   	<h1>404</h1>
   	</div>
 	</div>
