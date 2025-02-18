@@ -311,12 +311,12 @@ function Province() {
                   <td data-cell="ID">{prov.id}</td>
                   <td data-cell="Nom">{prov.name}</td>
                   <td data-cell="ID de l'estat">
-                    <Button size="sm" onClick={() => navigate('/dadesGeografiques')}>
+                    <Button  className='outline-orange' onClick={() => navigate('/dadesGeografiques')}>
                       Veure Estat
                     </Button>
                   </td>
                   <td data-cell="City">
-                  <Button size="sm" onClick={() => navigate(`../city/${prov.id}`)}> City </Button>
+                  <Button className='outline-blue' onClick={() => navigate(`../city/${prov.id}`)}> City </Button>
                   </td>
                   <td className="fs-5" data-no-colon="true">
                     <i

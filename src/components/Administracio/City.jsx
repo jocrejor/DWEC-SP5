@@ -301,7 +301,7 @@ function City() {
                   <td data-cell="ID">{city.id}</td>
                   <td data-cell="Nom">{city.name}</td>
                   <td data-cell="Provincias">
-                    <Button size="sm" onClick={() => navegarprovincies(city.province_id)} title="Veure Provincias">
+                    <Button size="sm" className='outline-orange' onClick={() => navegarprovincies(city.province_id)} title="Veure Provincias">
                       Provincias
                     </Button>
                   </td>

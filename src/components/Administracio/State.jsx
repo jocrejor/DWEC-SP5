@@ -160,7 +160,7 @@ function State() {
                   <td data-cell="Nombre">{item.name}</td>
                   <td data-cell="Nombre">
                     <Button 
-                      title="Veure Provincias"
+                      title="Veure Provincias" className='outline-orange'
                       onClick={() => navigate(`./province/${item.id}`)}
                     >
                       Provincies
