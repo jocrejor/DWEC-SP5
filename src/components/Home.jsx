@@ -17,34 +17,34 @@ function Home() {
     const fetchData = async () => {
       try {
         // Obtenir la llista d'estats de les ordres
-        const { data: statusList } = await axios.get(`${apiUrl}/orderreception_status`, {
+        const { data: orderReceptionStatus } = await axios.get(`${apiUrl}/orderreception_status`, {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        const { data: orders } = await axios.get(`${apiUrl}/orderreception`, {
+        const { data: orderReception } = await axios.get(`${apiUrl}/orderreception`, {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        const statusCounts = statusList.map(status => {
-          const quantity = orders.filter(order => order.orderreception_status_id === status.id).length;
+        const orderReceptionList = orderReceptionStatus.map(status => {
+          const quantity = orderReception.filter(order => order.orderreception_status_id === status.id).length;
           return { id: status.id, status: status.name, quantity };
         });
-        setOrderCounts(statusCounts);
+        setOrderCounts(orderReceptionList);
 
-        // Obtenir la llista d'estats de les línies d'ordres
-        const { data: lineStatusList } = await axios.get(`${apiUrl}/orderline_status`, {
+        // Obtenir la llista d'estats d'ordres d'enviament
+        const { data: orderShippingStatus } = await axios.get(`${apiUrl}/ordershipping_status`, {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        const { data: orderLines } = await axios.get(`${apiUrl}/orderlinereception`, {
+        const { data: orderShipping } = await axios.get(`${apiUrl}/ordershipping`, {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        const lineStatusCounts = lineStatusList.map(status => {
-          const quantity = orderLines.filter(line => line.orderline_status_id === status.id).length;
+        const orderShippingList = orderShippingStatus.map(status => {
+          const quantity = orderShipping.filter(line => line.ordershipping_status_id === status.id).length;
           return { id: status.id, status: status.name, quantity };
         });
-        setOrderLineCounts(lineStatusCounts);
+        setOrderLineCounts(orderShippingList);
       } catch (error) {
         console.error('Error carregant les dades:', error);
       } finally {
@@ -53,12 +53,14 @@ function Home() {
     };
 
     fetchData();
+    const interval = setInterval(fetchData, 10000); // Actualitza cada 10 segons
+    return () => clearInterval(interval);
   }, [apiUrl]);
 
   const chartData = {
     labels: orderCounts.map(item => item.status),
     datasets: [{
-      label: 'Quantitat d\'ordres per estat',
+      label: "Quantitat d'estats d'ordres de recepció",
       data: orderCounts.map(item => item.quantity),
       backgroundColor: ['#4CAF50', '#FF9800', '#2196F3', '#E91E63', '#9C27B0'],
       borderColor: ['#388E3C', '#F57C00', '#1976D2', '#C2185B', '#7B1FA2'],
@@ -69,7 +71,7 @@ function Home() {
   const chartData2 = {
     labels: orderLineCounts.map(item => item.status),
     datasets: [{
-      label: 'Quantitat d\'ordres en línia',
+      label: "Quantitat d'estats d'ordres d'enviament",
       data: orderLineCounts.map(item => item.quantity),
       backgroundColor: ['#4CAF50', '#FF9800', '#2196F3', '#E91E63', '#9C27B0'],
       borderColor: ['#388E3C', '#F57C00', '#1976D2', '#C2185B', '#7B1FA2'],
@@ -82,13 +84,13 @@ function Home() {
       <Header title='Panel de control' />
       <div className='container mt-4 row'>
         <div className='col-md-6 col-sm-12'>
-          <h2 className='text-center'>Ordres de Recepció</h2>
+          <h2 className='text-center'>Ordres de recepció</h2>
           <div className='mt-4'>
             <Bar data={chartData} />
           </div>
         </div>
         <div className='col-md-6 col-sm-12'>
-          <h2 className='text-center'>Línies d'Ordres</h2>
+          <h2 className='text-center'>Ordres d'enviament</h2>
           <div className="mt-4">
             <Bar data={chartData2} />
           </div>
