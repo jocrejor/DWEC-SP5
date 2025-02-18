@@ -141,6 +141,7 @@ function OrderPickingReception() {
             const line = orderLineReception.find((l) => l.id === parseInt(order));
             const product = products.find((p) => p.id === line.product_id);
             let space = spaces.find((s) => s.product_id === line.product_id);
+            console.log(space);
 
             const cantitatOcupada = space.quantity * product.volume;
             const cantitatLliure = space.volume_max - cantitatOcupada;
