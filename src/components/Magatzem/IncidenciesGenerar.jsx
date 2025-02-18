@@ -10,7 +10,7 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
     const [products, setProducts] = useState([]);
     const [error, setError] = useState("");
     const [dataForm, setDataForm] = useState({
-        quantity_ordered: 0,
+        quantity_received: 0,
         description: ''
     })
    
@@ -58,7 +58,8 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
         console.log("Datos a enviar en la incidencia:");
        // Validar errors
        setError("")
-       dataForm.quantity_ordered < 0 ? setError("El valor ha de ser positiu."):    
+      
+       dataForm.quantity_received < 0 ? setError("El valor ha de ser positiu."):    
        (dataForm.description.length< 4 || dataForm.description.length> 250) ?   setError("La descripció ha de tindre entre 4 i 250 caracters."):
        postDataIncident();
     };
@@ -73,12 +74,12 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
             const dataSend = {
                 'description' : dataForm.description,
                 'operator_id' : JSON.parse(localStorage.getItem("user")).id,
-                'supplier_id' :  orderReceptionRes.supplier_id,
-                'orderReception_id' : orderLineReceptionID,
+                'orderlinereception_id':  parseInt(orderLineReceptionID),
+                'supplier_id' :  orderReceptionRes.data.supplier_id,
                 'product_id' :orderLineReception.product_id, 
-                'status' : 1 ,
-                'quantity_ordered':orderLineReception.quantity_ordered,
-                'quantity_received': dataForm.quantity_received
+                'orderline_status_id' : 1 ,
+                'quantity_ordered': orderLineReception.quantity_ordered,
+                'quantity_received' : parseInt(dataForm.quantity_received)
              }   
              console.log(dataSend)
             const response = await axios.post(`${apiURL}/incident`, dataSend,{ 
@@ -88,7 +89,7 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
         // Actualitzar dades de linea de ordre de recepció
                 try {
                     const dataUpdate = {
-                        'quantity_received': dataForm.quantity_received,
+                        'quantity_received': parseInt(dataForm.quantity_received)
                     }
                     const response = await axios.put(`${apiURL}/orderlinereception/${orderLineReceptionID}`, dataUpdate,{ 
                         headers: { "auth-token": token }
@@ -102,27 +103,6 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
         }
     };
 
-    /*
-    const updateDataIncident = (updatedData) => {
-        const apiURL = import.meta.env.VITE_API_URL
-        const token = localStorage.getItem("token")
-        const id = updatedData.id;
-        delete updatedData.id
-        delete updatedData.created_at
-
-        updatedData.orderline_status_id = Number(updatedData.orderline_status_id)
-
-        axios.put(`${apiURL}incident/${id}`, updatedData, { headers: { "auth-token": token } })
-            .then(response => setIncident(prevIncidents =>
-                prevIncidents.map(incidents => incidents.id === updatedData.id ? response.data : incidents)
-            ))
-            .catch(error => console.log(error)
-            );
-    }
-
-    
-    */
-    
 
     
     return (
@@ -151,7 +131,7 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
                                     <td><input 
                                             type='number' 
                                             className='form-control'
-                                            name="quantity_ordered"
+                                            name="quantity_received"
                                             onChange={handleInputChange}
                                             /></td>
                                 </tr>
