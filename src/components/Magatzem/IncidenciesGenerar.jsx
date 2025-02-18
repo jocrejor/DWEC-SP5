@@ -458,6 +458,17 @@ function OrderReception() {
             .catch(error => console.log(error))
     }
 
+    const postDataIncident = (newIncident) => {
+        const apiURL = import.meta.env.VITE_API_URL
+        const token = localStorage.getItem("token")
+
+        axios.post(`${apiURL}incident`, newIncident, { headers: { "auth-token": token } })
+            .then(response => {
+                setIncident(prevIncidents => [...prevIncidents, response.data])
+            })
+            .catch(error => console.log(error));
+    }
+
     const updateDataIncident = (updatedData) => {
         const apiURL = import.meta.env.VITE_API_URL
         const token = localStorage.getItem("token")
@@ -927,7 +938,7 @@ function OrderReception() {
                         <Button variant="secondary">
                             Tancar
                         </Button>
-                        <Button variant="success">
+                        <Button variant="success" onClick={postDataIncident()}>
                             Crear incidència
                         </Button>
                     </>
