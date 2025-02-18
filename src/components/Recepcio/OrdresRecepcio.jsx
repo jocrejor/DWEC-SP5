@@ -718,9 +718,9 @@ function OrderReception() {
                               <Button className="btn btn-danger mb-2" onClick={() => alert(`Incidència per ${linea.product_id}`)}>
                                 Incidència
                               </Button>
-                              <Button variant="secondary" onClick={() => alert(`Lot/Serie per ${linea.product_id}`)} className="ms-2">
+                         {/*     <Button variant="secondary" onClick={() => alert(`Lot/Serie per ${linea.product_id}`)} className="ms-2">
                                 Lot/Serie
-                              </Button>
+                              </Button> */}
                             </>
                           )}
                         </td>
