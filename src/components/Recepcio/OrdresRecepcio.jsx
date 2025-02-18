@@ -252,17 +252,39 @@ function OrderReception() {
 
   const desempaquetarOrdre = async (ordreId) => {
     try {
-      await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderreception_status_id: 3 }, {
+      const orderLinesResponse = await axios.get(`${apiUrl}/orderlinereception`, {
+        params: { order_reception_id: ordreId },
         headers: { "auth-token": localStorage.getItem("token") },
       });
+
+      const orderLines = orderLinesResponse.data;
+
+      const updatePromises = orderLines.map(line => {
+        return axios.put(`${apiUrl}/orderlinereception/${line.id}`, {
+          quantity_received: line.quantity_ordered,
+        }, {
+          headers: { "auth-token": localStorage.getItem("token") },
+        });
+      });
+
+      await Promise.all(updatePromises);
+
+      await axios.put(`${apiUrl}/orderreception/${ordreId}`, {
+        orderreception_status_id: 3,
+      }, {
+        headers: { "auth-token": localStorage.getItem("token") },
+      });
+
       setOrderReceptions(prev => prev.map(order =>
         order.id === ordreId ? { ...order, orderreception_status_id: 3 } : order
       ));
+
       setShowReviewModal(false);
     } catch (err) {
       console.error("Error canviant l'estat de l'ordre:", err);
     }
   };
+
 
   const emmagatzemarOrdre = async (ordreId) => {
     try {
@@ -748,14 +770,14 @@ function OrderReception() {
           )}
 
           {orderToReview?.orderreception_status_id === 2 && (
-      <>
-        <Button className="btn orange-button text-white ms-2" onClick={() => desempaquetarOrdre(orderToReview.id)}>
-          Desempaquetada
-        </Button>
-      </>
-    )}
-  </Modal.Footer>
-</Modal>
+            <>
+              <Button className="btn orange-button text-white ms-2" onClick={() => desempaquetarOrdre(orderToReview.id)}>
+                Desempaquetada
+              </Button>
+            </>
+          )}
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }
