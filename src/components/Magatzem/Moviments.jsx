@@ -227,6 +227,7 @@ function Moviments() {
     return {
       magatzem: Array.from(new Set(moviments.map(m => m.storage_id.toString()))).sort(),
       carrer: Array.from(new Set(moviments.map(m => m.street_id.toString()))).sort(),
+      estanteria: Array.from(new Set(moviments.map(m => m.shelf_id.toString()))).sort(),
       espai: Array.from(new Set(moviments.map(m => m.space_id.toString()))).sort(),
       producte: producte.length > 0
         ? Array.from(new Set(producte.map(p => p.name))).sort()
@@ -238,6 +239,7 @@ function Moviments() {
       origen: Array.from(new Set(moviments.map(m => m.origin))).sort()
     };
   }, [moviments, producte, users]);
+  
 
   const indexOfLastItem = currentPage * pagina;
   const indexprimerItem = indexOfLastItem - pagina;
