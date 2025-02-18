@@ -257,8 +257,6 @@ function Inventariar() {
       currentWeight = selectedSpace.quantity * products.find(p => p.id === selectedSpace.product_id).weight;
     } 
 
-    console.log(currentVolume)
-    console.log(currentWeight)
     const totalVolume = newVolume + currentVolume;
     const totalWeight = newWeight + currentWeight;
 
