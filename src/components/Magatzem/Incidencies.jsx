@@ -4,6 +4,7 @@ import { Routes, Route, Outlet, Link } from 'react-router-dom'
 import Button from 'react-bootstrap/Button'
 import IncidenciesGenerar from './IncidenciesGenerar'
 import IncidenciesResoldre from './IncidenciesResoldre'
+import IncidenciesTemporal from './IncidenciesTemporal'
 
 
 export default function Incidencies() {

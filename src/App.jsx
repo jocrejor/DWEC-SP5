@@ -36,7 +36,6 @@ import Incidencies from './components/Magatzem/Incidencies';
 import Moviments from './components/Magatzem/Moviments';
 import Inventariar from './components/Magatzem/Inventariar';
 import CompletarInventari from './components/Magatzem/CompletarInventari';
-import './App.js';
 import OrderPickingReception from './components/Recepcio/OrderPickingReception';
 import OrderPickingShipping from './components/Enviament/OrderPickingShipping';
 

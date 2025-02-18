@@ -1,93 +1,108 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
 import { Button, Modal, Table } from 'react-bootstrap';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 
-const IncidenciaSchema = Yup.object().shape({
-    quantity_received: Yup.number().positive().integer().required('Tens que introduïr una cantitat vàlida'),
-    description: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(200, 'El valor màxim és de 200 caracters')
-})
-
-function IncidenciaGenerarModal({orderLineReceptionID,viewModal}) {
-    const [orderReception, setOrderReception] = useState([]);
+function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
     const [orderLineReception, setOrderLineReception] = useState([]);
     const [products, setProducts] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [error, setError] = useState(null);
-    const [users, setUsers] = useState([]);
-    /*Así comensa tot lo relacionat en les incidències (menos el UseState i boto de crear incidència)*/
-    /*Incidències*/
-    const [incidents, setIncident] = useState([])
-    const [orderlineStatus, setOrderlineStatus] = useState([])
-    const [valorsInicialsIncidents, setValorsInicialsIncidents] = useState({
-        id: '',
-        product: '',
-        quantity_received: '',
-        description: '',
+    const [error, setError] = useState("");
+    const [dataForm, setDataForm] = useState({
+        quantity_ordered: 0,
+        description: ''
     })
-    setShowModal(viewModal)
+   
 
-
+    const fetchData = async () => {
+       
+        try {
+            const [ orderLineReceptionRes,productsRes] = await Promise.all([
+               
+                axios.get(`${apiUrl}/orderlinereception/${orderLineReceptionID}`, { headers: { "auth-token": localStorage.getItem("token") } }),
+                axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } }),
+                            ]);
+            setProducts(productsRes.data);
+            setOrderLineReception(orderLineReceptionRes.data);               
+        } 
+        catch (err) {
+            console.error("Error carregant dades:", err);
+        } 
+    };
   
+
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [ordersRes, productsRes, orderLineReceptionRes, usersRes] = await Promise.all([
-                    axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
-                    axios.get(`${apiUrl}/orderlinereception/${orderLineReceptionID}`, { headers: { "auth-token": localStorage.getItem("token") } }),
-                    axios.get(`${apiUrl}/products`, { headers: { "auth-token": localStorage.getItem("token") } }),
-                    axios.get(`${apiUrl}/users`, { headers: { "auth-token": localStorage.getItem("token") } })
-                                ]);
-                setOrderReception(ordersRes.data);
-                setProducts(productsRes.data);
-                setOrderLineReception(orderLineReceptionRes.data);                
-                setUsers(usersRes.data);
-            } 
-            catch (err) {
-                console.error("Error carregant dades:", err);
-            } 
-        };
         fetchData();
+
     }, []);
 
+    useEffect(() => {
+
+    }, [error]);
+
+
+
     const handleInputChange = (event) => {
-        setOperariSeleccionat(event.target.value);
+        setDataForm({
+            ...dataForm,
+            [event.target.name]: event.target.value
+        })
     };
 
-    const getDataIncident = () => {
-        const apiURL = import.meta.env.VITE_API_URL
-        const token = localStorage.getItem("token")
 
-        axios.get(`${apiURL}/incident`, { headers: { "auth-token": token } })
-            .then(response => setIncident(response.data))
-            .catch(error => console.log(error))
-    }
+    const handleSubmitIncident = (e) => {
+        e.preventDefault();
 
-    const handleSubmitIncident = (values) => {
-        console.log("Datos a enviar en la incidencia:", values);
-    
-        postDataIncident(values);
+        console.log("Datos a enviar en la incidencia:");
+       // Validar errors
+       setError("")
+       dataForm.quantity_ordered < 0 ? setError("El valor ha de ser positiu."):    
+       (dataForm.description.length< 4 || dataForm.description.length> 250) ?   setError("La descripció ha de tindre entre 4 i 250 caracters."):
+       postDataIncident();
     };
 
-    const postDataIncident = async (newIncident) => {
+    const postDataIncident = async () => {
+        const apiURL = import.meta.env.VITE_API_URL;
+        const token = localStorage.getItem("token");
         try {
-            const apiURL = import.meta.env.VITE_API_URL;
-            const token = localStorage.getItem("token");
-    
-            const response = await axios.post(`${apiURL}/incident`, newIncident, { 
+          
+            const orderReceptionRes = await axios.get(`${apiUrl}/orderreception/${orderLineReception.order_reception_id}`, { headers: { "auth-token": localStorage.getItem("token") } })
+            console.log(orderReceptionRes)
+            const dataSend = {
+                'description' : dataForm.description,
+                'operator_id' : JSON.parse(localStorage.getItem("user")).id,
+                'supplier_id' :  orderReceptionRes.supplier_id,
+                'orderReception_id' : orderLineReceptionID,
+                'product_id' :orderLineReception.product_id, 
+                'status' : 1 ,
+                'quantity_ordered':orderLineReception.quantity_ordered,
+                'quantity_received': dataForm.quantity_received
+             }   
+             console.log(dataSend)
+            const response = await axios.post(`${apiURL}/incident`, dataSend,{ 
                 headers: { "auth-token": token }
             });
-    
-            setIncident(prevIncidents => [...prevIncidents, response.data]);
+        
+        // Actualitzar dades de linea de ordre de recepció
+                try {
+                    const dataUpdate = {
+                        'quantity_received': dataForm.quantity_received,
+                    }
+                    const response = await axios.put(`${apiURL}/orderlinereception/${orderLineReceptionID}`, dataUpdate,{ 
+                        headers: { "auth-token": token }
+                    });
+                }catch (error){
+                    console.error("Error actualitzant la linia d'ordre de recepció", error.response?.data || error.message);
+                }
+
         } catch (error) {
             console.error("Error en postDataIncident:", error.response?.data || error.message);
         }
     };
 
+    /*
     const updateDataIncident = (updatedData) => {
         const apiURL = import.meta.env.VITE_API_URL
         const token = localStorage.getItem("token")
@@ -99,44 +114,28 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal}) {
 
         axios.put(`${apiURL}incident/${id}`, updatedData, { headers: { "auth-token": token } })
             .then(response => setIncident(prevIncidents =>
-                prevIncidents.map(incidents => incidents.id === updatedData.id ? response.data : incidents),
-                getDataIncident()
+                prevIncidents.map(incidents => incidents.id === updatedData.id ? response.data : incidents)
             ))
             .catch(error => console.log(error)
             );
     }
 
-    const getDataOrderLineStatus = () => {
-        const apiURL = import.meta.env.VITE_API_URL
-        const token = localStorage.getItem("token")
+    
+    */
+    
 
-        axios.get(`${apiURL}/orderline_status`, { headers: { "auth-token": token } })
-            .then(response => setOrderlineStatus(response.data))
-            .catch(error => console.log(error))
-    }
-
-    const getStatusId = (statusId) => {
-        const status = orderlineStatus.find(s => Number(s.id) === Number(statusId));
-        return status ? status.name : "Estat desconegut";
-    }
-
-    useEffect(() => {
-        getDataIncident()
-        getDataOrderLineStatus()
-    }, [])
-
+    
     return (
         <>
             {/* Modal per Crear incidència */}
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal show={viewModal} onHide={() => handleModal()}>
                 <Modal.Header closeButton>
                     <Modal.Title>Crear incidència</Modal.Title>
                 </Modal.Header>
+                <form>
                 <Modal.Body>
                     <div>
-                        
                         {/* Taula de productes associats a l'ordre */}
-                        <h5>Producte:</h5>
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
@@ -148,68 +147,50 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal}) {
                             <tbody>
                                 <tr>                                        
                                     <td>{products.find((product) => product.id === orderLineReception.product_id)?.name}</td>
-                                    <td>{linea.quantity_ordered}</td>
-                                    <td><input type='number' /></td>
+                                    <td>{orderLineReception.quantity_ordered}</td>
+                                    <td><input 
+                                            type='number' 
+                                            className='form-control'
+                                            name="quantity_ordered"
+                                            onChange={handleInputChange}
+                                            /></td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={3}>
+                                        <label>Descripció</label>
+                                        <textarea 
+                                        name= "description"
+                                        className='form-control'
+                                        onChange={handleInputChange}
+                                        >
+
+                                        </textarea>
+                                    </td>
                                 </tr>
                             </tbody>
                         </Table>
-                        {/* Formulario de Creación de Incidència */}
-                        <Formik
-                            initialValues={valorsInicials}
-                            validationSchema={IncidenciaSchema}
-                            onSubmit={values => {
-                                console.log("Valores enviados a updateDataIncident:", values);
-                                updateDataIncident(values);
-                                canviEstatModal();
-                            }}
-                        >
-                            {({ values, errors, touched }) => (
-                                <Form>
-                                    <div className="form-group">
-                                        <label className='fw-bolder' htmlFor='description'>Descripció</label>
-                                        <Field
-                                            type="text"
-                                            name="description"
-                                            className="text-light-blue form-control"
-                                            value={values.description || ''} />
-                                        {errors.description && touched.description ? <div className="invalid-feedback">{errors.description}</div> : null}
-                                    </div>
-                                    <div className="form-group">
-                                        <label className='fw-bolder' htmlFor='quantity_received'>Cantitat recibida</label>
-                                        <Field
-                                            type="number"
-                                            name="quantity_received"
-                                            className="text-light-blue form-control"
-                                            value={values.quantity_received || ''} />
-                                        {errors.quantity_received && touched.quantity_received ? <div className="invalid-feedback">{errors.quantity_received}</div> : null}
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="fw-bolder" htmlFor="orderline_status_id">Estat</label>
-                                        <Field as="select" name="orderline_status_id" className="text-light-blue form-control">
-                                            {orderlineStatus.map(status =>
-                                                <option key={status.id} value={status.id}>{status.name}</option>
-                                            )}
-                                        </Field>
-                                        {errors.status && touched.status ? (
-                                            <div className="invalid-feedback">{errors.status}</div>
-                                        ) : null}
-                                    </div>
-                                </Form>
-                            )}
-                        </Formik>
+                        
+                        <div><span className='text-danger' >{error} </span></div>
+                       
+                        
                     </div>                 
                 </Modal.Body>
                 <Modal.Footer>
                     <>
-                        <Button variant="secondary">
+                        <Button 
+                            variant="secondary"
+                            onClick={() => handleModal()}>
                             Tancar
                         </Button>
-                        <Button variant="success" onClick={() => handleSubmitIncident(valorsInicialsIncidents)}>
+                        <Button variant="success" onClick={handleSubmitIncident}>
                             Crear incidència
                         </Button>
+
                     </>
                 </Modal.Footer>
+                </form>
             </Modal>
+            
         </>
     );
 }
