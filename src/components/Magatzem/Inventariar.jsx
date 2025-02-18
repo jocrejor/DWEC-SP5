@@ -177,7 +177,7 @@ function Inventariar() {
     })
 
   }
-
+  //********* UPDATED INVENTORY LINES' QUANTITY *********
   const handleSubmit = async () => {
     if (updatedInventoryLines.length != selectedInventoryLines.length) {
       //console.log(updatedInventoryLines.length + " - " + selectedInventory.length)
@@ -216,7 +216,7 @@ function Inventariar() {
     }
 
   }
-
+  //********* CHANGE DATE *********
   const changeDate = (date) => {
     const newDate = new Date(date);
     return newDate.toLocaleDateString();
@@ -227,8 +227,75 @@ function Inventariar() {
   const handleClose = () => {
     setShow(false)
   };
-
   const handleShow = () => setShow(true);
+
+  //********* HANDLE NEW INVENTORY LINE SUBMIT *********
+  const handleNewInventoryLineSubmit = async (values) => {
+    console.log(selectedSpace)
+    console.log(values)
+    const selectedProduct = products.find(product => product.id === parseInt(values.product_id));
+    console.log(selectedProduct)
+
+    if(!selectedProduct){
+      alert("Producte no trobat.");
+      return
+    }
+
+    if(selectedSpace.product_id != null && selectedSpace.product_id != values.product_id){
+      alert("No es pot afegir un producte diferent a l'espai seleccionat.");
+      return
+    }
+
+    const newVolume = selectedProduct.volume * values.quantity_real;
+    const newWeight = selectedProduct.weight * values.quantity_real;
+    
+    let currentVolume = 0;
+    let currentWeight = 0;
+    
+    if(selectedSpace.quantity != 0){
+      currentVolume = selectedSpace.quantity * products.find(p => p.id === selectedSpace.product_id).volume;
+      currentWeight = selectedSpace.quantity * products.find(p => p.id === selectedSpace.product_id).weight;
+    } 
+
+    console.log(currentVolume)
+    console.log(currentWeight)
+    const totalVolume = newVolume + currentVolume;
+    const totalWeight = newWeight + currentWeight;
+
+    if(totalVolume > selectedSpace.volume_max){
+      alert("No hi ha espai suficient. El volum supera el màxim permès. El volum màxim és de " + selectedSpace.volume_max + " m3. Actualment hi ha " + currentVolume + " m3 i el producte ocupa " + newVolume + " m3.");
+      return
+    }
+
+    if(totalWeight > selectedSpace.weight_max){
+      alert("No hi ha espai suficient. El pes supera el màxim permès. El pes màxim és de " + selectedSpace.weight_max + " kg. Actualment hi ha " + currentWeight + " kg i el producte pesa " + newWeight + " kg.");
+      return;
+    }
+
+    //const updatedQuantity = selectedSpace.quantity === null ? values.quantity_real : selectedSpace.quantity + values.quantity_real;
+    
+      //const updatedSpace = {...selectedSpace, product_id: values.product_id, quantity: updatedQuantity}
+      //await axios.put(`${apiURL}/space/${selectedSpace.storage_id}/${selectedSpace.street_id}/${selectedSpace.shelf_id}/${selectedSpace.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+    const newLine = {
+      ...values,
+      inventory_id: selectedInventory.id,
+      storage_id: selectedInventory.storage_id,
+      operator_id: user.id,
+      quantity_estimated: selectedSpace.quantity,
+      quantity_real: values.quantity_real,
+    }
+
+    await axios.post(`${apiURL}/inventoryline`, newLine, { headers: { "auth-token": localStorage.getItem('token') } })
+
+    await axios.get(`${apiURL}/inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
+      .then(response => {
+        setInventoryLines(response.data);
+      })
+    alert("Linia afegida amb èxit");
+    handleClose();
+    
+  }
+
 
   return (
     <>
@@ -327,35 +394,10 @@ function Inventariar() {
             </Modal.Header>
             <Modal.Body>
               <Formik
-                initialValues={{street_id: '', shelf_id: '', space_id: '', product_id: '', quantity_real: '', inventory_reason_id: 6}}
+                initialValues={{ street_id: '', shelf_id: '', space_id: '', product_id: '', quantity_real: '', inventory_reason_id: 6 }}
                 validationSchema={InventoryLineSchema}
-                onSubmit={ async(values) =>  {
-                  console.log(selectedSpace)
-                  const updatedQuantity = (selectedSpace?.quantity === null) ? 100 - values.quantity_real : selectedSpace?.quantity - values.quantity_real;
-                  
-
-                  if(updatedQuantity >= 0){
-                    //const updatedSpace = {...selectedSpace, product_id: values.product_id, quantity: updatedQuantity}
-                    //await axios.put(`${apiURL}/space/${selectedSpace.storage_id}/${selectedSpace.street_id}/${selectedSpace.shelf_id}/${selectedSpace.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
-                    const newLine = {
-                      ...values,
-                      inventory_id: selectedInventory.id,
-                      storage_id: selectedInventory.storage_id,
-                      operator_id: user.id,
-                      quantity_estimated: selectedSpace.quantity,
-                    }
-                    await axios.post(`${apiURL}/inventoryline`, newLine, { headers: { "auth-token": localStorage.getItem('token') } })
-
-                    await axios.get(`${apiURL}/inventoryline`, { headers: { "auth-token": localStorage.getItem('token') } })
-                      .then(response => {
-                        setInventoryLines(response.data);
-                      })
-                      alert("Linia afegida amb èxit");
-                      handleClose();
-                  } else {
-                    alert("No hi ha espai suficient. La quantitat màxima és de " + selectedSpace.quantity + " unitats.");
-                  }
-                  
+                onSubmit={(values) => {
+                  handleNewInventoryLineSubmit(values);
                 }}
               >
                 {({ errors, touched, setFieldValue, values }) => (
@@ -420,7 +462,7 @@ function Inventariar() {
                         disabled={!values.shelf_id}
                         onChange={(e) => {
                           setFieldValue('space_id', e.target.value);
-                          setSelectedSpace(selectedSpaces.find((space) => space.id === e.target.value));
+                          setSelectedSpace(selectedSpaces.find((space) => space.id === String(e.target.value) && space.shelf_id === values.shelf_id && space.street_id === values.street_id));
                         }}
 
                       >
@@ -463,7 +505,7 @@ function Inventariar() {
                         name='quantity_real'
                         className='form-control'
                         placeholder="0"
-                        
+
                       >
                       </Field>
                       {errors.quantity_real && touched.quantity_real ? <div className='text-danger'>{errors.quantity_real}</div> : null}

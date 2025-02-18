@@ -144,7 +144,7 @@ function Inventaris() {
     } else {
       setSelectedInventoryLines([]);
     }
-  }, [selectedInventory])
+  }, [selectedInventory, inventoryLines, spaces]);
 
   /**************** FILTROS ****************/
   const handleFilter = (f) => {
@@ -204,15 +204,16 @@ function Inventaris() {
       storage_id: values.storage_id
     }
     
+    const getNewId =  await axios.post(`${apiURL}/inventory`, newInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+                        .then(response => { return response.data })                 
+                        .catch(e => { console.log(e.response.data) })
 
-    axios.post(`${apiURL}/inventory`, newInventory, { headers: { "auth-token": localStorage.getItem('token') } })
-    
-      .catch(e => { console.log(e.response.data) })
+     console.log(getNewId.results.insertId)
+
     filteredSpaces.map(space => {
       if(space.product_id != null) {
-        
         let newInventoryLine = {
-          inventory_id: newInv.id,
+          inventory_id: getNewId.results.insertId,
           product_id: space.product_id,
           quantity_estimated: space.quantity,
           storage_id: space.storage_id,
@@ -221,9 +222,8 @@ function Inventaris() {
           space_id: space.id
         }
         console.log(newInventoryLine)
-      }
-      
-      //axios.post(`${apiURL}/inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
+        axios.post(`${apiURL}/inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
+      }      
     });
 
     await axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
@@ -414,7 +414,7 @@ function Inventaris() {
             <tbody className='text-light-blue'>
               {
                 (inventory.length === 0) ?
-                  <tr><td colSpan={7}>No hay nada</td></tr>
+                  <tr><td colSpan={7}>No s'han creat inventaris.</td></tr>
                   : inventory.map((values) => {
 
                     return (
