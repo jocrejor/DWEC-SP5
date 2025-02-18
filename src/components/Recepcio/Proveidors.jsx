@@ -245,47 +245,66 @@ const handleImport = async () => {
     try {
       console.log("Datos CSV antes del filtrado:", csvData);
 
-      // Verificar si hay datos válidos antes de enviar
-      if (csvData.length === 0) {
-        console.error("Error: No hay datos válidos para importar.");
-        return;
-      }
+      // Obtener la lista actual de proveedores desde la API
+      const existingSuppliersRes = await axios.get(`${apiUrl}/supplier`, {
+        headers: { "auth-token": localStorage.getItem("token") }
+      });
+
+      // Extraer nombres y NIFs de los proveedores existentes
+      const existingSuppliers = existingSuppliersRes.data.map(supplier => ({
+        name: supplier.name.toLowerCase(),
+        nif: supplier.nif.toLowerCase()
+      }));
+
+      let duplicatedSuppliers = [];
 
       for (let i = 0; i < csvData.length; i++) {
         const provider = csvData[i];
 
-        // Asegúrate de que el objeto tenga los campos correctos antes de enviarlo
+        // Verificar que el proveedor tiene los datos esenciales
         if (provider.name && provider.address && provider.nif && provider.phone && provider.email) {
-          const response = await fetch(`${apiUrl}/supplier`, {
-            method: 'POST',
-            headers: {
-              "Content-Type": "application/json",
-              "auth-token": localStorage.getItem("token")
-            },
-            body: JSON.stringify(provider)
-          });
+          const providerName = provider.name.toLowerCase();
+          const providerNif = provider.nif.toLowerCase();
 
-          if (response.ok) {
-            const responseData = await response.json();
-            console.log("Proveedor importado exitosamente:", responseData);
+          // Verificar si ya existe un proveedor con el mismo nombre o NIF
+          const isDuplicate = existingSuppliers.some(sup => sup.name === providerName || sup.nif === providerNif);
+
+          if (isDuplicate) {
+            duplicatedSuppliers.push(`${provider.name} (NIF: ${provider.nif})`);
           } else {
-            console.error("Error al importar proveedor:", provider.name);
+            const response = await fetch(`${apiUrl}/supplier`, {
+              method: 'POST',
+              headers: {
+                "Content-Type": "application/json",
+                "auth-token": localStorage.getItem("token")
+              },
+              body: JSON.stringify(provider)
+            });
+
+            if (response.ok) {
+              const responseData = await response.json();
+              console.log("Proveedor importado exitosamente:", responseData);
+            } else {
+              console.error("Error al importar proveedor:", provider.name);
+            }
           }
         } else {
           console.error("Datos incompletos para el proveedor:", provider);
         }
       }
 
-      // Después de importar todos los proveedores, recarga la lista actualizada
+      // Mostrar alerta si hay proveedores duplicados
+      if (duplicatedSuppliers.length > 0) {
+        alert(`Els següents proveïdors ja existeixen i no s'han importat:\n\n${duplicatedSuppliers.join("\n")}`);
+      }
+
+      // Actualizar la lista después de la importación
       const updatedSuppliers = await axios.get(`${apiUrl}/supplier`, {
         headers: { "auth-token": localStorage.getItem("token") }
       });
 
-      // Actualiza el estado con la nueva lista de proveedores
       setSuppliers(updatedSuppliers.data);
-
-      // Cerrar el modal de importación si todo fue bien
-      setShowImportModal(false);
+      setShowImportModal(false); // Cerrar modal si todo fue bien
     } catch (error) {
       console.error("Error al importar:", error);
     }
@@ -293,6 +312,8 @@ const handleImport = async () => {
     console.error("Error: No se encontraron datos válidos en el CSV.");
   }
 };
+
+
 
 
   return (
@@ -665,28 +686,31 @@ const handleImport = async () => {
         </Modal.Body>
       </Modal>
 
-      <nav aria-label="Page navigation example" className="d-block">
-        <ul className="pagination justify-content-center">
-          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-            <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-            <li key={number} className={`page-item ${currentPage === number ? 'activo-2' : ''}`}>
-              <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
-                {number}
+      {suppliers.length >= elementsPaginacio && (
+        <nav aria-label="Page navigation example" className="d-block">
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={(e) => { e.preventDefault(); goToPreviousPage(); }}>
+                <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-          ))}
-          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-            <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {e.preventDefault(); goToNextPage(); }}>
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                <a className="page-link text-light-blue activo-2" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
+                  {number}
+                </a>
+              </li>
+            ))}
+            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {e.preventDefault(); goToNextPage(); }}>
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      )}
+
     </>
   );
 }
