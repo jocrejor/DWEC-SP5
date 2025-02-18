@@ -94,6 +94,7 @@ function OrderPickingReception() {
                     }
                     tempPickings.push(objTemporal);
                     
+                    //actualitzar espai elegit per aquest producte
                     axios.put(`${apiUrl}/space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`, {
                         product_id: line.product_id,
                     },{headers: { "auth-token": token }})
