@@ -376,7 +376,7 @@ const OrderPickingShippingPicking = () => {
                         <li
                           key={number}
                           className={`page-item ${
-                            currentPage === number ? "active" : ""
+                            currentPage === number ? "activo-2" : ""
                           }`}
                         >
                           <a
