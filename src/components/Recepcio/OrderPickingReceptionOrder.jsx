@@ -138,7 +138,7 @@ function OrderPickingReception() {
     
     const aceptarOrderPickingReception = async () => {
         orderSelected.forEach((order) => {
-            const line = orderLineReception.find((l) => l.id === parseInt(order)); setLoading(true);
+            const line = orderLineReception.find((l) => l.id === parseInt(order));
             const product = products.find((p) => p.id === line.product_id);
             let space = spaces.find((s) => s.product_id === line.product_id);
 
@@ -373,12 +373,12 @@ function OrderPickingReception() {
 
 
                                     <tbody>
-                                        {orderSelected.map((order,ind) => {
+                                        {orderSelected.map((order) => {
                                             const lines = orderLineReception.find(line => line.id === parseInt(order));
                                             const product = products.find(p => p.id === lines.product_id);
                                             const space = spaces.find((space) => space.product_id === lines.product_id);
                                             return (
-                                                <tr key={ind}>
+                                                <tr key={order}>
                                                     <td data-cell="Producte">{product.name}</td>
                                                     <td data-cell="Quantitat">{lines.quantity_received}</td>
                                                     <td data-cell="Magatzem / Carrer / Estantería / Espai">
