@@ -100,7 +100,7 @@ function City() {
   };
 
   const navegarprovincies = (province_id) => {
-    navigate(`./Province/${province_id}`);
+    navigate(`../province/${province_id}`);
   };
 
   const suggestions = [...new Set(cities.map(city => city.name))];
@@ -147,7 +147,6 @@ function City() {
     }
   };
 
-  // Cuando se apliquen nuevos filtros se reinicia la paginación a la página 1
   const handleFilter = (filters) => {
     setAppliedFilters(filters);
     setCurrentPage(1);
@@ -160,8 +159,16 @@ function City() {
 
   return (
     <>
-      {/* Cabecera con acciones (ejemplo de acciones en lote y botón para crear) */}
-      <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+
+
+      {/* Component de filtres */}
+      <FiltresCity
+        suggestions={suggestions}
+        onFilter={handleFilter}
+        onClear={handleClearFilters}
+      />
+
+<div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
             <div className="form-floating bg-white">
@@ -185,14 +192,6 @@ function City() {
           </div>
         </div>
       </div>
-
-      {/* Component de filtres */}
-      <FiltresCity
-        suggestions={suggestions}
-        onFilter={handleFilter}
-        onClear={handleClearFilters}
-      />
-
       {/* Modal para crear City */}
       <Modal show={showCreate} onHide={() => setShowCrear(false)}>
         <Modal.Header closeButton>
@@ -302,7 +301,7 @@ function City() {
                   <td data-cell="Nom">{city.name}</td>
                   <td data-cell="Provincias">
                     <Button size="sm" className='outline-orange' onClick={() => navegarprovincies(city.province_id)} title="Veure Provincias">
-                      Provincias
+                      Provincies
                     </Button>
                   </td>
                   <td className="fs-5" data-no-colon="true">

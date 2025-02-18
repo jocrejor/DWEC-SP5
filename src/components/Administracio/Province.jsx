@@ -316,7 +316,7 @@ function Province() {
                     </Button>
                   </td>
                   <td data-cell="City">
-                  <Button className='outline-blue' onClick={() => navigate(`../city/${prov.id}`)}> City </Button>
+                  <Button className='outline-blue' onClick={() => navigate(`../city/${prov.id}`)}> Veure City </Button>
                   </td>
                   <td className="fs-5" data-no-colon="true">
                     <i

@@ -21,6 +21,8 @@ function State() {
   const [showModal, setShowModal] = useState(false);
   const [tipoModal, setTipoModal] = useState("Crear");
   const [valorsInicials, setValorsInicials] = useState({ name: '' });
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedState, setSelectedState] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,6 +53,11 @@ function State() {
   const crearestat = () => {
     setShowModal(true);
     setTipoModal("Crear");
+  };
+
+  const visualizarestat = (stateItem) => {
+    setSelectedState(stateItem);
+    setShowViewModal(true);
   };
 
   const [appliedFilters, setAppliedFilters] = useState({ name: '', orden: 'none' });
@@ -146,7 +153,6 @@ function State() {
                 <th scope="col">ID</th>
                 <th scope="col">Nombre</th>
                 <th scope="col">Provincies</th>
-                
                 <th scope="col">Acciones</th>
               </tr>
             </thead>
@@ -160,15 +166,33 @@ function State() {
                   <td data-cell="Nombre">{item.name}</td>
                   <td data-cell="Nombre">
                     <Button 
-                      title="Veure Provincias" className='outline-orange'
+                      title="Veure Provincias" 
+                      className='outline-orange'
                       onClick={() => navigate(`./province/${item.id}`)}
                     >
                       Provincies
                     </Button>
                   </td>
                   <td className="fs-5" data-no-colon="true">
-                    <i className="bi bi-pencil-square me-2" title="Modificar" onClick={() => modificarestat(item)}></i>
-                    <i className="bi bi-trash" title="Eliminar" onClick={() => eliminarestat(item.id)}></i>
+                    {/* Icono para visualizar */}
+                    <i 
+                      className="bi bi-eye me-2" 
+                      title="Visualizar" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => visualizarestat(item)}
+                    ></i>
+                    <i 
+                      className="bi bi-pencil-square me-2" 
+                      title="Modificar" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => modificarestat(item)}
+                    ></i>
+                    <i 
+                      className="bi bi-trash" 
+                      title="Eliminar" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => eliminarestat(item.id)}
+                    ></i>
                   </td>
                 </tr>
               ))}
@@ -256,6 +280,28 @@ function State() {
             )}
           </Formik>
         </Modal.Body>
+      </Modal>
+
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Visualizar Estado</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedState ? (
+            <>
+              <p><strong>ID:</strong> {selectedState.id}</p>
+              <p><strong>Nombre:</strong> {selectedState.name}</p>
+            
+            </>
+          ) : (
+            <p>No hay datos para mostrar.</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );

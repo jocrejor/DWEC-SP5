@@ -58,7 +58,7 @@ function Moviments() {
 
   const polsarorigin = (origin, id) => {
     switch (origin) {
-      case 'inventoryl': {
+      case 'inventory': {
         const inventariDetails = inventari.find(item => item.id === id);
         if (inventariDetails) {
           setSelectedInventory(inventariDetails);
@@ -78,7 +78,7 @@ function Moviments() {
         }
         break;
       }
-      case 'ordrerecep': {  
+      case 'PickingRep': {  
         const orderReceptionDetails = Orderreception.find(item => item.id === id);
         if (orderReceptionDetails) {
           setSelectedOrderReception(orderReceptionDetails);
