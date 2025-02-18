@@ -3,7 +3,7 @@ import { Button, Modal } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom'; // Importa useParams
+import { useNavigate, useParams } from 'react-router-dom'; 
 import FiltresCity from './CityFiltres'; 
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -19,7 +19,7 @@ const CitySchema = Yup.object().shape({
 });
 
 function City() {
-  // Extrae el parámetro "provinceId" de la URL
+
   const { provinceId } = useParams();
   const navigate = useNavigate();
   
@@ -29,7 +29,7 @@ function City() {
   const [cities, setCities] = useState([]);
   const [currentCity, setCurrentCity] = useState(null);
   
-  // También puedes usar un filtro adicional, pero lo principal es filtrar por provinceId
+
   const [appliedFilters, setAppliedFilters] = useState({ name: '', orden: 'none', provinceId: '' });
   
   const [currentPage, setCurrentPage] = useState(1);
@@ -128,7 +128,7 @@ function City() {
     );
   }
   
-  // Cálculos de paginación
+  // Cálculs de paginación
   const totalPages = Math.ceil(filteredCities.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = filteredCities.slice(startIndex, startIndex + itemsPerPage);
@@ -170,7 +170,7 @@ function City() {
   
   return (
     <>
-      {/* Cabecera con acciones */}
+  
       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
