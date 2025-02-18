@@ -413,8 +413,8 @@ function Usuaris() {
                     <Button variant="secondary" onClick={tancarModal}>
                       Tancar
                     </Button>
-                    <Button className="primary orange-button" type="button" onClick={() => alert("S'està enviant el formulari!")}>
-                      Gravar
+                    <Button className="primary orange-button" type="button" >
+                    Gravar
                     </Button>
                   </div>
                 </Form>
