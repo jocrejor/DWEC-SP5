@@ -213,6 +213,7 @@ function OrderReception_Status() {
           </tbody>
         </Table>
         {/* Paginació */}
+        {totalPages > 1 && (
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -222,7 +223,7 @@ function OrderReception_Status() {
             </li>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-              <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+              <li key={number} className={`page-item ${currentPage === number ? 'activo-2' : ''}`}>
                 <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
                   {number}
                 </a>
@@ -235,6 +236,7 @@ function OrderReception_Status() {
             </li>
           </ul>
         </nav>
+        )}
       </div>
 
       <Modal show={showModal} onHide={canviEstatModal}>
