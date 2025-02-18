@@ -94,6 +94,11 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
                     const response = await axios.put(`${apiURL}/orderlinereception/${orderLineReceptionID}`, dataUpdate,{ 
                         headers: { "auth-token": token }
                     });
+                    // Fes moviment al magatzem de incidencies: 
+                    
+
+
+
                 }catch (error){
                     console.error("Error actualitzant la linia d'ordre de recepció", error.response?.data || error.message);
                 }
