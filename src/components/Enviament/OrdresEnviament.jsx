@@ -321,7 +321,7 @@ function OrdresEnviament() {
       canviEstatModalEnviament();
       actualitzaDades();
     }
-    else if (tipoModal === "Preparada"){
+    else if (tipoModal === "Preparada") {
       console.log(values)
       values.ordershipping_status_id = 3;
       axios.put(`${apiUrl}/ordershipping/${values.id}`, values, { headers: { "auth-token": localStorage.getItem("token") } })
@@ -454,6 +454,7 @@ function OrdresEnviament() {
             )}
           </tbody>
         </table>
+        {totalPages > 1 && (      
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -463,7 +464,7 @@ function OrdresEnviament() {
             </li>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-              <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+              <li key={number} className={`page-item ${currentPage === number ? 'activo-2' : ''}`}>
                 <a className="page-link text-light-blue" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
                   {number}
                 </a>
@@ -476,6 +477,7 @@ function OrdresEnviament() {
             </li>
           </ul>
         </nav>
+        )}
       </div>
 
       <Modal show={showModal} >
@@ -503,7 +505,17 @@ function OrdresEnviament() {
             }) => (
               <Form>
                 <div>
-                  <Button className='mb-4' variant={tipoModal === "Crear" ? "success" : "info"} type='submit'>{tipoModal}</Button>
+
+                  <Button className='mb-4' variant={tipoModal === "Crear" ? "btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0" : "info"} type='submit'>
+                    {tipoModal === "Crear" && (
+                      <i className="bi bi-plus-circle text-white pe-1"></i>
+                    )}
+                    {tipoModal === "Modificar" && (
+                      <i className="bi bi-pencil-square icono pe-1"></i>
+                    )}
+
+                    {tipoModal}
+                  </Button>
 
                 </div>
 
@@ -642,9 +654,9 @@ function OrdresEnviament() {
             }) => (
               <Form>
                 <div>
-                {tipoModal === "Preparada" &&(
+                  {tipoModal === "Preparada" && (
                     <button type='submit' className='btn btn-secondary'>Preparada</button>
-                  )}         
+                  )}
                 </div>
                 <div className='form-group'>
                   <label htmlFor='client_id'>Client</label>
