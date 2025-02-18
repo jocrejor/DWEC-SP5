@@ -697,11 +697,19 @@ const handleImport = async () => {
             
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
               <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
-                <a className="page-link text-light-blue activo-2" href="#" onClick={(e) => { e.preventDefault(); paginate(number); }}>
+                <a 
+                  className={`page-link text-light-blue ${currentPage === number ? 'activo-2' : ''}`} 
+                  href="#" 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    paginate(number); 
+                  }}
+                >
                   {number}
                 </a>
               </li>
             ))}
+
             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
               <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={(e) => {e.preventDefault(); goToNextPage(); }}>
                 <span aria-hidden="true">&raquo;</span>
