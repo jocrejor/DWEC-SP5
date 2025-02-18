@@ -51,10 +51,6 @@ function OrderPickingReception() {
         }
     }
         
-        
-
-     
-
     useEffect(()=>{
         const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 3);
         const tempPickings = [];
@@ -86,7 +82,6 @@ function OrderPickingReception() {
                 }else{
 
                     const space = spaces.find(space => (space.quantity === 0 || space.quantity===null));
-                    console.log(spaces)
                     const objTemporal = {
                         order_reception_id: order.id,
                         order_line_reception_id: line.id,
@@ -98,6 +93,10 @@ function OrderPickingReception() {
                         space_id: space.id
                     }
                     tempPickings.push(objTemporal);
+                    
+                    axios.put(`${apiUrl}/space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`, {
+                        product_id: line.product_id,
+                    },{headers: { "auth-token": token }})
                 }
             });
         });
