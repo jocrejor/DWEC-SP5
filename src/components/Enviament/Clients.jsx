@@ -15,7 +15,7 @@ const ClientSchema = yup.object().shape({
   email: yup.string().email("Email no vàlid").required("Valor Requerit."),
   phone: yup
     .string()
-    .min(10, "El número de telèfon ha de tindre almenys 10 digits")
+    .min(9, "El número de telèfon ha de tindre almenys 10 digits")
     .required("Valor Requerit."),
   address: yup
     .string()
