@@ -6,6 +6,7 @@ import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
 import Filtres from "./OrdresRecepcioFiltres";
 import { useNavigate, useLocation } from "react-router-dom";
+import IncidenciaGenerarModal from '../Magatzem/IncidenciesGenerar'
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -41,6 +42,8 @@ function OrderReception() {
   const [totalPages, setTotalPages] = useState(1);
   const [orderPage, setOrderPage] = useState([]);
   const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
+  const [showModalIncident,setShowModalIncident]=useState(false)
+  const [idModalIncident, setIdModalIncident] = useState(0)
 
   // Funcions paginació
   useEffect(() => {
@@ -421,6 +424,16 @@ function OrderReception() {
     }
   };
 
+  //Control modal incident
+  const handleModalIncident = (id) => {  
+    setShowModalIncident(!showModalIncident)
+    setIdModalIncident(id)
+  }
+
+  useEffect(() => {
+    console.log("id ", idModalIncident)
+  }, [idModalIncident]);
+
   return (
     <>
       <Header title="Llistat Ordres de Recepció" />
@@ -715,7 +728,7 @@ function OrderReception() {
                         <td>
                           {orderToReview?.orderreception_status_id === 2 && (
                             <>
-                              <Button className="btn btn-danger mb-2" onClick={() => alert(`Incidència per ${linea.product_id}`)}>
+                              <Button className="btn btn-danger mb-2" onClick={() =>{handleModalIncident(linea.id)}}>
                                 Incidència
                               </Button>
                          {/*     <Button variant="secondary" onClick={() => alert(`Lot/Serie per ${linea.product_id}`)} className="ms-2">
@@ -778,6 +791,11 @@ function OrderReception() {
           )}
         </Modal.Footer>
       </Modal>
+
+      {/*Modal incident*/}
+      {(idModalIncident!=0 && showModalIncident === true) ? 
+        <IncidenciaGenerarModal orderLineReceptionID={idModalIncident} viewModal={showModalIncident} handleModal={handleModalIncident}/>
+      : null}
     </>
   );
 }

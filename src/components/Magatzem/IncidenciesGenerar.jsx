@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, Modal, Table } from 'react-bootstrap';
+import PropTypes from 'prop-types';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -14,9 +15,8 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
         description: ''
     })
    
-
     const fetchData = async () => {
-       
+        console.log(orderLineReceptionID)
         try {
             const [ orderLineReceptionRes,productsRes] = await Promise.all([
                
@@ -35,8 +35,7 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
 
     useEffect(() => {
         fetchData();
-
-    }, []);
+    }, [orderLineReceptionID]);
 
     useEffect(() => {
 
@@ -115,7 +114,7 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
             {/* Modal per Crear incidència */}
             <Modal show={viewModal} onHide={() => handleModal()}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Crear incidència</Modal.Title>
+                    <Modal.Title>Crear incidència{ orderLineReceptionID}</Modal.Title>
                 </Modal.Header>
                 <form>
                 <Modal.Body>
@@ -125,7 +124,7 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
                             <thead>
                                 <tr>
                                     <th>Producte</th>
-                                    <th>Quantitat Estinada</th>
+                                    <th>Quantitat Estimada</th>
                                     <th>Quantitat Rebuda</th>
                                 </tr>
                             </thead>
@@ -178,5 +177,13 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
             
         </>
     );
+   
 }
+
+IncidenciaGenerarModal.propTypes = {
+    orderLineReceptionID: PropTypes.number,
+    viewModal: PropTypes.bool,
+    handleModal: PropTypes.func.isRequired,
+}
+
 export default IncidenciaGenerarModal;
