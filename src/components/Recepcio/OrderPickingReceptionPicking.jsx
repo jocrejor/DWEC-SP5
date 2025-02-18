@@ -110,8 +110,9 @@ function OrderPickingReception() {
                     console.error("Error en actualitzar quantitat space", error.response.data);
                 });
 
-            movMagatzem(lineActualitzar.product_id, lineActualitzar.operator_id, lineActualitzar.quantity_received, "Recepcio", space.storage_id, space.storage_id, space.street_id, space.shelf_id, space.id);
+            movMagatzem(lineActualitzar.product_id, lineActualitzar.operator_id, lineActualitzar.quantity_received, "Recepcio", "01", "01", "01", "01", "01");
             console.log("Moviment eixida realitzat");
+            console.log(lineActualitzar.operator_id);
 
             movMagatzem(lineActualitzar.product_id, lineActualitzar.operator_id, lineActualitzar.quantity_received, "General", space.storage_id, space.storage_id, space.street_id, space.shelf_id, space.id);
             console.log("Moviment entrada realitzat");
