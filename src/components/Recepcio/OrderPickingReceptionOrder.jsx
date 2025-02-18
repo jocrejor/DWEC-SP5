@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {Modal } from "react-bootstrap";
 import axios from "axios";
-import { useNavigate,useLocation } from "react-router-dom";
+import { useNavigate,useLocation, data } from "react-router-dom";
 
 function OrderPickingReception() {
     const [orderreception, setOrderReception] = useState([]); //order reception
@@ -81,7 +81,7 @@ function OrderPickingReception() {
                     tempPickings.push(objTemporal);
                 }else{
 
-                    const space = spaces.find(space => (space.quantity === 0 || space.quantity===null));
+                    const space = spaces.find(space => space.product_id === null && (space.quantity === 0 || space.quantity===null));
                     const objTemporal = {
                         order_reception_id: order.id,
                         order_line_reception_id: line.id,
@@ -97,6 +97,7 @@ function OrderPickingReception() {
                     axios.put(`${apiUrl}/space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`, {
                         product_id: line.product_id,
                     },{headers: { "auth-token": token }})
+
                 }
             });
         });
