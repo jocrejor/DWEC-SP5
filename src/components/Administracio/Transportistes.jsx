@@ -9,10 +9,20 @@ import axios from 'axios';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const carrierschema = Yup.object().shape({
-  name: Yup.string().min(4, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
-  address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
-  nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit'),
-  phone: Yup.string().matches(/^\d{9}$/, 'El telèfon ha de ser correcte (ex: 911234567, 621121124)').required('Valor requerit'),
+  name: Yup.string()
+    .min(4, 'Valor mínim de 4 caràcters.')
+    .max(50, 'El valor màxim és de 50 caràcters')
+    .required('Valor requerit'),
+  address: Yup.string()
+    .min(10, 'Valor mínim de 10 caràcters.')
+    .max(100, 'El valor màxim és de 100 caràcters')
+    .required('Valor requerit'),
+  nif: Yup.string()
+    .matches(/^\w{9}$/, 'El NIF ha de tenir 9 caràcters')
+    .required('Valor requerit'),
+  phone: Yup.string()
+    .matches(/^\d{9}$/, 'El telèfon ha de ser correcte (ex: 911234567, 621121124)')
+    .required('Valor requerit'),
   email: Yup.string().email('Email no vàlid').required('Valor requerit'),
   state_id: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
   province: Yup.string().required('Valor requerit'),
@@ -350,16 +360,16 @@ function Transportistes() {
               tipoModal === 'Crear'
                 ? valorsInicials
                 : {
-                  name: '',
-                  address: '',
-                  nif: '',
-                  phone: '',
-                  email: '',
-                  state_id: 0,
-                  province: '',
-                  city: '',
-                  cp: '',
-                }
+                    name: '',
+                    address: '',
+                    nif: '',
+                    phone: '',
+                    email: '',
+                    state_id: 0,
+                    province: '',
+                    city: '',
+                    cp: '',
+                  }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
@@ -537,16 +547,16 @@ function Transportistes() {
               tipoModal === 'Modificar'
                 ? valorsInicials
                 : {
-                  name: '',
-                  address: '',
-                  nif: '',
-                  phone: '',
-                  email: '',
-                  state_id: 0,
-                  province: '',
-                  city: '',
-                  cp: '',
-                }
+                    name: '',
+                    address: '',
+                    nif: '',
+                    phone: '',
+                    email: '',
+                    state_id: 0,
+                    province: '',
+                    city: '',
+                    cp: '',
+                  }
             }
             validationSchema={carrierschema}
             onSubmit={(values) => {
@@ -707,44 +717,53 @@ function Transportistes() {
         </Modal.Body>
       </Modal>
 
-      <nav aria-label="Page navigation" className="d-block mt-4">
-        <ul className="pagination justify-content-center">
-          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-            <button
-              className="page-link "
-              onClick={() => canviPag(currentPage - 1)}
-              aria-label="Anterior"
-            >
-              <span aria-hidden="true">&laquo;</span>
-            </button>
-          </li>
-          {[...Array(totalPages)].map((_, index) => {
-            const page = index + 1;
-            return (
-              <li
-                key={page}
-                className={`page-item ${currentPage === page ? 'active' : ''}`}
+      {/* Paginació */}
+      {totalPages !== 1 && (
+        <nav aria-label="Page navigation example" className="d-block mt-4">
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <a
+                className="page-link text-light-blue"
+                href="#"
+                aria-label="Previous"
+                onClick={(e) => {
+                  e.preventDefault();
+                  canviPag(currentPage - 1);
+                }}
               >
-                <button
-                  className="page-link"
-                  onClick={() => canviPag(page)}
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              <li key={number} className={`page-item ${currentPage === number ? '' : ''}`}>
+                <a
+                  className="page-link activo-2 text-light-blue"
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    canviPag(number);
+                  }}
                 >
-                  {page}
-                </button>
+                  {number}
+                </a>
               </li>
-            );
-          })}
-          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-            <button
-              className="page-link"
-              onClick={() => canviPag(currentPage + 1)}
-              aria-label="Següent"
-            >
-              <span aria-hidden="true">&raquo;</span>
-            </button>
-          </li>
-        </ul>
-      </nav>
+            ))}
+            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <a
+                className="page-link text-light-blue"
+                href="#"
+                aria-label="Next"
+                onClick={(e) => {
+                  e.preventDefault();
+                  canviPag(currentPage + 1);
+                }}
+              >
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      )}
     </>
   );
 }
