@@ -27,7 +27,7 @@ function Lots() {
     orderlinereception: '',
     /* sirve para pasar la cantidad total de la orden al modal,
     * esta informacion no se añadirá a la base de datos */
-    quantity_received: 0,
+    quantity_ordered: 0,
   });
   //estado que determina si un producto será serie o lote
   const [lotOrSerial, setLotOrSerial] = useState("");
@@ -159,7 +159,7 @@ function Lots() {
       filtered = filtered.filter(valors => parseInt(valors.product_id) === parseInt(productValue));
     }
     if (quantityValue) {
-      filtered = filtered.filter(valors => parseInt(valors.quantity_received) === parseInt(quantityValue));
+      filtered = filtered.filter(valors => parseInt(valors.quantity_ordered) === parseInt(quantityValue));
     }
 
     setFilteredOrderLineReception(filtered);
@@ -244,7 +244,7 @@ function Lots() {
                         const orderRec = orderreception.find(
                           (or) => or.id === valors.order_reception_id
                         );
-                        return orderRec && orderRec.orderreception_status_id === 3;
+                        return orderRec && orderRec.orderreception_status_id === 2;
                       })
                       .map((valors) => (
                         <tr key={`filteredOrderLineReception-${valors.id}`}>
@@ -284,7 +284,7 @@ function Lots() {
                           </td>
 
                           <td data-cell="Quantitat rebuda">
-                            {valors.quantity_received}
+                            {valors.quantity_ordered}
                           </td>
 
                           <td data-no-colon="true">
@@ -320,7 +320,7 @@ function Lots() {
                                       production_date: lot.production_date.split("T")[0],
                                       expiration_date: lot.expiration_date.split("T")[0],
                                       orderlinereception_id: lot.orderlinereception_id,
-                                      quantity_received: valors.quantity_received, // suponiendo que este dato se mantiene igual para todos
+                                      quantity_ordered: valors.quantity_ordered, // suponiendo que este dato se mantiene igual para todos
                                     }));
 
                                     console.log("Todos los lotes: ", transformedLots);
@@ -362,7 +362,7 @@ function Lots() {
                                       expiration_date: "",
                                       orderlinereception_id: valors.id,
                                       //cantidad total de la orden de linea de recepcion
-                                      quantity_received: valors.quantity_received,
+                                      quantity_ordered: valors.quantity_ordered,
                                     });
                                   }}
                                 >
@@ -428,7 +428,7 @@ function Lots() {
       </div>
 
       {/* MODAL CON FORMIK */}
-      <LotsLotOSerie products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} setLotYaCreados={setLotYaCreados} tipoModal={tipoModal} suppliers={suppliers} arrayVisualitzar={arrayVisualitzar} />
+      <LotsLotOSerie setLot={setLot} products={products} canviEstatModal={canviEstatModal} showModal={showModal} valorsInicials={valorsInicials} setValorsInicials={setValorsInicials} lotOrSerial={lotOrSerial} guardado={guardado} setGuardado={setGuardado} errorAgregar={errorAgregar} setErrorAgregar={setErrorAgregar} setLotYaCreados={setLotYaCreados} tipoModal={tipoModal} suppliers={suppliers} arrayVisualitzar={arrayVisualitzar} setArrayVisualitzar={setArrayVisualitzar} />
     </>
   );
 }

@@ -47,13 +47,25 @@ function limpiarCampos(resetForm, lotOrSerial, setErrorAgregar) {
 }
 
 function LotsLotOSerie({
-  products, canviEstatModal, showModal, valorsInicials, setValorsInicials, lotOrSerial, guardado,
-  setGuardado, errorAgregar, setErrorAgregar, setLotYaCreados, tipoModal, suppliers, arrayVisualitzar
+  setLot, products, canviEstatModal, showModal, valorsInicials, setValorsInicials, lotOrSerial, guardado,
+  setGuardado, errorAgregar, setErrorAgregar, setLotYaCreados, tipoModal, suppliers, arrayVisualitzar, setArrayVisualitzar
 }) {
+
+  const cargarDatos = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } });
+      setLot(response.data);
+      // Si 'arrayVisualitzar' se deriva de 'lots', asegúrate de actualizarlo también:
+      setArrayVisualitzar(response.data); // O realiza algún filtro si es necesario.
+    } catch (error) {
+      console.error("Error al cargar datos:", error);
+    }
+  };
+
   return (
     <>
-      <Modal show={showModal} onHide={canviEstatModal} 
-      dialogClassName={tipoModal === "Visualitzar" ? "modal-50w" : ""}
+      <Modal show={showModal} onHide={canviEstatModal}
+        dialogClassName={tipoModal === "Visualitzar" ? "modal-50w" : ""}
       // dialogClassName="modal-50w"
       >
         <Modal.Header closeButton>
@@ -73,8 +85,8 @@ function LotsLotOSerie({
                   return;
                 }
 
-                //verifica que la cantidad total guardada no supere el quantity_received
-                const cantidadMaxima = Number(valorsInicials.quantity_received);
+                //verifica que la cantidad total guardada no supere el quantity_ordered
+                const cantidadMaxima = Number(valorsInicials.quantity_ordered);
                 console.log("Cantidad max:", cantidadMaxima)
 
                 const totalGuardado = guardado.reduce(
@@ -90,7 +102,7 @@ function LotsLotOSerie({
                 else {
                   setErrorAgregar("");
                 }
-                
+
                 try {
                   for (const lote of guardado) {
                     const saveResponse = await axios.post(`${apiUrl}lot`, lote, {
@@ -98,6 +110,18 @@ function LotsLotOSerie({
                     });
                     console.log("Registres guardats correctament", saveResponse.data);
                   }
+
+                  console.log("Funciona?", values)
+                  console.log("FuncionaID?", values.orderlinereception_id)
+                  console.log("FuncionaQuantityOrdered?", values.quantity_ordered)
+                  // Actualizar la orderlinereception para que quantity_received tome el valor de quantity_ordered
+                  await axios.put(`${apiUrl}orderlinereception/${values.orderlinereception_id}`, {
+                    quantity_received: values.quantity_ordered  // Asegúrate de que 'quantity_ordered' esté definido en values
+                  }, {
+                    headers: { "auth-token": token }
+                  });
+
+                  await cargarDatos();
 
                   setGuardado([]);      // vacia la lista después de guardar
                   setValorsInicials({
@@ -128,8 +152,8 @@ function LotsLotOSerie({
                   return;
                 }
 
-                //comprueba que la cantidad sea exactamente quantity_received
-                const cantidadMaxima = Number(valorsInicials.quantity_received);
+                //comprueba que la cantidad sea exactamente quantity_ordered
+                const cantidadMaxima = Number(valorsInicials.quantity_ordered);
 
                 const totalActual = guardado.reduce(
                   (sum, guardado) => sum + Number(guardado.quantity), 0
@@ -227,9 +251,8 @@ function LotsLotOSerie({
                                   </td>
                                   <td data-cell="Quantitat total rebuda">
                                     {/* <span className='fw-bold'>Quantitat total rebuda: </span> */}
-                                    {lot.quantity_received}
+                                    {lot.quantity_ordered}
                                   </td>
-
                                 </tr>
                               ))
                             )}
@@ -254,8 +277,8 @@ function LotsLotOSerie({
 
                       {/* Cantidad */}
                       <div className="form-group">
-                        <label htmlFor="quantity_reveived">Quantitat de la ordre</label>
-                        <Field type="number" name="quantity_received" className="form-control" disabled />
+                        <label htmlFor="quantity_ordered">Quantitat de la ordre</label>
+                        <Field type="number" name="quantity_ordered" className="form-control" disabled />
                       </div>
 
                       {/* Inputs para lot o serie */}
@@ -372,6 +395,7 @@ function LotsLotOSerie({
 }
 
 LotsLotOSerie.propTypes = {
+  setLot: PropTypes.func.isRequired,
   products: PropTypes.array.isRequired,
   lotOrSerial: PropTypes.string.isRequired,
   canviEstatModal: PropTypes.func.isRequired,
@@ -386,6 +410,7 @@ LotsLotOSerie.propTypes = {
   tipoModal: PropTypes.string.isRequired,
   suppliers: PropTypes.array.isRequired,
   arrayVisualitzar: PropTypes.array.isRequired,
+  setArrayVisualitzar: PropTypes.func.isRequired,
 };
 
 export default LotsLotOSerie;
