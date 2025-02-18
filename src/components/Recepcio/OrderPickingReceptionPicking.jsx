@@ -61,6 +61,8 @@ function OrderPickingReception() {
         catch{(error) => {console.error('Error user:', error);}};
     }
 
+    
+
     useEffect(() => {
         dataFetch()
     }, []);
