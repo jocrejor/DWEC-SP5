@@ -41,7 +41,6 @@ function OrdresEnviament() {
   // Paginació
   const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
 
-
   // Obtindreels index. 
   useEffect(() => {
     const totalPages = Math.ceil(orders.length / elementsPaginacio);
@@ -185,7 +184,6 @@ function OrdresEnviament() {
         console.log(e)
       }
       )
-
     canviEstatModalVisualitza();
   }
 
@@ -490,7 +488,7 @@ function OrdresEnviament() {
             initialValues={(tipoModal === 'Modificar' ? valorsInicials : {
               client_id: '',
               shipping_date: '',
-              ordershipping_status_id: 2
+              ordershipping_status_id: 1
             })}
             validationSchema={OrderShippingSchema}
             onSubmit={values => {
