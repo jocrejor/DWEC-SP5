@@ -88,6 +88,8 @@ function LotsLotOSerie({
                   setErrorAgregar("");
                 }
 
+                console.log("Lotessss: ", guardado);
+                
                 try {
                   for (const lote of guardado) {
                     const saveResponse = await axios.post(`${apiUrl}lot`, lote, {

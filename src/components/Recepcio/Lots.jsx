@@ -38,6 +38,21 @@ function Lots() {
   // array para guardar los lotes para visualizar
   const [arrayVisualitzar, setArrayVisualitzar] = useState([]);
 
+  /**
+   * estados de la paginacion
+   */
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // número de ordenes por página
+
+  // Calcular el total de páginas en base a los datos filtrados (o totales si prefieres)
+  const totalPages = Math.ceil(filteredOrderLineReception.length / itemsPerPage);
+
+  // Configuración para mostrar un bloque de páginas
+  const pagesToShow = 3;
+  const currentBlock = Math.floor((currentPage - 1) / pagesToShow);
+  const blockStart = currentBlock * pagesToShow + 1;
+  const blockEnd = Math.min(totalPages, (currentBlock + 1) * pagesToShow);
+
   useEffect(() => {
     const fetchData = async () => {
       axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
@@ -152,6 +167,24 @@ function Lots() {
 
   const netejaFiltres = () => {
     setFilteredOrderLineReception(orderlinereception);
+  };
+
+  /**
+   * funciones de la paginacion 
+   */
+
+  const prevBlock = (e) => {
+    e.preventDefault();
+    if (currentBlock > 0) {
+      setCurrentPage((currentBlock - 1) * pagesToShow + 1);
+    }
+  };
+
+  const nextBlock = (e) => {
+    e.preventDefault();
+    if (blockEnd < totalPages) {
+      setCurrentPage((currentBlock + 1) * pagesToShow + 1);
+    }
   };
 
   return (
@@ -342,7 +375,7 @@ function Lots() {
                   )}
                 </tbody>
               </table>
-              <nav aria-label="Page navigation example" className="d-block">
+              {/* <nav aria-label="Page navigation example" className="d-block">
                 <ul className="pagination justify-content-center">
                   <li className="page-item">
                     <a className="page-link text-light-blue" href="#" aria-label="Previous">
@@ -350,15 +383,44 @@ function Lots() {
                     </a>
                   </li>
                   <li className="page-item"><a className="page-link activo-2" href="#">1</a></li>
-                  <li className="page-item"><a className="page-link text-light-blue" href="#">2</a></li>
-                  <li className="page-item"><a className="page-link text-light-blue" href="#">3</a></li>
                   <li className="page-item">
                     <a className="page-link text-light-blue" href="#" aria-label="Next">
                       <span aria-hidden="true">&raquo;</span>
                     </a>
                   </li>
                 </ul>
-              </nav>
+              </nav> */}
+              {totalPages > 0 && (
+                <nav aria-label="Page navigation example" className="d-block">
+                  <ul className="pagination justify-content-center">
+                    <li className={`page-item ${currentBlock === 0 ? 'disabled' : ''}`}>
+                      <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={prevBlock}>
+                        <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                    {Array.from({ length: blockEnd - blockStart + 1 }, (_, i) => blockStart + i).map((page) => (
+                      <li key={page} className="page-item">
+                        <a
+                          className={`page-link ${currentPage === page ? 'activo-2' : 'text-light-blue'}`}
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(page);
+                          }}
+                        >
+                          {page}
+                        </a>
+                      </li>
+                    ))}
+                    <li className={`page-item ${blockEnd === totalPages ? 'disabled' : ''}`}>
+                      <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={nextBlock}>
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              )}
+
 
             </div>
           </div>
