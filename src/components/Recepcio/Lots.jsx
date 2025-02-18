@@ -244,7 +244,7 @@ function Lots() {
                         const orderRec = orderreception.find(
                           (or) => or.id === valors.order_reception_id
                         );
-                        return orderRec && orderRec.orderreception_status_id === 2;
+                        return orderRec && orderRec.orderreception_status_id === 3;
                       })
                       .map((valors) => (
                         <tr key={`filteredOrderLineReception-${valors.id}`}>

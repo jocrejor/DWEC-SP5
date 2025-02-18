@@ -52,7 +52,10 @@ function LotsLotOSerie({
 }) {
   return (
     <>
-      <Modal show={showModal} onHide={canviEstatModal}>
+      <Modal show={showModal} onHide={canviEstatModal} 
+      dialogClassName={tipoModal === "Visualitzar" ? "modal-50w" : ""}
+      // dialogClassName="modal-50w"
+      >
         <Modal.Header closeButton>
           <Modal.Title>
             {tipoModal} {lotOrSerial === "lot" ? "lot" : lotOrSerial === "serie" ? "serie" : "No definit"}
@@ -166,18 +169,18 @@ function LotsLotOSerie({
                         <table className="table table-striped text-center align-middle">
                           <thead className="table-active border-bottom border-dark-subtle">
                             <tr>
-                              <th scope="col" className="align-middle d-none">Nom</th>
-                              <th scope="col" className="align-middle d-none">Producte</th>
-                              <th scope="col" className="align-middle d-none">Proveïdor</th>
-                              <th scope="col" className="align-middle d-none">Quantitat</th>
+                              <th scope="col" className="align-middle">Nom</th>
+                              <th scope="col" className="align-middle">Producte</th>
+                              <th scope="col" className="align-middle">Proveïdor</th>
+                              <th scope="col" className="align-middle">Quantitat</th>
                               {lotOrSerial === "lot" && (
                                 <>
-                                  <th scope="col" className="align-middle d-none">Data de produccio</th>
-                                  <th scope="col" className="align-middle d-none">Data de caducitat</th>
+                                  <th scope="col" className="align-middle">Data de produccio</th>
+                                  <th scope="col" className="align-middle">Data de caducitat</th>
                                 </>
                               )}
-                              <th scope="col" className="align-middle d-none">ID d&apos;ordre de linea de recepció</th>
-                              <th scope="col" className="align-middle d-none">Quantitat rebuda</th>
+                              <th scope="col" className="align-middle">ID d&apos;ordre de linea de recepció</th>
+                              <th scope="col" className="align-middle">Quantitat rebuda</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -190,36 +193,41 @@ function LotsLotOSerie({
                             ) : (
                               arrayVisualitzar.map((lot, index) => (
                                 <tr key={`lot-${index}`}>
-                                  <td className='d-block' data-cell="Nom">
-                                    <span className='fw-bold d-none d-xl-inline'>Nom: </span>{lot.name}
+                                  <td data-cell="Nom">
+                                    {/* <span className='fw-bold'>Nom: </span> */}
+                                    {lot.name}
                                   </td>
-                                  <td className='d-block' data-cell="Producte">
-                                    <span className='fw-bold d-none d-xl-inline'>Producte: </span>
+                                  <td data-cell="Producte">
+                                    {/* <span className='fw-bold'>Producte: </span> */}
                                     {products.find((product) => product.id === lot.product_id)?.name || '-'}
                                   </td>
-                                  <td className='d-block' data-cell="Proveïdor">
-                                    <span className='fw-bold d-none d-xl-inline'>Proveïdor: </span>
+                                  <td data-cell="Proveïdor">
+                                    {/* <span className='fw-bold'>Proveïdor: </span> */}
                                     {suppliers.find((supplier) => supplier.id === lot.supplier_id)?.name || '-'}
                                   </td>
-                                  <td className='d-block' data-cell="Quantitat">
-                                    <span className='fw-bold d-none d-xl-inline'>Quantitat: </span>
+                                  <td data-cell="Quantitat">
+                                    {/* <span className='fw-bold'>Quantitat: </span> */}
                                     {lot.quantity}
                                   </td>
                                   {lotOrSerial === "lot" && (
                                     <>
-                                      <td className='d-block' data-cell="Data de produccio">
-                                        <span className='fw-bold d-none d-xl-inline'>Data de produccio: </span>{lot.production_date}
+                                      <td data-cell="Data de produccio">
+                                        {/* <span className='fw-bold'>Data de produccio: </span> */}
+                                        {lot.production_date}
                                       </td>
-                                      <td className='d-block' data-cell="Data de caducitat">
-                                        <span className='fw-bold d-none d-xl-inline'>Data de caducitat: </span>{lot.expiration_date}
+                                      <td data-cell="Data de caducitat">
+                                        {/* <span className='fw-bold'>Data de caducitat: </span> */}
+                                        {lot.expiration_date}
                                       </td>
                                     </>
                                   )}
-                                  <td className='d-block' data-cell="ID Ordre de linea de recepció">
-                                    <span className='fw-bold d-none d-xl-inline'>ID Ordre de linea de recepció: </span>{lot.orderlinereception_id}
+                                  <td data-cell="ID Ordre de linea de recepció">
+                                    {/* <span className='fw-bold'>ID Ordre de linea de recepció: </span> */}
+                                    {lot.orderlinereception_id}
                                   </td>
-                                  <td className='d-block' data-cell="Quantitat total rebuda">
-                                    <span className='fw-bold d-none d-xl-inline'>Quantitat total rebuda: </span>{lot.quantity_received}
+                                  <td data-cell="Quantitat total rebuda">
+                                    {/* <span className='fw-bold'>Quantitat total rebuda: </span> */}
+                                    {lot.quantity_received}
                                   </td>
 
                                 </tr>
