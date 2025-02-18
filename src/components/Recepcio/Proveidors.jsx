@@ -14,9 +14,7 @@ const elementsPaginacio = import.meta.env.VITE_PAGINACIO;
 const supplierschema = Yup.object().shape({
   name: Yup.string().min(3, 'Valor mínim de 4 caracters.').max(50, 'El valor màxim és de 50 caracters').required('Valor requerit'),
   address: Yup.string().min(10, 'Valor mínim de 10 caracters.').max(100, 'El valor màxim és de 100 caracters').required('Valor requerit'),
-  nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters').required('Valor requerit').test('is-unique', 'Aquest NIF ja existeix', (value) => {
-    return !suppliers.some((supplier) => supplier.nif === value);
-  }),
+  nif: Yup.string().matches(/^\w{9}$/, 'El NIF ha de tenir 9 caracters i ha de ser únic.´').required('Valor requerit'),
   phone: Yup.string().matches(/^(\+\d{1,3}\s?)?(\d{9}|\d{3}\s\d{3}\s\d{3})$/,'El telèfon ha de ser correcte (ex: +34 911234567, 621121124, 932 123 456)').required('Valor requerit'),
   email: Yup.string().email('Email no vàlid').required('Valor requerit'),
   state_id: Yup.number().positive('El valor ha de ser positiu').required('Valor requerit'),
@@ -295,8 +293,6 @@ const handleImport = async () => {
     console.error("Error: No se encontraron datos válidos en el CSV.");
   }
 };
-
-
 
 
   return (
