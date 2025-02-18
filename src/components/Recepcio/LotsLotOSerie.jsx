@@ -87,8 +87,6 @@ function LotsLotOSerie({
                 else {
                   setErrorAgregar("");
                 }
-
-                console.log("Lotessss: ", guardado);
                 
                 try {
                   for (const lote of guardado) {
