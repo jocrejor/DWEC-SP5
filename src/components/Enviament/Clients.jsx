@@ -5,6 +5,8 @@ import { Button, Modal } from "react-bootstrap";
 import Header from "../Header";
 import Filtres from "./FiltresClients";
 import axios from "axios";
+import Papa from "papaparse";
+
 
 const ClientSchema = yup.object().shape({
   name: yup
@@ -15,7 +17,7 @@ const ClientSchema = yup.object().shape({
   email: yup.string().email("Email no vàlid").required("Valor Requerit."),
   phone: yup
     .string()
-    .min(10, "El número de telèfon ha de tindre almenys 10 digits")
+    .min(9, "El número de telèfon ha de tindre almenys 10 digits")
     .required("Valor Requerit."),
   address: yup
     .string()
@@ -62,6 +64,12 @@ function Client() {
   const [filteredClients, setFilteredClients] = useState([]);
   const [sortField, setSortField] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const openImportModal = () => setShowImportModal(true);
+  const closeImportModal = () => setShowImportModal(false);
+  
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,6 +95,78 @@ function Client() {
 
     fetchData();
   }, []);
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleFileUpload = () => {
+    if (!selectedFile) {
+      alert("Por favor, selecciona un archivo CSV");
+      return;
+    }
+  
+    Papa.parse(selectedFile, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const rows = results.data;
+
+        const duplicateRow = rows.find((row) => {
+          const nif = row["NIF"]?.trim();
+          return clients.some((client) => client.nif === nif);
+        });
+  
+        if (duplicateRow) {
+          alert(
+            `Error: ya existe un cliente con el NIF ${duplicateRow["NIF"]?.trim()}`
+          );
+          return;
+        }
+  
+        try {
+          const requests = rows.map((row) => {
+            const clientData = {
+              name: row["Nombre"]?.trim() || "",
+              email: row["Email"]?.trim() || "",
+              phone: row["Teléfono"]?.trim() || "",
+              address: row["Dirección"]?.trim() || "",
+              nif: row["NIF"]?.trim() || "",
+              state_id: 194,
+              province: row["Provincia"]?.trim() || "",
+              city: row["Ciudad"]?.trim() || "",
+              cp: row["Código Postal"]?.trim() || "",
+            };
+  
+            console.log("Enviando cliente:", clientData);
+  
+            return axios.post(`${apiUrl}/client`, clientData, {
+              headers: {
+                "auth-token": localStorage.getItem("token"),
+                "Content-Type": "application/json",
+              },
+            });
+          });
+  
+          const responses = await Promise.all(requests);
+          const newClients = responses.map((res) => res.data);
+  
+          setClients((prev) => [...prev, ...newClients]);
+          setFilteredClients((prev) => [...prev, ...newClients]);
+  
+          alert("Clientes importados exitosamente");
+        } catch (error) {
+          console.error("Error al importar clientes", error);
+          alert("Error al importar algunos clientes");
+        }
+      },
+    });
+  
+    closeImportModal();
+  };
+  
+  
+  
 
   const handleFilter = (filters) => {
     console.log("Filtros aplicados:", filters);
@@ -158,19 +238,21 @@ function Client() {
       const response = await axios.get(`${apiUrl}/client/${id}`, {
         headers: { "auth-token": localStorage.getItem("token") },
       });
-  
+
       if (response.data) {
-        const client = response.data; 
+        const client = response.data;
         setTipoModal("Modificar");
-  
-        const provincesData = await getData("Province?state_id=" + client.state_id);
+
+        const provincesData = await getData(
+          "Province?state_id=" + client.state_id
+        );
         setProvinces(provincesData);
-  
+
         const provinceObj = provincesData.find(
           (p) => p.name.toLowerCase() === client.province.toLowerCase()
         );
         const provinceIdStr = provinceObj ? provinceObj.id.toString() : "";
-  
+
         let citiesData = [];
         let cityIdStr = "";
         if (provinceObj) {
@@ -190,7 +272,7 @@ function Client() {
           city_id: cityIdStr,
           cp: client.cp || "",
         });
-  
+
         setSelectedState(client.state_id);
         setSelectedProvince(provinceObj ? provinceObj.id : "");
         setShowModal(true);
@@ -199,7 +281,6 @@ function Client() {
       console.error("Error al obtener los datos del cliente", error);
     }
   };
-  
 
   const canviEstatModal = () => {
     setShowModal(!showModal);
@@ -279,18 +360,19 @@ function Client() {
       const provinceObj = provinces.find(
         (p) => p.id === parseInt(values.province_id)
       );
-      const cityObj = cities.find(
-        (c) => c.id === parseInt(values.city_id)
-      );
+      const cityObj = cities.find((c) => c.id === parseInt(values.city_id));
+      
+      const { id, province_id, city_id, ...rest } = values;
+      
       const updatedData = {
-        ...values,
+        ...rest,
         state_id: parseInt(values.state_id),
         province: provinceObj ? provinceObj.name : "",
         city: cityObj ? cityObj.name : "",
       };
   
       const response = await axios.put(
-        `${apiUrl}/client/${values.id}`,
+        `${apiUrl}/client/${id}`,
         updatedData,
         {
           headers: { "auth-token": localStorage.getItem("token") },
@@ -300,12 +382,12 @@ function Client() {
       if (response.data) {
         setClients((prevClients) =>
           prevClients.map((client) =>
-            client.id === values.id ? response.data : client
+            client.id === id ? response.data : client
           )
         );
         setFilteredClients((prevClients) =>
           prevClients.map((client) =>
-            client.id === values.id ? response.data : client
+            client.id === id ? response.data : client
           )
         );
         setShowModal(false);
@@ -317,22 +399,31 @@ function Client() {
   
   
 
-  const handleStateChange = (e, setFieldValue) => {
+  const handleStateChange = async (e, setFieldValue) => {
     const selectedStateId = e.target.value;
-    const selectedCountryId = states.find(
-      (state) => state.id.toString() === selectedStateId
-    )?.country_id;
-    setCountryId(selectedCountryId);
     setFieldValue("state_id", selectedStateId);
+    setFieldValue("province_id", "");
+    setFieldValue("city_id", "");
+    setCities([]);
+
+    if (selectedStateId === "194") {
+      const provincesData = await getData("Province?state_id=194");
+      setProvinces(provincesData);
+    } else {
+      setProvinces([]);
+    }
   };
 
   const handleProvinceChange = async (e, setFieldValue) => {
-    const selectedProvinceId = e.target.value; 
+    const selectedProvinceId = e.target.value;
     setFieldValue("province_id", selectedProvinceId);
     setSelectedProvince(selectedProvinceId);
-  
+
     if (selectedProvinceId) {
-      const filteredCities = await getData(`City?province_id=${selectedProvinceId}`);
+      const allCities = await getData("City");
+      const filteredCities = allCities.filter(
+        (city) => city.province_id.toString() === selectedProvinceId
+      );
       setCities(filteredCities);
       setFieldValue("city_id", "");
     } else {
@@ -340,9 +431,6 @@ function Client() {
       setFieldValue("city_id", "");
     }
   };
-  
-  
-  
 
   const postData = async (endpoint, data) => {
     try {
@@ -362,7 +450,7 @@ function Client() {
       alert("El NIF debe tener al menos 9 caracteres.");
       return;
     }
-
+  
     const clientData = {
       name: values.name,
       address: values.address,
@@ -371,19 +459,24 @@ function Client() {
       email: values.email,
       state_id: values.state_id,
       province:
-        provinces.find(
-          (province) => province.id === parseInt(values.province_id)
-        )?.name || "",
+        values.state_id === "194"
+          ? provinces.find(
+              (province) => province.id === parseInt(values.province_id)
+            )?.name || ""
+          : values.province_name,
       city:
-        cities.find((city) => city.id === parseInt(values.city_id))?.name || "",
+        values.state_id === "194"
+          ? cities.find((city) => city.id === parseInt(values.city_id))?.name ||
+            ""
+          : values.city_name,
       cp: values.cp,
     };
-
+  
     console.log("Datos enviados para la creación del cliente:", clientData);
-
+  
     try {
       const response = await axios.post(
-        "https://api.dwes.iesevalorpego.es/client",
+        `${apiUrl}/client`,
         clientData,
         {
           headers: {
@@ -392,7 +485,7 @@ function Client() {
           },
         }
       );
-
+  
       if (response.data) {
         console.log("Cliente creado con éxito:", response.data);
         setClients((prevClients) => [...prevClients, response.data]);
@@ -403,6 +496,7 @@ function Client() {
       console.error("Error al crear el cliente:", error);
     }
   };
+  
 
   const [currentPage, setCurrentPage] = useState(1);
   const clientsPerPage = 10;
@@ -444,9 +538,13 @@ function Client() {
             </button>
           </div>
         </div>
+        
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
+          <button className="btn btn-success border-white text-white mt-2 me-4 my-md-2 flex-grow-1 flex-xl-grow-0" onClick={openImportModal}>
+          <i className="bi bi-file-earmark-arrow-up pe-1 text-white"></i>Importar
+          </button>
             <button
               className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
               onClick={openCrearModal}
@@ -532,7 +630,22 @@ function Client() {
           </tbody>
         </table>
       </div>
-
+      <Modal show={showImportModal} onHide={closeImportModal} backdrop="static">
+        <Modal.Header closeButton>
+          <Modal.Title>Importar Clientes</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <input type="file" accept=".csv" className="form-control" onChange={handleFileChange} />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeImportModal}>
+            Cancelar
+          </Button>
+          <Button variant="success" onClick={handleFileUpload}>
+            Subir Archivo
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <Modal
         size="lg"
         show={showModal}
@@ -694,55 +807,94 @@ function Client() {
                     )}
                   </div>
 
+                  {/* Campo de Província */}
                   <div className="mb-3">
-                    <label className="form-label" htmlFor="province_id">
+                    <label className="form-label" htmlFor="province">
                       Província
                     </label>
-                    <Field
-                      as="select"
-                      className="form-control"
-                      id="province_id"
-                      name="province_id"
-                      onChange={(e) => handleProvinceChange(e, setFieldValue)}
-                      disabled={tipoModal === "Visualitzar"}
-                    >
-                      <option value="">Tria una província</option>
-                      {provinces.map((province) => (
-                        <option
-                          key={province.id}
-                          value={province.id.toString()}
-                        >
-                          {province.name}
-                        </option>
-                      ))}
-                    </Field>
-                    {errors.province_id && touched.province_id && (
-                      <div className="text-danger">{errors.province_id}</div>
+                    {values.state_id === "194" ? (
+                      <Field
+                        as="select"
+                        className="form-control"
+                        id="province_id"
+                        name="province_id"
+                        onChange={(e) => handleProvinceChange(e, setFieldValue)}
+                        disabled={tipoModal === "Visualitzar"}
+                      >
+                        <option value="">Tria una província</option>
+                        {provinces.map((province) => (
+                          <option
+                            key={province.id}
+                            value={province.id.toString()}
+                          >
+                            {province.name}
+                          </option>
+                        ))}
+                      </Field>
+                    ) : (
+                      <Field
+                        className="form-control"
+                        type="text"
+                        id="province_name"
+                        name="province_name"
+                        disabled={tipoModal === "Visualitzar"}
+                      />
                     )}
+                    {values.state_id === "194" &&
+                      errors.province_id &&
+                      touched.province_id && (
+                        <div className="text-danger">{errors.province_id}</div>
+                      )}
+                    {values.state_id !== "194" &&
+                      errors.province_name &&
+                      touched.province_name && (
+                        <div className="text-danger">
+                          {errors.province_name}
+                        </div>
+                      )}
                   </div>
 
+                  {/* Campo de Ciutat */}
                   <div className="mb-3">
-                    <label className="form-label" htmlFor="city_id">
+                    <label className="form-label" htmlFor="city">
                       Ciutat
                     </label>
-                    <Field
-                      as="select"
-                      className="form-control"
-                      id="city_id"
-                      name="city_id"
-                      disabled={tipoModal === "Visualitzar"}
-                    >
-                      <option value="">Tria una ciutat</option>
-                      {cities.map((city) => (
-                        <option key={city.id} value={city.id.toString()}>
-                          {city.name}
-                        </option>
-                      ))}
-                    </Field>
-                    {errors.city_id && touched.city_id && (
-                      <div className="text-danger">{errors.city_id}</div>
+                    {values.state_id === "194" ? (
+                      <Field
+                        as="select"
+                        className="form-control"
+                        id="city_id"
+                        name="city_id"
+                        disabled={tipoModal === "Visualitzar"}
+                      >
+                        <option value="">Tria una ciutat</option>
+                        {cities.map((city) => (
+                          <option key={city.id} value={city.id.toString()}>
+                            {city.name}
+                          </option>
+                        ))}
+                      </Field>
+                    ) : (
+                      <Field
+                        className="form-control"
+                        type="text"
+                        id="city_name"
+                        name="city_name"
+                        disabled={tipoModal === "Visualitzar"}
+                      />
                     )}
+                    {values.state_id === "194" &&
+                      errors.city_id &&
+                      touched.city_id && (
+                        <div className="text-danger">{errors.city_id}</div>
+                      )}
+                    {values.state_id !== "194" &&
+                      errors.city_name &&
+                      touched.city_name && (
+                        <div className="text-danger">{errors.city_name}</div>
+                      )}
                   </div>
+
                   <div className="mb-3">
                     <label className="form-label" htmlFor="cp">
                       Codi postal
