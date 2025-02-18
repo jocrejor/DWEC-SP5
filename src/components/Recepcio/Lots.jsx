@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import axios from "axios";
-
 import Header from '../Header';
 import Filtres from '../OrdreLiniesRecepcioFiltres';
 import LotsLotOSerie from './LotsLotOSerie';
@@ -35,9 +34,8 @@ function Lots() {
   const [guardado, setGuardado] = useState([]);
   const [errorAgregar, setErrorAgregar] = useState("");
   const [lotYaCreados, setLotYaCreados] = useState([]);
-  const [filteredOrderLineReception, setFilteredOrderLineReception] = useState([]);
-
-
+  const [filteredOrderLineReception, setFilteredOrderLineReception] = useState([]);   // filtros
+  // array para guardar los lotes para visualizar
   const [arrayVisualitzar, setArrayVisualitzar] = useState([]);
 
   useEffect(() => {
@@ -135,16 +133,13 @@ function Lots() {
     lotYaCreados.includes(valors.id);
 
   const actualitzaFiltres = (supplierValue, productValue, quantityValue) => {
-    let filtered = orderlinereception; // Datos originales
+    let filtered = orderlinereception; // datos originales
     if (supplierValue) {
       filtered = filtered.filter(valors => {
         const orderRec = orderreception.find(or => or.id === valors.order_reception_id);
         return orderRec && parseInt(orderRec.supplier_id) === parseInt(supplierValue);
       });
     }
-    // if (statusValue) {
-    //   filtered = filtered.filter(valors => parseInt(valors.orderline_status_id) === parseInt(statusValue));
-    // }
     if (productValue) {
       filtered = filtered.filter(valors => parseInt(valors.product_id) === parseInt(productValue));
     }
@@ -197,26 +192,26 @@ function Lots() {
                     <th scope='col' className="align-middle">Estat ordre de recepció</th>
                     <th scope='col' className="align-middle">Producte</th>
                     <th scope='col' className="align-middle">Quantitat</th>
-                    {/* <th scope='col' className="align-middle">Visualitzar</th>
-                    <th scope='col' className="align-middle">Lot/Serie</th> */}
                     <th scope='col' className="align-middle">Accions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredOrderLineReception.length === 0 ? (
                     <tr>
-                      <td colSpan="12" className="text-center">
+                      <td colSpan="8" className="text-center">
                         No hi han linies d&apos;ordre de recepció
                       </td>
                     </tr>
                   ) : (
                     filteredOrderLineReception
+                      // filtra por orderlinestatus
                       .filter((valors) => valors.orderline_status_id === 1)
+                      // filtra por orderreception_status_id
                       .filter((valors) => {
                         const orderRec = orderreception.find(
                           (or) => or.id === valors.order_reception_id
                         );
-                        return orderRec && orderRec.orderreception_status_id === 2; // Filtro por orderreception_status_id
+                        return orderRec && orderRec.orderreception_status_id === 2;
                       })
                       .map((valors) => (
                         <tr key={`filteredOrderLineReception-${valors.id}`}>
@@ -255,7 +250,9 @@ function Lots() {
                             {products.find((product) => product.id === valors.product_id)?.name || "Desconegut"}
                           </td>
 
-                          <td data-cell="Quantitat rebuda">{valors.quantity_received}</td>
+                          <td data-cell="Quantitat rebuda">
+                            {valors.quantity_received}
+                          </td>
 
                           <td data-no-colon="true">
                             <div className="d-lg-flex justify-content-lg-center gap-3">
@@ -292,25 +289,10 @@ function Lots() {
                                       orderlinereception_id: lot.orderlinereception_id,
                                       quantity_received: valors.quantity_received, // suponiendo que este dato se mantiene igual para todos
                                     }));
-                                    
+
                                     console.log("Todos los lotes: ", transformedLots);
 
                                     setArrayVisualitzar(transformedLots);
-                                    // const lot = lots.find((lot) => lot.orderlinereception_id === valors.id);
-
-                                    // console.log("PRODUCTO: ", lot);
-
-                                    // setValorsInicials({
-                                    //   name: lot.name,
-                                    //   product_id: lot.product_id,
-                                    //   supplier_id: lot.supplier_id,
-                                    //   quantity: lot.quantity,
-                                    //   production_date: lot.production_date.split("T")[0],
-                                    //   expiration_date: lot.expiration_date.split("T")[0],
-                                    //   orderlinereception_id: lot.orderlinereception_id,
-                                    //   //cantidad total de la orden de linea de recepcion
-                                    //   quantity_received: valors.quantity_received,
-                                    // });
                                   }}
                                 >
                                 </i>
@@ -355,84 +337,6 @@ function Lots() {
                               )}
                             </div>
                           </td>
-
-                          {/* <td data-no-colon="true">
-                            <i className="bi bi-eye icono"
-                              role='button'
-                              onClick={() => {
-                                const selectedProduct = products.find(p => p.id === valors.product_id);
-                                const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
-
-                                const hayLotOSerie = lots.some((lot) => lot.orderlinereception_id === valors.id);
-                                const hayLotOSerie2 = lotYaCreados.includes(valors.id);
-
-                                if (hayLotOSerie || hayLotOSerie2) {
-                                  console.log(`Visualizar ${valors.id}`);
-                                  setShowModalVisualitzar(true);
-                                }
-                                else {
-                                  if (lotOSerie === "Lot") {
-                                    alert(`No hi ha cap lot creat per a aquesta ordre encara.`)
-                                  }
-                                  else if (lotOSerie === "Serial") {
-                                    alert(`No hi ha cap sèrie creada per a aquesta ordre encara.`);
-                                  }
-                                }
-                              }}
-                            >
-
-                            </i>
-                          </td> */}
-
-                          {/* <td data-no-colon="true">
-                            <i className="bi bi-plus-circle icono"
-                              role='button'
-                              onClick={() => {
-                                console.log("Lot ya creados: ", lotYaCreados)
-
-                                const selectedProduct = products.find(p => p.id === valors.product_id);
-                                const lotOSerie = selectedProduct ? selectedProduct.lotorserial : null;
-
-                                const hayLotOSerie = lots.some((lot) => lot.orderlinereception_id === valors.id);
-                                const hayLotOSerie2 = lotYaCreados.includes(valors.id);
-
-                                if (lotOSerie === "Lot") {
-                                  setLotOrSerial("lot");
-                                  if (hayLotOSerie || hayLotOSerie2) {
-                                    alert("Este lot ja està creat.");
-                                    return;
-                                  }
-                                }
-                                else if (lotOSerie === "Serial") {
-                                  setLotOrSerial("serie");
-                                  if (hayLotOSerie || hayLotOSerie2) {
-                                    alert("Esta serie ja està creada.");
-                                    return;
-                                  }
-                                }
-
-                                canviEstatModal();
-
-                                const orderReceptions = orderreception.find(
-                                  (or) => or.id === valors.order_reception_id
-                                );
-                                const supplier = suppliers.find((s) => s.id === orderReceptions?.supplier_id);
-
-                                setValorsInicials({
-                                  name: "",
-                                  product_id: valors.product_id,
-                                  supplier_id: supplier ? supplier.id : "",
-                                  quantity: lotOSerie === "Serial" ? 1 : "",
-                                  production_date: "",
-                                  expiration_date: "",
-                                  orderlinereception_id: valors.id,
-                                  //cantidad total de la orden de linea de recepcion
-                                  quantity_received: valors.quantity_received,
-                                });
-                              }}
-                            >
-                            </i>
-                          </td> */}
                         </tr>
                       ))
                   )}

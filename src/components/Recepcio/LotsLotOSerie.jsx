@@ -16,7 +16,7 @@ const LotSchema = (lotOrSerial) => Yup.object().shape({
   quantity: Yup.number()
     .min(1, "La quantitat ha de ser almenys 1")
     .required("Valor requerit"),
-  // Agregar condicionalmente las fechas si es un lot
+  // agregar condicionalmente las fechas si es un lot
   ...(lotOrSerial === "lot" && {
     production_date: Yup.date().required("La data de producció és requerida"),
     expiration_date: Yup.date()
@@ -24,14 +24,17 @@ const LotSchema = (lotOrSerial) => Yup.object().shape({
       .test(
         "is-expiration-after-production",
         "La data d'expiració ha de ser posterior a la data de producció",
+        /**
+         * funcion que valida si la fecha de produccion
+         * está antes que la de expiración
+         */
         function (value) {
-          const { production_date } = this.parent; // Obtén la fecha de producción
-          if (!production_date || !value) return true; // Si cualquiera de las fechas está vacía, no validamos
-          return new Date(value) > new Date(production_date); // Compara las fechas
+          const { production_date } = this.parent;
+          if (!production_date || !value) return true;
+          return new Date(value) > new Date(production_date);
         })
   }),
 });
-
 
 function limpiarCampos(resetForm, lotOrSerial, setErrorAgregar) {
   resetForm({
@@ -44,7 +47,7 @@ function limpiarCampos(resetForm, lotOrSerial, setErrorAgregar) {
 }
 
 function LotsLotOSerie({
-  products, orderreception, canviEstatModal, showModal, valorsInicials, setValorsInicials, lotOrSerial, guardado,
+  products, canviEstatModal, showModal, valorsInicials, setValorsInicials, lotOrSerial, guardado,
   setGuardado, errorAgregar, setErrorAgregar, setLotYaCreados, tipoModal, suppliers, arrayVisualitzar
 }) {
   return (
@@ -90,11 +93,10 @@ function LotsLotOSerie({
                     const saveResponse = await axios.post(`${apiUrl}lot`, lote, {
                       headers: { "auth-token": token }
                     });
-
                     console.log("Registres guardats correctament", saveResponse.data);
                   }
 
-                  setGuardado([]);      // Vaciar la lista después de guardar
+                  setGuardado([]);      // vacia la lista después de guardar
                   setValorsInicials({
                     name: "",
                     quantity: lotOrSerial === "serie" ? 1 : "",
@@ -174,7 +176,7 @@ function LotsLotOSerie({
                                   <th scope="col" className="align-middle d-none">Data de caducitat</th>
                                 </>
                               )}
-                              <th scope="col" className="align-middle d-none">ID d'ordre de linea de recepció</th>
+                              <th scope="col" className="align-middle d-none">ID d&apos;ordre de linea de recepció</th>
                               <th scope="col" className="align-middle d-none">Quantitat rebuda</th>
                             </tr>
                           </thead>
@@ -241,11 +243,13 @@ function LotsLotOSerie({
                           ))}
                         </Field>
                       </div>
+
                       {/* Cantidad */}
                       <div className="form-group">
                         <label htmlFor="quantity_reveived">Quantitat de la ordre</label>
                         <Field type="number" name="quantity_received" className="form-control" disabled />
                       </div>
+
                       {/* Inputs para lot o serie */}
                       <div className="form-group d-flex mt-3">
                         <div>
@@ -271,6 +275,7 @@ function LotsLotOSerie({
                           {errors.name && touched.name && <div className="text-danger">{errors.name}</div>}
                         </div>
                       </div>
+
                       {/* Campos adicionales solo para "Lot" */}
                       {lotOrSerial === "lot" && (
                         <>
@@ -333,13 +338,7 @@ function LotsLotOSerie({
                       </div>
                     </>
                   )}
-
-
-
-
-
-
-
+                  {/* Botones */}
                   <div className="form-group d-flex justify-content-between mt-3">
                     <Button className='me-auto' variant="secondary" onClick={() => canviEstatModal()}>
                       Tancar
@@ -353,7 +352,6 @@ function LotsLotOSerie({
                         <Button className="btn text-white orange-button" onClick={handleSave}>Gravar</Button>
                       </>
                     )}
-
                   </div>
                 </Form>
               );
@@ -379,6 +377,7 @@ LotsLotOSerie.propTypes = {
   setLotYaCreados: PropTypes.func.isRequired,
   tipoModal: PropTypes.string.isRequired,
   suppliers: PropTypes.array.isRequired,
+  arrayVisualitzar: PropTypes.array.isRequired,
 };
 
 export default LotsLotOSerie;
