@@ -76,7 +76,6 @@ function IncidenciesResoldre() {
         setFilteredIncidents(incidents);
         setCurrentPage(1);
       }, [incidents]);
-
       
     useEffect(() => {
         const indexOfLastItem = currentPage * elementsPaginacio;
@@ -134,15 +133,6 @@ function IncidenciesResoldre() {
 
         axios.get(`${apiURL}/orderline_status`, { headers: { "auth-token": token } })
             .then(response => setOrderlineStatus(response.data))
-            .catch(error => console.log(error))
-    }
-
-    const getOrderReceptionStatus = () => {
-        const apiURL = import.meta.env.VITE_API_URL
-        const token = localStorage.getItem("token")
-
-        axios.get(`${apiURL}/orderreception_status`, { headers: { "auth-token": token } })
-            .then(response => setOrderReceptionStatus(response.data))
             .catch(error => console.log(error))
     }
 
@@ -260,11 +250,6 @@ function IncidenciesResoldre() {
         return supplier ? supplier.name : "Proveïdor no trobat";
     }
 
-    const getOrderReceptionStatusName = (statusId) => {
-        const status = orderlineStatus.find(s => s.id === statusId);
-        return status ? status.name : "Estat desconegut";
-    }
-
     return (
         <>
             <Filtres onFilter={handleFilterChange} onClear={handleFilterRestart} />
@@ -336,11 +321,14 @@ function IncidenciesResoldre() {
                                             <span onClick={() => visualitzarIncident(valors)} role='button'>
                                                 <i className="bi bi-eye icono fs-5"></i>
                                             </span>
-                                            <span onClick={() => resoldreIncident(valors)} className="mx-2" role='button'>
-                                                <i title="Resoldre incidència" className="bi bi-check icono fs-5 mx-2"></i>
-                                            </span>
+                                            {getStatusId(valors.orderline_status_id) === "Pendent" && (
+                                                <span onClick={() => resoldreIncident(valors)} className="mx-2" role='button'>
+                                                    <i title="Resoldre incidència" className="bi bi-check icono fs-5 mx-2"></i>
+                                                </span>
+                                            )}
                                         </div>
                                     </td>
+
                                 </tr>
                             ))
                         )}
