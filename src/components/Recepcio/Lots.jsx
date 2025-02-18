@@ -172,7 +172,6 @@ function Lots() {
   /**
    * funciones de la paginacion 
    */
-
   const prevBlock = (e) => {
     e.preventDefault();
     if (currentBlock > 0) {
