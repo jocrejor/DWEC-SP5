@@ -317,66 +317,68 @@ function OrderPickingShippingOrder() {
                 </tbody>
               </table>
 
-              <nav aria-label="Page navigation example" className="d-block">
-                <ul className="pagination justify-content-center">
-                  <li
-                    className={`page-item ${
-                      currentPage === 1 ? "disabled" : ""
-                    }`}
-                  >
-                    <a
-                      className="page-link text-light-blue"
-                      href="#"
-                      aria-label="Previous"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        goToPreviousPage();
-                      }}
+              {totalPages !== 1 && (
+                <nav aria-label="Page navigation example" className="d-block">
+                  <ul className="pagination justify-content-center">
+                    <li
+                      className={`page-item ${
+                        currentPage === 1 ? "disabled" : ""
+                      }`}
                     >
-                      <span aria-hidden="true">&laquo;</span>
-                    </a>
-                  </li>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (number) => (
-                      <li
-                        key={number}
-                        className={`page-item ${
-                          currentPage === number ? "active" : ""
-                        }`}
+                      <a
+                        className="page-link text-light-blue"
+                        href="#"
+                        aria-label="Previous"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToPreviousPage();
+                        }}
                       >
-                        <a
-                          className="page-link text-light-blue"
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            paginate(number);
-                          }}
+                        <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (number) => (
+                        <li
+                          key={number}
+                          className={`page-item ${
+                            currentPage === number ? "active" : ""
+                          }`}
                         >
-                          {number}
-                        </a>
-                      </li>
-                    )
-                  )}
-                  <li
-                    className={`page-item ${
-                      currentPage === totalPages ? "disabled" : ""
-                    }`}
-                  >
-                    <a
-                      className="page-link text-light-blue"
-                      href="#"
-                      aria-label="Next"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        goToNextPage();
-                      }}
+                          <a
+                            className="page-link text-light-blue"
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              paginate(number);
+                            }}
+                          >
+                            {number}
+                          </a>
+                        </li>
+                      )
+                    )}
+                    <li
+                      className={`page-item ${
+                        currentPage === totalPages ? "disabled" : ""
+                      }`}
                     >
-                      <span aria-hidden="true">&raquo;</span>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
+                      <a
+                        className="page-link text-light-blue"
+                        href="#"
+                        aria-label="Next"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToNextPage();
+                        }}
+                      >
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              )}
             </div>
           </div>
         </div>
@@ -405,7 +407,11 @@ function OrderPickingShippingOrder() {
                         Tria una opció
                       </option>
                       {users.map((user) => {
-                        return <option value={user.id} key={user.id}>{user.name}</option>;
+                        return (
+                          <option value={user.id} key={user.id}>
+                            {user.name}
+                          </option>
+                        );
                       })}
                     </select>
                     <label htmlFor="operari">Operari</label>
