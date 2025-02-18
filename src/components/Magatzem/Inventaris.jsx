@@ -193,29 +193,37 @@ function Inventaris() {
     if (!values.street_id) {
       filteredSpaces = spaces.filter(space => space.storage_id === values.storage_id);
     } else {
-      filteredSpaces = spaces.filter(space => space.storage_id === values.street_id)
+      filteredSpaces = spaces.filter(space => (space.storage_id === values.storage_id && space.street_id === values.street_id));
     };
+    console.log(values)
+    console.log(filteredSpaces);
 
     let newInventory = {
       created_by: user.id,
       inventory_status: inventoryStatus?.find(status => status.name === 'Pendent').id,
       storage_id: values.storage_id
     }
+    
 
     axios.post(`${apiURL}/inventory`, newInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+    
       .catch(e => { console.log(e.response.data) })
-
     filteredSpaces.map(space => {
-      let newInventoryLine = {
-        inventory_id: newInventory.id,
-        product_id: space.product_id,
-        quantity_estimated: space.quantity,
-        storage_id: space.storage_id,
-        street_id: space.street_id,
-        selft_id: space.selft_id,
-        space_id: space.id
+      if(space.product_id != null) {
+        
+        let newInventoryLine = {
+          inventory_id: newInv.id,
+          product_id: space.product_id,
+          quantity_estimated: space.quantity,
+          storage_id: space.storage_id,
+          street_id: space.street_id,
+          shelf_id: space.shelf_id,
+          space_id: space.id
+        }
+        console.log(newInventoryLine)
       }
-      axios.post(`${apiURL}/inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
+      
+      //axios.post(`${apiURL}/inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
     });
 
     await axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
@@ -324,7 +332,7 @@ function Inventaris() {
         <Col>
           <Modal show={show} onHide={handleClose} animation={true} >
             <Modal.Header closeButton>
-              <Modal.Title className='text-light-blue'>Alta de Inventari</Modal.Title>
+              <Modal.Title className='text-light-blue text-orange'>Alta de Inventari</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Formik
@@ -380,7 +388,7 @@ function Inventaris() {
                     </div>
 
                     <div className='py-3 text-end'>
-                      <Button variant='secondary' onClick={handleClose}>Cerrar</Button>
+                      <Button variant='secondary' onClick={handleClose}>Tancar</Button>
                       <Button type='submit' className='ms-2 orange-button'>Generar Inventari</Button>
                     </div>
                   </Form>
@@ -446,7 +454,7 @@ function Inventaris() {
 
           <Modal show={showInventoryModal} onHide={changeModalStatus} animation={true} size='xl'>
             <Modal.Header closeButton>
-              <Modal.Title className='text-light-blue'>Detall Inventari</Modal.Title>
+              <Modal.Title className='text-light-blue text-orange'>Detall Inventari</Modal.Title>
             </Modal.Header>
             <Modal.Body>
 
@@ -465,7 +473,7 @@ function Inventaris() {
                     <tbody className='text-light-blue'>
                       <tr>
                         <td data-cell="ID Inventari: " className='text-light-blue'>{selectedInventory.id}</td>
-                        <td data-cell="Data: ">{selectedInventory.created_at}</td>
+                        <td data-cell="Data: ">{changeDate(new Date(selectedInventory.created_at))}</td>
                         <td data-cell="Estat: ">{inventoryStatus.find(status => status.id === selectedInventory.inventory_status)?.name}</td>
                         <td data-cell="Magatzem: ">{(storages.find(storage => storage.id === selectedInventory.storage_id))?.name}</td>
                       </tr>
@@ -519,7 +527,7 @@ function Inventaris() {
 
             </Modal.Body>
           </Modal>
-          
+          {(pageNumbers.length<10) ? "" : 
           <nav aria-label="Page navigation example" className="d-block" id='pagination'>
             <ul className="pagination justify-content-center">
               <li className="page-item">
@@ -539,6 +547,7 @@ function Inventaris() {
               </li>
             </ul>
           </nav>
+          }
         </Col>
       </Row >
     </>

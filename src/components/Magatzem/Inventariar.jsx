@@ -315,7 +315,7 @@ function Inventariar() {
                 }
                 <tr>
                   <td colSpan={7} className='text-center'>
-                    <Button className="btn outline-blue fw-bold" onClick={handleShow}>+</Button>
+                    <Button className="btn outline-blue" onClick={handleShow}><i className="bi bi-chevron-double-up pe-2"></i>Afegir linea</Button>
                   </td>
                 </tr>
               </tbody>

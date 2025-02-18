@@ -124,7 +124,13 @@ li:hover i{
     border-color: var(--lightBlue);
 }
 
+.outline-blue:hover i{
+    color: white !important;
+}
 
+.text-orange{
+    color: var(--orange);
+}
 
 
 @media only screen and (max-width: 1199px)
