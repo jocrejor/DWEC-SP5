@@ -5,6 +5,8 @@ import { Button, Modal } from "react-bootstrap";
 import Header from "../Header";
 import Filtres from "./FiltresClients";
 import axios from "axios";
+import Papa from "papaparse";
+
 
 const ClientSchema = yup.object().shape({
   name: yup
@@ -104,8 +106,67 @@ function Client() {
       return;
     }
   
+    Papa.parse(selectedFile, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const rows = results.data;
+
+        const duplicateRow = rows.find((row) => {
+          const nif = row["NIF"]?.trim();
+          return clients.some((client) => client.nif === nif);
+        });
+  
+        if (duplicateRow) {
+          alert(
+            `Error: ya existe un cliente con el NIF ${duplicateRow["NIF"]?.trim()}`
+          );
+          return;
+        }
+  
+        try {
+          const requests = rows.map((row) => {
+            const clientData = {
+              name: row["Nombre"]?.trim() || "",
+              email: row["Email"]?.trim() || "",
+              phone: row["Teléfono"]?.trim() || "",
+              address: row["Dirección"]?.trim() || "",
+              nif: row["NIF"]?.trim() || "",
+              state_id: 194,
+              province: row["Provincia"]?.trim() || "",
+              city: row["Ciudad"]?.trim() || "",
+              cp: row["Código Postal"]?.trim() || "",
+            };
+  
+            console.log("Enviando cliente:", clientData);
+  
+            return axios.post(`${apiUrl}/client`, clientData, {
+              headers: {
+                "auth-token": localStorage.getItem("token"),
+                "Content-Type": "application/json",
+              },
+            });
+          });
+  
+          const responses = await Promise.all(requests);
+          const newClients = responses.map((res) => res.data);
+  
+          setClients((prev) => [...prev, ...newClients]);
+          setFilteredClients((prev) => [...prev, ...newClients]);
+  
+          alert("Clientes importados exitosamente");
+        } catch (error) {
+          console.error("Error al importar clientes", error);
+          alert("Error al importar algunos clientes");
+        }
+      },
+    });
+  
     closeImportModal();
   };
+  
+  
+  
 
   const handleFilter = (filters) => {
     console.log("Filtros aplicados:", filters);
