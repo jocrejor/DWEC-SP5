@@ -158,8 +158,8 @@ function Street() {
                 <td>{valors.id}</td>
                 <td>{valors.name}</td>
                 <td>{valors.storage_id}</td>
-                <td><Button onClick={() => handleBackClick()}>Magatzem</Button></td>
-                <td><Button onClick={() => handleStreetClick(valors.id)}>Estanteria</Button></td>
+                <td><Button onClick={() => handleBackClick()} className='outline-orange'>Magatzem</Button></td>
+                <td><Button onClick={() => handleStreetClick(valors.id)} className='outline-orange'>Estanteria</Button></td>
                 <td data-no-colon="true">
                   <span onClick={() => viewSupplier(valors)} style={{ cursor: "pointer" }}>
                     <i className="bi bi-eye"></i>
@@ -177,24 +177,27 @@ function Street() {
             ))}
           </tbody>
         </table>
-      
-        {/* Paginación */}
+        {/* Pagination Controls */}
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className="page-item">
-              <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={() => paginate(currentPage - 1)}>
+              <a className="page-link text-light-blue" href="#" onClick={() => paginate(currentPage - 1)} aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            {[...Array(Math.ceil(filteredStreets.length / itemsPerPage))].map((_, index) => (
-              <li key={index} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
-                <a className="page-link text-light-blue" href="#" onClick={() => paginate(index + 1)}>
+            {Array.from({ length: Math.ceil(filteredStreets.length / itemsPerPage) }).map((_, index) => (
+              <li key={index} className="page-item">
+                <a
+                  className={`page-link ${currentPage === index + 1 ? 'activo-2' : 'text-light-blue'}`}
+                  href="#"
+                  onClick={() => paginate(index + 1)}
+                >
                   {index + 1}
                 </a>
               </li>
             ))}
             <li className="page-item">
-              <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={() => paginate(currentPage + 1)}>
+              <a className="page-link text-light-blue" href="#" onClick={() => paginate(currentPage + 1)} aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>

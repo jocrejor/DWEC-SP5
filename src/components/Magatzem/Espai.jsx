@@ -156,7 +156,7 @@ function Space() {
                                     <td>{values.storage_id}</td>
                                     <td>{values.street_id}</td>
                                     <td>{values.shelf_id}</td>
-                                    <td><Button onClick={() => handleBackClick()}>Estanteria</Button></td>
+                                    <td><Button onClick={() => handleBackClick()} className='outline-orange'>Estanteria</Button></td>
                                     <td data-no-colon="true">
                                         <span onClick={() => viewSpace(values)} style={{ cursor: "pointer" }}>
                                             <i className="bi bi-eye"></i>
