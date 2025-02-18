@@ -110,6 +110,11 @@ function Shelf() {
     navigate(`../espai/${magatzem}/${carrer}/${id}`);
   };
 
+  const handleBackClick = () => {
+    navigate(`/gestioMagatzem/carrer/${carrer}`);
+  };
+  
+
   const handleFilter = (filters) => {
     setFilters(filters); // Actualiza los filtros
   };
@@ -155,6 +160,7 @@ function Shelf() {
               <th>Nom</th>
               <th>ID Magatzem</th>
               <th>ID Carrer</th>
+              <th> Carrer</th>
               <th>Espai</th>
               <th>Accions</th>
             </tr>
@@ -167,6 +173,7 @@ function Shelf() {
                 <td>{values.name}</td>
                 <td>{values.storage_id}</td>
                 <td>{values.street_id}</td>
+                <td><Button onClick={() => handleBackClick()}>Carrer</Button></td>
                 <td><Button onClick={() => handleShelfClick(values.id)}>Espai</Button></td>
                 <td data-no-colon="true">
                   <span onClick={() => viewShelf(values)} style={{ cursor: "pointer" }}>

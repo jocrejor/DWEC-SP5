@@ -108,6 +108,12 @@ function Space() {
         setFilters(newFilters); // Actualizar los filtros con los nuevos valores
     };
 
+    const handleBackClick = () => {
+        // Esta navegación te llevará a la ruta de estanteria con los dos IDs dinámicos
+        navigate(`/gestioMagatzem/estanteria/${magatzem}/${carrer}`);
+    };
+    
+
     return (
         <>
             {/* Componente de filtros */}
@@ -133,6 +139,7 @@ function Space() {
                                 <th scope="col">ID Magatzem</th>
                                 <th scope="col">ID Carrer</th>
                                 <th scope="col">ID Estanteria</th>
+                                <th scope="col">Estanteria</th>
                                 <th scope="col">Accions</th>
                             </tr>
                         </thead>
@@ -149,6 +156,7 @@ function Space() {
                                     <td>{values.storage_id}</td>
                                     <td>{values.street_id}</td>
                                     <td>{values.shelf_id}</td>
+                                    <td><Button onClick={() => handleBackClick()}>Estanteria</Button></td>
                                     <td data-no-colon="true">
                                         <span onClick={() => viewSpace(values)} style={{ cursor: "pointer" }}>
                                             <i className="bi bi-eye"></i>

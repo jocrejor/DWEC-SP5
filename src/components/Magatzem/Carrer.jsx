@@ -74,6 +74,11 @@ function Street() {
     navigate(`../estanteria/${magatzem}/${id}`);
   };
 
+  const handleBackClick = () => {
+    navigate(`/gestioMagatzem/magatzem/`);  // Navega hacia la página del magatzem
+  };
+  
+
   const canviEstatModal = () => {
     setShowModal(!showModal);
     setTipoModal("Crear");
@@ -139,6 +144,7 @@ function Street() {
               <th scope="col">ID</th>
               <th scope="col">Nom</th>
               <th scope="col">ID Magatzem</th>
+              <th scope="col"> Magatzem</th>
               <th scope="col">Estanteria</th>
               <th scope="col">Accions</th>
             </tr>
@@ -152,6 +158,7 @@ function Street() {
                 <td>{valors.id}</td>
                 <td>{valors.name}</td>
                 <td>{valors.storage_id}</td>
+                <td><Button onClick={() => handleBackClick()}>Magatzem</Button></td>
                 <td><Button onClick={() => handleStreetClick(valors.id)}>Estanteria</Button></td>
                 <td data-no-colon="true">
                   <span onClick={() => viewSupplier(valors)} style={{ cursor: "pointer" }}>
