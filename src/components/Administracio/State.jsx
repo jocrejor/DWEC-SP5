@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+// State.jsx
+import React, { useState, useEffect } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
@@ -66,7 +67,7 @@ function State() {
     filteredStates = [...filteredStates].sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  // Paginació
+  // Paginación
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(filteredStates.length / itemsPerPage);
@@ -104,13 +105,12 @@ function State() {
 
   return (
     <>
-  
       <FiltresState 
         suggestions={suggestions} 
         onFilter={handleFilter} 
         onClear={handleClear} 
       />
-       <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+      <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
             <div className="form-floating bg-white">
@@ -136,47 +136,55 @@ function State() {
       </div>
   
       <div className="row">
-  <div className="col-12">
-    <table className="table table-striped text-center align-middle">
-      <thead className="table-active border-bottom border-dark-subtle">
-        <tr>
-          <th className="align-middle" scope="col">
-            <input className="form-check-input" type="checkbox" />
-          </th>
-          <th scope="col">ID</th>
-          <th scope="col">Nombre</th>
-          <th scope="col">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {currentItems.map(item => (
-          <tr key={item.id}>
-            <td data-cell="Seleccionar">
-              <input className="form-check-input" type="checkbox" />
-            </td>
-            <td data-cell="ID">{item.id}</td>
-            <td data-cell="Nombre">{item.name}</td>
-            <td className="fs-5" data-no-colon="true">
-              <i className="bi bi-pencil-square me-2" title="Modificar" onClick={() => modificarestat(item)}></i>
-              <i className="bi bi-trash" title="Eliminar" onClick={() => eliminarestat(item.id)}></i>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
+        <div className="col-12">
+          <table className="table table-striped text-center align-middle">
+            <thead className="table-active border-bottom border-dark-subtle">
+              <tr>
+                <th className="align-middle" scope="col">
+                  <input className="form-check-input" type="checkbox" />
+                </th>
+                <th scope="col">ID</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Provincies</th>
+                
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentItems.map(item => (
+                <tr key={item.id}>
+                  <td data-cell="Seleccionar">
+                    <input className="form-check-input" type="checkbox" />
+                  </td>
+                  <td data-cell="ID">{item.id}</td>
+                  <td data-cell="Nombre">{item.name}</td>
+                  <td data-cell="Nombre">
+                    <Button 
+                      title="Veure Provincias"
+                      onClick={() => navigate(`/dadesGeografiques/province/${item.id}`)}
+                    >
+                      Provincies
+                    </Button>
+                  </td>
+                  <td className="fs-5" data-no-colon="true">
+                    <i className="bi bi-pencil-square me-2" title="Modificar" onClick={() => modificarestat(item)}></i>
+                    <i className="bi bi-trash" title="Eliminar" onClick={() => eliminarestat(item.id)}></i>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {totalPages > 1 && (
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
-  
             <li className={`page-item ${currentBlock === 0 ? 'disabled' : ''}`}>
               <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={handlePreviousBlock}>
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-        
             {Array.from({ length: blockEnd - blockStart + 1 }, (_, i) => blockStart + i).map(page => (
               <li key={page} className="page-item">
                 <a
@@ -191,8 +199,6 @@ function State() {
                 </a>
               </li>
             ))}
-
-            {/* Flecha derecha para siguiente bloque */}
             <li className={`page-item ${blockEnd === totalPages ? 'disabled' : ''}`}>
               <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={handleNextBlock}>
                 <span aria-hidden="true">&raquo;</span>
@@ -202,7 +208,7 @@ function State() {
         </nav>
       )}
 
-      {/* Modal per Crear/Modificar Estat */}
+      {/* Modal para Crear/Modificar Estado */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{tipoModal} Estado</Modal.Title>

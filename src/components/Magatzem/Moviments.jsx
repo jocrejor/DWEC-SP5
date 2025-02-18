@@ -41,6 +41,18 @@ function Moviments() {
     setShow(true);
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   const polsarorigin = (origin, id) => {
     switch (origin) {
       case 'inventoryl': {
@@ -188,7 +200,8 @@ function Moviments() {
           cumple = false;
       }
       if (activarfiltres.data) {
-        if (!mov.movement_date.toLowerCase().includes(activarfiltres.data.toLowerCase()))
+        // Aquí también se formatea la fecha para la comparación si es necesario
+        if (!formatDate(mov.movement_date).toLowerCase().includes(activarfiltres.data.toLowerCase()))
           cumple = false;
       }
       if (activarfiltres.operari) {
@@ -215,7 +228,7 @@ function Moviments() {
       producte: producte.length > 0
         ? Array.from(new Set(producte.map(p => p.name))).sort()
         : [],
-      data: Array.from(new Set(moviments.map(m => m.movement_date))).sort(),
+      data: Array.from(new Set(moviments.map(m => formatDate(m.movement_date)))).sort(),
       operari: users.length > 0
         ? Array.from(new Set(users.map(u => u.name))).sort()
         : [],
@@ -223,13 +236,12 @@ function Moviments() {
     };
   }, [moviments, producte, users]);
 
-
   const indexOfLastItem = currentPage * pagina;
   const indexprimerItem = indexOfLastItem - pagina;
   const currentItems = filteredMoviments.slice(indexprimerItem, indexOfLastItem);
   const paginestotal = Math.ceil(filteredMoviments.length / pagina);
 
-  // Funció per cambiar de página
+  // Función para cambiar de página
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -276,85 +288,83 @@ function Moviments() {
             </div>
           </div>                                                    
         </div>
-<div className='row'> 
-<div className="col-12">
-<div>
-<table className="table table-striped text-center align-middle"> 
-<thead className="table-active border-bottom border-dark-subtle">
-<tr>
-   <th className='align-middle' scope='col'>
-            <input className='form-check-input' type="checkbox" />
-                  </th>
-                <th scope='col' className="align-middle">ID</th>
-                <th scope='col' className="align-middle">Id Producte</th>
-                <th scope='col' className="align-middle">Magatzem</th>
-                <th scope='col' className="align-middle">Carrer</th>
-                <th scope='col' className="align-middle">Estanteria</th>
-                <th scope='col' className="align-middle">Espai</th>
-                <th scope='col' className="align-middle">Quantitat</th>
-                <th scope='col' className="align-middle">Data</th>
-                <th scope='col' className="align-middle">Operari</th>
-                <th scope='col' className="align-middle">Origen</th>
-                <th scope='col' className="align-middle">Accions</th>
-          </tr>
-</thead>
-<tbody>
-              {currentItems.length === 0 ? (
-                <tr>
-                  <td colSpan="12">No hi han proveidors</td>
-                </tr>
-              ) : (
-                currentItems.map((valors) => (
-                  <tr key={valors.id}>
-                    <td data-cell="Seleccionar" >
-                      <input className="form-check-input" type="checkbox" />
-                    </td>
-                    <td data-cell="ID">
-                     {valors.id}
-                    </td>
-                    <td data-cell="Producto">
-                    {nomProducte(valors.product_id)}
-                    </td>
-                    <td data-cell="Magatzem">
-                    {valors.storage_id}
-                    </td>
-                    <td data-cell="Carrer">
-                    {valors.street_id}
-                    </td>
-                    <td data-cell="Estanteria">
-                     {valors.shelf_id}
-                    </td>
-                    <td data-cell="Espai">
-                     {valors.space_id}
-                    </td>
-                    <td data-cell="Quantitat">
-                      {valors.quantity}
-                    </td>
-                    <td data-cell="Data">
-                      {valors.movement_date}
-                    </td>
-                    <td data-cell="Operari">
-                     {usuari(valors.operator_id)}
-                    </td>
-                    <td  data-cell="Origen">
-                      <a href="#" className="text-decoration-none text-dark" onClick={() => polsarorigin(valors.origin, valors.origin_id)}
-                        style={{ cursor: 'pointer', textDecoration: 'underline' }} >
-                        {valors.origin}
-                      </a>
-                    </td>
-                    <td data-cell="Visualitzar">
-                      <i  className="bi bi-eye px-2" style={{ cursor: 'pointer' }} onClick={() => handleShow(valors)}></i>
-                    </td>
+        <div className='row'> 
+          <div className="col-12">
+            <div>
+              <table className="table table-striped text-center align-middle"> 
+                <thead className="table-active border-bottom border-dark-subtle">
+                  <tr>
+                    <th className='align-middle' scope='col'>
+                      <input className='form-check-input' type="checkbox" />
+                    </th>
+                    <th scope='col' className="align-middle">ID</th>
+                    <th scope='col' className="align-middle">Id Producte</th>
+                    <th scope='col' className="align-middle">Magatzem</th>
+                    <th scope='col' className="align-middle">Carrer</th>
+                    <th scope='col' className="align-middle">Estanteria</th>
+                    <th scope='col' className="align-middle">Espai</th>
+                    <th scope='col' className="align-middle">Quantitat</th>
+                    <th scope='col' className="align-middle">Data</th>
+                    <th scope='col' className="align-middle">Operari</th>
+                    <th scope='col' className="align-middle">Origen</th>
+                    <th scope='col' className="align-middle">Accions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-
-</table>
-
-</div>
-      </div>
-      </div>
+                </thead>
+                <tbody>
+                  {currentItems.length === 0 ? (
+                    <tr>
+                      <td colSpan="12">No hi han proveidors</td>
+                    </tr>
+                  ) : (
+                    currentItems.map((valors) => (
+                      <tr key={valors.id}>
+                        <td data-cell="Seleccionar">
+                          <input className="form-check-input" type="checkbox" />
+                        </td>
+                        <td data-cell="ID">
+                          {valors.id}
+                        </td>
+                        <td data-cell="Producto">
+                          {nomProducte(valors.product_id)}
+                        </td>
+                        <td data-cell="Magatzem">
+                          {valors.storage_id}
+                        </td>
+                        <td data-cell="Carrer">
+                          {valors.street_id}
+                        </td>
+                        <td data-cell="Estanteria">
+                          {valors.shelf_id}
+                        </td>
+                        <td data-cell="Espai">
+                          {valors.space_id}
+                        </td>
+                        <td data-cell="Quantitat">
+                          {valors.quantity}
+                        </td>
+                        <td data-cell="Data">
+                          {formatDate(valors.movement_date)}
+                        </td>
+                        <td data-cell="Operari">
+                          {usuari(valors.operator_id)}
+                        </td>
+                        <td data-cell="Origen">
+                          <a href="#" className="text-decoration-none text-dark" onClick={() => polsarorigin(valors.origin, valors.origin_id)}
+                            style={{ cursor: 'pointer', textDecoration: 'underline' }} >
+                            {valors.origin}
+                          </a>
+                        </td>
+                        <td data-cell="Visualitzar">
+                          <i className="bi bi-eye px-2" style={{ cursor: 'pointer' }} onClick={() => handleShow(valors)}></i>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -378,195 +388,190 @@ function Moviments() {
           </ul>
         </nav>
 
- {/* Modal de  Moviments */}
-<Modal show={show} onHide={handleClose} centered>
-  <Modal.Header closeButton className="bg-primary text-white">
-    <Modal.Title>Detalls del Moviment</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {selectMoviments ? (
-      <div className="p-3">
-        <p className="border-bottom pb-2"><span className="fw-bold">ID:</span> {selectMoviments.id}</p>
-        <p className="border-bottom pb-2"><span className="fw-bold">ID Producto:</span> {nomProducte(selectMoviments.product_id)}</p>
-        <p className="border-bottom pb-2"><span className="fw-bold">Magatzem:</span> {selectMoviments.storage_id}</p>
-        <p className="border-bottom pb-2"><span className="fw-bold">Carrer:</span> {selectMoviments.street_id}</p>
-        <p className="border-bottom pb-2"><span className="fw-bold">Estanteria:</span> {selectMoviments.shelf_id}</p>
-        <p className="border-bottom pb-2"><span className="fw-bold">Espai:</span> {selectMoviments.space_id}</p>
-        <p className="border-bottom pb-2"><span className="fw-bold">Quantitat:</span> {selectMoviments.quantity}</p>
-        <p className="border-bottom pb-2"><span className="fw-bold">Data:</span> {selectMoviments.movement_date}</p>
-        <p className="border-bottom pb-2"><span className="fw-bold">Operari:</span> {usuari(selectMoviments.operator_id)}</p>
-        <p className="border-bottom pb-2"><span className="fw-bold">Origen:</span> {selectMoviments.origin}</p>
-      </div>
-    ) : (
-      <p className="text-muted text-center">No hay detalles disponibles.</p>
-    )}
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={handleClose}>
-      Cerrar
-    </Button>
-  </Modal.Footer>
-</Modal>
+        {/* Modal de Moviments */}
+        <Modal show={show} onHide={handleClose} centered>
+          <Modal.Header closeButton className="bg-primary text-white">
+            <Modal.Title>Detalls del Moviment</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectMoviments ? (
+              <div className="p-3">
+                <p className="border-bottom pb-2"><span className="fw-bold">ID:</span> {selectMoviments.id}</p>
+                <p className="border-bottom pb-2"><span className="fw-bold">ID Producto:</span> {nomProducte(selectMoviments.product_id)}</p>
+                <p className="border-bottom pb-2"><span className="fw-bold">Magatzem:</span> {selectMoviments.storage_id}</p>
+                <p className="border-bottom pb-2"><span className="fw-bold">Carrer:</span> {selectMoviments.street_id}</p>
+                <p className="border-bottom pb-2"><span className="fw-bold">Estanteria:</span> {selectMoviments.shelf_id}</p>
+                <p className="border-bottom pb-2"><span className="fw-bold">Espai:</span> {selectMoviments.space_id}</p>
+                <p className="border-bottom pb-2"><span className="fw-bold">Quantitat:</span> {selectMoviments.quantity}</p>
+                <p className="border-bottom pb-2"><span className="fw-bold">Data:</span> {formatDate(selectMoviments.movement_date)}</p>
+                <p className="border-bottom pb-2"><span className="fw-bold">Operari:</span> {usuari(selectMoviments.operator_id)}</p>
+                <p className="border-bottom pb-2"><span className="fw-bold">Origen:</span> {selectMoviments.origin}</p>
+              </div>
+            ) : (
+              <p className="text-muted text-center">No hay detalles disponibles.</p>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>
+              Cerrar
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-{/* Modal Inventari */}
-<Modal show={showInventoryModal} onHide={() => setShowInventoryModal(false)} centered>
-  <Modal.Header closeButton>
-    <Modal.Title>Detalles de Inventario</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {inventariseleccionat ? (
-      <div>
-     <p className="border-bottom pb-2">
-    <span className="fw-bold">ID:</span> {inventariseleccionat.id}
-  </p>
-   <p className="border-bottom pb-2">
-   <span className="fw-bold">Date:</span> {inventariseleccionat.created_at}
-  </p>
-  <p className="border-bottom pb-2">
-  <span className="fw-bold">Created By:</span> {inventariseleccionat.created_by}
-  </p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Inventory Status:</span> {inventariseleccionat.inventory_status}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Storage ID:</span> {inventariseleccionat.storage_id}
-</p>
+        {/* Modal Inventari */}
+        <Modal show={showInventoryModal} onHide={() => setShowInventoryModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Detalles de Inventario</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {inventariseleccionat ? (
+              <div>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">ID:</span> {inventariseleccionat.id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Date:</span> {inventariseleccionat.created_at}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Created By:</span> {inventariseleccionat.created_by}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Inventory Status:</span> {inventariseleccionat.inventory_status}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Storage ID:</span> {inventariseleccionat.storage_id}
+                </p>
+              </div>
+            ) : (
+              <p>No hay detalles disponibles.</p>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowInventoryModal(false)}>
+              Cerrar
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-      </div>
-    ) : (
-      <p>No hay detalles disponibles.</p>
-    )}
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={() => setShowInventoryModal(false)}>
-      Cerrar
-    </Button>
-  </Modal.Footer>
-</Modal>
+        {/* Modal de Orden de Recepción */}
+        <Modal show={showOrderReceptionModal} onHide={() => setShowOrderReceptionModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Detalles de Orden de Recepción</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {ordreRecepcioseleccionada ? (
+              <div>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">ID:</span> {ordreRecepcioseleccionada.id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Supplier ID:</span> {ordreRecepcioseleccionada.supplier_id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Estimated Reception Date:</span> {ordreRecepcioseleccionada.estimated_reception_date}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Created By:</span> {ordreRecepcioseleccionada.created_by}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Order Reception Status ID:</span> {ordreRecepcioseleccionada.orderreception_status_id}
+                </p>
+              </div>
+            ) : (
+              <p>No hay detalles disponibles.</p>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowOrderReceptionModal(false)}>
+              Cerrar
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-{/* Modal de Orde de Recepció */}
-<Modal show={showOrderReceptionModal} onHide={() => setShowOrderReceptionModal(false)} centered>
-  <Modal.Header closeButton>
-    <Modal.Title>Detalles de Orden de Recepción</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {ordreRecepcioseleccionada ? (
-      <div>
-  <p className="border-bottom pb-2">
-  <span className="fw-bold">ID:</span> {ordreRecepcioseleccionada.id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Supplier ID:</span> {ordreRecepcioseleccionada.supplier_id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Estimated Reception Date:</span> {ordreRecepcioseleccionada.estimated_reception_date}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Created By:</span> {ordreRecepcioseleccionada.created_by}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Order Reception Status ID:</span> {ordreRecepcioseleccionada.orderreception_status_id}
-</p>
+        {/* Modal de Línea de Orden de Recepción */}
+        <Modal show={showOrderLineModal} onHide={() => setShowOrderLineModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Detalles de Línea de Orden de Recepción</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {ordrelineaseleccionada ? (
+              <div>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">ID:</span> {ordrelineaseleccionada.id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Order Reception ID:</span> {ordrelineaseleccionada.order_reception_id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Product ID:</span> {ordrelineaseleccionada.product_id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Quantity Ordered:</span> {ordrelineaseleccionada.quantity_ordered}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Quantity Received:</span> {ordrelineaseleccionada.quantity_received}
+                </p>
+              </div>
+            ) : (
+              <p>No hay detalles disponibles.</p>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowOrderLineModal(false)}>
+              Cerrar
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-      </div>
-    ) : (
-      <p>No hay detalles disponibles.</p>
-    )}
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={() => setShowOrderReceptionModal(false)}>
-      Cerrar
-    </Button>
-  </Modal.Footer>
-</Modal>
-
-{/* Modal de Línea de Orde de Recepció */}
-<Modal show={showOrderLineModal} onHide={() => setShowOrderLineModal(false)} centered>
-  <Modal.Header closeButton>
-    <Modal.Title>Detalles de Línea de Orden de Recepción</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {ordrelineaseleccionada ? (
-      <div>
-     <p className="border-bottom pb-2">
-  <span className="fw-bold">ID:</span> {ordrelineaseleccionada.id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Order Reception ID:</span> {ordrelineaseleccionada.order_reception_id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Product ID:</span> {ordrelineaseleccionada.product_id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Quantity Ordered:</span> {ordrelineaseleccionada.quantity_ordered}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Quantity Received:</span> {ordrelineaseleccionada.quantity_received}
-</p>
-
-      </div>
-    ) : (
-      <p>No hay detalles disponibles.</p>
-    )}
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={() => setShowOrderLineModal(false)}>
-      Cerrar
-    </Button>
-  </Modal.Footer>
-</Modal>
-
-<Modal show={showIncidentModal} onHide={() => setShowIncidentModal(false)} centered>
-  <Modal.Header closeButton>
-    <Modal.Title>Detalles de Incidencia</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {incidencia_seleccionada ? (
-      <div>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">ID:</span> {incidencia_seleccionada.id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Descripción:</span> {incidencia_seleccionada.description}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">ID del Operador:</span> {incidencia_seleccionada.operator_id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Creado el:</span> {incidencia_seleccionada.created_at}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">ID del Proveedor:</span> {incidencia_seleccionada.supplier_id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">ID de Recepción de Línea de Pedido:</span> {incidencia_seleccionada.orderlinereception_id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">ID del Producto:</span> {incidencia_seleccionada.product_id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">ID del Estado de la Línea de Pedido:</span> {incidencia_seleccionada.orderline_status_id}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Cantidad Pedida:</span> {incidencia_seleccionada.quantity_ordered}
-</p>
-<p className="border-bottom pb-2">
-  <span className="fw-bold">Cantidad Recibida:</span> {incidencia_seleccionada.quantity_received}
-</p>
-
-      </div>
-    ) : (
-      <p>No hay detalles disponibles.</p>
-    )}
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={() => setShowIncidentModal(false)}>
-      Cerrar
-    </Button>
-  </Modal.Footer>
-</Modal>
-
-    
+        {/* Modal de Incidencia */}
+        <Modal show={showIncidentModal} onHide={() => setShowIncidentModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Detalles de Incidencia</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {incidencia_seleccionada ? (
+              <div>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">ID:</span> {incidencia_seleccionada.id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Descripción:</span> {incidencia_seleccionada.description}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">ID del Operador:</span> {incidencia_seleccionada.operator_id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Creado el:</span> {incidencia_seleccionada.created_at}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">ID del Proveedor:</span> {incidencia_seleccionada.supplier_id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">ID de Recepción de Línea de Pedido:</span> {incidencia_seleccionada.orderlinereception_id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">ID del Producto:</span> {incidencia_seleccionada.product_id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">ID del Estado de la Línea de Pedido:</span> {incidencia_seleccionada.orderline_status_id}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Cantidad Pedida:</span> {incidencia_seleccionada.quantity_ordered}
+                </p>
+                <p className="border-bottom pb-2">
+                  <span className="fw-bold">Cantidad Recibida:</span> {incidencia_seleccionada.quantity_received}
+                </p>
+              </div>
+            ) : (
+              <p>No hay detalles disponibles.</p>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowIncidentModal(false)}>
+              Cerrar
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </>
   );
