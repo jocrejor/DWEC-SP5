@@ -112,7 +112,7 @@ const OrderPickingShippingPicking = () => {
     // Actualitzar estat a completada
     const updatedLine = {
       ...lineActualitzar,
-      orderline_status_id: 3,
+      orderline_status_id: 2,
     };
 
     //actualitzar order line
@@ -169,7 +169,7 @@ const OrderPickingShippingPicking = () => {
       movMagatzem(
         lineActualitzar.product_id,
         usuariFiltrar,
-        lineActualitzar.quantity,
+        lineActualitzar.quantity * -1,
         "PickingShi",
         space.storage_id,
         space.storage_id,
@@ -184,11 +184,11 @@ const OrderPickingShippingPicking = () => {
         usuariFiltrar,
         lineActualitzar.quantity,
         "PickingShi",
-        space.storage_id,
-        space.storage_id,
-        space.street_id,
-        space.shelf_id,
-        space.id
+        "04",
+        "01",
+        "01",
+        "01",
+        "01"
       );
       console.log("Moviment entrada realitzat");
     }
@@ -296,6 +296,7 @@ const OrderPickingShippingPicking = () => {
                     <th scope="col">Producte</th>
                     <th scope="col">Data</th>
                     <th scope="col">Operari</th>
+                    <th scope="col">Magatzem / Carrer / Estantería / Espai</th>
                   </tr>
                 </thead>
 
@@ -317,6 +318,9 @@ const OrderPickingShippingPicking = () => {
                       const orderShippingToFind = orderShipping.find(
                         (o) => o.id === orderLineToFind.shipping_order_id
                       );
+                      const space = spaces.find(
+                        (s) => s.product_id === product.id
+                      );
                       return (
                         <tr key={order.id}>
                           <td className="d-flex justify-content-center align-items-center">
@@ -332,8 +336,14 @@ const OrderPickingShippingPicking = () => {
                           </td>
                           <td data-cell="Ordre ID">{orderShippingToFind.id}</td>
                           <td data-cell="Producte">{product.name}</td>
-                          <td data-cell="Data">{formatDate(order.created_date)}</td>
+                          <td data-cell="Data">
+                            {formatDate(order.created_date)}
+                          </td>
                           <td data-cell="Operari">{user.name}</td>
+                          <td data-cell="Magatzem / Carrer / Estantería / Espai">
+                            {space.storage_id} / {space.street_id} /{" "}
+                            {space.shelf_id} / {space.id}
+                          </td>
                         </tr>
                       );
                     })}
