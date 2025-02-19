@@ -3,7 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Modal, Table, Spinner } from 'react-bootstrap';
 import Header from '../Header';
-import Filter from "../EstatsOrdresEnviamentFiltres";
+import Filter from "./EstatsOrdresEnviamentFiltres";
 import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;

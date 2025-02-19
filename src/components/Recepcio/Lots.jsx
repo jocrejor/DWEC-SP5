@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from "axios";
 import Header from '../Header';
-import Filtres from '../OrdreLiniesRecepcioFiltres';
+import Filtres from './OrdreLiniesRecepcioFiltres';
 import LotsLotOSerie from './LotsLotOSerie';
 const apiUrl = import.meta.env.VITE_API_URL;
 const token = localStorage.getItem('token');
