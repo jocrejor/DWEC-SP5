@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 
 function FiltresCity({ suggestions = [], onFilter, onClear }) {
-  // Estados locales para cada uno de los filtros
+
   const [name, setName] = useState('');
-  const [orden, setOrden] = useState('none'); // 'none' = sin ordenar, 'asc' = A-Z
+  const [orden, setOrden] = useState('none'); 
   const [provinceId, setProvinceId] = useState('');
 
-  // Al pulsar "Filtrar" se envía un objeto con los filtros al componente padre
+ 
   const handleFilter = () => {
     onFilter({ name, orden, provinceId });
   };
 
-  // Al pulsar "Netejar", se limpian los campos y se notifica al padre
+
   const handleClear = () => {
     setName('');
     setOrden('none');
@@ -59,21 +59,7 @@ function FiltresCity({ suggestions = [], onFilter, onClear }) {
           </div>
         </div>
 
-        {/* Filtro por ID de la provincia */}
-        <div className="col-12 col-md-6 col-xl-4">
-          <div className="mb-3 text-light-blue">
-            <label htmlFor="provinceId" className="form-label">ID de la provincia</label>
-            <input
-              type="number"
-              placeholder="Ej: 1"
-              className="form-control"
-              id="provinceId"
-              value={provinceId}
-              onChange={(e) => setProvinceId(e.target.value)}
-            />
-          </div>
-        </div>
-    
+
 
       <div className="row bg-grey pb-3 mx-0">
         <div className="col-xl-4"></div>

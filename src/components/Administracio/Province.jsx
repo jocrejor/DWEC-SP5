@@ -1,3 +1,4 @@
+// Province.jsx
 import { useState, useEffect } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
@@ -18,9 +19,8 @@ const ProvinciaSchema = Yup.object().shape({
     .required('Valor requerit'),
 });
 
-function Provincia() {
-
-  const { provinceId } = useParams();
+function Province() {
+  const { stateId } = useParams();
   const navigate = useNavigate();
 
   const [provincias, setProvincias] = useState([]);
@@ -48,8 +48,9 @@ function Provincia() {
   }, []);
 
   const crearProvincia = (values, { setSubmitting, resetForm }) => {
-    axios.post(`${apiUrl}/province`, values, {headers: { "auth-token": localStorage.getItem("token") },
-      })
+    axios.post(`${apiUrl}/province`, values, {
+      headers: { "auth-token": localStorage.getItem("token") },
+    })
       .then(() => {
         cargarDatos();
       })
@@ -100,13 +101,13 @@ function Provincia() {
       });
   };
 
+  // Filtrar provincias según el estado seleccionado
   let filteredProvincias = provincias;
-  if (provinceId) {
+  if (stateId) {
     filteredProvincias = filteredProvincias.filter(
-      (prov) => prov.id === Number(provinceId)
+      (prov) => prov.state_id === Number(stateId)
     );
   }
-
   if (appliedFilters.nombre) {
     filteredProvincias = filteredProvincias.filter((prov) =>
       prov.name.toLowerCase().includes(appliedFilters.nombre.toLowerCase())
@@ -117,7 +118,6 @@ function Provincia() {
       a.name.localeCompare(b.name)
     );
   }
-
 
   const totalpagines = Math.ceil(filteredProvincias.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -185,7 +185,7 @@ function Provincia() {
         </div>
       </div>
 
-      {/* Modal per crear */}
+      {/* Modal para crear */}
       <Modal show={showCreate} onHide={() => setShowCrear(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Nova Provincia</Modal.Title>
@@ -221,7 +221,7 @@ function Provincia() {
         </Modal.Body>
       </Modal>
 
-      {/* Modal per visualizar */}
+      {/* Modal para visualizar */}
       <Modal show={showView} onHide={() => setShowView(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Visualitzar Provincia</Modal.Title>
@@ -231,10 +231,7 @@ function Provincia() {
             <>
               <p><strong>ID:</strong> {currentProvince.id}</p>
               <p><strong>Nom:</strong> {currentProvince.name}</p>
-              <p>
-                <strong>ID de l'estat:</strong>{" "}
-                {currentProvince.state_id}
-              </p>
+              <p><strong>ID de l'estat:</strong> {currentProvince.state_id}</p>
             </>
           ) : (
             <p>No hi ha dades per mostrar.</p>
@@ -289,7 +286,7 @@ function Provincia() {
         </Modal.Body>
       </Modal>
 
-      {/* Tabla de Provincies */}
+      {/* Tabla de Provincias */}
       <div className="row">
         <div className="col-12">
           <table className="table table-striped text-center align-middle">
@@ -301,6 +298,7 @@ function Provincia() {
                 <th scope="col">ID</th>
                 <th scope="col">Nom</th>
                 <th scope="col">ID de l'estat</th>
+                <th scope="col">City</th>
                 <th scope="col">Accions</th>
               </tr>
             </thead>
@@ -313,14 +311,12 @@ function Provincia() {
                   <td data-cell="ID">{prov.id}</td>
                   <td data-cell="Nom">{prov.name}</td>
                   <td data-cell="ID de l'estat">
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        navigate(`/dadesGeografiques/State/${prov.state_id}`)
-                      }
-                    >
+                    <Button  className='outline-orange' onClick={() => navigate('/dadesGeografiques')}>
                       Veure Estat
                     </Button>
+                  </td>
+                  <td data-cell="City">
+                  <Button className='outline-blue' onClick={() => navigate(`../city/${prov.id}`)}> Veure City </Button>
                   </td>
                   <td className="fs-5" data-no-colon="true">
                     <i
@@ -391,4 +387,4 @@ function Provincia() {
   );
 }
 
-export default Provincia;
+export default Province;
