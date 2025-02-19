@@ -237,7 +237,7 @@ function OrderLineReception_Status() {
 
       {/* Modal */}
       <Modal className="text-light-blue" show={showModal} onHide={canviEstatModal}>
-        <Modal.Header closeButton>
+      <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
           <Modal.Title>{tipoModal} Estat de Línia</Modal.Title>
         </Modal.Header>
         <Modal.Body>

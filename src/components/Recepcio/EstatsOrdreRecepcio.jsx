@@ -240,7 +240,7 @@ function OrderReception_Status() {
       </div>
 
       <Modal show={showModal} onHide={canviEstatModal}>
-        <Modal.Header closeButton>
+      <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
           <Modal.Title>{tipoModal} Estat de Ordre</Modal.Title>
         </Modal.Header>
         <Modal.Body>
