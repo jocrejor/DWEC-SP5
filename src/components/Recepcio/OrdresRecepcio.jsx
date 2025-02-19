@@ -652,7 +652,7 @@ function OrderReception() {
                               <td>{prod.name}</td>
                               <td>{prod.quantity}</td>
                               <td>
-                                <Button variant="link text-secondary p-0" onClick={() => eliminarProducte(index)}>
+                                <Button variant="outline-secondary" onClick={() => eliminarProducte(index)}>
                                   <i className="bi bi-trash"></i>
                                 </Button>
                               </td>
@@ -718,7 +718,7 @@ function OrderReception() {
                         <td>
                           {orderToReview?.orderreception_status_id === 2 && (
                             <>
-                              <Button className="btn btn-danger mb-2" onClick={() => alert(`Incidència per ${linea.product_id}`)}>
+                              <Button variant="outline-danger" onClick={() => alert(`Incidència per ${linea.product_id}`)}>
                                 Incidència
                               </Button>
                             </>
