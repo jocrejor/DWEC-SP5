@@ -121,15 +121,15 @@ function Lateral() {
                                     Ordres de recepció
                                 </Link>
                             </li>
-                            <li className={activeOption == 'OrdesRecepcio' ? liActive : liInactive}>
+                            <li className={activeOption == 'orderpickingreception' ? liActive : liInactive}>
                                 <Link className={activeOption == 'orderpickingreception' ? linkActive : linkInactive} onClick={() => {setActiveOption('orderpickingreception') }} to="/orderpickingreception">
-                                    {activeOption == 'OrdesRecepcio' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}
+                                    {activeOption == 'orderpickingreception' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}
                                     Ordres Picking R
                                 </Link>
                             </li>
-                            <li className={activeOption == 'EstatsOrdreEnviament' ? liActive : liInactive}>
-                                <Link className={activeOption == 'EstatsOrdreEnviament' ? linkActive : linkInactive} onClick={() => {setActiveOption('EstatsOrdreEnviament') }} to="/estatsOrdreEnviament">
-                                    {activeOption == 'EstatsOrdreEnviament' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}
+                            <li className={activeOption == 'EstatsOrdreRecepcio' ? liActive : liInactive}>
+                                <Link className={activeOption == 'EstatsOrdreRecepcio' ? linkActive : linkInactive} onClick={() => {setActiveOption('EstatsOrdreRecepcio') }} to="/estatsOrdreRecepcio">
+                                    {activeOption == 'EstatsOrdreRecepcio' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}
                                     Estats Ordres
                                 </Link>
                             </li>
