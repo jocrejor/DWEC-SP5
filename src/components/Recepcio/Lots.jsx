@@ -55,7 +55,7 @@ function Lots() {
 
   useEffect(() => {
     const fetchData = async () => {
-      axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}/lot`, { headers: { "auth-token": token } })
         .then(
           response => {
             setLot(response.data)
@@ -66,7 +66,7 @@ function Lots() {
           }
         )
 
-      axios.get(`${apiUrl}Product`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}/Product`, { headers: { "auth-token": token } })
         .then(
           response => {
             setProduct(response.data)
@@ -77,7 +77,7 @@ function Lots() {
           }
         )
 
-      axios.get(`${apiUrl}Supplier`, { headers: { "auth-token": token } })
+      axios.get(`${apiUrl}/Supplier`, { headers: { "auth-token": token } })
         .then(
           response => {
             setSupplier(response.data)

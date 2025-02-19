@@ -53,7 +53,7 @@ function LotsLotOSerie({
 
   const cargarDatos = async () => {
     try {
-      const response = await axios.get(`${apiUrl}lot`, { headers: { "auth-token": token } });
+      const response = await axios.get(`${apiUrl}/lot`, { headers: { "auth-token": token } });
       setLot(response.data);
       // Si 'arrayVisualitzar' se deriva de 'lots', asegúrate de actualizarlo también:
       setArrayVisualitzar(response.data); // O realiza algún filtro si es necesario.
@@ -105,7 +105,7 @@ function LotsLotOSerie({
 
                 try {
                   for (const lote of guardado) {
-                    const saveResponse = await axios.post(`${apiUrl}lot`, lote, {
+                    const saveResponse = await axios.post(`${apiUrl}/lot`, lote, {
                       headers: { "auth-token": token }
                     });
                     console.log("Registres guardats correctament", saveResponse.data);
@@ -115,7 +115,7 @@ function LotsLotOSerie({
                   console.log("FuncionaID?", values.orderlinereception_id)
                   console.log("FuncionaQuantityOrdered?", values.quantity_ordered)
                   // Actualizar la orderlinereception para que quantity_received tome el valor de quantity_ordered
-                  await axios.put(`${apiUrl}orderlinereception/${values.orderlinereception_id}`, {
+                  await axios.put(`${apiUrl}/orderlinereception/${values.orderlinereception_id}`, {
                     quantity_received: values.quantity_ordered  // Asegúrate de que 'quantity_ordered' esté definido en values
                   }, {
                     headers: { "auth-token": token }

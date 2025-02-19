@@ -10,7 +10,7 @@ function Filtres({ onFilterChange, onFilterRestart }) {
 
   useEffect(() => {
     // Carregar proveïdors
-    axios.get(`${apiUrl}Supplier`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/Supplier`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => setSuppliers(response.data))
       .catch(e => console.log(e));
 
@@ -20,7 +20,7 @@ function Filtres({ onFilterChange, onFilterRestart }) {
     //   .catch(e => console.log(e));
 
     // Carregar productes
-    axios.get(`${apiUrl}Product`, { headers: { "auth-token": localStorage.getItem("token") } })
+    axios.get(`${apiUrl}/Product`, { headers: { "auth-token": localStorage.getItem("token") } })
       .then(response => setProducts(response.data))
       .catch(e => console.log(e));
   }, []);
