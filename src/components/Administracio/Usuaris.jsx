@@ -19,7 +19,6 @@ const UserSchema = Yup.object().shape({
     .max(20, 'El valor màxim és de 20 caràcters')
     .required('Valor requerit'),
   role: Yup.string().required('Valor requerit'),
-  image: Yup.string().required('Valor requerit')
 });
 
 const userPerPage = 10;
@@ -34,8 +33,7 @@ function Usuaris() {
     name: '',
     email: '',
     password: '',
-    role: '',
-    image: ''
+    role: ''
   });
   const [selectedUser, setSelectedUser] = useState(null);
   const [filterName, setFilterName] = useState('');
@@ -43,7 +41,7 @@ function Usuaris() {
   const [filterRole, setFilterRole] = useState('');
   const [showSecondModal, setShowSecondModal] = useState(false);
   const [showTercerModal, setShowTercerModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState('');
 
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
@@ -53,11 +51,13 @@ function Usuaris() {
   useEffect(() => {
     axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } })
       .then((response) => {
+        console.log("Dades de l'API:", response.data);
+
         setUser(response.data);
         setFilteredUsers(response.data);
       })
       .catch((error) => {
-        console.error(error.response.data);
+        console.error(error.response?.data || error.message);
       });
   }, [apiUrl, token]);
 
@@ -130,6 +130,7 @@ function Usuaris() {
     const endIndex = startIndex + userPerPage;
     return filteredUsers.slice(startIndex, endIndex);
   };
+  
 
   // Canviar de pàgina
   const paginate = (pageNumber) => {
@@ -168,11 +169,7 @@ function Usuaris() {
         <div className="col-12 col-md-4">
           <div className="mb-3 text-light-blue">
             <label htmlFor="name" className="form-label">Nom</label>
-            <input
-              type="text"
-              className="form-control"
-              id="nombre"
-              value={filterName}
+            <input type="text" className="form-control" id="nombre" value={filterName}
               onChange={(e) => setFilterName(e.target.value)}
               onKeyUp={handleFilterChange}
             />
@@ -193,15 +190,15 @@ function Usuaris() {
         </div>
         <div className="col-12 col-md-4">
           <div className="mb-3 text-light-blue">
-            <label htmlFor="telefono" className="form-label">Rol</label>
-            <input
-              type="text"
-              className="form-control"
-              id="telefono"
-              value={filterRole}
+            <label htmlFor="role" className="form-label">Rol</label>
+            <select className="form-select" id="role" value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              onKeyUp={handleFilterChange}
-            />
+              onKeyUp={handleFilterChange} aria-label="Seleccione una opción" >
+              <option value="" disabled>Selecciona un rol</option>
+              <option value="admin">Administrador</option>
+              <option value="user">Operari</option>
+              <option value="moderator">Encarregat</option>
+            </select>
           </div>
         </div>
         <div className="mt-3">
@@ -253,7 +250,6 @@ function Usuaris() {
               <th>Id</th>
               <th>Nom</th>
               <th>Email</th>
-              <th>Password</th>
               <th>Rol</th>
               <th>Accions</th>
             </tr>
@@ -262,7 +258,7 @@ function Usuaris() {
 
             {getCurrentPageUser().length === 0 ? (
               <tr>
-                <td colSpan="7" className="text-center text-light-blue">No hi ha perfils d'usuaris</td>
+                <td colSpan="6" className="text-center text-light-blue">No hi ha perfils usuaris</td>
               </tr>
             ) : (
               getCurrentPageUser().map((user) => (
@@ -273,8 +269,7 @@ function Usuaris() {
                   <td>{user.id}</td>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
-                  <td>{user.password}</td>
-                  <td>{user.role}</td>
+                  <td>{user.userprofile_id}</td>
                   <td>
                     <Button
                       style={{ backgroundColor: 'transparent', border: 'none' }} onClick={() => passwordUsuari(user)}
@@ -363,30 +358,29 @@ function Usuaris() {
           {tipoModal === 'Visualitzar' ? (
             <div>
               <h5>Nom: {selectedUser?.name}</h5>
-              <p>Email: {selectedUser?.email}</p>
-              <p>Password: {selectedUser?.password}</p>
+              <h5>Email: {selectedUser?.email}</h5>
+              <h5>Rol: {selectedUser?.userprofile_id}</h5>
+
             </div>
           ) : (
             <Formik
               initialValues={tipoModal === 'Crear' ? valorsInicials : { name: '', email: '', password: '', role: '' }}
               validationSchema={UserSchema}
               onSubmit={async (values) => {
-                console.log("Enviar valors:", values);
+                console.log("Valors enviats:", values);
                 try {
                   if (tipoModal === "Crear") {
-                    await axios.post(`${apiUrl}/users`, values);
+                    const res = await axios.post(`${apiUrl}/users`, values);
+                    console.log("Resposta del servidor (crear):", res.data);
                   } else {
-                    await axios.put(`${apiUrl}/users/${values.id}`, values);
+                    const res = await axios.put(`${apiUrl}/users/${values.id}`, values);
+                    console.log("Resposta del servidor (modificar):", res.data);
                   }
-                  tancarModal();
-                  axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } })
-                    .then((response) => {
-                      setUser(response.data);
-                    });
                 } catch (error) {
-                  console.error("Error submitting form:", error);
+                  console.error("Error al enviar:", error.response?.data || error.message);
                 }
               }}
+              
             >
               {({ errors, touched }) => (
                 <Form>
@@ -419,8 +413,8 @@ function Usuaris() {
                     <Button variant="secondary" onClick={tancarModal}>
                       Tancar
                     </Button>
-                    <Button className="primary orange-button" type="button" onClick={() => alert("S'està enviant el formulari!")}>
-                      Gravar
+                    <Button className="primary orange-button" type="button" >
+                    Gravar
                     </Button>
                   </div>
                 </Form>
