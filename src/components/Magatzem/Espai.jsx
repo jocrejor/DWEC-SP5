@@ -149,7 +149,7 @@ function Space() {
                             onClick={canviEstatModal}
                             className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
                         >
-                            <i className="bi bi-plus-circle text-white pe-1"></i>Crear Carrer
+                            <i className="bi bi-plus-circle text-white pe-1"></i>Crear Espai
                         </button>
                     </div>
                 </div>
