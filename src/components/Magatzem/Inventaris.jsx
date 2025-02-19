@@ -187,7 +187,7 @@ function Inventaris() {
   const specificPage = (page) => {
     setCurrentPage(page);
   }
-  /**************** CREAR INVENTARIO ****************/
+  /**************** CREATE INVENTORY ****************/
   const createInventory = async (values) => {
     let filteredSpaces;
     if (!values.street_id) {
@@ -241,7 +241,7 @@ function Inventaris() {
       .catch(e => { console.log(e) })
   }
 
-  /************* ELIMINAR INVENTARIO ***************/
+  /************* DELETE INVENTORY ***************/
   const deleteInventory = (id) => {
     if (confirm("¿Estàs segur de que vols esborrar aquest inventari?")) {
       axios.delete(`${apiURL}/inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
@@ -277,26 +277,56 @@ function Inventaris() {
     const newDate = new Date(date);
     return newDate.toLocaleDateString();
   }
-
+  //********* GENERATE PDF *********
   const generarPDF = (inventory) => {
     const doc = new jsPDF();
     doc.setFontSize(18);
+    doc.setFont("Noto Serif", "bold")
     doc.text("Informe d'inventari completat", 65, 20);
-
-
 
     doc.autoTable({
       startY: 30,
+      headStyles:{fillColor:[34, 40, 49]},
+      bodyStyles: { textColor: [ 	48, 71, 94] },
       head:[['ID Inventari', 'Data', 'Estat', 'Magatzem']],
       body:[
         [inventory.id, changeDate(inventory.created_at), inventoryStatus.find(inv => inv.id === inventory.inventory_status)?.name, storages.find(st => st.id === inventory.storage_id)?.name]
-      ]
-    })
+      ],
+      didParseCell: (data) => {
+        if (data.section === 'head') {
+          data.cell.styles.font = 'Noto Serif'; 
+          data.cell.styles.fontStyle = 'bold'; 
+          data.cell.styles.halign ='center';
+
+        }
+
+        if (data.section === 'body') {
+          data.cell.styles.font = 'Noto Serif'; 
+          data.cell.styles.fontStyle = 'serif';
+          data.cell.styles.halign ='center';
+      }
+    }
+  })
 
     doc.autoTable({
       startY: 60,
+      headStyles:{fillColor:[34, 40, 49]},
+      bodyStyles: { textColor: [ 	48, 71, 94] },
       head:[['Carrer', 'Estanteria', 'Espai', 'Producte', 'Quantitat Estimada', 'Quantitat Real', 'Justificació']],
-      body: selectedInventoryLines.map(line => ([line.street_id, line.shelf_id, line.space_id, products.find(product => product.id === line.product_id)?.name, line?.quantity_estimated, line?.quantity_real, inventoryReasons.find(reason => reason.id === line?.inventory_reason_id)?.name]))     
+      body: selectedInventoryLines.map(line => ([line.street_id, line.shelf_id, line.space_id, products.find(product => product.id === line.product_id)?.name, line?.quantity_estimated, line?.quantity_real, inventoryReasons.find(reason => reason.id === line?.inventory_reason_id)?.name])),
+      didParseCell: (data) => {
+        if (data.section === 'head') {
+          data.cell.styles.font = 'Noto Serif'; 
+          data.cell.styles.fontStyle = 'bold'; 
+          data.cell.styles.halign ='center';
+        }
+
+        if (data.section === 'body') {
+          data.cell.styles.font = 'Noto Serif'; 
+          data.cell.styles.fontStyle = 'serif';
+          data.cell.styles.halign ='center';
+      }     
+    }
     });
     doc.save("Informe d'Inventari.dpf");
   }

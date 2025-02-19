@@ -18,7 +18,7 @@ const InventoryLineSchema = Yup.object().shape({
 });
 
 
-function Inventariar() {
+function Inventariar({route}) {
   const { id } = useParams();
   const navigate = useNavigate();
   const apiURL = import.meta.env.VITE_API_URL;
@@ -150,7 +150,7 @@ function Inventariar() {
     //console.log(updatedInventoryLines)
     //console.log(selectedInventoryLines)
 
-  }, [updatedInventoryLines, selectedInventoryLines])
+  }, [updatedInventoryLines, selectedInventoryLines, selectedSpace])
 
   const handleInputChange = (e) => {
     //console.log(e)
@@ -233,6 +233,9 @@ function Inventariar() {
   const handleNewInventoryLineSubmit = async (values) => {
     console.log(selectedSpace)
     console.log(values)
+    console.log(typeof(parseInt(values.product_id)))
+    console.log(typeof(values.quantity_real))
+
     const selectedProduct = products.find(product => product.id === parseInt(values.product_id));
     console.log(selectedProduct)
 
@@ -241,7 +244,7 @@ function Inventariar() {
       return
     }
 
-    if(selectedSpace.product_id != null && selectedSpace.product_id != values.product_id){
+    if(selectedSpace.product_id && selectedSpace.product_id != values.product_id){
       alert("No es pot afegir un producte diferent a l'espai seleccionat.");
       return
     }
@@ -252,16 +255,25 @@ function Inventariar() {
     let currentVolume = 0;
     let currentWeight = 0;
     
-    if(selectedSpace.quantity != 0){
-      currentVolume = selectedSpace.quantity * products.find(p => p.id === selectedSpace.product_id).volume;
-      currentWeight = selectedSpace.quantity * products.find(p => p.id === selectedSpace.product_id).weight;
+    if(selectedSpace.quantity){
+      const productVolume = products.find(p => p.id === selectedSpace.product_id)?.volume;
+      const productWeight = products.find(p => p.id === selectedSpace.product_id)?.weight;
+      currentVolume = selectedSpace.quantity * productVolume;
+      currentWeight = selectedSpace.quantity * productWeight;
+
+      console.log(typeof(selectedSpace.quantity))
+      console.log(typeof(products.find(p => p.id === selectedSpace.product_id)?.volume))
+      console.log(currentVolume)
+      console.log(currentWeight)
     } 
 
     const totalVolume = newVolume + currentVolume;
     const totalWeight = newWeight + currentWeight;
 
+    console.log(totalWeight)
+
     if(totalVolume > selectedSpace.volume_max){
-      alert("No hi ha espai suficient. El volum supera el màxim permès. El volum màxim és de " + selectedSpace.volume_max + " m3. Actualment hi ha " + currentVolume + " m3 i el producte ocupa " + newVolume + " m3.");
+      alert("No hi ha espai suficient. El volum supera el màxim permès. El volum màxim és de " + selectedSpace.volume_max + " m3. "+  ((currentVolume!= 0) ?"Actualment hi ha " + currentVolume + " m3 disponible. ": "") + "El producte ocupa " + newVolume + " m3.");
       return
     }
 
@@ -270,10 +282,11 @@ function Inventariar() {
       return;
     }
 
-    //const updatedQuantity = selectedSpace.quantity === null ? values.quantity_real : selectedSpace.quantity + values.quantity_real;
-    
-      //const updatedSpace = {...selectedSpace, product_id: values.product_id, quantity: updatedQuantity}
-      //await axios.put(`${apiURL}/space/${selectedSpace.storage_id}/${selectedSpace.street_id}/${selectedSpace.shelf_id}/${selectedSpace.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+    // SPACE UPDATE
+    /*const updatedQuantity = selectedSpace.quantity === null ? values.quantity_real : selectedSpace.quantity + values.quantity_real;
+    const updatedSpace = {...selectedSpace, product_id: values.product_id, quantity: updatedQuantity}
+    await axios.put(`${apiURL}/space/${selectedSpace.storage_id}/${selectedSpace.street_id}/${selectedSpace.shelf_id}/${selectedSpace.id}`, updatedSpace, { headers: { "auth-token": localStorage.getItem('token') } })
+    */
     const newLine = {
       ...values,
       inventory_id: selectedInventory.id,
@@ -388,7 +401,7 @@ function Inventariar() {
 
           <Modal show={show} onHide={handleClose} animation={true} >
             <Modal.Header closeButton>
-              <Modal.Title className='text-light-blue'>Afegir línia d'inventari</Modal.Title>
+              <Modal.Title className='text-orange'>Afegir línia d'inventari</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Formik
@@ -460,7 +473,7 @@ function Inventariar() {
                         disabled={!values.shelf_id}
                         onChange={(e) => {
                           setFieldValue('space_id', e.target.value);
-                          setSelectedSpace(selectedSpaces.find((space) => space.id === String(e.target.value) && space.shelf_id === values.shelf_id && space.street_id === values.street_id));
+                          setSelectedSpace(selectedSpaces.find((space) => space.id === String(e.target.value) && space.shelf_id === String(values.shelf_id) && space.street_id === String(values.street_id)));
                         }}
 
                       >

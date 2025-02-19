@@ -112,6 +112,12 @@ li:hover i{
     border-color: var(--orange);
 }
 
+.outline-orange:active{
+    background-color:var(--orange) !important;
+    color: white;
+    border-color: var(--orange) !important;
+}
+
 .outline-blue{
     color: var(--lightBlue);
     border-color: var(--lightBlue);
@@ -123,13 +129,22 @@ li:hover i{
     color: white;
     border-color: var(--lightBlue);
 }
-
 .outline-blue:hover i{
     color: white !important;
 }
+.outline-blue:active{
+    background-color:var(--lightBlue) !important;
+    color: white !important;
+    border-color: var(--lightBlue) !important;
+}
+
+.outline-blue:active i{
+    color: white !important;
+}
+
 
 .text-orange{
-    color: var(--orange);
+    color: var(--orange) !important;
 }
 
 
