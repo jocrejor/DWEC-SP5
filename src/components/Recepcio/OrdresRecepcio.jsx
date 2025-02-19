@@ -718,9 +718,14 @@ function OrderReception() {
                         <td>
                           {orderToReview?.orderreception_status_id === 2 && (
                             <>
-                              <Button variant="outline-danger" onClick={() => alert(`Incidència per ${linea.product_id}`)}>
-                                Incidència
-                              </Button>
+                              <div className="d-flex">
+                                <Button variant="outline-danger" onClick={() => alert(`Incidència per ${linea.product_id}`)}>
+                                  Incidència
+                                </Button>
+                                <Button variant="outline-secondary" href="#" className="ms-2">
+                                  Lot/Serie
+                                </Button>
+                              </div>
                             </>
                           )}
                         </td>
