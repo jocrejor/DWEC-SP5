@@ -1,35 +1,103 @@
-import {useState} from 'react'
-import Header from './Header'
-import { AgCharts } from 'ag-charts-react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Header from './Header';
+import { Bar } from 'react-chartjs-2';
 
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import 'chart.js/auto';
 
 function Home() {
+  const [orderCounts, setOrderCounts] = useState([]);
+  const [orderLineCounts, setOrderLineCounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const apiUrl = import.meta.env.VITE_API_URL;
 
-  const [chartOptions, setChartOptions] = useState({
-    // Data: Data to be displayed in the chart
-    data: [
-        { month: 'Jan', avgTemp: 2.3, iceCreamSales: 162000 },
-        { month: 'Mar', avgTemp: 6.3, iceCreamSales: 302000 },
-        { month: 'May', avgTemp: 16.2, iceCreamSales: 800000 },
-        { month: 'Jul', avgTemp: 22.8, iceCreamSales: 1254000 },
-        { month: 'Sep', avgTemp: 14.5, iceCreamSales: 950000 },
-        { month: 'Nov', avgTemp: 8.9, iceCreamSales: 200000 },
-    ],
-    // Series: Defines which chart type and data to use
-    series: [{ type: 'bar', xKey: 'month', yKey: 'iceCreamSales' }],
-});
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Obtenir la llista d'estats de les ordres
+        const { data: orderReceptionStatus } = await axios.get(`${apiUrl}/orderreception_status`, {
+          headers: { 'auth-token': localStorage.getItem('token') },
+        });
+
+        const { data: orderReception } = await axios.get(`${apiUrl}/orderreception`, {
+          headers: { 'auth-token': localStorage.getItem('token') },
+        });
+
+        const orderReceptionList = orderReceptionStatus.map(status => {
+          const quantity = orderReception.filter(order => order.orderreception_status_id === status.id).length;
+          return { id: status.id, status: status.name, quantity };
+        });
+        setOrderCounts(orderReceptionList);
+
+        // Obtenir la llista d'estats d'ordres d'enviament
+        const { data: orderShippingStatus } = await axios.get(`${apiUrl}/ordershipping_status`, {
+          headers: { 'auth-token': localStorage.getItem('token') },
+        });
+
+        const { data: orderShipping } = await axios.get(`${apiUrl}/ordershipping`, {
+          headers: { 'auth-token': localStorage.getItem('token') },
+        });
+
+        const orderShippingList = orderShippingStatus.map(status => {
+          const quantity = orderShipping.filter(line => line.ordershipping_status_id === status.id).length;
+          return { id: status.id, status: status.name, quantity };
+        });
+        setOrderLineCounts(orderShippingList);
+      } catch (error) {
+        console.error('Error carregant les dades:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 10000); // Actualitza cada 10 segons
+    return () => clearInterval(interval);
+  }, [apiUrl]);
+
+  const chartData = {
+    labels: orderCounts.map(item => item.status),
+    datasets: [{
+      label: "Quantitat d'estats d'ordres de recepció",
+      data: orderCounts.map(item => item.quantity),
+      backgroundColor: ['#4CAF50', '#FF9800', '#2196F3', '#E91E63', '#9C27B0'],
+      borderColor: ['#388E3C', '#F57C00', '#1976D2', '#C2185B', '#7B1FA2'],
+      borderWidth: 2,
+    }],
+  };
+
+  const chartData2 = {
+    labels: orderLineCounts.map(item => item.status),
+    datasets: [{
+      label: "Quantitat d'estats d'ordres d'enviament",
+      data: orderLineCounts.map(item => item.quantity),
+      backgroundColor: ['#4CAF50', '#FF9800', '#2196F3', '#E91E63', '#9C27B0'],
+      borderColor: ['#388E3C', '#F57C00', '#1976D2', '#C2185B', '#7B1FA2'],
+      borderWidth: 2,
+    }],
+  };
 
   return (
-    <> 
-      <Header title="Panel de control" />
-
-
-    <div>
-      
-      <AgCharts options={chartOptions} />
-    </div>
-   </>
-  )
+    <>
+      <Header title='Panel de control' />
+      <div className='container mt-4 row'>
+        <div className='col-md-6 col-sm-12'>
+          <h2 className='text-center'>Ordres de recepció</h2>
+          <div className='mt-4'>
+            <Bar data={chartData} />
+          </div>
+        </div>
+        <div className='col-md-6 col-sm-12'>
+          <h2 className='text-center'>Ordres d'enviament</h2>
+          <div className="mt-4">
+            <Bar data={chartData2} />
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
 
-export default Home
+export default Home;
