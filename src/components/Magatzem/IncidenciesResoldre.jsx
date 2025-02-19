@@ -178,7 +178,7 @@ function IncidenciesResoldre() {
 
         updatedData.orderline_status_id = Number(updatedData.orderline_status_id)        
 
-        axios.put(`${apiURL}incident/${id}`, updatedData, { headers: { "auth-token": token } })
+        axios.put(`${apiURL}/incident/${id}`, updatedData, { headers: { "auth-token": token } })
             .then(response => setIncident(prevIncidents =>
                 prevIncidents.map(incidents => incidents.id === updatedData.id ? response.data : incidents),
                 getDataIncident()
