@@ -16,7 +16,6 @@ function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obtenir la llista d'estats de les ordres
         const { data: orderReceptionStatus } = await axios.get(`${apiUrl}/orderreception_status`, {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
@@ -25,13 +24,14 @@ function Home() {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        const orderReceptionList = orderReceptionStatus.map(status => {
-          const quantity = orderReception.filter(order => order.orderreception_status_id === status.id).length;
-          return { id: status.id, status: status.name, quantity };
-        });
+        const orderReceptionList = orderReceptionStatus
+          .filter(status => status.name !== "Emmagatzemada")
+          .map(status => {
+            const quantity = orderReception.filter(order => order.orderreception_status_id === status.id).length;
+            return { id: status.id, status: status.name, quantity };
+          });
         setOrderCounts(orderReceptionList);
 
-        // Obtenir la llista d'estats d'ordres d'enviament
         const { data: orderShippingStatus } = await axios.get(`${apiUrl}/ordershipping_status`, {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
@@ -40,10 +40,12 @@ function Home() {
           headers: { 'auth-token': localStorage.getItem('token') },
         });
 
-        const orderShippingList = orderShippingStatus.map(status => {
-          const quantity = orderShipping.filter(line => line.ordershipping_status_id === status.id).length;
-          return { id: status.id, status: status.name, quantity };
-        });
+        const orderShippingList = orderShippingStatus
+          .filter(status => status.name !== "Enviada")
+          .map(status => {
+            const quantity = orderShipping.filter(line => line.ordershipping_status_id === status.id).length;
+            return { id: status.id, status: status.name, quantity };
+          });
         setOrderLineCounts(orderShippingList);
       } catch (error) {
         console.error('Error carregant les dades:', error);
@@ -53,7 +55,7 @@ function Home() {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 10000); // Actualitza cada 10 segons
+    const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, [apiUrl]);
 
