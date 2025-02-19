@@ -86,6 +86,12 @@ function Lateral() {
                                     Ordres d'enviament 
                                 </Link>
                             </li>
+                            <li className={activeOption == 'ordresPickingEnviament' ? liActive : liInactive}>
+                                <Link className={activeOption == 'oordresPickingEnviament' ? linkActive : linkInactive} onClick={() => {setActiveOption('ordresPickingEnviament') }} to="/orderpickingshipping">
+                                    {activeOption == 'ordresPickingEnviament' ? <i className="bi bi-caret-right-fill pe-1"></i> : null}
+                                    Ordres Picking E 
+                                </Link>
+                            </li>
 
                             <li className={activeOption == 'EstatsOrdesEnviament' ? liActive : liInactive}>
                                 <Link className={activeOption == 'EstatsOrdesEnviament' ? linkActive : linkInactive} onClick={() => {setActiveOption('EstatsOrdesEnviament') }} to="/estatsOrdreEnviament">
