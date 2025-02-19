@@ -113,7 +113,7 @@ function Shelf() {
   const handleBackClick = () => {
     navigate(`/gestioMagatzem/carrer/${carrer}`);
   };
-  
+
 
   const handleFilter = (filters) => {
     setFilters(filters); // Actualiza los filtros
@@ -122,7 +122,7 @@ function Shelf() {
   return (
     <>
       {/* Filtro de Estanteria */}
-      <FilterEstanteria 
+      <FilterEstanteria
         filters={filters}
         onFilterChange={handleFilter}
       />
@@ -145,11 +145,21 @@ function Shelf() {
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
-            <button type="button" onClick={canviEstatModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
-              <i className="bi bi-plus-circle text-white pe-1"></i>Crear Estanteria
+            <Button
+              onClick={() => handleBackClick()}
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0 me-2">
+              Carrer
+            </Button>
+            <button
+              type="button"
+              onClick={canviEstatModal}
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+            >
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear Carrer
             </button>
           </div>
         </div>
+
       </div>
       <div className="table-responsive mt-3">
         <table className="table table-striped text-center">
@@ -160,7 +170,6 @@ function Shelf() {
               <th>Nom</th>
               <th>ID Magatzem</th>
               <th>ID Carrer</th>
-              <th> Carrer</th>
               <th>Espai</th>
               <th>Accions</th>
             </tr>
@@ -173,7 +182,6 @@ function Shelf() {
                 <td>{values.name}</td>
                 <td>{values.storage_id}</td>
                 <td>{values.street_id}</td>
-                <td><Button onClick={() => handleBackClick()} className='outline-orange'>Carrer</Button></td>
                 <td><Button onClick={() => handleShelfClick(values.id)} className='outline-orange'>Espai</Button></td>
                 <td data-no-colon="true">
                   <span onClick={() => viewShelf(values)} style={{ cursor: "pointer" }}>

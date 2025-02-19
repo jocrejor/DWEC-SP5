@@ -83,7 +83,7 @@ function Space() {
         setShowModal(true);
     };
 
-    const toggleModal = () => {
+    const canviEstatModal = () => {
         setShowModal(!showModal);
         setModalType("Crear");
     };
@@ -112,7 +112,7 @@ function Space() {
         // Esta navegación te llevará a la ruta de estanteria con los dos IDs dinámicos
         navigate(`/gestioMagatzem/estanteria/${magatzem}/${carrer}`);
     };
-    
+
 
     return (
         <>
@@ -121,7 +121,40 @@ function Space() {
                 filters={filters}
                 onFilterChange={handleFilterChange}
             />
+            <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+                <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
+                    <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
+                        <div className="form-floating bg-white">
+                            <select className="form-select" id="floatingSelect" aria-label="Seleccione una opció">
+                                <option selected>Tria una opció</option>
+                                <option value="1">Eliminar</option>
+                            </select>
+                            <label htmlFor="floatingSelect">Accions en lot</label>
+                        </div>
+                        <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0" type="button">
+                            <i className="bi bi-check-circle text-white px-1"></i>Aplicar
+                        </button>
+                    </div>
+                </div>
+                <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
+                <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
+                    <div className="d-flex h-100 justify-content-xl-end">
+                        <Button
+                            onClick={() => handleBackClick()}
+                            className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0 me-2">
+                            Estanteria
+                        </Button>
+                        <button
+                            type="button"
+                            onClick={canviEstatModal}
+                            className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+                        >
+                            <i className="bi bi-plus-circle text-white pe-1"></i>Crear Carrer
+                        </button>
+                    </div>
+                </div>
 
+            </div>
             {spaces.length === 0 ? (
                 <p>No hi han espais</p>
             ) : (
@@ -139,7 +172,6 @@ function Space() {
                                 <th scope="col">ID Magatzem</th>
                                 <th scope="col">ID Carrer</th>
                                 <th scope="col">ID Estanteria</th>
-                                <th scope="col">Estanteria</th>
                                 <th scope="col">Accions</th>
                             </tr>
                         </thead>
@@ -156,7 +188,6 @@ function Space() {
                                     <td>{values.storage_id}</td>
                                     <td>{values.street_id}</td>
                                     <td>{values.shelf_id}</td>
-                                    <td><Button onClick={() => handleBackClick()} className='outline-orange'>Estanteria</Button></td>
                                     <td data-no-colon="true">
                                         <span onClick={() => viewSpace(values)} style={{ cursor: "pointer" }}>
                                             <i className="bi bi-eye"></i>

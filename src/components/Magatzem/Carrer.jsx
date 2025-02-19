@@ -77,7 +77,7 @@ function Street() {
   const handleBackClick = () => {
     navigate(`/gestioMagatzem/magatzem/`);  // Navega hacia la página del magatzem
   };
-  
+
 
   const canviEstatModal = () => {
     setShowModal(!showModal);
@@ -129,13 +129,22 @@ function Street() {
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
-            <button type="button" onClick={canviEstatModal} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+            <Button
+              onClick={() => handleBackClick()}
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0 me-2">
+              Magatzem
+            </Button>
+            <button
+              type="button"
+              onClick={canviEstatModal}
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+            >
               <i className="bi bi-plus-circle text-white pe-1"></i>Crear Carrer
             </button>
           </div>
         </div>
       </div>
-     
+
       <div className="table-responsive mt-3">
         <table className="table table-striped text-center">
           <thead className="table-active border-bottom border-dark-subtle">
@@ -144,7 +153,6 @@ function Street() {
               <th scope="col">ID</th>
               <th scope="col">Nom</th>
               <th scope="col">ID Magatzem</th>
-              <th scope="col"> Magatzem</th>
               <th scope="col">Estanteria</th>
               <th scope="col">Accions</th>
             </tr>
@@ -158,7 +166,6 @@ function Street() {
                 <td>{valors.id}</td>
                 <td>{valors.name}</td>
                 <td>{valors.storage_id}</td>
-                <td><Button onClick={() => handleBackClick()} className='outline-orange'>Magatzem</Button></td>
                 <td><Button onClick={() => handleStreetClick(valors.id)} className='outline-orange'>Estanteria</Button></td>
                 <td data-no-colon="true">
                   <span onClick={() => viewSupplier(valors)} style={{ cursor: "pointer" }}>
