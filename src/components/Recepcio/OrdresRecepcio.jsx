@@ -557,7 +557,7 @@ function OrderReception() {
       </div>
 
       <Modal show={showModal} onHide={canviEstatModal}>
-        <Modal.Header closeButton>
+      <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
           <Modal.Title>{tipoModal} Ordre de Recepció</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -678,6 +678,7 @@ function OrderReception() {
                   )}
 
                   {/* BOTONS D'ACCIÓ */}
+                  <Modal.Footer>
                   <div className="form-group text-right mt-3">
                     <Button variant="secondary" onClick={canviEstatModal}>
                       Tanca
@@ -690,6 +691,7 @@ function OrderReception() {
                       {tipoModal}
                     </Button>
                   </div>
+                  </Modal.Footer>
                 </Form>
               )}
             </Formik>
@@ -699,7 +701,7 @@ function OrderReception() {
 
       {/* Modal per Revisar Ordre */}
       <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)}>
-        <Modal.Header closeButton>
+      <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
           <Modal.Title>Ordre de Recepció</Modal.Title>
         </Modal.Header>
         <Modal.Body>
