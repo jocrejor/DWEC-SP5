@@ -105,7 +105,7 @@ function FiltresClients({ onSearch }) {
                     </div>
                 </div>
             </div>
-            <div className="row bg-grey pb-3 mx-0">
+            <div className="row bg-grey pb-3 mx-0 d-flex justify-content-end">
                 <div className="col-12 col-xl-4 text-end">
                     <button
                         className="btn btn-secondary ps-2 me-2 text-white"
