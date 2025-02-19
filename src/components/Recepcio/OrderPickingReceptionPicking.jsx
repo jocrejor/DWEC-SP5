@@ -61,6 +61,8 @@ function OrderPickingReception() {
         catch{(error) => {console.error('Error user:', error);}};
     }
 
+    
+
     useEffect(() => {
         dataFetch()
     }, []);
@@ -68,6 +70,12 @@ function OrderPickingReception() {
     const completarOrderPicking = async (lineId, orderPickingId) => {
          // filtrar la linea de la order picking
         const lineActualitzar = orderLineReception.find((line) => line.id === lineId);
+
+        const orderPicking = await axios.get(`${apiUrl}/orderpickingreception/${orderPickingId}`, {
+            headers: { "auth-token": token },
+        });
+
+        const operatorId = orderPicking.data.operator_id; // operari de la order picking
     
         // Actualitzar estat a completada
         const updatedLine = {
@@ -110,10 +118,11 @@ function OrderPickingReception() {
                     console.error("Error en actualitzar quantitat space", error.response.data);
                 });
 
-            movMagatzem(lineActualitzar.product_id, lineActualitzar.operator_id, lineActualitzar.quantity_received, "Recepcio", space.storage_id, space.storage_id, space.street_id, space.shelf_id, space.id);
+            movMagatzem(lineActualitzar.product_id, operatorId, lineActualitzar.quantity_received, "PickingRe", "01", "01", "01", "01", "01");
             console.log("Moviment eixida realitzat");
+            console.log(lineActualitzar.operator_id);
 
-            movMagatzem(lineActualitzar.product_id, lineActualitzar.operator_id, lineActualitzar.quantity_received, "General", space.storage_id, space.storage_id, space.street_id, space.shelf_id, space.id);
+            movMagatzem(lineActualitzar.product_id, operatorId, lineActualitzar.quantity_received, "PickingRe", space.storage_id, space.storage_id, space.street_id, space.shelf_id, space.id);
             console.log("Moviment entrada realitzat");
         }
         alert("Order picking completada");
@@ -201,16 +210,19 @@ function OrderPickingReception() {
                                     {orderPickingPage
                                         .filter(order => order.operator_id === parseInt(usuariFiltrar))
                                         .map(order => {
-                                            const user = users.find(u => u.id === order.operator_id);
                                             const product = products.find(p => p.id === order.product_id);
+                                            const linea = orderLineReception.find(line => line.id === order.order_line_reception_id);
+
+                                            let date = new Date(order.create_date);
+                                            const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} - ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
                                             return (
                                                 <tr key={order.id}>
                                                     <td className="d-flex justify-content-center align-items-center">
                                                         <i className="bi bi-arrow-down" onClick={() => completarOrderPicking(order.order_line_reception_id, order.id)}></i>
                                                     </td>
-                                                    <td data-cell="Ordre ID">{order.id}</td>
+                                                    <td data-cell="Ordre ID">{linea ? linea.order_reception_id : 'No disponible'}</td>
                                                     <td data-cell="Producte">{product.name}</td>
-                                                    <td data-cell="Data">{order.create_date}</td>
+                                                    <td data-cell="Data">{formattedDate}</td>
                                                     <td data-cell="Operari">{order.storage_id} / {order.street_id} / {order.shelf_id} / {order.space_id}</td>
                                                 </tr>
                                             );

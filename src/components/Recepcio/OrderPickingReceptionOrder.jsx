@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {Modal } from "react-bootstrap";
 import axios from "axios";
-import { useNavigate,useLocation } from "react-router-dom";
+import { useNavigate,useLocation, data } from "react-router-dom";
 
 function OrderPickingReception() {
     const [orderreception, setOrderReception] = useState([]); //order reception
@@ -13,7 +13,7 @@ function OrderPickingReception() {
     const [operariSeleccionat, setOperariSeleccionat] = useState(""); //operari seleccionat al crear order picking
 
     const [showModal, setShowModal] = useState(false); //mostrar modal
-    const [tipoModal, setTipoModal] = useState("Alta"); //tipus de modal Alta/Visualitzar
+    const [tipoModal, setorderreceptionTipoModal] = useState("Alta"); //tipus de modal Alta/Visualitzar
 
     const [orderSelected, setOrderSelected] = useState([]); //order seleccionat per crear order picking
 
@@ -32,49 +32,32 @@ function OrderPickingReception() {
     const location = useLocation();
 
     const dataFetch = async ()=>{
-        try{
-        //order line reception
-        const orderLineReception = await axios.get(`${apiUrl}/orderlinereception`, { headers: { "auth-token": token } 
-        })
-        setOrderLineReception(orderLineReception.data)
-        }catch{(error) => {console.error('Error order line:', error);}};
-        
-        //order reception
-        try{
-        const orderReception = await axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": token }})
-        setOrderReception(orderReception.data)
-        }
-        catch{(error) => {console.error('Error order reception:', error);}};
-
-        //product
         try {
-            const product = await axios.get(`${apiUrl}/product`, { headers: { "auth-token": token } })
-            setProducts(product.data);
+        const [orderLineReception, orderreception, productsRes, space, users] = await Promise.all([
+            axios.get(`${apiUrl}/orderlinereception`, { headers: { "auth-token": localStorage.getItem("token") } }),
+            axios.get(`${apiUrl}/orderreception`, { headers: { "auth-token": localStorage.getItem("token") } }),
+            axios.get(`${apiUrl}/product`, { headers: { "auth-token": localStorage.getItem("token") } }),
+            axios.get(`${apiUrl}/space/03`, { headers: { "auth-token": localStorage.getItem("token") } }),
+            axios.get(`${apiUrl}/users`, { headers: { "auth-token": localStorage.getItem("token") } })
+          ]);
+          setOrderLineReception(orderLineReception.data);
+          setOrderReception(orderreception.data);
+          setProducts(productsRes.data);
+          setSpaces(space.data);
+          setUsers(users.data);
+        } catch (err) {
+            console.error("Error al carregar dades:", err);
+            setError('Error carregant les dades.');
         }
-        catch{(error) => {console.error('Error product:', error);}};
-
-        //space
-        try {
-            const space = await axios.get(`${apiUrl}/space`, { headers: { "auth-token": token } })
-            setSpaces(space.data);
-        }
-        catch{(error) => {console.error('Error space:', error);}};
-
-        //user
-        try {
-            const user = await axios.get(`${apiUrl}/users`, { headers: { "auth-token": token } })
-            setUsers(user.data);
-        }
-        catch{(error) => {console.error('Error user:', error);}};
     }
-
+        
     useEffect(()=>{
         const orderPendent = orderreception.filter((order) => order.orderreception_status_id === 3);
         const tempPickings = [];
-        
         //recorrer orden reception pendent (desempaquetada)
         orderPendent.map((order) => { 
             //filtrar lines en estat pendent o forçosa
+           
             const lines = orderLineReception.filter((line) =>
                 line.order_reception_id === order.id &&
                 (line.orderline_status_id === 1 || line.orderline_status_id === 4)
@@ -96,6 +79,26 @@ function OrderPickingReception() {
                         space_id: space.id
                     }
                     tempPickings.push(objTemporal);
+                }else{
+
+                    const space = spaces.find(space => space.product_id === null && (space.quantity === 0 || space.quantity===null));
+                    const objTemporal = {
+                        order_reception_id: order.id,
+                        order_line_reception_id: line.id,
+                        product_id: line.product_id,
+                        quantity_received: line.quantity_received,
+                        storage_id: space.storage_id,
+                        street_id: space.street_id,
+                        shelf_id: space.shelf_id,
+                        space_id: space.id
+                    }
+                    tempPickings.push(objTemporal);
+                    
+                    //actualitzar espai elegit per aquest producte
+                    axios.put(`${apiUrl}/space/${space.storage_id}/${space.street_id}/${space.shelf_id}/${space.id}`, {
+                        product_id: line.product_id,
+                    },{headers: { "auth-token": token }})
+
                 }
             });
         });
@@ -139,6 +142,7 @@ function OrderPickingReception() {
             const line = orderLineReception.find((l) => l.id === parseInt(order));
             const product = products.find((p) => p.id === line.product_id);
             let space = spaces.find((s) => s.product_id === line.product_id);
+            console.log(space);
 
             const cantitatOcupada = space.quantity * product.volume;
             const cantitatLliure = space.volume_max - cantitatOcupada;
@@ -183,7 +187,6 @@ function OrderPickingReception() {
     useEffect (()=>{
         const totalPages = Math.ceil(temporalPickings.length / elementsPaginacio);
         setTotalPages(totalPages);
-        console.log(totalPages)
     },[temporalPickings])
 
     const paginate = (pageNumber) => {
@@ -220,8 +223,9 @@ function OrderPickingReception() {
                                     className="form-select"
                                     id="floatingSelect"
                                     aria-label="Seleccione una opción"
+                                    defaultValue={"tria una opció"}
                                 >
-                                    <option selected>Tria una opció</option>
+                                    <option >Tria una opció</option>
                                     <option value="1">Eliminar</option>
                                 </select>
                                 <label htmlFor="floatingSelect">Accions en lot</label>
@@ -371,7 +375,7 @@ function OrderPickingReception() {
 
 
                                     <tbody>
-                                        {orderSelected.map(order => {
+                                        {orderSelected.map((order) => {
                                             const lines = orderLineReception.find(line => line.id === parseInt(order));
                                             const product = products.find(p => p.id === lines.product_id);
                                             const space = spaces.find((space) => space.product_id === lines.product_id);
