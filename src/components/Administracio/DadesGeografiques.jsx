@@ -19,6 +19,7 @@ const DadesGeografiques = () => {
     </div>
   );
 };
+
 function Error404() {
 
   return (

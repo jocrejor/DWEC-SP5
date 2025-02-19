@@ -1,4 +1,3 @@
-// Province.jsx
 import { useState, useEffect } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
@@ -101,7 +100,7 @@ function Province() {
       });
   };
 
-  // Filtrar provincias según el estado seleccionado
+
   let filteredProvincias = provincias;
   if (stateId) {
     filteredProvincias = filteredProvincias.filter(
@@ -177,11 +176,23 @@ function Province() {
         </div>
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
-          <div className="d-flex h-100 justify-content-xl-end">
-            <button type="button" onClick={() => setShowCrear(true)} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
-              <i className="bi bi-plus-circle text-white pe-1"></i>Crear
-            </button>
-          </div>
+        <div className="d-flex h-100 justify-content-xl-end">
+  <button 
+    type="button"  
+    onClick={() => navigate('/dadesGeografiques')} 
+    className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0 me-2"
+  >
+    Tornar 
+  </button>
+  <button 
+    type="button" 
+    onClick={() => setShowCrear(true)} 
+    className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+  >
+    <i className="bi bi-plus-circle text-white pe-1"></i>Crear
+  </button>
+</div>
+
         </div>
       </div>
 
@@ -297,7 +308,7 @@ function Province() {
                 </th>
                 <th scope="col">ID</th>
                 <th scope="col">Nom</th>
-                <th scope="col">ID de l'estat</th>
+           
                 <th scope="col">City</th>
                 <th scope="col">Accions</th>
               </tr>
@@ -310,13 +321,11 @@ function Province() {
                   </td>
                   <td data-cell="ID">{prov.id}</td>
                   <td data-cell="Nom">{prov.name}</td>
-                  <td data-cell="ID de l'estat">
-                    <Button  className='outline-orange' onClick={() => navigate('/dadesGeografiques')}>
-                      Veure Estat
-                    </Button>
-                  </td>
+    
                   <td data-cell="City">
-                  <Button className='outline-blue' onClick={() => navigate(`../city/${prov.id}`)}> Veure City </Button>
+                    <Button className="outline-orange" onClick={() => navigate(`../city/${prov.id}`)}>
+                       City
+                    </Button>
                   </td>
                   <td className="fs-5" data-no-colon="true">
                     <i

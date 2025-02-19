@@ -56,8 +56,18 @@ function FiltresState({ suggestions = [], onFilter, onClear }) {
                             <div className="col-xl-4"></div>
                             <div className="col-xl-4"></div>
                             <div className="col-12 col-xl-4 text-end">
-                                <button className="btn btn-secondary ps-2 me-2 text-white"><i className="bi bi-trash px-1 text-white"  onClick={handleClear}></i>Netejar</button>
-                                <button className="btn btn-primary me-2 ps-2 orange-button text-white"><i className="bi bi-funnel px-1 text-white"  onClick={handleFilter}></i>Filtrar</button>
+                            <button className="btn btn-secondary ps-2 me-2 text-white" onClick={handleClear}>
+  <i className="bi bi-trash px-1 text-white"></i>
+  Netejar
+</button>
+
+<button 
+  className="btn btn-primary me-2 ps-2 orange-button text-white"
+  onClick={handleFilter}
+>
+  <i className="bi bi-funnel px-1 text-white"></i>
+  Filtrar
+</button>
                             </div>
                         </div>
       </div>

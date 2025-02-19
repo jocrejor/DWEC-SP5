@@ -3,7 +3,7 @@ import { Button, Modal } from 'react-bootstrap';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import FiltresCity from './CityFiltres'; 
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -19,15 +19,18 @@ const CitySchema = Yup.object().shape({
 });
 
 function City() {
+  // Extraemos el id de la provincia desde la URL
+  const { provinceId: routeProvinceId } = useParams();
+  const navigate = useNavigate();
+
   const [showCreate, setShowCrear] = useState(false);
   const [showView, setShowView] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [cities, setCities] = useState([]);
   const [currentCity, setCurrentCity] = useState(null);
-  const navigate = useNavigate();
 
-  const [appliedFilters, setAppliedFilters] = useState({ name: '', orden: 'none', provinceId: '' });
-
+  // Iniciamos el filtro incluyendo la provincia de la URL (si existe)
+  const [appliedFilters, setAppliedFilters] = useState({ name: '', orden: 'none', provinceId: routeProvinceId || '' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -45,6 +48,13 @@ function City() {
   useEffect(() => {
     cargarDatos();
   }, []);
+
+  useEffect(() => {
+    if (routeProvinceId) {
+      setAppliedFilters(prev => ({ ...prev, provinceId: routeProvinceId }));
+      setCurrentPage(1);
+    }
+  }, [routeProvinceId]);
 
   const crearciutat = (values, { setSubmitting, resetForm }) => {
     axios
@@ -153,14 +163,12 @@ function City() {
   };
 
   const handleClearFilters = () => {
-    setAppliedFilters({ name: '', orden: 'none', provinceId: '' });
+    setAppliedFilters({ name: '', orden: 'none', provinceId: routeProvinceId || '' });
     setCurrentPage(1);
   };
 
   return (
     <>
-
-
       {/* Component de filtres */}
       <FiltresCity
         suggestions={suggestions}
@@ -168,7 +176,7 @@ function City() {
         onClear={handleClearFilters}
       />
 
-<div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
+      <div className="row d-flex mx-0 bg-secondary mt-3 rounded-top">
         <div className="col-12 order-1 pb-2 col-md-6 order-md-0 col-xl-4 d-flex">
           <div className="d-flex rounded border mt-2 flex-grow-1 flex-xl-grow-0">
             <div className="form-floating bg-white">
@@ -186,12 +194,18 @@ function City() {
         <div className="d-none d-xl-block col-xl-4 order-xl-1"></div>
         <div className="col-12 order-0 col-md-6 order-md-1 col-xl-4 oder-xl-2">
           <div className="d-flex h-100 justify-content-xl-end">
-            <button type="button" onClick={() => setShowCrear(true)} className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0">
+          
+            <button 
+              type="button" 
+              onClick={() => setShowCrear(true)} 
+              className="btn btn-dark border-white text-white mt-2 my-md-2 flex-grow-1 flex-xl-grow-0"
+            >
               <i className="bi bi-plus-circle text-white pe-1"></i>Crear
             </button>
           </div>
         </div>
       </div>
+
       {/* Modal para crear City */}
       <Modal show={showCreate} onHide={() => setShowCrear(false)}>
         <Modal.Header closeButton>
@@ -300,7 +314,7 @@ function City() {
                   <td data-cell="ID">{city.id}</td>
                   <td data-cell="Nom">{city.name}</td>
                   <td data-cell="Provincias">
-                    <Button size="sm" className='outline-orange' onClick={() => navegarprovincies(city.province_id)} title="Veure Provincias">
+                    <Button  className="outline-orange" onClick={() => navegarprovincies(city.province_id)} title="Veure Provincias">
                       Provincies
                     </Button>
                   </td>
@@ -319,13 +333,11 @@ function City() {
       {totalPages > 1 && (
         <nav aria-label="Page navigation example" className="d-block">
           <ul className="pagination justify-content-center">
-            
             <li className={`page-item ${currentBlock === 0 ? 'disabled' : ''}`}>
               <a className="page-link text-light-blue" href="#" aria-label="Previous" onClick={handlePreviousBlock}>
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-
             {Array.from({ length: blockEnd - blockStart + 1 }, (_, i) => blockStart + i).map((page) => (
               <li key={page} className="page-item">
                 <a
@@ -340,8 +352,6 @@ function City() {
                 </a>
               </li>
             ))}
-
-            {/* Flecha Derecha para el siguiente bloque */}
             <li className={`page-item ${blockEnd === totalPages ? 'disabled' : ''}`}>
               <a className="page-link text-light-blue" href="#" aria-label="Next" onClick={handleNextBlock}>
                 <span aria-hidden="true">&raquo;</span>
