@@ -61,6 +61,7 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
        dataForm.quantity_received < 0 ? setError("El valor ha de ser positiu."):    
        (dataForm.description.length< 4 || dataForm.description.length> 250) ?   setError("La descripció ha de tindre entre 4 i 250 caracters."):
        postDataIncident();
+       handleModal()
     };
 
     const postDataIncident = async () => {
@@ -114,7 +115,7 @@ function IncidenciaGenerarModal({orderLineReceptionID,viewModal,handleModal}) {
             {/* Modal per Crear incidència */}
             <Modal show={viewModal} onHide={() => handleModal()}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Crear incidència{ orderLineReceptionID}</Modal.Title>
+                    <Modal.Title>Crear incidència</Modal.Title>
                 </Modal.Header>
                 <form>
                 <Modal.Body>

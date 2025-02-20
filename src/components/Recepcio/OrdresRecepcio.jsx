@@ -445,7 +445,7 @@ function OrderReception() {
                 <option value="" disabled selected>Tria una opció</option>
                 <option value="1">Eliminar</option>
               </select>
-              <label for="floatingSelect">Accions en lot</label>
+              <label htmlFor="floatingSelect">Accions en lot</label>
             </div>
             <button className="btn rounded-0 rounded-end-2 orange-button text-white px-2 flex-grow-1 flex-xl-grow-0"
               type="button"
@@ -467,14 +467,14 @@ function OrderReception() {
                 canviEstatModal();
               }}
               aria-label="Crear nova ordre de recepció">
-              <i class="bi bi-plus-circle text-white pe-1"></i>Crear</Button>
+              <i className="bi bi-plus-circle text-white pe-1"></i>Crear</Button>
           </div>
         </div>
       </div>
 
       <div className='container-fluid pt-3'>
         <Table className='table table-striped border text-center m-2' aria-live="polite">
-          <thead class="table-active border-bottom border-dark-subtle">
+          <thead className="table-active border-bottom border-dark-subtle">
             <tr>
               <th>Id</th>
               <th>Proveïdor</th>
@@ -732,10 +732,10 @@ function OrderReception() {
                           {orderToReview?.orderreception_status_id === 2 && (
                             <>
                               <div className="d-flex">
-                                <Button variant="outline-danger" onClick={() => alert(`Incidència per ${linea.product_id}`)}>
+                              <Button variant="outline-danger" onClick={() =>{handleModalIncident(linea.id)}}>
                                   Incidència
                                 </Button>
-                                <Button variant="outline-secondary" href="#" className="ms-2">
+                                <Button variant="outline-secondary" className="ms-2" onClick={() => alert(`Lot or Series del ${linea.product_id}`)}>
                                   Lot/Serie
                                 </Button>
                               </div>
