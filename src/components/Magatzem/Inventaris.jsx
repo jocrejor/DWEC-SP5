@@ -144,7 +144,7 @@ function Inventaris() {
     } else {
       setSelectedInventoryLines([]);
     }
-  }, [selectedInventory])
+  }, [selectedInventory, inventoryLines, spaces]);
 
   /**************** FILTROS ****************/
   const handleFilter = (f) => {
@@ -187,35 +187,43 @@ function Inventaris() {
   const specificPage = (page) => {
     setCurrentPage(page);
   }
-  /**************** CREAR INVENTARIO ****************/
+  /**************** CREATE INVENTORY ****************/
   const createInventory = async (values) => {
     let filteredSpaces;
     if (!values.street_id) {
       filteredSpaces = spaces.filter(space => space.storage_id === values.storage_id);
     } else {
-      filteredSpaces = spaces.filter(space => space.storage_id === values.street_id)
+      filteredSpaces = spaces.filter(space => space.storage_id === values.storage_id && space.street_id === values.street_id);
     };
+    console.log(values)
+    console.log(filteredSpaces);
 
     let newInventory = {
       created_by: user.id,
       inventory_status: inventoryStatus?.find(status => status.name === 'Pendent').id,
       storage_id: values.storage_id
     }
+    
+    const getNewId =  await axios.post(`${apiURL}/inventory`, newInventory, { headers: { "auth-token": localStorage.getItem('token') } })
+                        .then(response => { return response.data })                 
+                        .catch(e => { console.log(e.response.data) })
 
-    axios.post(`${apiURL}/inventory`, newInventory, { headers: { "auth-token": localStorage.getItem('token') } })
-      .catch(e => { console.log(e.response.data) })
+     console.log(getNewId.results.insertId)
 
     filteredSpaces.map(space => {
-      let newInventoryLine = {
-        inventory_id: newInventory.id,
-        product_id: space.product_id,
-        quantity_estimated: space.quantity,
-        storage_id: space.storage_id,
-        street_id: space.street_id,
-        selft_id: space.selft_id,
-        space_id: space.id
-      }
-      axios.post(`${apiURL}/inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
+      if(space.product_id != null) {
+        let newInventoryLine = {
+          inventory_id: getNewId.results.insertId,
+          product_id: space.product_id,
+          quantity_estimated: space.quantity,
+          storage_id: space.storage_id,
+          street_id: space.street_id,
+          shelf_id: space.shelf_id,
+          space_id: space.id
+        }
+        console.log(newInventoryLine)
+        axios.post(`${apiURL}/inventoryline`, newInventoryLine, { headers: { "auth-token": localStorage.getItem('token') } })
+      }      
     });
 
     await axios.get(`${apiURL}/inventory`, { headers: { "auth-token": localStorage.getItem('token') } })
@@ -233,7 +241,7 @@ function Inventaris() {
       .catch(e => { console.log(e) })
   }
 
-  /************* ELIMINAR INVENTARIO ***************/
+  /************* DELETE INVENTORY ***************/
   const deleteInventory = (id) => {
     if (confirm("¿Estàs segur de que vols esborrar aquest inventari?")) {
       axios.delete(`${apiURL}/inventory/${id}`, { headers: { "auth-token": localStorage.getItem('token') } })
@@ -269,26 +277,56 @@ function Inventaris() {
     const newDate = new Date(date);
     return newDate.toLocaleDateString();
   }
-
+  //********* GENERATE PDF *********
   const generarPDF = (inventory) => {
     const doc = new jsPDF();
     doc.setFontSize(18);
+    doc.setFont("Noto Serif", "bold")
     doc.text("Informe d'inventari completat", 65, 20);
-
-
 
     doc.autoTable({
       startY: 30,
+      headStyles:{fillColor:[34, 40, 49]},
+      bodyStyles: { textColor: [ 	48, 71, 94] },
       head:[['ID Inventari', 'Data', 'Estat', 'Magatzem']],
       body:[
         [inventory.id, changeDate(inventory.created_at), inventoryStatus.find(inv => inv.id === inventory.inventory_status)?.name, storages.find(st => st.id === inventory.storage_id)?.name]
-      ]
-    })
+      ],
+      didParseCell: (data) => {
+        if (data.section === 'head') {
+          data.cell.styles.font = 'Noto Serif'; 
+          data.cell.styles.fontStyle = 'bold'; 
+          data.cell.styles.halign ='center';
+
+        }
+
+        if (data.section === 'body') {
+          data.cell.styles.font = 'Noto Serif'; 
+          data.cell.styles.fontStyle = 'serif';
+          data.cell.styles.halign ='center';
+      }
+    }
+  })
 
     doc.autoTable({
       startY: 60,
+      headStyles:{fillColor:[34, 40, 49]},
+      bodyStyles: { textColor: [ 	48, 71, 94] },
       head:[['Carrer', 'Estanteria', 'Espai', 'Producte', 'Quantitat Estimada', 'Quantitat Real', 'Justificació']],
-      body: selectedInventoryLines.map(line => ([line.street_id, line.shelf_id, line.space_id, products.find(product => product.id === line.product_id)?.name, line?.quantity_estimated, line?.quantity_real, inventoryReasons.find(reason => reason.id === line?.inventory_reason_id)?.name]))     
+      body: selectedInventoryLines.map(line => ([line.street_id, line.shelf_id, line.space_id, products.find(product => product.id === line.product_id)?.name, line?.quantity_estimated, line?.quantity_real, inventoryReasons.find(reason => reason.id === line?.inventory_reason_id)?.name])),
+      didParseCell: (data) => {
+        if (data.section === 'head') {
+          data.cell.styles.font = 'Noto Serif'; 
+          data.cell.styles.fontStyle = 'bold'; 
+          data.cell.styles.halign ='center';
+        }
+
+        if (data.section === 'body') {
+          data.cell.styles.font = 'Noto Serif'; 
+          data.cell.styles.fontStyle = 'serif';
+          data.cell.styles.halign ='center';
+      }     
+    }
     });
     doc.save("Informe d'Inventari.dpf");
   }
@@ -324,7 +362,7 @@ function Inventaris() {
         <Col>
           <Modal show={show} onHide={handleClose} animation={true} >
             <Modal.Header closeButton>
-              <Modal.Title className='text-light-blue'>Alta de Inventari</Modal.Title>
+              <Modal.Title className='text-light-blue text-orange'>Alta de Inventari</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Formik
@@ -380,7 +418,7 @@ function Inventaris() {
                     </div>
 
                     <div className='py-3 text-end'>
-                      <Button variant='secondary' onClick={handleClose}>Cerrar</Button>
+                      <Button variant='secondary' onClick={handleClose}>Tancar</Button>
                       <Button type='submit' className='ms-2 orange-button'>Generar Inventari</Button>
                     </div>
                   </Form>
@@ -406,7 +444,7 @@ function Inventaris() {
             <tbody className='text-light-blue'>
               {
                 (inventory.length === 0) ?
-                  <tr><td colSpan={7}>No hay nada</td></tr>
+                  <tr><td colSpan={7}>No s'han creat inventaris.</td></tr>
                   : inventory.map((values) => {
 
                     return (
@@ -446,7 +484,7 @@ function Inventaris() {
 
           <Modal show={showInventoryModal} onHide={changeModalStatus} animation={true} size='xl'>
             <Modal.Header closeButton>
-              <Modal.Title className='text-light-blue'>Detall Inventari</Modal.Title>
+              <Modal.Title className='text-light-blue text-orange'>Detall Inventari</Modal.Title>
             </Modal.Header>
             <Modal.Body>
 
@@ -465,7 +503,7 @@ function Inventaris() {
                     <tbody className='text-light-blue'>
                       <tr>
                         <td data-cell="ID Inventari: " className='text-light-blue'>{selectedInventory.id}</td>
-                        <td data-cell="Data: ">{selectedInventory.created_at}</td>
+                        <td data-cell="Data: ">{changeDate(new Date(selectedInventory.created_at))}</td>
                         <td data-cell="Estat: ">{inventoryStatus.find(status => status.id === selectedInventory.inventory_status)?.name}</td>
                         <td data-cell="Magatzem: ">{(storages.find(storage => storage.id === selectedInventory.storage_id))?.name}</td>
                       </tr>
@@ -519,7 +557,7 @@ function Inventaris() {
 
             </Modal.Body>
           </Modal>
-          
+          {(pageNumbers.length<10) ? "" : 
           <nav aria-label="Page navigation example" className="d-block" id='pagination'>
             <ul className="pagination justify-content-center">
               <li className="page-item">
@@ -539,6 +577,7 @@ function Inventaris() {
               </li>
             </ul>
           </nav>
+          }
         </Col>
       </Row >
     </>

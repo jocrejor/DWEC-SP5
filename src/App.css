@@ -135,6 +135,12 @@ li:hover i {
     border-color: var(--orange);
 }
 
+.outline-orange:active{
+    background-color:var(--orange) !important;
+    color: white;
+    border-color: var(--orange) !important;
+}
+
 .outline-blue{
     color: var(--lightBlue);
     border-color: var(--lightBlue);
