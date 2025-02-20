@@ -288,7 +288,6 @@ function OrderReception() {
     }
   };
 
-
   const emmagatzemarOrdre = async (ordreId) => {
     try {
       await axios.put(`${apiUrl}/orderreception/${ordreId}`, { orderreception_status_id: 4 }, {
@@ -557,7 +556,7 @@ function OrderReception() {
       </div>
 
       <Modal show={showModal} onHide={canviEstatModal}>
-      <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
+        <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
           <Modal.Title>{tipoModal} Ordre de Recepció</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -666,7 +665,7 @@ function OrderReception() {
                               <td>{prod.name}</td>
                               <td>{prod.quantity}</td>
                               <td>
-                                <Button variant="danger" size="sm" onClick={() => eliminarProducte(index)}>
+                                <Button variant="outline-secondary" onClick={() => eliminarProducte(index)}>
                                   <i className="bi bi-trash"></i>
                                 </Button>
                               </td>
@@ -679,18 +678,18 @@ function OrderReception() {
 
                   {/* BOTONS D'ACCIÓ */}
                   <Modal.Footer>
-                  <div className="form-group text-right mt-3">
-                    <Button variant="secondary" onClick={canviEstatModal}>
-                      Tanca
-                    </Button>
-                    <Button
-                      variant={tipoModal === 'Modificar' ? 'success' : 'info'}
-                      type="submit"
-                      className="btn orange-button text-white ms-2"
-                    >
-                      {tipoModal}
-                    </Button>
-                  </div>
+                    <div className="form-group text-right mt-3">
+                      <Button variant="secondary" onClick={canviEstatModal}>
+                        Tanca
+                      </Button>
+                      <Button
+                        variant={tipoModal === 'Modificar' ? 'success' : 'info'}
+                        type="submit"
+                        className="btn orange-button text-white ms-2"
+                      >
+                        {tipoModal}
+                      </Button>
+                    </div>
                   </Modal.Footer>
                 </Form>
               )}
@@ -701,7 +700,7 @@ function OrderReception() {
 
       {/* Modal per Revisar Ordre */}
       <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)}>
-      <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
+        <Modal.Header className='text-center py-4 fs-4 fw-bold m-0 text-white bg-title' closeButton>
           <Modal.Title>Ordre de Recepció</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -711,7 +710,9 @@ function OrderReception() {
               <p><strong>Proveïdor:</strong> {suppliers.find((sup) => sup.id === orderToReview.supplier_id)?.name}</p>
               <p><strong>Data Estimada:</strong> {formateaFecha(orderToReview.estimated_reception_date)}</p>
               <p><strong>Estat:</strong> {getStatusName(orderToReview.orderreception_status_id)}</p>
-
+              {orderToReview.orderreception_status_id >= 2 && (
+                <p><strong>Operari Associat:</strong> {users.find(user => user.id === orderToReview.created_by)?.name || 'Desconegut'}</p>
+              )}
               <h5 className="mt-3">Productes:</h5>
               <Table striped bordered hover className="table-sm">
                 <thead>
@@ -730,12 +731,14 @@ function OrderReception() {
                         <td>
                           {orderToReview?.orderreception_status_id === 2 && (
                             <>
-                              <Button className="btn btn-danger mb-2" onClick={() =>{handleModalIncident(linea.id)}}>
-                                Incidència
-                              </Button>
-                         {/*     <Button variant="secondary" onClick={() => alert(`Lot/Serie per ${linea.product_id}`)} className="ms-2">
-                                Lot/Serie
-                              </Button> */}
+                              <div className="d-flex">
+                                <Button variant="outline-danger" onClick={() => alert(`Incidència per ${linea.product_id}`)}>
+                                  Incidència
+                                </Button>
+                                <Button variant="outline-secondary" href="#" className="ms-2">
+                                  Lot/Serie
+                                </Button>
+                              </div>
                             </>
                           )}
                         </td>
